@@ -1,0 +1,130 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// 1. CATALOGO DE EMPLEADOS [cite: 1]
+model Empleados {
+  Email            String  @id @db.VarChar(50)
+  Password         String  @default("123456")
+  Nombre_Empleado  String  @db.VarChar(30)
+  A_Paterno        String  @db.VarChar(30)
+  A_Materno        String? @db.VarChar(30)
+  Cargo            String? @db.VarChar(30)
+  Departamento     String? @db.VarChar(40)
+  Rol              String  @default("USER")
+
+  // Relaciones
+  telefonos         Telefono[]
+  autos_encargados  Inventario_Automoviles[]     @relation("EncargadoAuto")
+  historial_autos   Historial_Registro_Automovil[]
+  historial_propios Historial_Empleados[]
+  solicitudes       Solicitud[]
+  procesos          Procesos[]
+}
+
+// 2. INVENTARIO DE UNIDADES [cite: 2]
+model Inventario_Automoviles {
+  Consecutivo     String  @id @db.VarChar(10)
+  Placa           String  @unique @db.VarChar(10)
+  Marca           String? @db.VarChar(20)
+  Modelo          String? @db.VarChar(20)
+  Color           String? @db.VarChar(15)
+  Linea           String? @db.VarChar(15)
+  Estado_Unidad   Boolean @default(true)
+  Email_encargado String? @db.VarChar(50)
+
+  // Relaciones
+  encargado       Empleados? @relation("EncargadoAuto", fields: [Email_encargado], references: [Email])
+  historial_reg   Historial_Registro_Automovil[]
+  bitacora_autos  Historial_Auto[]
+  solicitudes     Solicitud[]
+}
+
+// 3. TELEFONOS DE EMPLEADOS [cite: 3]
+model Telefono {
+  Email_Empleado String @db.VarChar(50)
+  No_Telefonico  String @db.VarChar(15)
+
+  empleado       Empleados @relation(fields: [Email_Empleado], references: [Email], onDelete: Cascade)
+
+  @@id([Email_Empleado, No_Telefonico]) // Llave primaria compuesta
+}
+
+// 4. HISTORIAL DE CAMBIOS EN EL INVENTARIO [cite: 4]
+model Historial_Registro_Automovil {
+  Id_Historial_Reg Int      @id @default(autoincrement())
+  Consecutivo      String   @db.VarChar(10)
+  Placa            String?  @db.VarChar(10)
+  Marca            String?  @db.VarChar(20)
+  Modelo           String?  @db.VarChar(20)
+  Color            String?  @db.VarChar(15)
+  Linea            String?  @db.VarChar(15)
+  Email_Personal   String?  @db.VarChar(50)
+  Fecha_Cambio     DateTime @default(now())
+
+  // Relaciones
+  auto             Inventario_Automoviles @relation(fields: [Consecutivo], references: [Consecutivo], onDelete: Cascade)
+  empleado         Empleados?             @relation(fields: [Email_Personal], references: [Email])
+}
+
+// 5. BITACORA DE SERVICIOS [cite: 6]
+model Historial_Auto {
+  Id_Historial     Int      @id @default(autoincrement())
+  Consecutivo      String   @db.VarChar(10)
+  Placa_Actual     String?  @db.VarChar(10)
+  Kilometraje      Int?
+  Estado_Actual    Boolean  @default(true)
+  Descripcion      String?  @db.Text
+  Fecha_Registro   DateTime @default(now())
+
+  auto             Inventario_Automoviles @relation(fields: [Consecutivo], references: [Consecutivo], onDelete: Cascade)
+}
+
+// 6. HISTORIAL DE TRAYECTORIA DE EMPLEADOS [cite: 7]
+model Historial_Empleados {
+  Id_Historial_Emp Int      @id @default(autoincrement())
+  Email_Empleado   String   @db.VarChar(50)
+  Nombre           String?  @db.VarChar(30)
+  A_Paterno        String?  @db.VarChar(30)
+  A_Materno        String?  @db.VarChar(30)
+  Cargo            String?  @db.VarChar(30)
+  Departamento     String?  @db.VarChar(40)
+  Fecha_Cambio     DateTime @default(now())
+
+  empleado         Empleados @relation(fields: [Email_Empleado], references: [Email], onDelete: Cascade)
+}
+
+// 7. SOLICITUD (Tickets) [cite: 8]
+model Solicitud {
+  Pk_folio_ticket   String   @id @db.VarChar(25) // Se genera por Trigger en BD
+  Consecutivo       String   @db.VarChar(10)
+  Email_Empleado    String   @db.VarChar(50)
+  Kilometraje       Int?
+  Descripcion       String?  @db.Text
+  Fecha_Realizacion DateTime @default(now()) @db.Date
+  Estado  String  @default("PENDIENTE")
+
+  auto              Inventario_Automoviles @relation(fields: [Consecutivo], references: [Consecutivo])
+  empleado          Empleados              @relation(fields: [Email_Empleado], references: [Email])
+  procesos          Procesos[]
+
+}
+
+// 8. PROCESOS (Seguimiento) [cite: 9]
+model Procesos {
+  Id_Proceso      Int      @id @default(autoincrement())
+  Pk_folio_ticket String   @db.VarChar(25)
+  Email_Empleado  String   @db.VarChar(50)
+  Detalle_Proceso String?  @db.Text
+  Fecha_Hora      DateTime @default(now())
+
+  ticket          Solicitud @relation(fields: [Pk_folio_ticket], references: [Pk_folio_ticket], onDelete: Cascade)
+  empleado        Empleados @relation(fields: [Email_Empleado], references: [Email])
+}

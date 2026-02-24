@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Empleados" ADD COLUMN     "Rol" TEXT NOT NULL DEFAULT 'USER';

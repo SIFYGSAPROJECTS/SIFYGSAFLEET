@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  # Tu base de datos intacta (justo como la tenías)
+  postgres:
+    image: postgres:15-alpine
+    container_name: sifygsa_db
+    restart: always
+    environment:
+      POSTGRES_USER: sifygsa_admin
+      POSTGRES_PASSWORD: secure_password_123
+      POSTGRES_DB: sifygsa_fleet
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # El nuevo contenedor para tu aplicación Next.js
+  web:
+    build: .
+    container_name: sifygsa_web
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules # Evita conflictos con tus librerías locales
+      - /app/.next        # Evita conflictos con la compilación local de Next.js
+    env_file:
+      - .env
+    # Le inyectamos la conexión exacta a la base de datos de arriba
+    environment:
+      - DATABASE_URL=postgresql://sifygsa_admin:secure_password_123@postgres:5432/sifygsa_fleet?schema=public
+    depends_on:
+      - postgres
+    # Genera el cliente, empuja los cambios a la BD y arranca
+    command: sh -c "npx prisma generate && npx prisma db push && npm run dev"
+
+volumes:
+  postgres_data:
