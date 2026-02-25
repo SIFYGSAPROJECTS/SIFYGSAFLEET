@@ -107,7 +107,7 @@ export async function POST(request: Request) {
             <div style="background-color: #f8fafc; border-left: 4px solid #2563eb; padding: 15px; margin: 20px 0;">
               <p><strong>Unidad:</strong> ${nuevoMantenimiento.auto?.Marca} ${nuevoMantenimiento.auto?.Modelo} (${nuevoMantenimiento.auto?.Placa})</p>
               <p><strong>Solicita:</strong> ${userEmail}</p>
-              <p><strong>Kilometraje:</strong> ${nuevoMantenimiento.Kilometraje.toLocaleString()} KM</p>
+              <p><strong>Kilometraje:</strong> ${nuevoMantenimiento.Kilometraje?.toLocaleString() ?? '0'} KM</p>
             </div>
             <p><strong>Trabajo a realizar:</strong></p>
             <p style="background-color: #f1f5f9; padding: 15px; border-radius: 6px; font-style: italic;">"${nuevoMantenimiento.Descripcion}"</p>
