@@ -107,6 +107,7 @@ model Solicitud {
   Consecutivo       String   @db.VarChar(10)
   Email_Empleado    String   @db.VarChar(50)
   Kilometraje       Int?
+  Evidencia         String?
   Descripcion       String?  @db.Text
   Fecha_Realizacion DateTime @default(now()) @db.Date
   Estado  String  @default("PENDIENTE")
