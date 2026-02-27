@@ -31,14 +31,21 @@ model Empleados {
 
 // 2. INVENTARIO DE UNIDADES [cite: 2]
 model Inventario_Automoviles {
-  Consecutivo     String  @id @db.VarChar(10)
-  Placa           String  @unique @db.VarChar(10)
-  Marca           String? @db.VarChar(20)
-  Modelo          String? @db.VarChar(20)
-  Color           String? @db.VarChar(15)
-  Linea           String? @db.VarChar(15)
-  Estado_Unidad   Boolean @default(true)
-  Email_encargado String? @db.VarChar(50)
+  Consecutivo      String   @id @db.VarChar(10)
+  Placa            String   @unique @db.VarChar(20) // Aumentamos a 20
+  Marca            String?  @db.VarChar(50)         // Aumentamos a 50
+  Modelo           String?  @db.VarChar(50)         // Aumentamos a 50
+  Color            String?  @db.VarChar(40)         // Aumentamos a 40 para colores largos
+  Linea            String?  @db.VarChar(20)         // Aumentamos a 20
+  Estado_Unidad    Boolean  @default(true)
+  Email_encargado  String?  @db.VarChar(100)        // Aumentamos a 100 por correos largos
+  // Los campos de abajo no tienen @db.VarChar, así que son ilimitados (text) y están bien.
+  Numero_Serie     String?
+  Poliza_Seguro    String?
+  Departamento     String?
+  Contrato         String?
+  Ubicacion        String?
+  Percance         String?
 
   // Relaciones
   encargado       Empleados? @relation("EncargadoAuto", fields: [Email_encargado], references: [Email])

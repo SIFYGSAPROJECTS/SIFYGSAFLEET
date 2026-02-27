@@ -19,7 +19,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Credenciales inválidas' }, { status: 401 });
     }
 
-    // --- ¡ESTO ES LO NUEVO! ---
     // Guardamos el Rol y el Nombre en una "Cookie" (memoria del navegador)
     const cookieStore = await cookies();
     cookieStore.set('user_role', usuario.Rol); // Aquí se guarda si es ADMIN o USER

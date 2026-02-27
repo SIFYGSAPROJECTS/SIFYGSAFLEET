@@ -44,7 +44,7 @@ export default async function Dashboard() {
       <main className="max-w-7xl mx-auto p-6 space-y-8">
         <div>
           <h1 className="text-3xl font-bold text-slate-800">
-            {userRole === 'ADMIN' ? 'Panel de Control Maestro' : 'Centro de Servicios'}
+            {userRole === 'ADMIN' ? 'Panel de Control' : 'Centro de Servicios'}
           </h1>
           <p className="text-slate-500">Gestión de flota SIFYGSA</p>
         </div>
@@ -58,7 +58,7 @@ export default async function Dashboard() {
                 <Car className="text-blue-600" />
               </div>
               <p className="text-4xl font-bold text-slate-900">{totalAutos}</p>
-              <p className="text-xs text-green-600 mt-2 font-medium">Unidades registradas en DB</p>
+              <p className="text-xs text-green-600 mt-2 font-medium">Unidades registradas</p>
             </div>
             
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">

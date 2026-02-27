@@ -50,7 +50,7 @@ const handleLogin = async (e: React.FormEvent) => {
             <Car className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-2xl font-bold text-white tracking-wide">SIFYGSA</h1>
-          <p className="text-slate-400 text-sm mt-1">Fleet Management System</p>
+          <p className="text-slate-400 text-sm mt-1">Sistema para mantenimiento de flota</p>
         </div>
 
         {/* Formulario */}
