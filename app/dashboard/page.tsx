@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/db';
-import { Car, Users, LogOut, Wrench, History, ShieldCheck, Activity } from 'lucide-react';
+import { Car, Users, LogOut, Wrench, History, ShieldCheck, Activity, FileText } from 'lucide-react'; // <-- Agregué FileText
 import Link from 'next/link';
 import { cookies } from 'next/headers';
 
@@ -49,7 +49,7 @@ export default async function Dashboard() {
           <p className="text-slate-500">Gestión de flota SIFYGSA</p>
         </div>
 
-        {/* --- TARJETAS DE MÉTRICAS (AQUÍ ESTÁ EL CAMBIO) --- */}
+        {/* --- TARJETAS DE MÉTRICAS --- */}
         {userRole === 'ADMIN' && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
@@ -70,7 +70,6 @@ export default async function Dashboard() {
               <p className="text-xs text-slate-500 mt-2">Usuarios con acceso al sistema</p>
             </div>
 
-            {/* 👇 NUEVA TARJETA: SERVICIOS PENDIENTES 👇 */}
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
               <div className="flex justify-between items-start mb-4">
                 <h2 className="text-sm font-semibold text-slate-500">SERVICIOS PENDIENTES</h2>
@@ -100,6 +99,13 @@ export default async function Dashboard() {
                   <Users className="w-8 h-8 text-purple-600 mb-4" />
                   <span className="block font-bold text-lg text-slate-800">Gestión de Personal</span>
                   <span className="text-sm text-slate-500">Administrar accesos, roles y contraseñas.</span>
+                </Link>
+                
+                {/* 👇 NUEVA TARJETA: CHECKLISTS PDF 👇 */}
+                <Link href="/dashboard/checklists" className="p-6 bg-white border border-slate-200 rounded-xl hover:border-cyan-500 hover:shadow-md transition-all group block text-left">
+                  <FileText className="w-8 h-8 text-cyan-600 mb-4" />
+                  <span className="block font-bold text-lg text-slate-800">Checklists PDF</span>
+                  <span className="text-sm text-slate-500">Consulta y sube revisiones físicas de unidades.</span>
                 </Link>
               </>
             )}
