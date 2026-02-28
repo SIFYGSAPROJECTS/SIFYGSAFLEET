@@ -2,14 +2,17 @@ import { prisma } from '@/lib/db';
 import { CheckCircle2, ArrowLeft, Calendar, Gauge, Car } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import PrintButton from './PrintButton'; // <--- Aquí traemos el botón corregido
+import PrintButton from './PrintButton';
 
 export default async function VerTicketPage({ params }: { params: Promise<{ folio: string }> }) {
   
   const { folio } = await params;
 
+  // 👇 LA SOLUCIÓN: Decodificamos el folio para recuperar el símbolo '&' original
+  const folioReal = decodeURIComponent(folio);
+
   const ticket = await prisma.solicitud.findUnique({
-    where: { Pk_folio_ticket: folio },
+    where: { Pk_folio_ticket: folioReal }, // Buscamos con el folio real (F&G-...)
     include: { auto: true } 
   });
 
@@ -22,9 +25,7 @@ export default async function VerTicketPage({ params }: { params: Promise<{ foli
           <ArrowLeft size={16} /> Volver al Inicio
         </Link>
         
-        {/* Usamos el nuevo componente interactivo */}
         <PrintButton />
-        
       </div>
 
       <div className="w-full max-w-2xl bg-white shadow-xl rounded-lg border-t-8 border-blue-600 overflow-hidden print:shadow-none print:border-t-0">

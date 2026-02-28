@@ -1,0 +1,68 @@
+import { NextResponse } from 'next/server';
+import { prisma } from '@/lib/db';
+
+// 1. OBTENER TODO EL PERSONAL
+export async function GET() {
+  try {
+    const empleados = await prisma.empleados.findMany({
+      orderBy: { Nombre_Empleado: 'asc' }
+    });
+    return NextResponse.json(empleados);
+  } catch (error) {
+    console.error('❌ Error al cargar empleados:', error);
+    return NextResponse.json({ error: 'Error al cargar el personal' }, { status: 500 });
+  }
+}
+
+// 2. REGISTRAR UN NUEVO EMPLEADO
+export async function POST(request: Request) {
+  try {
+    const body = await request.json();
+    const { Email, Nombre_Empleado, A_Paterno, A_Materno, Cargo, Departamento, Rol } = body;
+
+    const nuevoEmpleado = await prisma.empleados.create({
+      data: {
+        Email: Email.toLowerCase(),
+        Nombre_Empleado,
+        A_Paterno,
+        A_Materno,
+        Cargo,
+        Departamento,
+        Rol: Rol || 'USER',
+        // Nota: La contraseña se pondrá sola como "123456" gracias a tu base de datos
+      }
+    });
+
+    return NextResponse.json({ success: true, data: nuevoEmpleado });
+  } catch (error: any) {
+    if (error.code === 'P2002') {
+      return NextResponse.json({ error: 'Este correo electrónico ya está registrado en el sistema.' }, { status: 400 });
+    }
+    return NextResponse.json({ error: 'Error interno en el servidor' }, { status: 500 });
+  }
+}
+
+// 3. ACTUALIZAR UN EMPLEADO (Rol, Cargo, etc.)
+export async function PUT(request: Request) {
+  try {
+    const body = await request.json();
+    const { Email, Nombre_Empleado, A_Paterno, A_Materno, Cargo, Departamento, Rol } = body;
+
+    const empleadoActualizado = await prisma.empleados.update({
+      where: { Email },
+      data: {
+        Nombre_Empleado,
+        A_Paterno,
+        A_Materno,
+        Cargo,
+        Departamento,
+        Rol,
+      }
+    });
+
+    return NextResponse.json({ success: true, data: empleadoActualizado });
+  } catch (error) {
+    console.error('❌ Error al actualizar empleado:', error);
+    return NextResponse.json({ error: 'Error al actualizar los datos en la base de datos' }, { status: 500 });
+  }
+}

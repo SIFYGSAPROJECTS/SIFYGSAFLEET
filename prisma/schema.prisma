@@ -5,8 +5,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("POSTGRES_PRISMA_URL")
+  directUrl = env("POSTGRES_URL_NON_POOLING")
 }
 
 // 1. CATALOGO DE EMPLEADOS [cite: 1]
@@ -31,20 +32,28 @@ model Empleados {
 
 // 2. INVENTARIO DE UNIDADES [cite: 2]
 model Inventario_Automoviles {
-  Consecutivo     String  @id @db.VarChar(10)
-  Placa           String  @unique @db.VarChar(10)
-  Marca           String? @db.VarChar(20)
-  Modelo          String? @db.VarChar(20)
-  Color           String? @db.VarChar(15)
-  Linea           String? @db.VarChar(15)
-  Estado_Unidad   Boolean @default(true)
-  Email_encargado String? @db.VarChar(50)
+  Consecutivo      String   @id @db.VarChar(10)
+  Placa            String   @unique @db.VarChar(20) // Aumentamos a 20
+  Marca            String?  @db.VarChar(50)         // Aumentamos a 50
+  Modelo           String?  @db.VarChar(50)         // Aumentamos a 50
+  Color            String?  @db.VarChar(40)         // Aumentamos a 40 para colores largos
+  Linea            String?  @db.VarChar(20)         // Aumentamos a 20
+  Estado_Unidad    Boolean  @default(true)
+  Email_encargado  String?  @db.VarChar(100)        // Aumentamos a 100 por correos largos
+  // Los campos de abajo no tienen @db.VarChar, así que son ilimitados (text) y están bien.
+  Numero_Serie     String?
+  Poliza_Seguro    String?
+  Departamento     String?
+  Contrato         String?
+  Ubicacion        String?
+  Percance         String?
 
   // Relaciones
   encargado       Empleados? @relation("EncargadoAuto", fields: [Email_encargado], references: [Email])
   historial_reg   Historial_Registro_Automovil[]
   bitacora_autos  Historial_Auto[]
   solicitudes     Solicitud[]
+  checklists      Checklist[]
 }
 
 // 3. TELEFONOS DE EMPLEADOS [cite: 3]
@@ -74,6 +83,7 @@ model Historial_Registro_Automovil {
   empleado         Empleados?             @relation(fields: [Email_Personal], references: [Email])
 }
 
+
 // 5. BITACORA DE SERVICIOS [cite: 6]
 model Historial_Auto {
   Id_Historial     Int      @id @default(autoincrement())
@@ -87,7 +97,19 @@ model Historial_Auto {
   auto             Inventario_Automoviles @relation(fields: [Consecutivo], references: [Consecutivo], onDelete: Cascade)
 }
 
-// 6. HISTORIAL DE TRAYECTORIA DE EMPLEADOS [cite: 7]
+// 6. CHECKLISTS EN PDF
+model Checklist {
+  id            Int      @id @default(autoincrement())
+  Consecutivo   String   
+  Titulo        String
+  Ruta_PDF      String   // Aquí guardaremos el nombre del archivo (ej. /uploads/VSI-011-check.pdf)
+  Fecha_Subida  DateTime @default(now())
+
+  // Relación: Este checklist pertenece a un auto específico
+  vehiculo      Inventario_Automoviles @relation(fields: [Consecutivo], references: [Consecutivo], onDelete: Cascade)
+}
+
+// 7. HISTORIAL DE TRAYECTORIA DE EMPLEADOS [cite: 7]
 model Historial_Empleados {
   Id_Historial_Emp Int      @id @default(autoincrement())
   Email_Empleado   String   @db.VarChar(50)
@@ -101,12 +123,13 @@ model Historial_Empleados {
   empleado         Empleados @relation(fields: [Email_Empleado], references: [Email], onDelete: Cascade)
 }
 
-// 7. SOLICITUD (Tickets) [cite: 8]
+// 8. SOLICITUD (Tickets) [cite: 8]
 model Solicitud {
   Pk_folio_ticket   String   @id @db.VarChar(25) // Se genera por Trigger en BD
   Consecutivo       String   @db.VarChar(10)
   Email_Empleado    String   @db.VarChar(50)
   Kilometraje       Int?
+  Evidencia         String?
   Descripcion       String?  @db.Text
   Fecha_Realizacion DateTime @default(now()) @db.Date
   Estado  String  @default("PENDIENTE")
@@ -117,7 +140,7 @@ model Solicitud {
 
 }
 
-// 8. PROCESOS (Seguimiento) [cite: 9]
+// 9. PROCESOS (Seguimiento) [cite: 9]
 model Procesos {
   Id_Proceso      Int      @id @default(autoincrement())
   Pk_folio_ticket String   @db.VarChar(25)

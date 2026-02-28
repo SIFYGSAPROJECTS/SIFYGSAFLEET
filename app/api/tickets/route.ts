@@ -15,6 +15,24 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'No se encontró sesión' }, { status: 401 });
     }
 
+    // --- NUEVO: CANDADO DE ESTADO DEL VEHÍCULO ---
+    const vehiculoRequerido = await prisma.inventario_Automoviles.findUnique({
+      where: { Consecutivo: consecutivo }
+    });
+
+    if (!vehiculoRequerido) {
+      return NextResponse.json({ error: 'El vehículo seleccionado no existe.' }, { status: 404 });
+    }
+
+    // Si el Estado_Unidad es false (Dado de Baja), bloqueamos la creación del ticket
+    if (vehiculoRequerido.Estado_Unidad === false) {
+      return NextResponse.json(
+        { error: `El vehículo ${consecutivo} está dado de baja. No se pueden programar servicios hasta que sea reactivado.` }, 
+        { status: 400 }
+      );
+    }
+    // --- FIN DEL CANDADO ---
+
     // --- INICIO DEL FILTRO VIP ---
     // 1. Buscamos quién está intentando hacer el ticket
     const usuario = await prisma.empleados.findUnique({
