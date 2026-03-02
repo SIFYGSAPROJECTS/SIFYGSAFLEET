@@ -66,8 +66,7 @@ export default function TicketForm({ vehiculos }: Props) {
             .filter((auto) => auto.Estado_Unidad === true)
             .map((auto) => (
             <option key={auto.Consecutivo} value={auto.Consecutivo}>
-              {/* 👇 CAMBIO REALIZADO AQUÍ 👇 */}
-              {auto.Consecutivo} - {auto.Marca} {auto.Modelo}
+            ({auto.Consecutivo.toLowerCase()})-{auto.Marca} {auto.Modelo}
             </option>
           ))}
         </select>
