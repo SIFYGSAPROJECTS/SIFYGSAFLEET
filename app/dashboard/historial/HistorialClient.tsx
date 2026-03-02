@@ -23,7 +23,8 @@ export default function HistorialClient({ historial, rol }: Props) {
     ? historial 
     : historial.filter(ticket => ticket.auto?.Consecutivo === filtroAuto);
 
-  const handleSubirEvidencia = async (e: React.ChangeEvent<HTMLInputElement>, folio: string) => {
+  // 👇 CAMBIO 1: Agregamos "consecutivo" a los parámetros
+  const handleSubirEvidencia = async (e: React.ChangeEvent<HTMLInputElement>, folio: string, consecutivo: string) => {
     if (!e.target.files || e.target.files.length === 0) return;
     
     const file = e.target.files[0];
@@ -35,7 +36,9 @@ export default function HistorialClient({ historial, rol }: Props) {
     setSubiendoFolio(folio);
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('folio', folio);
+    formData.append('folio', folio); 
+    // 👇 CAMBIO 2: Adjuntamos el consecutivo para que lo lea el backend
+    formData.append('consecutivo', consecutivo); 
 
     try {
       const res = await fetch('/api/evidencia', {
@@ -155,7 +158,8 @@ export default function HistorialClient({ historial, rol }: Props) {
                             type="file" 
                             accept=".pdf" 
                             className="hidden" 
-                            onChange={(e) => handleSubirEvidencia(e, ticket.Pk_folio_ticket)}
+                            // 👇 CAMBIO 3: Le pasamos el consecutivo del vehículo a la función
+                            onChange={(e) => handleSubirEvidencia(e, ticket.Pk_folio_ticket, ticket.auto?.Consecutivo || 'Unidad')}
                             disabled={subiendoFolio === ticket.Pk_folio_ticket}
                           />
                         </label>
@@ -163,7 +167,6 @@ export default function HistorialClient({ historial, rol }: Props) {
                     </td>
 
                     <td className="p-4 text-center">
-                      {/* 👇 AQUÍ ESTÁ EL DISFRAZ PARA EL & 👇 */}
                       <Link 
                         href={`/dashboard/tickets/ver/${encodeURIComponent(ticket.Pk_folio_ticket)}`}
                         className="inline-flex items-center gap-1 bg-blue-50 text-blue-600 px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-blue-100 transition-colors"
