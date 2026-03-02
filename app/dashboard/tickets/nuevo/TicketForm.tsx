@@ -29,7 +29,6 @@ export default function TicketForm({ vehiculos }: Props) {
         body: JSON.stringify(formData),
       });
 
-      // ¡NUEVO!: Capturamos el error exacto de tu API (Ej. Si ya hizo 1 hoy)
       if (!res.ok) {
         const errorData = await res.json();
         throw new Error(errorData.error || 'Error al guardar');
@@ -44,7 +43,6 @@ export default function TicketForm({ vehiculos }: Props) {
       router.refresh();
 
     } catch (error: any) {
-      // Ahora la alerta muestra el mensaje inteligente que le programamos al Cerebro
       alert(`⚠️ ${error.message}`);
     } finally {
       setLoading(false);
@@ -64,12 +62,12 @@ export default function TicketForm({ vehiculos }: Props) {
           onChange={(e) => setFormData({...formData, consecutivo: e.target.value})}
         >
           <option value="">-- Selecciona una unidad --</option>
-          {/* 👇 AQUÍ ESTÁ EL TRUCO DE MAGIA 👇 */}
           {vehiculos
-            .filter((auto) => auto.Estado_Unidad === true) // Oculta los fantasmas
+            .filter((auto) => auto.Estado_Unidad === true)
             .map((auto) => (
             <option key={auto.Consecutivo} value={auto.Consecutivo}>
-              {auto.Marca} {auto.Modelo} ({auto.Placa})
+              {/* 👇 CAMBIO REALIZADO AQUÍ 👇 */}
+              {auto.Consecutivo} - {auto.Marca} {auto.Modelo}
             </option>
           ))}
         </select>
