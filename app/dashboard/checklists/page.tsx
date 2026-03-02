@@ -9,9 +9,7 @@ export default function ChecklistsPage() {
   const [checklists, setChecklists] = useState<any[]>([]);
   const [vehiculoInfo, setVehiculoInfo] = useState<any>(null);
   
-  // Estados para la subida
   const [archivo, setArchivo] = useState<File | null>(null);
-  const [tituloChecklist, setTituloChecklist] = useState(''); // Nuevo estado para el título
   const [cargando, setCargando] = useState(false);
   const [mensaje, setMensaje] = useState('');
 
@@ -47,18 +45,12 @@ export default function ChecklistsPage() {
 
   const subirPDF = async () => {
     if (!archivo || !vehiculoActivo) return;
-    
-    // Validación extra: obligamos a que pongan un título
-    if (!tituloChecklist.trim()) {
-      alert("⚠️ Por favor, ingresa un título para el checklist.");
-      return;
-    }
 
     setCargando(true);
     const formData = new FormData();
     formData.append('file', archivo);
     formData.append('consecutivo', vehiculoActivo);
-    formData.append('titulo', tituloChecklist.trim()); // Mandamos el título a la API
+    // Ya no mandamos el título, el backend lo genera solo.
 
     try {
       const res = await fetch('/api/checklists', {
@@ -69,8 +61,7 @@ export default function ChecklistsPage() {
       if (res.ok) {
         alert("✅ Checklist subido con éxito.");
         setArchivo(null); 
-        setTituloChecklist(''); // Limpiamos el título
-        buscarVehiculo(); // Recargamos la lista
+        buscarVehiculo(); // Recarga la lista para mostrar el nuevo checklist
       } else {
         const errorData = await res.json();
         alert(`❌ Error: ${errorData.error || "Hubo un error al guardar el PDF."}`);
@@ -85,7 +76,6 @@ export default function ChecklistsPage() {
   return (
     <div className="p-8 max-w-5xl mx-auto">
       
-      {/* 👇 BOTÓN DE REGRESO MINIMALISTA 👇 */}
       <div className="mb-6">
         <Link 
           href="/dashboard" 
@@ -130,38 +120,29 @@ export default function ChecklistsPage() {
 
       {vehiculoActivo && (
         <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 shadow-inner">
-          <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center mb-2 gap-4">
+          <div className="flex flex-col md:flex-row justify-between items-center mb-2 gap-4">
             <h2 className="text-2xl font-black text-blue-900 flex items-center gap-2">
               <CheckCircle2 className="w-6 h-6 text-emerald-500" />
               Unidad Activa: {vehiculoActivo}
             </h2>
             
-            {/* NUEVA SECCIÓN DE SUBIDA CON TÍTULO */}
-            <div className="flex flex-col sm:flex-row items-center gap-3 bg-white p-3 rounded-lg shadow-sm border border-slate-200 w-full xl:w-auto">
-              <input 
-                type="text"
-                placeholder="Título del documento..."
-                className="border border-slate-300 rounded-md px-3 py-2 text-sm outline-none focus:border-blue-500 w-full sm:w-48"
-                value={tituloChecklist}
-                onChange={(e) => setTituloChecklist(e.target.value)}
-              />
+            <div className="flex items-center gap-3 bg-white p-2 rounded-lg shadow-sm border border-slate-200 w-full md:w-auto">
               <input 
                 type="file" 
                 accept=".pdf"
-                className="block text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer w-full sm:w-56"
+                className="block text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer w-full md:w-auto"
                 onChange={(e) => setArchivo(e.target.files?.[0] || null)}
               />
               <button 
                 onClick={subirPDF}
-                disabled={cargando || !archivo || !tituloChecklist.trim()}
-                className="bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white px-4 py-2 rounded-md flex items-center justify-center gap-2 font-bold transition-colors w-full sm:w-auto"
+                disabled={cargando || !archivo}
+                className="bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white px-4 py-2 rounded-md flex items-center justify-center gap-2 font-bold transition-colors w-full md:w-auto"
               >
                 <Upload className="w-4 h-4" /> {cargando ? 'Subiendo...' : 'Subir'}
               </button>
             </div>
           </div>
 
-          {/* FICHA TÉCNICA DEL VEHÍCULO */}
           {vehiculoInfo && (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-white p-5 rounded-lg border border-slate-200 shadow-sm mb-6 mt-4">
               <div className="flex flex-col">
@@ -201,7 +182,6 @@ export default function ChecklistsPage() {
                     )}
                   </div>
                 </div>
-                {/* 👇 ENLACE DIRECTO A SUPABASE 👇 */}
                 <a 
                   href={check.Ruta_PDF} 
                   target="_blank" 
