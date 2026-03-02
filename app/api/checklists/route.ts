@@ -2,11 +2,12 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { prisma } from '@/lib/db'; 
 
+// Conexión a Supabase
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!; 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// 👇 ESTA ES LA FUNCIÓN QUE FALTABA PARA BUSCAR EL VEHÍCULO 👇
+// --- 1. BUSCADOR DE UNIDAD Y KILOMETRAJE ---
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -16,20 +17,33 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Falta el consecutivo' }, { status: 400 });
     }
 
-    // 1. Buscamos la unidad
+    // Buscamos la unidad en el inventario
     const vehiculo = await prisma.inventario_Automoviles.findUnique({
       where: { Consecutivo: consecutivo }
     });
 
     if (!vehiculo) {
-      return NextResponse.json({ error: 'Vehículo no encontrado en la base de datos' }, { status: 404 });
+      return NextResponse.json({ error: 'Vehículo no encontrado' }, { status: 404 });
     }
 
-    // 2. Buscamos sus checklists
+    // Traemos los checklists guardados
     const checklists = await prisma.checklist.findMany({
       where: { Consecutivo: consecutivo },
       orderBy: { Fecha_Subida: 'desc' }
     });
+
+    // 👇 AQUÍ SE HACE LA MAGIA DEL KILOMETRAJE 👇
+    // Buscamos la última solicitud de este auto para sacar los km
+    const ultimaSolicitud = await prisma.solicitud.findFirst({
+      where: { id_auto: vehiculo.id },
+      orderBy: { Fecha_Realizacion: 'desc' },
+      select: { Kilometraje: true }
+    });
+
+    // Si existe, le ponemos comas y "km", si no, ponemos un aviso
+    const kmFinal = ultimaSolicitud?.Kilometraje 
+      ? `${ultimaSolicitud.Kilometraje.toLocaleString()} km` 
+      : 'Sin registros';
 
     return NextResponse.json({
       checklists,
@@ -38,16 +52,16 @@ export async function GET(request: Request) {
         modelo: vehiculo.Modelo,
         color: vehiculo.Color,
         conductor: vehiculo.Email_encargado || 'Sin asignar',
-        kilometraje: 'N/A' // Ajusta esto si tienes el kilometraje en tu tabla
+        kilometraje: kmFinal 
       }
     });
   } catch (error) {
-    console.error("Error al buscar:", error);
-    return NextResponse.json({ error: 'Error interno al buscar los datos' }, { status: 500 });
+    console.error("Error GET:", error);
+    return NextResponse.json({ error: 'Error al cargar datos' }, { status: 500 });
   }
 }
 
-// 👇 ESTA ES LA FUNCIÓN QUE SUBE EL PDF A SUPABASE 👇
+// --- 2. SUBIDA DE PDF CON TÍTULO AUTOMÁTICO ---
 export async function POST(request: Request) {
   try {
     const formData = await request.formData();
@@ -55,44 +69,44 @@ export async function POST(request: Request) {
     const consecutivo = formData.get('consecutivo') as string;
 
     if (!file || !consecutivo) {
-      return NextResponse.json({ error: 'Faltan datos (archivo o consecutivo)' }, { status: 400 });
+      return NextResponse.json({ error: 'Datos incompletos' }, { status: 400 });
     }
 
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Generamos el título y nombre automáticos
-    const opcionesFecha: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'long' };
-    const fechaTexto = new Date().toLocaleDateString('es-ES', opcionesFecha);
-    const tituloGenerado = `Checklist ${fechaTexto}`;
-    
-    const timestamp = new Date().getTime(); 
-    const nombreArchivo = `${consecutivo.toLowerCase()}-checklist-${timestamp}.pdf`;
+    // Título automático: "Checklist 2 de marzo"
+    const opciones: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'long' };
+    const fecha = new Date().toLocaleDateString('es-ES', opciones);
+    const tituloAuto = `Checklist ${fecha}`;
 
-    // Subimos a Supabase
-    const { error: uploadError } = await supabase.storage
+    // Nombre de archivo único
+    const nombreArch = `${consecutivo.toLowerCase()}-${new Date().getTime()}.pdf`;
+
+    // Subida a Supabase
+    const { error: storageError } = await supabase.storage
       .from('checklists')
-      .upload(nombreArchivo, buffer, { contentType: file.type });
+      .upload(nombreArch, buffer, { contentType: file.type });
 
-    if (uploadError) throw uploadError;
+    if (storageError) throw storageError;
 
     const { data: { publicUrl } } = supabase.storage
       .from('checklists')
-      .getPublicUrl(nombreArchivo);
+      .getPublicUrl(nombreArch);
 
-    // Guardamos en BD
+    // Guardado en la base de datos
     await prisma.checklist.create({
       data: {
         Consecutivo: consecutivo,
-        Titulo: tituloGenerado, 
+        Titulo: tituloAuto,
         Ruta_PDF: publicUrl
       }
     });
 
-    return NextResponse.json({ url: publicUrl, mensaje: 'Checklist guardado exitosamente' });
+    return NextResponse.json({ mensaje: 'Guardado correctamente' });
 
   } catch (error) {
-    console.error("Error en el servidor al subir checklist:", error);
-    return NextResponse.json({ error: 'Error interno al procesar el documento' }, { status: 500 });
+    console.error("Error POST:", error);
+    return NextResponse.json({ error: 'Error al subir' }, { status: 500 });
   }
 }
