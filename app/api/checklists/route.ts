@@ -32,12 +32,19 @@ export async function GET(request: Request) {
       orderBy: { Fecha_Subida: 'desc' }
     });
 
-    // 👇 AQUÍ SE HACE LA MAGIA DEL KILOMETRAJE 👇
-    // Buscamos la última solicitud de este auto para sacar los km
+    // 👇 CAMBIO AQUÍ: Filtramos usando la relación 'auto' en lugar de 'id_auto' 👇
     const ultimaSolicitud = await prisma.solicitud.findFirst({
-      where: { id_auto: vehiculo.id },
-      orderBy: { Fecha_Realizacion: 'desc' },
-      select: { Kilometraje: true }
+      where: { 
+        auto: { 
+          Consecutivo: consecutivo 
+        } 
+      },
+      orderBy: { 
+        Fecha_Realizacion: 'desc' 
+      },
+      select: { 
+        Kilometraje: true 
+      }
     });
 
     // Si existe, le ponemos comas y "km", si no, ponemos un aviso
