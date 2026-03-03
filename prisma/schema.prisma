@@ -128,6 +128,9 @@ model Solicitud {
   Pk_folio_ticket   String   @id @db.VarChar(25) // Se genera por Trigger en BD
   Consecutivo       String   @db.VarChar(10)
   Email_Empleado    String   @db.VarChar(50)
+  Lugar_Cita        String?  @db.Text
+  Fecha_Cita        String?  @db.VarChar(50)
+  Hora_Cita         String?  @db.VarChar(20)
   Kilometraje       Int?
   Evidencia         String?
   Descripcion       String?  @db.Text

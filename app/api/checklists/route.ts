@@ -17,9 +17,12 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Falta el consecutivo' }, { status: 400 });
     }
 
-    // Buscamos la unidad en el inventario
+    // 👇 CAMBIO 1: Agregamos "include" para traer los datos del empleado (encargado) 👇
     const vehiculo = await prisma.inventario_Automoviles.findUnique({
-      where: { Consecutivo: consecutivo }
+      where: { Consecutivo: consecutivo },
+      include: {
+        encargado: true // Esto trae Nombre_Empleado, A_Paterno, etc.
+      }
     });
 
     if (!vehiculo) {
@@ -32,7 +35,6 @@ export async function GET(request: Request) {
       orderBy: { Fecha_Subida: 'desc' }
     });
 
-    // 👇 CAMBIO AQUÍ: Filtramos usando la relación 'auto' en lugar de 'id_auto' 👇
     const ultimaSolicitud = await prisma.solicitud.findFirst({
       where: { 
         auto: { 
@@ -47,10 +49,14 @@ export async function GET(request: Request) {
       }
     });
 
-    // Si existe, le ponemos comas y "km", si no, ponemos un aviso
     const kmFinal = ultimaSolicitud?.Kilometraje 
       ? `${ultimaSolicitud.Kilometraje.toLocaleString()} km` 
       : 'Sin registros';
+
+    // 👇 CAMBIO 2: Construimos el nombre completo en lugar de mandar el correo 👇
+    const nombreCompleto = vehiculo.encargado 
+      ? `${vehiculo.encargado.Nombre_Empleado} ${vehiculo.encargado.A_Paterno}` 
+      : 'Sin asignar';
 
     return NextResponse.json({
       checklists,
@@ -58,7 +64,7 @@ export async function GET(request: Request) {
         marca: vehiculo.Marca,
         modelo: vehiculo.Modelo,
         color: vehiculo.Color,
-        conductor: vehiculo.Email_encargado || 'Sin asignar',
+        nombreConductor: nombreCompleto, // 👈 Ahora mandamos el nombre real
         kilometraje: kmFinal 
       }
     });
@@ -82,15 +88,13 @@ export async function POST(request: Request) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Título automático: "Checklist 2 de marzo"
+    // Título automático (Asegúrate de que la fecha sea consistente)
     const opciones: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'long' };
     const fecha = new Date().toLocaleDateString('es-ES', opciones);
     const tituloAuto = `Checklist ${fecha}`;
 
-    // Nombre de archivo único
     const nombreArch = `${consecutivo.toLowerCase()}-${new Date().getTime()}.pdf`;
 
-    // Subida a Supabase
     const { error: storageError } = await supabase.storage
       .from('checklists')
       .upload(nombreArch, buffer, { contentType: file.type });
@@ -101,7 +105,6 @@ export async function POST(request: Request) {
       .from('checklists')
       .getPublicUrl(nombreArch);
 
-    // Guardado en la base de datos
     await prisma.checklist.create({
       data: {
         Consecutivo: consecutivo,

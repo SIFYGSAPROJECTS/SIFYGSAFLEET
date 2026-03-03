@@ -50,23 +50,25 @@ export default function TicketForm({ vehiculos }: Props) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white p-8 rounded-xl shadow-sm border border-slate-200">
+    // 👇 TARJETA GRIS OSCURA CON BORDE Y SOMBRA NARANJA 👇
+    <form onSubmit={handleSubmit} className="bg-slate-900 p-8 rounded-xl shadow-[0_0_20px_rgba(255,116,32,0.1)] border border-slate-800 border-t-4 border-t-[#FF7420]">
       
       {/* 1. Selección de Vehículo */}
       <div className="mb-6">
-        <label className="block text-sm font-medium text-slate-700 mb-2">Vehículo a intervenir</label>
+        <label className="block text-sm font-medium text-slate-400 mb-2">Vehículo a intervenir</label>
         <select 
           required
-          className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-slate-50"
+          // 👇 Inputs en modo oscuro con focus Naranja 👇
+          className="w-full p-3 bg-slate-950 border border-slate-700 text-white rounded-lg focus:ring-2 focus:ring-[#FF7420] focus:border-[#FF7420] outline-none transition-all"
           value={formData.consecutivo}
           onChange={(e) => setFormData({...formData, consecutivo: e.target.value})}
         >
-          <option value="">-- Selecciona una unidad --</option>
+          <option value="" className="text-slate-500">-- Selecciona una unidad --</option>
           {vehiculos
             .filter((auto) => auto.Estado_Unidad === true)
             .map((auto) => (
             <option key={auto.Consecutivo} value={auto.Consecutivo}>
-            ({auto.Consecutivo})-{auto.Marca} {auto.Modelo}
+              ({auto.Consecutivo}) - {auto.Marca} {auto.Modelo}
             </option>
           ))}
         </select>
@@ -74,38 +76,38 @@ export default function TicketForm({ vehiculos }: Props) {
 
       {/* 2. Kilometraje */}
       <div className="mb-6">
-        <label className="block text-sm font-medium text-slate-700 mb-2">Kilometraje Actual</label>
+        <label className="block text-sm font-medium text-slate-400 mb-2">Kilometraje Actual</label>
         <div className="relative">
           <input 
             type="number" 
             required
-            className="w-full p-3 pl-4 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            className="w-full p-3 pl-4 bg-slate-950 border border-slate-700 text-white rounded-lg focus:ring-2 focus:ring-[#FF7420] focus:border-[#FF7420] outline-none placeholder-slate-600 transition-all"
             placeholder="Ej: 150000"
             value={formData.kilometraje}
             onChange={(e) => setFormData({...formData, kilometraje: e.target.value})}
           />
-          <span className="absolute right-4 top-3.5 text-slate-400 text-sm font-medium">km</span>
+          <span className="absolute right-4 top-3.5 text-slate-500 text-sm font-medium">km</span>
         </div>
       </div>
 
       {/* 3. Descripción del Servicio */}
       <div className="mb-8">
-        <label className="block text-sm font-medium text-slate-700 mb-2">Detalles del Mantenimiento</label>
+        <label className="block text-sm font-medium text-slate-400 mb-2">Detalles del Mantenimiento</label>
         <textarea 
           required
           rows={4}
-          className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 placeholder:text-slate-400"
+          className="w-full p-3 bg-slate-950 border border-slate-700 text-white rounded-lg focus:ring-2 focus:ring-[#FF7420] focus:border-[#FF7420] outline-none placeholder-slate-600 transition-all"
           placeholder="Ej: Servicio preventivo de 10,000km, cambio de balatas y revisión de niveles..."
           value={formData.descripcion}
           onChange={(e) => setFormData({...formData, descripcion: e.target.value})}
         />
       </div>
 
-      {/* Botón Guardar */}
+      {/* 👇 Botón Naranja Oficial 👇 */}
       <button 
         type="submit" 
         disabled={loading}
-        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-lg flex items-center justify-center gap-2 transition-all shadow-md hover:shadow-lg disabled:opacity-70 disabled:cursor-not-allowed"
+        className="w-full bg-[#FF7420] hover:bg-[#E6681C] text-white font-bold py-3.5 rounded-lg flex items-center justify-center gap-2 transition-all shadow-lg shadow-[#FF7420]/20 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {loading ? <Loader2 className="animate-spin" /> : <Wrench size={20} />}
         Agendar Mantenimiento

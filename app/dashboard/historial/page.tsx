@@ -1,22 +1,25 @@
 import { prisma } from '@/lib/db';
 import { cookies } from 'next/headers';
-import HistorialClient from './HistorialClient'; // Conectamos con el nuevo archivo
+import HistorialClient from './HistorialClient';
 
 export default async function HistorialPage() {
-  // 1. Identificamos al usuario
   const cookieStore = await cookies();
   const userEmail = cookieStore.get('user_email')?.value;
 
   if (!userEmail) {
-    return <div className="p-8 text-center text-red-500">Error: No has iniciado sesión</div>;
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center p-8">
+        <div className="bg-red-900/20 border border-red-900 text-red-500 p-6 rounded-xl shadow-lg font-bold">
+          Error: No has iniciado sesión
+        </div>
+      </div>
+    );
   }
 
-  // 2. Buscamos si es ADMIN o USER
   const usuario = await prisma.empleados.findUnique({
     where: { Email: userEmail }
   });
 
-  // 3. EL FILTRO DE SEGURIDAD
   const condicionDeBusqueda = usuario?.Rol === 'ADMIN' 
     ? {} 
     : {
@@ -26,7 +29,6 @@ export default async function HistorialPage() {
         ]
       };
 
-  // 4. Traemos TODOS los tickets
   const historial = await prisma.solicitud.findMany({
     where: condicionDeBusqueda,
     include: { 
@@ -36,6 +38,12 @@ export default async function HistorialPage() {
     orderBy: { Fecha_Realizacion: 'desc' }
   });
 
-  // 5. ¡Le pasamos los datos a la pantalla interactiva!
-  return <HistorialClient historial={historial} rol={usuario?.Rol} />;
+  // 👇 Ahora solo mandamos llamar al cliente dentro del fondo negro
+  return (
+    <div className="min-h-screen bg-black">
+      <div className="p-8 max-w-7xl mx-auto">
+        <HistorialClient historial={historial} rol={usuario?.Rol} />
+      </div>
+    </div>
+  );
 }

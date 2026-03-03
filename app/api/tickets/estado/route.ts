@@ -4,27 +4,34 @@ import nodemailer from 'nodemailer';
 
 export async function PUT(request: Request) {
   try {
-    const { folio, estado } = await request.json();
+    // 👇 EXTRAEMOS LOS NUEVOS CAMPOS DEL CUERPO DE LA PETICIÓN 👇
+    const { folio, estado, lugar, fecha, hora } = await request.json();
 
-    // 1. Actualizamos el ticket y EXTRAEMOS los datos del auto y del empleado
+    // 1. Actualizamos el ticket incluyendo los datos de la cita
     const ticketActualizado = await prisma.solicitud.update({
       where: { Pk_folio_ticket: folio },
-      data: { Estado: estado },
+      data: { 
+        Estado: estado,
+        // 👇 AQUÍ SE GUARDA LA INFORMACIÓN EN TU BASE DE DATOS 👇
+        Lugar_Cita: lugar || null,
+        Fecha_Cita: fecha || null,
+        Hora_Cita: hora || null
+      },
       include: {
         empleado: true, // Para sacar su correo y nombre
         auto: true      // Para sacar la marca y placas
       }
     });
 
-    // 2. ¡LA MAGIA DEL CORREO! Solo se envía si el estado es LISTO
+    // 2. ¡NOTIFICACIÓN POR CORREO!
+    // Enviamos el correo solo si el estado es LISTO
     if (estado === 'LISTO' && ticketActualizado.empleado?.Email) {
       
-      // Configura esto igual que en tu creador de tickets original
       const transporter = nodemailer.createTransport({
-        service: 'gmail', // O el servicio que estés usando (Outlook, Resend, etc.)
+        service: 'gmail',
         auth: {
-          user: process.env.EMAIL_USER, // Tu correo de SIFYGSA o de pruebas
-          pass: process.env.EMAIL_PASSWORD, // Tu contraseña de aplicación
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASSWORD,
         },
       });
 
@@ -55,6 +62,7 @@ export async function PUT(request: Request) {
       console.log(`✉️ Correo de recolección enviado con éxito a: ${ticketActualizado.empleado.Email}`);
     }
 
+    // Retornamos el ticket actualizado para que la interfaz se refresque
     return NextResponse.json({ success: true, data: ticketActualizado });
     
   } catch (error) {
