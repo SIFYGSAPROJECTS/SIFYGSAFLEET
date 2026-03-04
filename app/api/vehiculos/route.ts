@@ -30,7 +30,9 @@ export async function POST(request: Request) {
         Departamento: body.Departamento,
         Contrato: body.Contrato,
         Ubicacion: body.Ubicacion,
-        Percance: body.Percance, // <--- GUARDAMOS EL PERCANCE
+        Percance: body.Percance,
+        Estatus_Operativo: body.Estatus_Operativo || 'Activo en flota',
+        Estado_Unidad: body.Estado_Unidad, // Aprovechamos para guardar el booleano viejo también
       }
     });
     return NextResponse.json({ success: true, data: vehiculo });
@@ -57,7 +59,8 @@ export async function PUT(request: Request) {
         Departamento: body.Departamento,
         Contrato: body.Contrato,
         Ubicacion: body.Ubicacion,
-        Percance: body.Percance, // <--- ACTUALIZAMOS EL PERCANCE
+        Percance: body.Percance, 
+        Estatus_Operativo: body.Estatus_Operativo, 
       }
     });
     return NextResponse.json({ success: true, data: vehiculo });

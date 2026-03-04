@@ -8,7 +8,7 @@ export default async function VerTicketPage({ params }: { params: Promise<{ foli
   
   const { folio } = await params;
 
-  // 👇 LA SOLUCIÓN: Decodificamos el folio para recuperar el símbolo '&' original
+  // Decodificamos el folio para recuperar el símbolo '&' original
   const folioReal = decodeURIComponent(folio);
 
   const ticket = await prisma.solicitud.findUnique({

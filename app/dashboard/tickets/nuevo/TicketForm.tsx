@@ -50,7 +50,7 @@ export default function TicketForm({ vehiculos }: Props) {
   };
 
   return (
-    // 👇 TARJETA GRIS OSCURA CON BORDE Y SOMBRA NARANJA 👇
+    //  TARJETA GRIS OSCURA CON BORDE Y SOMBRA NARANJA 
     <form onSubmit={handleSubmit} className="bg-slate-900 p-8 rounded-xl shadow-[0_0_20px_rgba(255,116,32,0.1)] border border-slate-800 border-t-4 border-t-[#FF7420]">
       
       {/* 1. Selección de Vehículo */}
@@ -58,7 +58,7 @@ export default function TicketForm({ vehiculos }: Props) {
         <label className="block text-sm font-medium text-slate-400 mb-2">Vehículo a intervenir</label>
         <select 
           required
-          // 👇 Inputs en modo oscuro con focus Naranja 👇
+          //  Inputs en modo oscuro con focus Naranja 
           className="w-full p-3 bg-slate-950 border border-slate-700 text-white rounded-lg focus:ring-2 focus:ring-[#FF7420] focus:border-[#FF7420] outline-none transition-all"
           value={formData.consecutivo}
           onChange={(e) => setFormData({...formData, consecutivo: e.target.value})}
@@ -103,7 +103,7 @@ export default function TicketForm({ vehiculos }: Props) {
         />
       </div>
 
-      {/* 👇 Botón Naranja Oficial 👇 */}
+      {/*  Botón Naranja Oficial  */}
       <button 
         type="submit" 
         disabled={loading}

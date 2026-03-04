@@ -38,7 +38,6 @@ export default function SeguimientoClient({ ticketsIniciales = [], isAdmin }: an
 
               {isAdmin && (
                 <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 shadow-inner">
-                  {/* 👇 Aquí es donde resolvemos el error "is not a function" (image_63f6d9.png) 👇 */}
                   <StatusUpdater 
                     folio={ticket.Pk_folio_ticket} 
                     estadoActual={ticket.Estado}

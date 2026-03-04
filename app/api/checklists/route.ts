@@ -17,7 +17,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Falta el consecutivo' }, { status: 400 });
     }
 
-    // 👇 CAMBIO 1: Agregamos "include" para traer los datos del empleado (encargado) 👇
+    
     const vehiculo = await prisma.inventario_Automoviles.findUnique({
       where: { Consecutivo: consecutivo },
       include: {
@@ -53,7 +53,7 @@ export async function GET(request: Request) {
       ? `${ultimaSolicitud.Kilometraje.toLocaleString()} km` 
       : 'Sin registros';
 
-    // 👇 CAMBIO 2: Construimos el nombre completo en lugar de mandar el correo 👇
+    //Construimos el nombre completo en lugar de mandar el correo 
     const nombreCompleto = vehiculo.encargado 
       ? `${vehiculo.encargado.Nombre_Empleado} ${vehiculo.encargado.A_Paterno}` 
       : 'Sin asignar';
@@ -64,7 +64,7 @@ export async function GET(request: Request) {
         marca: vehiculo.Marca,
         modelo: vehiculo.Modelo,
         color: vehiculo.Color,
-        nombreConductor: nombreCompleto, // 👈 Ahora mandamos el nombre real
+        nombreConductor: nombreCompleto,
         kilometraje: kmFinal 
       }
     });

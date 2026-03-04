@@ -18,7 +18,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { Email, Nombre_Empleado, A_Paterno, A_Materno, Cargo, Departamento, Rol } = body;
+    const { Email, Nombre_Empleado, A_Paterno, A_Materno, Cargo, Departamento, Rol, Estatus_Acceso } = body;
 
     const nuevoEmpleado = await prisma.empleados.create({
       data: {
@@ -29,7 +29,8 @@ export async function POST(request: Request) {
         Cargo,
         Departamento,
         Rol: Rol || 'USER',
-        // Nota: La contraseña se pondrá sola como "123456" gracias a tu base de datos
+        // AGREGAMOS EL ESTATUS INICIAL 
+        Estatus_Acceso: Estatus_Acceso || 'Activo',
       }
     });
 
@@ -42,11 +43,11 @@ export async function POST(request: Request) {
   }
 }
 
-// 3. ACTUALIZAR UN EMPLEADO (Rol, Cargo, etc.)
+// 3. ACTUALIZAR UN EMPLEADO (Rol, Cargo, Estatus, etc.)
 export async function PUT(request: Request) {
   try {
     const body = await request.json();
-    const { Email, Nombre_Empleado, A_Paterno, A_Materno, Cargo, Departamento, Rol } = body;
+    const { Email, Nombre_Empleado, A_Paterno, A_Materno, Cargo, Departamento, Rol, Estatus_Acceso } = body;
 
     const empleadoActualizado = await prisma.empleados.update({
       where: { Email },
@@ -57,6 +58,7 @@ export async function PUT(request: Request) {
         Cargo,
         Departamento,
         Rol,
+        Estatus_Acceso, 
       }
     });
 

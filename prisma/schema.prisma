@@ -16,6 +16,7 @@ model Empleados {
   Password         String  @default("123456")
   Nombre_Empleado  String  @db.VarChar(30)
   A_Paterno        String  @db.VarChar(30)
+  Estatus_Acceso   String   @default("Activo")
   A_Materno        String? @db.VarChar(30)
   Cargo            String? @db.VarChar(30)
   Departamento     String? @db.VarChar(40)
@@ -39,8 +40,8 @@ model Inventario_Automoviles {
   Color            String?  @db.VarChar(40)         // Aumentamos a 40 para colores largos
   Linea            String?  @db.VarChar(20)         // Aumentamos a 20
   Estado_Unidad    Boolean  @default(true)
+  Estatus_Operativo String   @default("Activo en flota") @db.VarChar(30)
   Email_encargado  String?  @db.VarChar(100)        // Aumentamos a 100 por correos largos
-  // Los campos de abajo no tienen @db.VarChar, así que son ilimitados (text) y están bien.
   Numero_Serie     String?
   Poliza_Seguro    String?
   Departamento     String?

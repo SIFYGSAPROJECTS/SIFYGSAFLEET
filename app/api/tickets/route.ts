@@ -65,7 +65,6 @@ export async function POST(request: Request) {
         );
       }
     }
-    // --- FIN DEL FILTRO VIP ---
 
     // 3. GUARDAMOS EN LA BASE DE DATOS
     // Generamos un folio único al instante (Ej. V-02-170879...)

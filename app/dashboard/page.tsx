@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/db';
-import { Car, Users, LogOut, Wrench, History, ShieldCheck, Activity, FileText } from 'lucide-react';
+import { Car, Users, LogOut, Wrench, History, ShieldCheck, Activity, FileText, Archive } from 'lucide-react';
 import Link from 'next/link';
 import { cookies } from 'next/headers';
 
@@ -22,7 +22,6 @@ export default async function Dashboard() {
       <nav className="bg-slate-950 text-white p-4 shadow-lg sticky top-0 z-10 border-b border-slate-800">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex items-center space-x-2">
-            {/* 👇 Naranja oficial en el icono 👇 */}
             <div className="bg-[#FF7420] p-1.5 rounded-lg shadow-lg shadow-[#FF7420]/20">
               <Car className="text-white h-5 w-5" />
             </div>
@@ -31,7 +30,6 @@ export default async function Dashboard() {
           <div className="flex items-center space-x-4">
             <div className="text-right">
               <p className="text-sm font-medium">{userName}</p>
-              {/* 👇 Naranja oficial en el badge de Admin 👇 */}
               <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold ${userRole === 'ADMIN' ? 'bg-[#FF7420]' : 'bg-slate-700 text-slate-300'}`}>
                 {userRole === 'ADMIN' ? 'ADMINISTRADOR' : 'EMPLEADO'}
               </span>
@@ -76,7 +74,6 @@ export default async function Dashboard() {
             <div className="bg-slate-900 p-6 rounded-2xl shadow-lg border-x border-b border-slate-800 border-t-4 border-t-[#FF7420]">
               <div className="flex justify-between items-start mb-4">
                 <h2 className="text-sm font-semibold text-slate-400">SERVICIOS PENDIENTES</h2>
-                {/* 👇 Naranja oficial en el icono de llave 👇 */}
                 <Wrench className="text-[#FF7420]" />
               </div>
               <p className="text-4xl font-bold text-white">{ticketsPendientes}</p>
@@ -93,20 +90,25 @@ export default async function Dashboard() {
             
             {userRole === 'ADMIN' && (
               <>
-                {/* 👇 Hover y bordes con el Naranja Oficial 👇 */}
-                <Link href="/dashboard/inventario" className="p-6 bg-slate-900 border-x border-b border-slate-800 border-t-4 border-t-[#FF7420] rounded-xl hover:border-[#FF7420] hover:shadow-[0_0_15px_rgba(255,116,32,0.15)] transition-all duration-300 group text-left">
+                <Link href="/dashboard/inventario" className="p-6 bg-slate-900 border-x border-b border-slate-800 border-t-4 border-t-[#FF7420] rounded-xl hover:border-[#FF7420] hover:shadow-[0_0_15px_rgba(255,116,32,0.15)] transition-all duration-300 group text-left block">
                   <ShieldCheck className="w-8 h-8 text-blue-500 mb-4" />
                   <span className="block font-bold text-lg text-white">Inventario Maestro</span>
                   <span className="text-sm text-slate-400">Editar, agregar o dar de baja unidades.</span>
                 </Link>
 
-                <Link href="/dashboard/empleados" className="p-6 bg-slate-900 border-x border-b border-slate-800 border-t-4 border-t-[#FF7420] rounded-xl hover:border-[#FF7420] hover:shadow-[0_0_15px_rgba(255,116,32,0.15)] transition-all duration-300 group text-left">
+                <Link href="/dashboard/inventario/bajas" className="p-6 bg-slate-900 border-x border-b border-slate-800 border-t-4 border-t-[#FF7420] rounded-xl hover:border-[#FF7420] hover:shadow-[0_0_15px_rgba(255,116,32,0.15)] transition-all duration-300 group text-left block">
+                  <Archive className="w-8 h-8 text-slate-400 mb-4" />
+                  <span className="block font-bold text-lg text-white">Gestion de bajas</span>
+                  <span className="text-sm text-slate-400">Registro inactivo de unidades y bajas.</span>
+                </Link>
+
+                <Link href="/dashboard/empleados" className="p-6 bg-slate-900 border-x border-b border-slate-800 border-t-4 border-t-[#FF7420] rounded-xl hover:border-[#FF7420] hover:shadow-[0_0_15px_rgba(255,116,32,0.15)] transition-all duration-300 group text-left block">
                   <Users className="w-8 h-8 text-purple-500 mb-4" />
                   <span className="block font-bold text-lg text-white">Gestión de Personal</span>
                   <span className="text-sm text-slate-400">Administrar accesos, roles y contraseñas.</span>
                 </Link>
                 
-                <Link href="/dashboard/checklists" className="p-6 bg-slate-900 border-x border-b border-slate-800 border-t-4 border-t-[#FF7420] rounded-xl hover:border-[#FF7420] hover:shadow-[0_0_15px_rgba(255,116,32,0.15)] transition-all duration-300 group block text-left">
+                <Link href="/dashboard/checklists" className="p-6 bg-slate-900 border-x border-b border-slate-800 border-t-4 border-t-[#FF7420] rounded-xl hover:border-[#FF7420] hover:shadow-[0_0_15px_rgba(255,116,32,0.15)] transition-all duration-300 group text-left block">
                   <FileText className="w-8 h-8 text-cyan-500 mb-4" />
                   <span className="block font-bold text-lg text-white">Checklists PDF</span>
                   <span className="text-sm text-slate-400">Consulta y sube revisiones físicas globales.</span>
@@ -115,26 +117,26 @@ export default async function Dashboard() {
             )}
 
             {userRole === 'USER' && (
-              <Link href="/dashboard/mis-checklists" className="p-6 bg-slate-900 border-x border-b border-slate-800 border-t-4 border-t-[#FF7420] rounded-xl hover:border-[#FF7420] hover:shadow-[0_0_15px_rgba(255,116,32,0.15)] transition-all duration-300 group block text-left">
+              <Link href="/dashboard/mis-checklists" className="p-6 bg-slate-900 border-x border-b border-slate-800 border-t-4 border-t-[#FF7420] rounded-xl hover:border-[#FF7420] hover:shadow-[0_0_15px_rgba(255,116,32,0.15)] transition-all duration-300 group text-left block">
                 <FileText className="w-8 h-8 text-cyan-500 mb-4" />
                 <span className="block font-bold text-lg text-white">Mis Checklists</span>
                 <span className="text-sm text-slate-400">Expediente digital de tu unidad asignada.</span>
               </Link>
             )}
 
-            <Link href="/dashboard/tickets/nuevo" className="p-6 bg-slate-900 border-x border-b border-slate-800 border-t-4 border-t-[#FF7420] rounded-xl hover:border-[#FF7420] hover:shadow-[0_0_15px_rgba(255,116,32,0.15)] transition-all duration-300 group text-left">
+            <Link href="/dashboard/tickets/nuevo" className="p-6 bg-slate-900 border-x border-b border-slate-800 border-t-4 border-t-[#FF7420] rounded-xl hover:border-[#FF7420] hover:shadow-[0_0_15px_rgba(255,116,32,0.15)] transition-all duration-300 group text-left block">
               <Wrench className="w-8 h-8 text-[#FF7420] mb-4" />
               <span className="block font-bold text-lg text-white">Nueva Orden</span>
               <span className="text-sm text-slate-400">Programar servicios o mantenimientos.</span>
             </Link>
 
-            <Link href="/dashboard/historial" className="p-6 bg-slate-900 border-x border-b border-slate-800 border-t-4 border-t-[#FF7420] rounded-xl hover:border-[#FF7420] hover:shadow-[0_0_15px_rgba(255,116,32,0.15)] transition-all duration-300 group block text-left">
+            <Link href="/dashboard/historial" className="p-6 bg-slate-900 border-x border-b border-slate-800 border-t-4 border-t-[#FF7420] rounded-xl hover:border-[#FF7420] hover:shadow-[0_0_15px_rgba(255,116,32,0.15)] transition-all duration-300 group text-left block">
               <History className="w-8 h-8 text-purple-500 mb-4" />
               <span className="block font-bold text-lg text-white">Ver Historial</span>
               <span className="text-sm text-slate-400">Consultar el registro de mantenimientos.</span>
             </Link>
 
-            <Link href="/dashboard/seguimiento" className="p-6 bg-slate-900 border-x border-b border-slate-800 border-t-4 border-t-[#FF7420] rounded-xl hover:border-[#FF7420] hover:shadow-[0_0_15px_rgba(255,116,32,0.15)] transition-all duration-300 group block text-left">
+            <Link href="/dashboard/seguimiento" className="p-6 bg-slate-900 border-x border-b border-slate-800 border-t-4 border-t-[#FF7420] rounded-xl hover:border-[#FF7420] hover:shadow-[0_0_15px_rgba(255,116,32,0.15)] transition-all duration-300 group text-left block">
               <Activity className="w-8 h-8 text-emerald-500 mb-4" />
               <span className="block font-bold text-lg text-white">Seguimiento</span>
               <span className="text-sm text-slate-400">

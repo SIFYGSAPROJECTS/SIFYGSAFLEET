@@ -4,7 +4,7 @@ import nodemailer from 'nodemailer';
 
 export async function PUT(request: Request) {
   try {
-    // 👇 EXTRAEMOS LOS NUEVOS CAMPOS DEL CUERPO DE LA PETICIÓN 👇
+    // EXTRAEMOS LOS NUEVOS CAMPOS DEL CUERPO DE LA PETICIÓN 
     const { folio, estado, lugar, fecha, hora } = await request.json();
 
     // 1. Actualizamos el ticket incluyendo los datos de la cita
@@ -12,7 +12,7 @@ export async function PUT(request: Request) {
       where: { Pk_folio_ticket: folio },
       data: { 
         Estado: estado,
-        // 👇 AQUÍ SE GUARDA LA INFORMACIÓN EN TU BASE DE DATOS 👇
+        //  AQUÍ SE GUARDA LA INFORMACIÓN EN LA BASE DE DATOS 
         Lugar_Cita: lugar || null,
         Fecha_Cita: fecha || null,
         Hora_Cita: hora || null

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { Users, UserPlus, X, Pencil, ShieldAlert, ShieldCheck, ArrowLeft } from 'lucide-react';
+import { Users, UserPlus, X, Pencil, ShieldAlert, ShieldCheck, ArrowLeft, UserMinus, UserCheck } from 'lucide-react';
 import Link from 'next/link';
 
 interface Empleado {
@@ -12,17 +12,21 @@ interface Empleado {
   Cargo: string | null;
   Departamento: string | null;
   Rol: string;
+  Estatus_Acceso: string; 
 }
 
 export default function PersonalPage() {
   const [empleados, setEmpleados] = useState<Empleado[]>([]);
   const [cargando, setCargando] = useState(true);
   
+  // ESTADO PARA LAS PESTAÑAS 
+  const [filtroTab, setFiltroTab] = useState<'Activo' | 'Inactivo'>('Activo');
+  
   const [modalAbierto, setModalAbierto] = useState(false);
   const [modoEdicion, setModoEdicion] = useState(false); 
   
   const [formData, setFormData] = useState({
-    Email: '', Nombre_Empleado: '', A_Paterno: '', A_Materno: '', Cargo: '', Departamento: '', Rol: 'USER'
+    Email: '', Nombre_Empleado: '', A_Paterno: '', A_Materno: '', Cargo: '', Departamento: '', Rol: 'USER', Estatus_Acceso: 'Activo'
   });
 
   const cargarEmpleados = async () => {
@@ -41,9 +45,14 @@ export default function PersonalPage() {
     cargarEmpleados();
   }, []);
 
+  // FILTRADO DE LA TABLA 
+  const empleadosFiltrados = empleados.filter(e => (e.Estatus_Acceso || 'Activo') === filtroTab);
+  const totalActivos = empleados.filter(e => (e.Estatus_Acceso || 'Activo') === 'Activo').length;
+  const totalInactivos = empleados.filter(e => e.Estatus_Acceso === 'Inactivo').length;
+
   const abrirModalNuevo = () => {
     setModoEdicion(false);
-    setFormData({ Email: '', Nombre_Empleado: '', A_Paterno: '', A_Materno: '', Cargo: '', Departamento: '', Rol: 'USER' });
+    setFormData({ Email: '', Nombre_Empleado: '', A_Paterno: '', A_Materno: '', Cargo: '', Departamento: '', Rol: 'USER', Estatus_Acceso: 'Activo' });
     setModalAbierto(true);
   };
 
@@ -56,9 +65,26 @@ export default function PersonalPage() {
       A_Materno: emp.A_Materno || '',
       Cargo: emp.Cargo || '',
       Departamento: emp.Departamento || '',
-      Rol: emp.Rol
+      Rol: emp.Rol,
+      Estatus_Acceso: emp.Estatus_Acceso || 'Activo'
     });
     setModalAbierto(true);
+  };
+
+  const alternarAcceso = async (emp: Empleado) => {
+    const nuevoEstado = emp.Estatus_Acceso === 'Inactivo' ? 'Activo' : 'Inactivo';
+    if (!confirm(`¿Confirmas cambiar el acceso de ${emp.Nombre_Empleado} a ${nuevoEstado}?`)) return;
+
+    try {
+      const res = await fetch('/api/empleados', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...emp, Estatus_Acceso: nuevoEstado }),
+      });
+      if (res.ok) cargarEmpleados();
+    } catch (error) {
+      alert('Error al procesar el cambio de acceso.');
+    }
   };
 
   const guardarEmpleado = async (e: React.FormEvent) => {
@@ -85,7 +111,6 @@ export default function PersonalPage() {
   };
 
   return (
-    // 👇 FONDO NEGRO ABSOLUTO 👇
     <div className="min-h-screen bg-black">
       <div className="p-8 max-w-7xl mx-auto">
         
@@ -110,8 +135,37 @@ export default function PersonalPage() {
           </button>
         </div>
 
-        {/* 👇 Contenedor de la Tabla con borde Naranja 👇 */}
-        <div className="bg-slate-900 rounded-xl shadow-[0_0_20px_rgba(255,116,32,0.1)] border border-[#FF7420]/50 overflow-hidden border-t-4 border-t-[#FF7420]">
+        <div className="flex gap-4 mb-6 border-b border-slate-800 pb-4">
+          <button
+            onClick={() => setFiltroTab('Activo')}
+            className={`flex items-center gap-2 px-6 py-3 rounded-lg font-bold transition-all ${
+              filtroTab === 'Activo' 
+                ? 'bg-[#FF7420]/10 text-[#FF7420] border border-[#FF7420]/50 shadow-[0_0_15px_rgba(255,116,32,0.15)]' 
+                : 'text-slate-500 hover:text-slate-300 hover:bg-slate-900'
+            }`}
+          >
+            <ShieldCheck size={18} /> Personal Activo
+            <span className={`ml-2 px-2 py-0.5 rounded-full text-[10px] ${filtroTab === 'Activo' ? 'bg-[#FF7420] text-white' : 'bg-slate-800 text-slate-400'}`}>
+              {totalActivos}
+            </span>
+          </button>
+
+          <button
+            onClick={() => setFiltroTab('Inactivo')}
+            className={`flex items-center gap-2 px-6 py-3 rounded-lg font-bold transition-all ${
+              filtroTab === 'Inactivo' 
+                ? 'bg-red-500/10 text-red-500 border border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.15)]' 
+                : 'text-slate-500 hover:text-slate-300 hover:bg-slate-900'
+            }`}
+          >
+            <ShieldAlert size={18} /> Personal Inactivo
+            <span className={`ml-2 px-2 py-0.5 rounded-full text-[10px] ${filtroTab === 'Inactivo' ? 'bg-red-500 text-white' : 'bg-slate-800 text-slate-400'}`}>
+              {totalInactivos}
+            </span>
+          </button>
+        </div>
+
+        <div className={`bg-slate-900 rounded-xl shadow-2xl border-x border-b border-t-4 overflow-hidden transition-all duration-500 ${filtroTab === 'Inactivo' ? 'border-t-red-500 border-slate-800' : 'border-t-[#FF7420] border-slate-800'}`}>
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
@@ -119,17 +173,17 @@ export default function PersonalPage() {
                   <th className="p-4 font-semibold">Empleado</th>
                   <th className="p-4 font-semibold">Contacto</th>
                   <th className="p-4 font-semibold">Puesto</th>
-                  <th className="p-4 font-semibold text-center">Nivel de Acceso</th>
+                  <th className="p-4 font-semibold text-center">Nivel</th>
                   <th className="p-4 font-semibold text-center">Acciones</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800">
                 {cargando ? (
                   <tr><td colSpan={5} className="text-center p-8 text-slate-500">Cargando personal... 👥</td></tr>
-                ) : empleados.length === 0 ? (
-                  <tr><td colSpan={5} className="text-center p-8 text-slate-500">No hay empleados registrados.</td></tr>
+                ) : empleadosFiltrados.length === 0 ? (
+                  <tr><td colSpan={5} className="text-center p-8 text-slate-500 uppercase font-bold tracking-widest">No hay usuarios en esta lista</td></tr>
                 ) : (
-                  empleados.map((emp) => (
+                  empleadosFiltrados.map((emp) => (
                     <tr key={emp.Email} className="hover:bg-slate-800/50 transition-colors">
                       <td className="p-4">
                         <div className="flex items-center gap-3">
@@ -137,28 +191,31 @@ export default function PersonalPage() {
                             {emp.Nombre_Empleado.charAt(0)}{emp.A_Paterno.charAt(0)}
                           </div>
                           <div>
-                            <div className="font-bold text-white">{emp.Nombre_Empleado} {emp.A_Paterno} {emp.A_Materno}</div>
+                            <div className="font-bold text-white leading-tight">{emp.Nombre_Empleado} {emp.A_Paterno}</div>
+                            <div className="text-[10px] text-slate-500 font-bold uppercase tracking-tighter">{emp.A_Materno}</div>
                           </div>
                         </div>
                       </td>
-                      <td className="p-4 text-sm text-slate-300 font-medium">{emp.Email}</td>
+                      <td className="p-4 text-sm text-slate-300 font-mono italic">{emp.Email}</td>
                       <td className="p-4 text-sm text-slate-300">
-                        <div>{emp.Cargo || 'Sin cargo'}</div>
-                        <div className="text-xs text-slate-500">{emp.Departamento || 'Sin departamento'}</div>
+                        <div className="font-bold">{emp.Cargo || 'Sin cargo'}</div>
+                        <div className="text-xs text-slate-500">{emp.Departamento || 'General'}</div>
                       </td>
                       <td className="p-4 text-center">
-                        <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold border ${emp.Rol === 'ADMIN' ? 'bg-blue-900/30 text-blue-400 border-blue-800' : 'bg-slate-800 text-slate-400 border-slate-700'}`}>
-                          {emp.Rol === 'ADMIN' ? <ShieldCheck className="w-3 h-3" /> : <ShieldAlert className="w-3 h-3" />}
+                        <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-black tracking-widest border ${emp.Rol === 'ADMIN' ? 'bg-blue-900/30 text-blue-400 border-blue-800' : 'bg-slate-800 text-slate-400 border-slate-700'}`}>
                           {emp.Rol}
                         </span>
                       </td>
-                      <td className="p-4 text-center">
+                      <td className="p-4 text-center flex justify-center gap-2">
+                        <button onClick={() => abrirModalEditar(emp)} className="p-2 text-slate-500 hover:text-white hover:bg-slate-700 rounded-lg transition-colors" title="Editar">
+                          <Pencil className="w-4 h-4" />
+                        </button>
                         <button 
-                          onClick={() => abrirModalEditar(emp)}
-                          className="p-2 text-slate-500 hover:text-[#FF7420] hover:bg-[#FF7420]/10 rounded-lg transition-colors"
-                          title="Editar Empleado"
+                          onClick={() => alternarAcceso(emp)} 
+                          className={`p-2 rounded-lg transition-colors ${filtroTab === 'Activo' ? 'text-slate-500 hover:text-red-500 hover:bg-red-500/10' : 'text-slate-500 hover:text-emerald-500 hover:bg-emerald-500/10'}`}
+                          title={filtroTab === 'Activo' ? "Revocar Acceso" : "Restaurar Acceso"}
                         >
-                          <Pencil className="w-5 h-5" />
+                          {filtroTab === 'Activo' ? <UserMinus className="w-5 h-5" /> : <UserCheck className="w-5 h-5" />}
                         </button>
                       </td>
                     </tr>
@@ -169,69 +226,73 @@ export default function PersonalPage() {
           </div>
         </div>
 
-        {/* --- MODAL ADAPTADO AL MODO OSCURO --- */}
+        {/* --- MODAL ADAPTADO --- */}
         {modalAbierto && (
           <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div className="bg-slate-900 rounded-xl shadow-2xl border border-slate-800 w-full max-w-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-              <div className="bg-slate-950 border-b border-[#FF7420]/50 p-4 flex justify-between items-center text-white transition-colors">
-                <h2 className="text-lg font-bold flex items-center gap-2">
-                  {modoEdicion ? <Pencil className="w-5 h-5 text-[#FF7420]" /> : <UserPlus className="w-5 h-5 text-[#FF7420]" />} 
-                  <span className="text-[#FF7420]">
-                    {modoEdicion ? 'Editar Empleado' : 'Registrar Nuevo Empleado'}
-                  </span>
+              <div className="bg-slate-950 border-b border-[#FF7420]/50 p-4 flex justify-between items-center text-white">
+                <h2 className="text-lg font-bold flex items-center gap-2 text-[#FF7420]">
+                  {modoEdicion ? <Pencil className="w-5 h-5" /> : <UserPlus className="w-5 h-5" />} 
+                  {modoEdicion ? 'Editar Registro de Personal' : 'Registrar Nuevo Colaborador'}
                 </h2>
-                <button onClick={() => setModalAbierto(false)} className="text-slate-400 hover:text-red-500 transition-colors">
-                  <X className="w-6 h-6" />
-                </button>
+                <button onClick={() => setModalAbierto(false)} className="text-slate-400 hover:text-red-500"><X className="w-6 h-6" /></button>
               </div>
               
               <form onSubmit={guardarEmpleado} className="p-6">
                 {!modoEdicion && (
-                  <div className="mb-4 bg-[#FF7420]/10 text-[#FF7420] p-3 rounded-lg text-sm flex items-start gap-2 border border-[#FF7420]/20">
-                    <span className="font-bold">💡 Nota:</span> Al registrar un nuevo empleado, su contraseña de acceso se generará automáticamente como <b className="text-white">123456</b>.
+                  <div className="mb-6 bg-[#FF7420]/10 text-[#FF7420] p-3 rounded-lg text-sm border border-[#FF7420]/20 flex items-center gap-2">
+                    <ShieldAlert size={16} /> Contraseña inicial predeterminada: <b className="text-white">123456</b>
                   </div>
                 )}
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="col-span-2">
-                    <label className="block text-sm font-medium text-slate-400 mb-1">Correo Electrónico (Para Iniciar Sesión) *</label>
-                    <input required type="email" value={formData.Email} disabled={modoEdicion} onChange={e => setFormData({...formData, Email: e.target.value})} className={`w-full border border-slate-700 rounded-lg p-2.5 outline-none text-white ${modoEdicion ? 'bg-slate-800/50 text-slate-500 cursor-not-allowed' : 'bg-slate-950 focus:ring-2 focus:ring-[#FF7420] focus:border-[#FF7420]'}`} placeholder="correo@sifygsa.com" />
+                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Email Corporativo *</label>
+                    <input required type="email" value={formData.Email} disabled={modoEdicion} onChange={e => setFormData({...formData, Email: e.target.value})} className={`w-full border border-slate-700 rounded-lg p-2.5 outline-none text-white ${modoEdicion ? 'bg-slate-800/50 text-slate-500 cursor-not-allowed' : 'bg-slate-950 focus:ring-2 focus:ring-[#FF7420]'}`} />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-400 mb-1">Nombre(s) *</label>
-                    <input required type="text" value={formData.Nombre_Empleado} onChange={e => setFormData({...formData, Nombre_Empleado: e.target.value})} className="w-full bg-slate-950 border border-slate-700 text-white rounded-lg p-2.5 focus:ring-2 focus:ring-[#FF7420] outline-none placeholder-slate-600" placeholder="Ej. Juan" />
+                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Nombre(s) *</label>
+                    <input required type="text" value={formData.Nombre_Empleado} onChange={e => setFormData({...formData, Nombre_Empleado: e.target.value})} className="w-full bg-slate-950 border border-slate-700 text-white rounded-lg p-2.5 focus:ring-2 focus:ring-[#FF7420]" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-400 mb-1">Apellido Paterno *</label>
-                    <input required type="text" value={formData.A_Paterno} onChange={e => setFormData({...formData, A_Paterno: e.target.value})} className="w-full bg-slate-950 border border-slate-700 text-white rounded-lg p-2.5 focus:ring-2 focus:ring-[#FF7420] outline-none placeholder-slate-600" placeholder="Ej. Pérez" />
+                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Apellido Paterno *</label>
+                    <input required type="text" value={formData.A_Paterno} onChange={e => setFormData({...formData, A_Paterno: e.target.value})} className="w-full bg-slate-950 border border-slate-700 text-white rounded-lg p-2.5 focus:ring-2 focus:ring-[#FF7420]" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-400 mb-1">Apellido Materno</label>
-                    <input type="text" value={formData.A_Materno} onChange={e => setFormData({...formData, A_Materno: e.target.value})} className="w-full bg-slate-950 border border-slate-700 text-white rounded-lg p-2.5 focus:ring-2 focus:ring-[#FF7420] outline-none placeholder-slate-600" placeholder="Ej. López" />
+                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Apellido Materno</label>
+                    <input type="text" value={formData.A_Materno} onChange={e => setFormData({...formData, A_Materno: e.target.value})} className="w-full bg-slate-950 border border-slate-700 text-white rounded-lg p-2.5 focus:ring-2 focus:ring-[#FF7420]" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-400 mb-1">Nivel de Acceso *</label>
-                    <select value={formData.Rol} onChange={e => setFormData({...formData, Rol: e.target.value})} className="w-full bg-slate-950 border border-slate-700 text-white rounded-lg p-2.5 focus:ring-2 focus:ring-[#FF7420] outline-none font-medium">
-                      <option value="USER">👤 Empleado (USER)</option>
-                      <option value="ADMIN">🛡️ Administrador (ADMIN)</option>
+                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Rol de Sistema *</label>
+                    <select value={formData.Rol} onChange={e => setFormData({...formData, Rol: e.target.value})} className="w-full bg-slate-950 border border-slate-700 text-white rounded-lg p-2.5 focus:ring-2 focus:ring-[#FF7420]">
+                      <option value="USER">EMPLEADO (USER)</option>
+                      <option value="ADMIN">ADMINISTRADOR (ADMIN)</option>
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-400 mb-1">Cargo / Puesto</label>
-                    <input type="text" value={formData.Cargo} onChange={e => setFormData({...formData, Cargo: e.target.value})} className="w-full bg-slate-950 border border-slate-700 text-white rounded-lg p-2.5 focus:ring-2 focus:ring-[#FF7420] outline-none placeholder-slate-600" placeholder="Ej. Chofer" />
+                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Cargo</label>
+                    <input type="text" value={formData.Cargo} onChange={e => setFormData({...formData, Cargo: e.target.value})} className="w-full bg-slate-950 border border-slate-700 text-white rounded-lg p-2.5 focus:ring-2 focus:ring-[#FF7420]" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-400 mb-1">Departamento</label>
-                    <input type="text" value={formData.Departamento} onChange={e => setFormData({...formData, Departamento: e.target.value})} className="w-full bg-slate-950 border border-slate-700 text-white rounded-lg p-2.5 focus:ring-2 focus:ring-[#FF7420] outline-none placeholder-slate-600" placeholder="Ej. Logística" />
+                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Departamento</label>
+                    <input type="text" value={formData.Departamento} onChange={e => setFormData({...formData, Departamento: e.target.value})} className="w-full bg-slate-950 border border-slate-700 text-white rounded-lg p-2.5 focus:ring-2 focus:ring-[#FF7420]" />
                   </div>
+
+                  {modoEdicion && (
+                    <div className="col-span-2">
+                      <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Estado de Acceso</label>
+                      <select value={formData.Estatus_Acceso} onChange={e => setFormData({...formData, Estatus_Acceso: e.target.value})} className="w-full bg-slate-950 border border-slate-700 text-white rounded-lg p-2.5 focus:ring-2 focus:ring-[#FF7420]">
+                        <option value="Activo">🟢 ACCESO PERMITIDO</option>
+                        <option value="Inactivo">🔴 ACCESO BLOQUEADO</option>
+                      </select>
+                    </div>
+                  )}
                 </div>
 
                 <div className="mt-8 flex justify-end gap-3 pt-4 border-t border-slate-800">
-                  <button type="button" onClick={() => setModalAbierto(false)} className="px-5 py-2.5 text-slate-300 font-medium hover:bg-slate-800 rounded-lg transition-colors">
-                    Cancelar
-                  </button>
-                  <button type="submit" className="px-5 py-2.5 text-white font-bold rounded-lg transition-colors shadow-lg bg-[#FF7420] hover:bg-[#E6681C] shadow-[#FF7420]/20">
-                    {modoEdicion ? 'Guardar Cambios' : 'Registrar Empleado'}
+                  <button type="button" onClick={() => setModalAbierto(false)} className="px-5 py-2.5 text-slate-300 font-medium hover:bg-slate-800 rounded-lg">Cancelar</button>
+                  <button type="submit" className="px-5 py-2.5 text-white font-bold rounded-lg bg-[#FF7420] hover:bg-[#E6681C] shadow-lg shadow-[#FF7420]/20">
+                    {modoEdicion ? 'Actualizar Datos' : 'Registrar Colaborador'}
                   </button>
                 </div>
               </form>

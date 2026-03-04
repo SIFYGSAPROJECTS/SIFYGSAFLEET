@@ -1,7 +1,8 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link'; 
-import { Search, Upload, FileText, AlertCircle, CheckCircle2, Car, User, Palette, Gauge, ArrowLeft } from 'lucide-react'; 
+//  Agregamos 'AlertCircle' para los mensajes de error 
+import { Search, Upload, FileText, AlertCircle, CheckCircle2, Car, User, Palette, Gauge, ArrowLeft, X, Eye, Download } from 'lucide-react'; 
 
 export default function ChecklistsPage() {
   const [consecutivoInput, setConsecutivoInput] = useState('');
@@ -12,11 +13,19 @@ export default function ChecklistsPage() {
   const [archivo, setArchivo] = useState<File | null>(null);
   const [cargando, setCargando] = useState(false);
   const [mensaje, setMensaje] = useState('');
+  
+  //  ESTADO PARA CONTROLAR EL ERROR DE BÚSQUEDA 
+  const [errorBusqueda, setErrorBusqueda] = useState(false);
+
+  // ESTADOS PARA EL VISOR PDF 
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [mostrarVisor, setMostrarVisor] = useState(false);
 
   const buscarVehiculo = async () => {
     if (!consecutivoInput) return;
     setCargando(true);
     setMensaje('');
+    setErrorBusqueda(false); // Reiniciamos el estado de error
     setVehiculoActivo(''); 
     setVehiculoInfo(null);
     const idBusqueda = consecutivoInput.toUpperCase();
@@ -31,13 +40,17 @@ export default function ChecklistsPage() {
         setVehiculoInfo(data.vehiculoInfo); 
 
         if (data.checklists.length === 0) {
+          // Si la unidad existe pero no tiene archivos, es un aviso (no un error)
           setMensaje('La unidad cargó correctamente, pero aún no tiene Checklists registrados.');
         }
       } else {
-        setMensaje(data.error || 'Hubo un error al buscar.');
+        //  SI EL SERVIDOR RESPONDE ERROR (404, etc.) 
+        setErrorBusqueda(true);
+        setMensaje(data.error || `La unidad ${idBusqueda} no se encuentra en el sistema.`);
       }
     } catch (error) {
       console.error("Error en la petición:", error);
+      setErrorBusqueda(true);
       setMensaje('Error de conexión con el servidor.');
     }
     setCargando(false);
@@ -72,6 +85,11 @@ export default function ChecklistsPage() {
     setCargando(false);
   };
 
+  const abrirPrevisualizacion = (url: string) => {
+    setPdfUrl(url);
+    setMostrarVisor(true);
+  };
+
   return (
     <div className="min-h-screen bg-black">
       <div className="p-8 max-w-5xl mx-auto">
@@ -100,9 +118,12 @@ export default function ChecklistsPage() {
             <input 
               type="text" 
               placeholder="Ej. F&G-002" 
-              className="w-full bg-slate-950 border-2 border-slate-700 rounded-lg px-4 py-3 focus:border-[#FF7420] focus:ring-4 focus:ring-[#FF7420]/10 outline-none uppercase text-center font-bold text-lg text-white transition-all placeholder:text-slate-600"
+              className={`w-full bg-slate-950 border-2 rounded-lg px-4 py-3 outline-none uppercase text-center font-bold text-lg text-white transition-all placeholder:text-slate-600 ${errorBusqueda ? 'border-red-500 focus:ring-4 focus:ring-red-500/10' : 'border-slate-700 focus:border-[#FF7420] focus:ring-4 focus:ring-[#FF7420]/10'}`}
               value={consecutivoInput}
-              onChange={(e) => setConsecutivoInput(e.target.value)}
+              onChange={(e) => {
+                setConsecutivoInput(e.target.value);
+                if(errorBusqueda) setErrorBusqueda(false); 
+              }}
               onKeyDown={(e) => e.key === 'Enter' && buscarVehiculo()}
             />
             <button 
@@ -110,9 +131,17 @@ export default function ChecklistsPage() {
               className="bg-[#FF7420] hover:bg-[#E6681C] text-white px-6 py-3 rounded-lg flex items-center gap-2 font-bold transition-all shadow-lg shadow-[#FF7420]/20"
               disabled={cargando}
             >
-              <Search className="w-5 h-5" /> {cargando ? 'Buscando...' : 'Buscar'}
+              <Search className="w-5 h-5" /> {cargando ? '...' : 'Buscar'}
             </button>
           </div>
+
+          {/*  BANNER DE MENSAJE (ERROR O ADVERTENCIA)  */}
+          {mensaje && !vehiculoActivo && (
+            <div className={`mt-6 p-4 rounded-lg border flex items-center justify-center gap-3 animate-in fade-in slide-in-from-top-2 duration-300 ${errorBusqueda ? 'bg-red-500/10 border-red-500/50 text-red-400' : 'bg-[#FF7420]/10 border-[#FF7420]/50 text-[#FF7420]'}`}>
+              <AlertCircle size={20} />
+              <span className="font-bold text-sm uppercase tracking-wide">{mensaje}</span>
+            </div>
+          )}
         </div>
 
         {vehiculoActivo && (
@@ -151,7 +180,6 @@ export default function ChecklistsPage() {
                   <span className="font-bold text-white text-sm">{vehiculoInfo.color}</span>
                 </div>
                 
-                {/* 👇 AQUÍ ESTÁ EL CAMBIO: Mostrar Nombre en lugar de Correo 👇 */}
                 <div className="flex flex-col border-l border-slate-800 pl-4">
                   <span className="text-[10px] font-bold text-[#FF7420] uppercase tracking-widest mb-1 flex items-center gap-1">
                     <User className="w-3 h-3"/> Conductor Asignado
@@ -188,19 +216,60 @@ export default function ChecklistsPage() {
                       )}
                     </div>
                   </div>
-                  <a 
-                    href={check.Ruta_PDF} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="bg-slate-900 hover:bg-[#FF7420] text-slate-300 hover:text-white text-center py-2.5 rounded-md text-xs font-bold w-full transition-all border border-slate-800 hover:border-[#FF7420]"
+                  <button 
+                    onClick={() => abrirPrevisualizacion(check.Ruta_PDF)}
+                    className="bg-slate-900 hover:bg-[#FF7420] text-slate-300 hover:text-white text-center py-2.5 rounded-md text-xs font-bold w-full transition-all border border-slate-800 hover:border-[#FF7420] flex items-center justify-center gap-2"
                   >
-                    Ver Documento
-                  </a>
+                    <Eye className="w-3 h-3" /> Ver Documento
+                  </button>
                 </div>
               ))}
             </div>
           </div>
         )}
+
+        {mostrarVisor && (
+          <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-[100] flex flex-col p-4 md:p-8 animate-in fade-in zoom-in-95 duration-200">
+            
+            <div className="max-w-6xl mx-auto w-full flex justify-between items-center mb-4">
+              <div className="flex items-center gap-3">
+                <div className="bg-[#FF7420] p-2 rounded-lg">
+                  <FileText className="text-white" size={20} />
+                </div>
+                <h3 className="font-bold text-lg text-white">Expediente Digital SIFYGSA</h3>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <button 
+                  onClick={() => window.open(pdfUrl!, '_blank')}
+                  className="bg-slate-800 hover:bg-slate-700 p-2.5 rounded-lg transition-colors text-slate-300"
+                  title="Abrir en pestaña nueva"
+                >
+                  <Download size={20} />
+                </button>
+                <button 
+                  onClick={() => setMostrarVisor(false)}
+                  className="bg-red-600 hover:bg-red-700 text-white p-2.5 rounded-lg transition-colors shadow-lg shadow-red-600/20"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+            </div>
+
+            <div className="max-w-6xl mx-auto w-full flex-1 bg-white rounded-xl overflow-hidden shadow-2xl border border-slate-800">
+              <iframe 
+                src={`${pdfUrl}#toolbar=0`} 
+                className="w-full h-full border-none"
+                title="Previsualización de Checklist"
+              />
+            </div>
+            
+            <p className="text-center text-slate-500 mt-4 text-[10px] uppercase tracking-[0.2em] font-bold">
+              Presiona cerrar para volver al panel de gestión
+            </p>
+          </div>
+        )}
+
       </div>
     </div>
   );

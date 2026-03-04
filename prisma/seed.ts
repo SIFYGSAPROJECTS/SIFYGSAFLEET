@@ -8,7 +8,7 @@ async function main() {
   await prisma.inventario_Automoviles.deleteMany({})
   await prisma.empleados.deleteMany({})
   
-  console.log('--- 🛡️ CREANDO ADMINISTRADORES ---')
+  console.log('---  CREANDO ADMINISTRADORES ---')
   await prisma.empleados.createMany({
     data: [
       {
@@ -16,7 +16,7 @@ async function main() {
         A_Paterno: "Mendez",
         Email: "mike.mendez2908@gmail.com",
         Rol: "ADMIN",
-        Password: "123456" // Asegúrate que en tu schema sea 'Password' con P mayúscula o minúscula
+        Password: "123456" 
       },
       {
         Nombre_Empleado: "Alan",
@@ -28,7 +28,7 @@ async function main() {
     ]
   })
 
-  console.log('--- 🚗 INYECTANDO FLOTA SIFYGSA (94 UNIDADES) ---')
+  console.log('---  INYECTANDO FLOTA SIFYGSA (94 UNIDADES) ---')
   await prisma.inventario_Automoviles.createMany({
     data: [
       // --- TABLA VSI ---

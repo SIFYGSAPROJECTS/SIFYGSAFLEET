@@ -80,7 +80,7 @@ export default function LoginPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  // 👇 Focus con el Naranja Oficial 👇
+                  // Focus con el Naranja Oficial 
                   className="block w-full pl-10 pr-3 py-3 bg-slate-950 border border-slate-700 rounded-lg text-white focus:ring-2 focus:ring-[#FF7420] focus:border-[#FF7420] transition-colors placeholder-slate-600 outline-none" 
                   placeholder="usuario@sifygsa.com"
                 />
@@ -98,14 +98,14 @@ export default function LoginPage() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  // 👇 Focus con el Naranja Oficial 👇
+                  // Focus con el Naranja Oficial 
                   className="block w-full pl-10 pr-3 py-3 bg-slate-950 border border-slate-700 rounded-lg text-white focus:ring-2 focus:ring-[#FF7420] focus:border-[#FF7420] transition-colors placeholder-slate-600 outline-none" 
                   placeholder="••••••••"
                 />
               </div>
             </div>
 
-            {/* 👇 Botón con el Naranja Oficial y Hover Oscurecido 👇 */}
+            {/*  Botón con el Naranja Oficial y Hover Oscurecido  */}
             <button 
               type="submit" 
               disabled={loading}

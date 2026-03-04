@@ -38,7 +38,7 @@ export default async function HistorialPage() {
     orderBy: { Fecha_Realizacion: 'desc' }
   });
 
-  // 👇 Ahora solo mandamos llamar al cliente dentro del fondo negro
+  //  Ahora solo mandamos llamar al cliente dentro del fondo negro
   return (
     <div className="min-h-screen bg-black">
       <div className="p-8 max-w-7xl mx-auto">

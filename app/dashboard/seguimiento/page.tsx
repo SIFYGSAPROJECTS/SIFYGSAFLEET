@@ -55,8 +55,8 @@ export default async function SeguimientoPage() {
           </h1>
           <p className="text-slate-400 mt-2 font-medium">
             {isAdmin 
-              ? '👑 Panel Maestro: Controla los 4 estatus y gestiona las citas de mantenimiento.' 
-              : '🚗 Centro de Rastreo: Consulta en tiempo real la etapa de tu unidad asignada.'}
+              ? ' Panel Maestro: Controla los 4 estatus y gestiona las citas de mantenimiento.' 
+              : ' Centro de Rastreo: Consulta en tiempo real la etapa de tu unidad asignada.'}
           </p>
         </div>
 

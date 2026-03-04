@@ -2,7 +2,10 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { FileText, ArrowLeft, Filter, UploadCloud, CheckCircle, Loader2, History, Calendar } from 'lucide-react';
+import { 
+  FileText, ArrowLeft, Filter, UploadCloud, CheckCircle, 
+  Loader2, History, Calendar, X, Eye, Download, ExternalLink 
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 interface Props {
@@ -13,19 +16,21 @@ interface Props {
 export default function HistorialClient({ historial, rol }: Props) {
   const router = useRouter();
   const [filtroAuto, setFiltroAuto] = useState('');
-  const [filtroMeses, setFiltroMeses] = useState(''); // 👈 Nuevo estado para el tiempo
+  const [filtroMeses, setFiltroMeses] = useState(''); 
   const [subiendoFolio, setSubiendoFolio] = useState<string | null>(null);
+
+  /* ESTADOS PARA EL VISOR PDF */
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [mostrarVisor, setMostrarVisor] = useState(false);
 
   const autosUnicos = Array.from(new Set(historial.map(t => t.auto?.Consecutivo)))
     .map(consecutivo => historial.find(t => t.auto?.Consecutivo === consecutivo)?.auto)
     .filter(Boolean);
 
-  // 👇 LÓGICA DE FILTRADO COMBINADA (Vehículo + Tiempo)
+  /* LOGICA DE FILTRADO COMBINADA (Vehiculo + Tiempo) */
   const historialFiltrado = historial.filter(ticket => {
-    // Filtro por Vehículo
     const cumpleVehiculo = filtroAuto === '' || ticket.auto?.Consecutivo === filtroAuto;
 
-    // Filtro por Tiempo
     let cumpleTiempo = true;
     if (filtroMeses !== '') {
       const fechaTicket = new Date(ticket.Fecha_Realizacion);
@@ -37,11 +42,16 @@ export default function HistorialClient({ historial, rol }: Props) {
     return cumpleVehiculo && cumpleTiempo;
   });
 
+  const abrirPrevisualizacion = (url: string) => {
+    setPdfUrl(url);
+    setMostrarVisor(true);
+  };
+
   const handleSubirEvidencia = async (e: React.ChangeEvent<HTMLInputElement>, folio: string, consecutivo: string) => {
     if (!e.target.files || e.target.files.length === 0) return;
     const file = e.target.files[0];
     if (file.type !== "application/pdf") {
-      alert("⚠️ Solo se permiten archivos PDF.");
+      alert("Solo se permiten archivos PDF.");
       return;
     }
     setSubiendoFolio(folio);
@@ -53,11 +63,11 @@ export default function HistorialClient({ historial, rol }: Props) {
     try {
       const res = await fetch('/api/evidencia', { method: 'POST', body: formData });
       if (res.ok) {
-        alert("✅ Evidencia subida con éxito.");
+        alert("Evidencia subida con éxito.");
         router.refresh(); 
       } else {
         const errorData = await res.json();
-        alert(`❌ Error: ${errorData.error}`);
+        alert(`Error: ${errorData.error}`);
       }
     } catch (error) {
       alert("Error de conexión al subir el archivo.");
@@ -79,15 +89,13 @@ export default function HistorialClient({ historial, rol }: Props) {
         </h1>
         <p className="text-slate-400 mt-2">
           {rol === 'ADMIN' 
-            ? <><span className="text-[#FF7420] font-bold">👑 Administrador:</span> Mostrando registro global de flota.</> 
-            : <><span className="text-[#FF7420] font-bold">🚗 Empleado:</span> Mostrando únicamente tus solicitudes asignadas.</>}
+            ? <><span className="text-[#FF7420] font-bold">Administrador:</span> Mostrando registro global de flota.</> 
+            : <><span className="text-[#FF7420] font-bold">Empleado:</span> Mostrando únicamente tus solicitudes asignadas.</>}
         </p>
       </div>
 
-      {/* 👇 PANEL DE FILTROS DOBLE 👇 */}
+      {/* PANEL DE FILTROS DOBLE */}
       <div className="bg-slate-900 p-5 rounded-xl border border-slate-800 mb-8 grid grid-cols-1 md:grid-cols-2 gap-6 shadow-lg shadow-black/40">
-        
-        {/* Filtro de Vehículo */}
         <div className="flex items-center gap-4">
           <div className="bg-[#FF7420]/10 p-2.5 rounded-lg border border-[#FF7420]/20">
             <Filter className="text-[#FF7420] w-5 h-5" />
@@ -109,7 +117,6 @@ export default function HistorialClient({ historial, rol }: Props) {
           </div>
         </div>
 
-        {/* Filtro de Tiempo */}
         <div className="flex items-center gap-4">
           <div className="bg-[#FF7420]/10 p-2.5 rounded-lg border border-[#FF7420]/20">
             <Calendar className="text-[#FF7420] w-5 h-5" />
@@ -129,7 +136,6 @@ export default function HistorialClient({ historial, rol }: Props) {
             </select>
           </div>
         </div>
-
       </div>
 
       {/* Tabla */}
@@ -172,9 +178,12 @@ export default function HistorialClient({ historial, rol }: Props) {
                     </td>
                     <td className="p-5 text-center">
                       {ticket.Evidencia ? (
-                        <a href={ticket.Evidencia} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-emerald-400/20 transition-all shadow-sm">
+                        <button 
+                          onClick={() => abrirPrevisualizacion(ticket.Evidencia)} 
+                          className="inline-flex items-center gap-1.5 text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-emerald-400/20 transition-all shadow-sm"
+                        >
                           <CheckCircle size={14} /> VER PDF
-                        </a>
+                        </button>
                       ) : (
                         <label className="cursor-pointer inline-flex items-center gap-1.5 text-slate-400 bg-slate-950 border border-slate-700 px-3 py-1.5 rounded-lg text-xs font-bold hover:border-[#FF7420] hover:text-[#FF7420] transition-all shadow-sm">
                           {subiendoFolio === ticket.Pk_folio_ticket ? (
@@ -198,6 +207,49 @@ export default function HistorialClient({ historial, rol }: Props) {
           </table>
         </div>
       </div>
+
+      {/* MODAL DE PREVISUALIZACION PDF */}
+      {mostrarVisor && (
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-[100] flex flex-col p-4 md:p-8 animate-in fade-in zoom-in-95 duration-200">
+          
+          <div className="max-w-6xl mx-auto w-full flex justify-between items-center mb-4">
+            <div className="flex items-center gap-3">
+              <div className="bg-[#FF7420] p-2 rounded-lg shadow-lg shadow-[#FF7420]/20">
+                <History className="text-white" size={20} />
+              </div>
+              <h3 className="font-bold text-lg text-white tracking-tight">Evidencia de Mantenimiento SIFYGSA</h3>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={() => window.open(pdfUrl!, '_blank')}
+                className="bg-slate-800 hover:bg-slate-700 p-2.5 rounded-lg transition-colors text-slate-300"
+                title="Abrir fuera"
+              >
+                <ExternalLink size={20} />
+              </button>
+              <button 
+                onClick={() => setMostrarVisor(false)}
+                className="bg-red-600 hover:bg-red-700 text-white p-2.5 rounded-lg transition-colors shadow-lg shadow-red-600/20"
+              >
+                <X size={20} />
+              </button>
+            </div>
+          </div>
+
+          <div className="max-w-6xl mx-auto w-full flex-1 bg-white rounded-xl overflow-hidden shadow-2xl border border-slate-800">
+            <iframe 
+              src={`${pdfUrl}#toolbar=0`} 
+              className="w-full h-full border-none"
+              title="Previsualizacion de Mantenimiento"
+            />
+          </div>
+          
+          <p className="text-center text-slate-500 mt-4 text-[10px] uppercase tracking-[0.2em] font-bold">
+            SIFYGSA Fleet • Control de Evidencia Digital
+          </p>
+        </div>
+      )}
     </div>
   );
 }

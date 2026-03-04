@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { prisma } from '@/lib/db'; // Asegúrate de que esta ruta coincida con tu archivo de Prisma
+import { prisma } from '@/lib/db'; // ruta con archivo de Prisma
 
 // Conexión a Supabase usando tus variables de entorno
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;

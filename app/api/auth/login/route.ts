@@ -14,14 +14,28 @@ export async function POST(request: Request) {
       where: { Email: email },
     });
 
-    // Validamos credenciales
-    if (!usuario || usuario.Password !== password) {
+    // Validamos que el usuario exista
+    if (!usuario) {
       return NextResponse.json({ error: 'Credenciales inválidas' }, { status: 401 });
     }
 
-    // Guardamos el Rol y el Nombre en una "Cookie" (memoria del navegador)
+    // Validamos el estatus de acceso
+    // Si el administrador lo marcó como "Inactivo", no puede entrar aunque sepa la clave.
+    if (usuario.Estatus_Acceso === 'Inactivo') {
+      return NextResponse.json(
+        { error: 'Esta cuenta ya no se encuentra activa.' }, 
+        { status: 403 }
+      );
+    }
+
+    // 4. TERCERA BARRERA: Validamos la contraseña
+    if (usuario.Password !== password) {
+      return NextResponse.json({ error: 'Credenciales inválidas' }, { status: 401 });
+    }
+
+    // 5. ÉXITO: Guardamos la información en las Cookies
     const cookieStore = await cookies();
-    cookieStore.set('user_role', usuario.Rol); // Aquí se guarda si es ADMIN o USER
+    cookieStore.set('user_role', usuario.Rol); 
     cookieStore.set('user_name', usuario.Nombre_Empleado);
     cookieStore.set('user_email', usuario.Email);
 
@@ -31,6 +45,7 @@ export async function POST(request: Request) {
     });
 
   } catch (error) {
-    return NextResponse.json({ error: 'Error interno' }, { status: 500 });
+    console.error('Login error:', error);
+    return NextResponse.json({ error: 'Error interno en el servidor' }, { status: 500 });
   }
 }
