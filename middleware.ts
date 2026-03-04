@@ -10,7 +10,7 @@ export function middleware(request: NextRequest) {
   if (pathname.startsWith('/dashboard')) {
     if (!session || !session.value) {
       // LO BOTAMOS: Redirección forzada al login
-      const loginUrl = new URL( request.url);
+      const loginUrl = new URL("/", request.url);
       return NextResponse.redirect(loginUrl);
     }
   }
