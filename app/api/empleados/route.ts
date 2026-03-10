@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import bcrypt from 'bcryptjs'; //  IMPORTAMOS BCRYPT AQUÍ
 
 // 1. OBTENER TODO EL PERSONAL
 export async function GET() {
@@ -20,6 +21,10 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { Email, Nombre_Empleado, A_Paterno, A_Materno, Cargo, Departamento, Rol, Estatus_Acceso } = body;
 
+    //  GENERAMOS UNA CONTRASEÑA TEMPORAL Y LA ENCRIPTAMOS
+    const passwordTemporal = Math.random().toString(36).slice(-8) + "S!fy";
+    const hashedPassword = await bcrypt.hash(passwordTemporal, 12);
+
     const nuevoEmpleado = await prisma.empleados.create({
       data: {
         Email: Email.toLowerCase(),
@@ -29,8 +34,8 @@ export async function POST(request: Request) {
         Cargo,
         Departamento,
         Rol: Rol || 'USER',
-        // AGREGAMOS EL ESTATUS INICIAL 
         Estatus_Acceso: Estatus_Acceso || 'Activo',
+        Password: hashedPassword, 
       }
     });
 
