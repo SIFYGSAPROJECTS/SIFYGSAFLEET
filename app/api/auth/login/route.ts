@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { cookies } from 'next/headers'; 
+import bcrypt from 'bcryptjs'; // IMPORTAMOS BCRYPT 
 
 const prisma = new PrismaClient();
 
@@ -28,8 +29,11 @@ export async function POST(request: Request) {
       );
     }
 
-    // 4. TERCERA BARRERA: Validamos la contraseña
-    if (usuario.Password !== password) {
+    // 4. TERCERA BARRERA: Validamos la contraseña ENCRIPTADA 
+    // Comparamos lo que el usuario escribió (password) con el hash de la BD (usuario.Password)
+    const passwordValida = await bcrypt.compare(password, usuario.Password);
+
+    if (!passwordValida) {
       return NextResponse.json({ error: 'Credenciales inválidas' }, { status: 401 });
     }
 

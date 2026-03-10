@@ -13,7 +13,7 @@ datasource db {
 // 1. CATALOGO DE EMPLEADOS [cite: 1]
 model Empleados {
   Email            String  @id @db.VarChar(50)
-  Password         String  @default("123456")
+  Password         String  
   Nombre_Empleado  String  @db.VarChar(30)
   A_Paterno        String  @db.VarChar(30)
   Estatus_Acceso   String   @default("Activo")

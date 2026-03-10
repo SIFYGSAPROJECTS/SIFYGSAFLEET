@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/db';
-import { Car, Users, LogOut, Wrench, History, ShieldCheck, Activity, FileText, Archive } from 'lucide-react';
+// Agregamos el icono 'Key' a las importaciones
+import { Car, Users, LogOut, Wrench, History, ShieldCheck, Activity, FileText, Archive, Key } from 'lucide-react';
 import Link from 'next/link';
 import { cookies } from 'next/headers';
 
@@ -49,7 +50,7 @@ export default async function Dashboard() {
           <p className="text-slate-400">Gestión de flota SIFYGSA</p>
         </div>
 
-        {/* --- TARJETAS DE MÉTRICAS --- */}
+        {/* TARJETAS DE METRICAS */}
         {userRole === 'ADMIN' && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             
@@ -82,7 +83,7 @@ export default async function Dashboard() {
           </div>
         )}
 
-        {/* --- BOTONES DE ACCIÓN --- */}
+        {/* BOTONES DE ACCION */}
         <div className="space-y-4">
           <h3 className="text-lg font-semibold text-white">Acciones Disponibles</h3>
           
@@ -106,6 +107,13 @@ export default async function Dashboard() {
                   <Users className="w-8 h-8 text-purple-500 mb-4" />
                   <span className="block font-bold text-lg text-white">Gestión de Personal</span>
                   <span className="text-sm text-slate-400">Administrar accesos, roles y contraseñas.</span>
+                </Link>
+
+                {/* NUEVA TARJETA DE SEGURIDAD AQUI */}
+                <Link href="/dashboard/seguridad" className="p-6 bg-slate-900 border-x border-b border-slate-800 border-t-4 border-t-[#FF7420] rounded-xl hover:border-[#FF7420] hover:shadow-[0_0_15px_rgba(255,116,32,0.15)] transition-all duration-300 group text-left block">
+                  <Key className="w-8 h-8 text-yellow-500 mb-4" />
+                  <span className="block font-bold text-lg text-white">Seguridad y Accesos</span>
+                  <span className="text-sm text-slate-400">Restablecer contraseñas de usuarios.</span>
                 </Link>
                 
                 <Link href="/dashboard/checklists" className="p-6 bg-slate-900 border-x border-b border-slate-800 border-t-4 border-t-[#FF7420] rounded-xl hover:border-[#FF7420] hover:shadow-[0_0_15px_rgba(255,116,32,0.15)] transition-all duration-300 group text-left block">
