@@ -32,7 +32,6 @@ export default function InventarioPage() {
   const [modalAbierto, setModalAbierto] = useState(false);
   const [modoEdicion, setModoEdicion] = useState(false); 
   
-  //  1. Estado para las pestañas 
   const [filtroActivo, setFiltroActivo] = useState<'Activo en flota' | 'Siniestrado'>('Activo en flota');
   
   const [formData, setFormData] = useState({
@@ -57,7 +56,6 @@ export default function InventarioPage() {
     cargarVehiculos();
   }, []);
 
-  //  2. Lógica de Filtrado (Ocultamos los de baja y filtramos por pestaña) 
   const vehiculosVisibles = vehiculos.filter(v => v.Estatus_Operativo !== 'Dado de baja');
   const vehiculosFiltrados = vehiculosVisibles.filter(v => v.Estatus_Operativo === filtroActivo);
   const totalActivos = vehiculosVisibles.filter(v => v.Estatus_Operativo === 'Activo en flota').length;
@@ -90,7 +88,7 @@ export default function InventarioPage() {
       Percance: auto.Percance || '',
       Email_encargado: auto.Email_encargado || '',
       Estado_Unidad: auto.Estado_Unidad,
-      Estatus_Operativo: auto.Estatus_Operativo || 'Activo en flota' // Cargamos el nuevo campo
+      Estatus_Operativo: auto.Estatus_Operativo || 'Activo en flota'
     });
     setModalAbierto(true);
   };
@@ -98,8 +96,6 @@ export default function InventarioPage() {
   const guardarVehiculo = async (e: React.FormEvent) => {
     e.preventDefault();
     const metodo = modoEdicion ? 'PUT' : 'POST';
-
-    // Sincronizamos el viejo booleano por si acaso algo más lo usa
     const dataAEnviar = {
       ...formData,
       Estado_Unidad: formData.Estatus_Operativo !== 'Dado de baja'
@@ -126,60 +122,63 @@ export default function InventarioPage() {
 
   return (
     <div className="min-h-screen bg-black">
-      <div className="p-8 max-w-7xl mx-auto">
+      {/* Ajuste de padding lateral para móviles */}
+      <div className="p-4 sm:p-8 max-w-7xl mx-auto">
         
         <Link href="/dashboard" className="inline-flex items-center gap-2 text-slate-400 hover:text-[#FF7420] transition-colors mb-6 font-medium text-sm">
           <ArrowLeft className="w-4 h-4" /> Volver al Panel Maestro
         </Link>
 
-        <div className="flex justify-between items-center mb-8">
+        {/* HEADER: Se vuelve vertical en móvil con gap-4 */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-              <Car className="text-[#FF7420] w-8 h-8" />
+            <h1 className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-3">
+              <Car className="text-[#FF7420] w-7 h-7 sm:w-8 h-8 shrink-0" />
               Inventario Maestro de Flota
             </h1>
-            <p className="text-slate-400 mt-1">Gestiona las unidades operativas y siniestradas de SIFYGSA</p>
+            <p className="text-slate-400 mt-1 text-sm sm:text-base">Gestiona las unidades operativas y siniestradas de SIFYGSA</p>
           </div>
-          <button onClick={abrirModalNuevo} className="bg-[#FF7420] hover:bg-[#E6681C] text-white px-5 py-2.5 rounded-lg font-bold flex items-center gap-2 transition-colors shadow-lg shadow-[#FF7420]/20">
+          {/* Botón ancho completo en móvil */}
+          <button onClick={abrirModalNuevo} className="w-full md:w-auto bg-[#FF7420] hover:bg-[#E6681C] text-white px-5 py-2.5 rounded-lg font-bold flex items-center justify-center gap-2 transition-colors shadow-lg shadow-[#FF7420]/20 active:scale-95">
             <Plus className="w-5 h-5" /> Nuevo Vehículo
           </button>
         </div>
 
-        {/*  3. LAS PESTAÑAS (TABS)  */}
-        <div className="flex gap-4 mb-6 border-b border-slate-800 pb-4">
+        {/* PESTAÑAS: flex-wrap permite que caigan al siguiente renglón si no caben */}
+        <div className="flex flex-wrap gap-2 sm:gap-4 mb-6 border-b border-slate-800 pb-4">
           <button
             onClick={() => setFiltroActivo('Activo en flota')}
-            className={`flex items-center gap-2 px-6 py-3 rounded-lg font-bold transition-all ${
+            className={`flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-lg font-bold transition-all text-sm sm:text-base flex-1 sm:flex-none ${
               filtroActivo === 'Activo en flota' 
                 ? 'bg-[#FF7420]/10 text-[#FF7420] border border-[#FF7420]/50 shadow-[0_0_15px_rgba(255,116,32,0.15)]' 
                 : 'text-slate-500 hover:text-slate-300 hover:bg-slate-900'
             }`}
           >
-            <ShieldCheck size={18} /> Activos
-            <span className={`ml-2 px-2 py-0.5 rounded-full text-[10px] ${filtroActivo === 'Activo en flota' ? 'bg-[#FF7420] text-white' : 'bg-slate-800 text-slate-400'}`}>
+            <ShieldCheck size={18} className="shrink-0" /> <span className="whitespace-nowrap">Activos</span>
+            <span className={`ml-1 px-2 py-0.5 rounded-full text-[10px] ${filtroActivo === 'Activo en flota' ? 'bg-[#FF7420] text-white' : 'bg-slate-800 text-slate-400'}`}>
               {totalActivos}
             </span>
           </button>
 
           <button
             onClick={() => setFiltroActivo('Siniestrado')}
-            className={`flex items-center gap-2 px-6 py-3 rounded-lg font-bold transition-all ${
+            className={`flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-lg font-bold transition-all text-sm sm:text-base flex-1 sm:flex-none ${
               filtroActivo === 'Siniestrado' 
                 ? 'bg-red-500/10 text-red-500 border border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.15)]' 
                 : 'text-slate-500 hover:text-slate-300 hover:bg-slate-900'
             }`}
           >
-            <AlertTriangle size={18} /> Siniestrados
-            <span className={`ml-2 px-2 py-0.5 rounded-full text-[10px] ${filtroActivo === 'Siniestrado' ? 'bg-red-500 text-white' : 'bg-slate-800 text-slate-400'}`}>
+            <AlertTriangle size={18} className="shrink-0" /> <span className="whitespace-nowrap">Siniestrados</span>
+            <span className={`ml-1 px-2 py-0.5 rounded-full text-[10px] ${filtroActivo === 'Siniestrado' ? 'bg-red-500 text-white' : 'bg-slate-800 text-slate-400'}`}>
               {totalSiniestrados}
             </span>
           </button>
         </div>
 
-        {/* CONTENEDOR DE LA TABLA */}
+        {/* CONTENEDOR DE LA TABLA: Mantiene el scroll horizontal original */}
         <div className={`bg-slate-900 rounded-xl shadow-2xl border-x border-b border-t-4 overflow-hidden transition-colors duration-500 ${filtroActivo === 'Siniestrado' ? 'border-t-red-500 border-slate-800/80' : 'border-t-[#FF7420] border-slate-800'}`}>
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+            <table className="min-w-[800px] w-full text-left border-collapse">
               <thead>
                 <tr className="bg-slate-950 border-b border-slate-800 text-slate-300 text-sm uppercase tracking-wider">
                   <th className="p-4 font-semibold">Unidad</th>
@@ -235,7 +234,7 @@ export default function InventarioPage() {
           </div>
         </div>
 
-        {/* --- MODAL ADAPTADO --- */}
+        {/* MODAL: Se mantiene igual pero con anchos dinámicos para el form */}
         {modalAbierto && (
           <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div className="bg-slate-900 rounded-xl shadow-2xl border border-slate-800 w-full max-w-4xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
@@ -253,8 +252,7 @@ export default function InventarioPage() {
               
               <form onSubmit={guardarVehiculo} className="p-6 max-h-[80vh] overflow-y-auto">
                 <h3 className="text-xs font-bold text-[#FF7420] uppercase tracking-wider mb-3 border-b border-slate-800 pb-2">Datos Principales</h3>
-                {/* ... (campos Consecutivo, Placa, Color iguales a los tuyos) ... */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-6">
                   <div>
                     <label className="block text-sm font-medium text-slate-400 mb-1">Consecutivo *</label>
                     <input required type="text" value={formData.Consecutivo} disabled={modoEdicion} onChange={e => setFormData({...formData, Consecutivo: e.target.value})} className={`w-full border border-slate-700 rounded-lg p-2.5 outline-none uppercase text-white ${modoEdicion ? 'bg-slate-800/50 text-slate-500 cursor-not-allowed' : 'bg-slate-950 focus:ring-2 focus:ring-[#FF7420] focus:border-[#FF7420]'}`} placeholder="V-XX" />
@@ -270,8 +268,7 @@ export default function InventarioPage() {
                 </div>
 
                 <h3 className="text-xs font-bold text-[#FF7420] uppercase tracking-wider mb-3 border-b border-slate-800 pb-2">Especificaciones</h3>
-                {/* ... (campos Marca, Modelo, Linea, Serie, Seguro iguales a los tuyos) ... */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-6">
                   <div>
                     <label className="block text-sm font-medium text-slate-400 mb-1">Marca</label>
                     <input type="text" value={formData.Marca} onChange={e => setFormData({...formData, Marca: e.target.value})} className="w-full bg-slate-950 border border-slate-700 text-white rounded-lg p-2.5 focus:ring-2 focus:ring-[#FF7420] outline-none placeholder-slate-600" placeholder="Ej. Ford" />
@@ -284,7 +281,7 @@ export default function InventarioPage() {
                     <label className="block text-sm font-medium text-slate-400 mb-1">Año</label>
                     <input type="text" value={formData.Linea} onChange={e => setFormData({...formData, Linea: e.target.value})} className="w-full bg-slate-950 border border-slate-700 text-white rounded-lg p-2.5 focus:ring-2 focus:ring-[#FF7420] outline-none placeholder-slate-600" placeholder="Ej. 2024" />
                   </div>
-                  <div className="md:col-span-2">
+                  <div className="sm:col-span-2">
                     <label className="block text-sm font-medium text-slate-400 mb-1">Número de Serie (VIN)</label>
                     <input type="text" value={formData.Numero_Serie} onChange={e => setFormData({...formData, Numero_Serie: e.target.value})} className="w-full bg-slate-950 border border-slate-700 text-white rounded-lg p-2.5 focus:ring-2 focus:ring-[#FF7420] outline-none uppercase font-mono placeholder-slate-600" placeholder="1FD..." />
                   </div>
@@ -295,22 +292,21 @@ export default function InventarioPage() {
                 </div>
 
                 <h3 className="text-xs font-bold text-[#FF7420] uppercase tracking-wider mb-3 border-b border-slate-800 pb-2">Asignación y Operación</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-4">
                   <div>
                     <label className="block text-sm font-medium text-slate-400 mb-1">Correo del Usuario</label>
                     <input type="email" value={formData.Email_encargado} onChange={e => setFormData({...formData, Email_encargado: e.target.value})} className="w-full bg-slate-950 border border-slate-700 text-white rounded-lg p-2.5 focus:ring-2 focus:ring-[#FF7420] outline-none placeholder-slate-600" placeholder="correo@sifygsa.com" />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-slate-400 mb-1">Departamento</label>
-                    <input type="text" value={formData.Departamento} onChange={e => setFormData({...formData, Departamento: e.target.value})} className="w-full bg-slate-950 border border-slate-700 text-white rounded-lg p-2.5 focus:ring-2 focus:ring-[#FF7420] outline-none placeholder-slate-600" placeholder="Ej. Ventas" />
+                    <input type="text" value={formData.Departamento} onChange={e => setFormData({...formData, Departamento: e.target.value})} className="w-full bg-slate-950 border border-slate-800 text-white rounded-lg p-2.5 focus:ring-2 focus:ring-[#FF7420] outline-none placeholder-slate-600" placeholder="Ej. Ventas" />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-slate-400 mb-1">Ubicación</label>
                     <input type="text" value={formData.Ubicacion} onChange={e => setFormData({...formData, Ubicacion: e.target.value})} className="w-full bg-slate-950 border border-slate-700 text-white rounded-lg p-2.5 focus:ring-2 focus:ring-[#FF7420] outline-none placeholder-slate-600" placeholder="Ej. Planta Sur" />
                   </div>
                   
-                  
-                  <div className="md:col-span-3">
+                  <div className="sm:col-span-2 md:col-span-3">
                     <label className="block text-sm font-medium text-slate-400 mb-1">Estatus Operativo de la Unidad</label>
                     <select 
                       value={formData.Estatus_Operativo} 
@@ -323,7 +319,7 @@ export default function InventarioPage() {
                     </select>
                   </div>
 
-                  <div className="md:col-span-3 mt-2">
+                  <div className="sm:col-span-2 md:col-span-3 mt-2">
                     <label className="block text-sm font-medium text-slate-400 mb-1">Percances / Observaciones</label>
                     <textarea value={formData.Percance} onChange={e => setFormData({...formData, Percance: e.target.value})} className="w-full bg-slate-950 border border-slate-700 text-white rounded-lg p-2.5 focus:ring-2 focus:ring-[#FF7420] outline-none placeholder-slate-600" placeholder="Registrar cualquier golpe, accidente o nota importante..." rows={2} />
                   </div>
