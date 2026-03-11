@@ -2,9 +2,9 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { Check, X, MapPin, Calendar, Clock } from 'lucide-react';
+import { Check, X, MapPin, Calendar, Clock, User } from 'lucide-react'; // 👈 Agregamos el icono de User
 
-export default function StatusUpdater({ folio, estadoActual, lugarActual, fechaActual, horaActual, onUpdateTemporal }: any) {
+export default function StatusUpdater({ folio, estadoActual, lugarActual, fechaActual, horaActual, asesorActual, onUpdateTemporal }: any) {
   const router = useRouter();
   const [cargando, setCargando] = useState(false);
   
@@ -12,9 +12,10 @@ export default function StatusUpdater({ folio, estadoActual, lugarActual, fechaA
   const [lugar, setLugar] = useState(lugarActual || '');
   const [fecha, setFecha] = useState(fechaActual || '');
   const [hora, setHora] = useState(horaActual || '');
+  const [asesor, setAsesor] = useState(asesorActual || ''); // 👈 Nuevo estado para el Asesor
 
-  // Detectamos si hay cambios para mostrar los botones
-  const hayCambios = estado !== estadoActual || lugar !== (lugarActual || '') || fecha !== (fechaActual || '') || hora !== (horaActual || '');
+  // Detectamos si hay cambios para mostrar los botones (incluyendo al asesor)
+  const hayCambios = estado !== estadoActual || lugar !== (lugarActual || '') || fecha !== (fechaActual || '') || hora !== (horaActual || '') || asesor !== (asesorActual || '');
 
   const guardarCambios = async () => {
     setCargando(true);
@@ -22,7 +23,8 @@ export default function StatusUpdater({ folio, estadoActual, lugarActual, fechaA
       const res = await fetch('/api/tickets/estado', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ folio, estado, lugar, fecha, hora }),
+        // 👇 Ahora enviamos el asesor en el paquete de datos
+        body: JSON.stringify({ folio, estado, lugar, fecha, hora, asesor }), 
       });
       if (res.ok) {
         router.refresh(); // Esto actualiza la vista de todos
@@ -39,6 +41,7 @@ export default function StatusUpdater({ folio, estadoActual, lugarActual, fechaA
     setLugar(lugarActual || '');
     setFecha(fechaActual || '');
     setHora(horaActual || '');
+    setAsesor(asesorActual || ''); // 👈 Reiniciamos el asesor si se cancela
     onUpdateTemporal?.(null);
   };
 
@@ -48,7 +51,7 @@ export default function StatusUpdater({ folio, estadoActual, lugarActual, fechaA
         <label className="text-[10px] font-black text-[#FF7420] uppercase tracking-widest">Estatus:</label>
         <select 
           value={estado}
-          onChange={(e) => { setEstado(e.target.value); onUpdateTemporal?.({ estado: e.target.value }); }}
+          onChange={(e) => { setEstado(e.target.value); onUpdateTemporal?.({ estado: e.target.value, lugar, fecha, hora, asesor }); }}
           className="bg-slate-950 border border-slate-800 text-white text-xs font-bold rounded px-2 py-1.5 outline-none focus:border-[#FF7420]"
         >
           <option value="PENDIENTE">PENDIENTE</option>
@@ -75,22 +78,29 @@ export default function StatusUpdater({ folio, estadoActual, lugarActual, fechaA
             className="bg-slate-950 border border-slate-800 text-[10px] text-white p-1.5 rounded outline-none focus:border-cyan-500"
             placeholder="¿Dónde será la cita?"
             value={lugar}
-            onChange={(e) => { setLugar(e.target.value); onUpdateTemporal?.({ estado: 'CITA', lugar: e.target.value, fecha, hora }); }}
+            onChange={(e) => { setLugar(e.target.value); onUpdateTemporal?.({ estado: 'CITA', lugar: e.target.value, fecha, hora, asesor }); }}
           />
           <div className="flex gap-2">
             <input 
-              className="w-1/2 bg-slate-950 border border-slate-800 text-[10px] text-white p-1.5 rounded"
+              className="w-1/2 bg-slate-950 border border-slate-800 text-[10px] text-white p-1.5 rounded outline-none focus:border-cyan-500"
               placeholder="Fecha"
               value={fecha}
-              onChange={(e) => { setFecha(e.target.value); onUpdateTemporal?.({ estado: 'CITA', lugar, fecha: e.target.value, hora }); }}
+              onChange={(e) => { setFecha(e.target.value); onUpdateTemporal?.({ estado: 'CITA', lugar, fecha: e.target.value, hora, asesor }); }}
             />
             <input 
-              className="w-1/2 bg-slate-950 border border-slate-800 text-[10px] text-white p-1.5 rounded"
+              className="w-1/2 bg-slate-950 border border-slate-800 text-[10px] text-white p-1.5 rounded outline-none focus:border-cyan-500"
               placeholder="Hora"
               value={hora}
-              onChange={(e) => { setHora(e.target.value); onUpdateTemporal?.({ estado: 'CITA', lugar, fecha, hora: e.target.value }); }}
+              onChange={(e) => { setHora(e.target.value); onUpdateTemporal?.({ estado: 'CITA', lugar, fecha, hora: e.target.value, asesor }); }}
             />
           </div>
+          {/* 🌟 EL NUEVO INPUT PARA EL ASESOR */}
+          <input 
+            className="bg-slate-950 border border-slate-800 text-[10px] text-white p-1.5 rounded outline-none focus:border-cyan-500"
+            placeholder="Nombre del Asesor"
+            value={asesor}
+            onChange={(e) => { setAsesor(e.target.value); onUpdateTemporal?.({ estado: 'CITA', lugar, fecha, hora, asesor: e.target.value }); }}
+          />
         </div>
       )}
     </div>

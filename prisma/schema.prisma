@@ -14,6 +14,7 @@ datasource db {
 model Empleados {
   Email            String  @id @db.VarChar(50)
   Password         String  
+  Ultimo_Cambio_Password DateTime?
   Nombre_Empleado  String  @db.VarChar(30)
   A_Paterno        String  @db.VarChar(30)
   Estatus_Acceso   String   @default("Activo")
@@ -130,6 +131,7 @@ model Solicitud {
   Consecutivo       String   @db.VarChar(10)
   Email_Empleado    String   @db.VarChar(50)
   Lugar_Cita        String?  @db.Text
+  Asesor            String?  @db.VarChar(50)
   Fecha_Cita        String?  @db.VarChar(50)
   Hora_Cita         String?  @db.VarChar(20)
   Kilometraje       Int?

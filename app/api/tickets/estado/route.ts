@@ -4,18 +4,18 @@ import nodemailer from 'nodemailer';
 
 export async function PUT(request: Request) {
   try {
-    // EXTRAEMOS LOS NUEVOS CAMPOS DEL CUERPO DE LA PETICIÓN 
-    const { folio, estado, lugar, fecha, hora } = await request.json();
+    // 👈 EXTRAEMOS LOS NUEVOS CAMPOS (INCLUYENDO AL ASESOR)
+    const { folio, estado, lugar, fecha, hora, asesor } = await request.json();
 
-    // 1. Actualizamos el ticket incluyendo los datos de la cita
+    // 1. Actualizamos el ticket incluyendo los datos de la cita y el asesor
     const ticketActualizado = await prisma.solicitud.update({
       where: { Pk_folio_ticket: folio },
       data: { 
         Estado: estado,
-        //  AQUÍ SE GUARDA LA INFORMACIÓN EN LA BASE DE DATOS 
         Lugar_Cita: lugar || null,
         Fecha_Cita: fecha || null,
-        Hora_Cita: hora || null
+        Hora_Cita: hora || null,
+        Asesor: asesor || null // 🌟 AQUÍ SE GUARDA EL ASESOR EN LA BASE DE DATOS
       },
       include: {
         empleado: true, // Para sacar su correo y nombre
@@ -49,6 +49,7 @@ export async function PUT(request: Request) {
               <p style="margin: 5px 0;"><strong>Vehículo:</strong> ${ticketActualizado.auto?.Marca} ${ticketActualizado.auto?.Modelo}</p>
               <p style="margin: 5px 0;"><strong>Placas:</strong> ${ticketActualizado.auto?.Placa}</p>
               <p style="margin: 5px 0;"><strong>Folio de Servicio:</strong> ${folio}</p>
+              ${asesor ? `<p style="margin: 5px 0;"><strong>Asesor a cargo:</strong> ${asesor}</p>` : ''}
             </div>
             
             <p style="color: #64748b; font-size: 12px; text-align: center; margin-top: 30px;">

@@ -2,8 +2,9 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import bcrypt from 'bcryptjs';
 import nodemailer from 'nodemailer';
+import { cookies } from 'next/headers'; //  IMPORTADO PARA LEER QUIÉN HACE LA PETICIÓN
 
-//  PLANTILLA DEL CORREO 
+// PLANTILLA DEL CORREO 
 const generarPlantillaCorreo = (nombreUsuario: string, nuevaPassword: string) => {
   return `
     <!DOCTYPE html>
@@ -34,7 +35,7 @@ const generarPlantillaCorreo = (nombreUsuario: string, nuevaPassword: string) =>
         <div class="content">
           <div class="greeting">Hola, ${nombreUsuario}</div>
           <div class="message">
-            Tu contraseña de acceso al sistema SIFYGSA Fleet ha sido restablecida por un administrador de seguridad. A continuación, encontrarás tus nuevas credenciales temporales.
+            Tu contraseña de acceso al sistema SIFYGSA Fleet ha sido restablecida. A continuación, encontrarás tus nuevas credenciales.
           </div>
           <div class="password-box">
             <span class="password-label">NUEVA CONTRASEÑA</span>
@@ -57,7 +58,7 @@ const generarPlantillaCorreo = (nombreUsuario: string, nuevaPassword: string) =>
   `;
 };
 
-//  CONFIGURACIÓN DE GMAIL
+// CONFIGURACIÓN DE GMAIL
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
@@ -111,26 +112,46 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Faltan datos requeridos o la contraseña es muy corta.' }, { status: 400 });
     }
 
-    // Buscamos al usuario
+    //  SABER QUIÉN ESTÁ HACIENDO LA PETICIÓN
+    const cookieStore = await cookies();
+    const rolActual = cookieStore.get('user_role')?.value;
+
+    // Buscamos al usuario y traemos la fecha de su último cambio de clave
     const empleado = await prisma.empleados.findUnique({
       where: { Email: email },
-      select: { Nombre_Empleado: true }
+      select: { Nombre_Empleado: true, Ultimo_Cambio_Password: true } //  Ahora traemos la fecha
     });
 
     if (!empleado) {
       return NextResponse.json({ error: 'Usuario no encontrado.' }, { status: 404 });
     }
 
+    //  LA REGLA DE LAS 12 HORAS  (Solo aplica si NO eres ADMIN)
+    if (rolActual !== 'ADMIN' && empleado.Ultimo_Cambio_Password) {
+      const ahora = new Date().getTime();
+      const ultimoCambio = new Date(empleado.Ultimo_Cambio_Password).getTime();
+      const horasPasadas = (ahora - ultimoCambio) / (1000 * 60 * 60);
+
+      if (horasPasadas < 12) {
+        return NextResponse.json({ 
+          error: 'Por seguridad, solo puedes cambiar tu contraseña una vez cada 12 horas. Contacta a un administrador si es urgente.' 
+        }, { status: 403 });
+      }
+    }
+
     // Encriptamos
     const hashedPassword = await bcrypt.hash(nuevaPassword, 12);
 
-    // Actualizamos BD
+    //  Actualizamos BD y GUARDAMOS LA FECHA ACTUAL ⏱
     await prisma.empleados.update({
       where: { Email: email }, 
-      data: { Password: hashedPassword }
+      data: { 
+        Password: hashedPassword,
+        Ultimo_Cambio_Password: new Date() //  Registramos el momento exacto del cambio
+      }
     });
 
-    // ENVIAMOS EL CORREO 🚀
+    // ENVIAMOS EL CORREO 
     const htmlCorreo = generarPlantillaCorreo(empleado.Nombre_Empleado, nuevaPassword);
     
     await transporter.sendMail({
@@ -140,7 +161,7 @@ export async function POST(request: Request) {
       html: htmlCorreo,
     });
 
-    return NextResponse.json({ message: 'Contraseña encriptada y correo enviado exitosamente por Gmail.' });
+    return NextResponse.json({ message: 'Contraseña y correo enviado exitosamente por Gmail.' });
   } catch (error) {
     console.error("Error al procesar la solicitud o enviar correo:", error);
     return NextResponse.json({ error: 'Contraseña actualizada, pero hubo un error al enviar el correo.' }, { status: 500 });

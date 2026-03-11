@@ -2,13 +2,13 @@
 
 import { useState } from 'react';
 import StatusUpdater from './StatusUpdater';
-import { Activity, ArrowLeft, MapPin, Calendar, Clock, Info, Timer, Wrench, CheckCircle2 } from 'lucide-react';
+import { Activity, ArrowLeft, MapPin, Calendar, Clock, Info, Timer, Wrench, CheckCircle2, User } from 'lucide-react'; // 👈 Agregamos el icono User
 import Link from 'next/link';
 
 export default function SeguimientoClient({ ticketsIniciales = [], isAdmin }: any) {
   const [datosTemporales, setDatosTemporales] = useState<Record<string, any>>({});
 
-  // Blindaje contra el error de "map" (image_639142.png)
+  // Blindaje contra el error de "map"
   if (!ticketsIniciales || ticketsIniciales.length === 0) {
     return <div className="bg-slate-900 p-12 rounded-xl text-center text-slate-500 font-bold">No hay unidades en mantenimiento.</div>;
   }
@@ -23,6 +23,7 @@ export default function SeguimientoClient({ ticketsIniciales = [], isAdmin }: an
         const lugar = infoMemoria.lugar || ticket.Lugar_Cita || '';
         const fecha = infoMemoria.fecha || ticket.Fecha_Cita || '';
         const hora = infoMemoria.hora || ticket.Hora_Cita || '';
+        const asesor = infoMemoria.asesor || ticket.Asesor || ''; // 👈 Leemos el Asesor
 
         const estados = ['PENDIENTE', 'CITA', 'EN TALLER', 'LISTO'];
         const pasoActual = estados.indexOf(estadoVisual);
@@ -44,6 +45,7 @@ export default function SeguimientoClient({ ticketsIniciales = [], isAdmin }: an
                     lugarActual={ticket.Lugar_Cita}
                     fechaActual={ticket.Fecha_Cita}
                     horaActual={ticket.Hora_Cita}
+                    asesorActual={ticket.Asesor} // 👈 Le pasamos el asesor al componente hijo
                     onUpdateTemporal={(info: any) => setDatosTemporales(prev => ({ ...prev, [ticket.Pk_folio_ticket]: info }))}
                   />
                 </div>
@@ -72,13 +74,27 @@ export default function SeguimientoClient({ ticketsIniciales = [], isAdmin }: an
               </div>
             </div>
 
-            {/* CUADRO DE CITA (¡Ahora visible para el empleado!) */}
-            {estadoVisual === 'CITA' && (lugar || fecha || hora) && (
+            {/* CUADRO DE CITA (Ahora con Asesor en 4 columnas) */}
+            {estadoVisual === 'CITA' && (lugar || fecha || hora || asesor) && (
               <div className="mt-8 bg-cyan-500/5 border border-cyan-500/20 rounded-xl p-6 animate-in slide-in-from-top-4 duration-500">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-white">
-                  <div className="flex items-center gap-4"><MapPin className="text-cyan-500" size={24}/> <div><p className="text-[10px] text-slate-500 font-bold uppercase">Lugar</p><p className="font-bold">{lugar || 'Por definir'}</p></div></div>
-                  <div className="flex items-center gap-4 border-l border-slate-800 pl-6"><Calendar className="text-cyan-500" size={24}/> <div><p className="text-[10px] text-slate-500 font-bold uppercase">Fecha</p><p className="font-bold">{fecha || 'Por definir'}</p></div></div>
-                  <div className="flex items-center gap-4 border-l border-slate-800 pl-6"><Clock className="text-cyan-500" size={24}/> <div><p className="text-[10px] text-slate-500 font-bold uppercase">Hora</p><p className="font-bold">{hora || 'Por definir'}</p></div></div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-white">
+                  <div className="flex items-center gap-4">
+                    <MapPin className="text-cyan-500 shrink-0" size={24}/> 
+                    <div><p className="text-[10px] text-slate-500 font-bold uppercase">Lugar</p><p className="font-bold">{lugar || 'Por definir'}</p></div>
+                  </div>
+                  <div className="flex items-center gap-4 lg:border-l lg:border-slate-800 lg:pl-6">
+                    <Calendar className="text-cyan-500 shrink-0" size={24}/> 
+                    <div><p className="text-[10px] text-slate-500 font-bold uppercase">Fecha</p><p className="font-bold">{fecha || 'Por definir'}</p></div>
+                  </div>
+                  <div className="flex items-center gap-4 lg:border-l lg:border-slate-800 lg:pl-6">
+                    <Clock className="text-cyan-500 shrink-0" size={24}/> 
+                    <div><p className="text-[10px] text-slate-500 font-bold uppercase">Hora</p><p className="font-bold">{hora || 'Por definir'}</p></div>
+                  </div>
+                  {/* 🌟 LA NUEVA CAJA DEL ASESOR */}
+                  <div className="flex items-center gap-4 lg:border-l lg:border-slate-800 lg:pl-6">
+                    <User className="text-cyan-500 shrink-0" size={24}/> 
+                    <div><p className="text-[10px] text-slate-500 font-bold uppercase">Asesor</p><p className="font-bold truncate">{asesor || 'Por definir'}</p></div>
+                  </div>
                 </div>
               </div>
             )}

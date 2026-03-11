@@ -1,0 +1,13 @@
+import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
+
+export async function POST() {
+  const cookieStore = await cookies();
+  
+  // Destruimos las credenciales
+  cookieStore.delete('user_role');
+  cookieStore.delete('user_name');
+  cookieStore.delete('user_email');
+
+  return NextResponse.json({ success: true });
+}

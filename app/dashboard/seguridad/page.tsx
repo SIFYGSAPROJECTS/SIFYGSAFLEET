@@ -130,7 +130,7 @@ export default function SeguridadPage() {
           <div className="flex max-w-lg mx-auto gap-2">
             <input 
               type="text" 
-              placeholder="Ej. Mike Mendez o correo@sifygsa.com" 
+              placeholder="Ej. Nombre o correo@sifygsa.com" 
               className="flex-1 bg-slate-950 border-2 border-slate-700 rounded-lg px-4 py-3 text-white focus:border-[#FF7420] outline-none transition-all font-medium placeholder:text-slate-600"
               value={busqueda}
               onChange={(e) => setBusqueda(e.target.value)}

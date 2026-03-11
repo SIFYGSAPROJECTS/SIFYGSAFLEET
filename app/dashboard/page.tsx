@@ -1,14 +1,15 @@
 import { prisma } from '@/lib/db';
-// Agregamos el icono 'Key' a las importaciones
-import { Car, Users, LogOut, Wrench, History, ShieldCheck, Activity, FileText, Archive, Key } from 'lucide-react';
+import { Car, Users, Wrench, History, ShieldCheck, Activity, FileText, Archive, Key, User } from 'lucide-react'; // 👈 Agregué 'User'
 import Link from 'next/link';
 import { cookies } from 'next/headers';
+import LogoutButton from './LogoutButton'; // 👈 Importamos nuestro nuevo botón inteligente
 
 export default async function Dashboard() {
   const cookieStore = await cookies();
   const userRole = cookieStore.get('user_role')?.value || 'USER';
   const userName = cookieStore.get('user_name')?.value || 'Usuario';
 
+  // TUS MÉTRICAS INTACTAS 🚀
   const totalAutos = userRole === 'ADMIN' ? await prisma.inventario_Automoviles.count() : 0;
   const totalEmpleados = userRole === 'ADMIN' ? await prisma.empleados.count() : 0;
   
@@ -35,9 +36,8 @@ export default async function Dashboard() {
                 {userRole === 'ADMIN' ? 'ADMINISTRADOR' : 'EMPLEADO'}
               </span>
             </div>
-            <Link href="/" className="bg-slate-800 hover:bg-red-600 border border-slate-700 hover:border-red-500 text-white px-3 py-1.5 rounded-lg text-xs flex items-center gap-2 transition-all">
-              <LogOut size={14} /> Salir
-            </Link>
+            {/* 👈 AQUÍ USAMOS EL COMPONENTE CLIENTE */}
+            <LogoutButton /> 
           </div>
         </div>
       </nav>
@@ -50,7 +50,7 @@ export default async function Dashboard() {
           <p className="text-slate-400">Gestión de flota SIFYGSA</p>
         </div>
 
-        {/* TARJETAS DE METRICAS */}
+        {/* TARJETAS DE METRICAS (YA DE REGRESO) */}
         {userRole === 'ADMIN' && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             
@@ -89,6 +89,13 @@ export default async function Dashboard() {
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             
+            {/* TARJETA DE MI PERFIL */}
+            <Link href="/dashboard/perfil" className="p-6 bg-slate-900 border-x border-b border-slate-800 border-t-4 border-t-[#FF7420] rounded-xl hover:border-[#FF7420] hover:shadow-[0_0_15px_rgba(255,116,32,0.15)] transition-all duration-300 group text-left block">
+              <User className="w-8 h-8 text-[#FF7420] mb-4" />
+              <span className="block font-bold text-lg text-white">Mi Perfil</span>
+              <span className="text-sm text-slate-400">Ver mis datos y cambiar contraseña.</span>
+            </Link>
+
             {userRole === 'ADMIN' && (
               <>
                 <Link href="/dashboard/inventario" className="p-6 bg-slate-900 border-x border-b border-slate-800 border-t-4 border-t-[#FF7420] rounded-xl hover:border-[#FF7420] hover:shadow-[0_0_15px_rgba(255,116,32,0.15)] transition-all duration-300 group text-left block">
