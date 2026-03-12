@@ -190,7 +190,7 @@ export default function ChecklistsPage() {
                 </div>
                 <div className="flex flex-col gap-1 lg:border-l lg:border-slate-800 lg:pl-4">
                   <span className="text-[10px] font-black text-[#FF7420] uppercase tracking-widest flex items-center gap-1"><Gauge size={12}/> Kilometraje</span>
-                  <span className="font-bold text-white text-sm sm:text-base">{vehiculoInfo.kilometraje ? `${vehiculoInfo.kilometraje} km` : 'N/A'}</span>
+                  <span className="font-bold text-white text-sm sm:text-base">{vehiculoInfo.kilometraje ? `${vehiculoInfo.kilometraje} ` : 'N/A'}</span>
                 </div>
               </div>
             )}
