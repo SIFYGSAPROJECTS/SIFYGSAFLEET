@@ -14,7 +14,7 @@ datasource db {
 model Empleados {
   Email            String  @id @db.VarChar(50)
   Password         String  
-  Ultimo_Cambio_Password DateTime?
+  Ultimo_Cambio_Password   DateTime?
   Nombre_Empleado  String  @db.VarChar(30)
   A_Paterno        String  @db.VarChar(30)
   Estatus_Acceso   String   @default("Activo")

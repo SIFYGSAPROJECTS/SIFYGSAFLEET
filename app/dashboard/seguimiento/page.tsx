@@ -63,7 +63,7 @@ export default async function SeguimientoPage() {
         {/* 3. Renderizado del Cliente */}
         {tickets.length === 0 ? (
           <div className="bg-slate-900 p-12 rounded-xl border border-slate-800 text-center text-slate-500 font-bold shadow-2xl">
-            NO HAY UNIDADES EN MANTENIMIENTO ACTUALMENTE 🚗✨
+            NO HAY UNIDADES EN MANTENIMIENTO ACTUALMENTE 
           </div>
         ) : (
           /* Pasamos los datos al componente de cliente. 
