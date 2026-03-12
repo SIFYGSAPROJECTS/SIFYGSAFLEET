@@ -134,11 +134,12 @@ model Solicitud {
   Asesor            String?  @db.VarChar(50)
   Fecha_Cita        String?  @db.VarChar(50)
   Hora_Cita         String?  @db.VarChar(20)
+  Num_Asesor        String?
   Kilometraje       Int?
   Evidencia         String?
   Descripcion       String?  @db.Text
   Fecha_Realizacion DateTime @default(now()) @db.Date
-  Estado  String  @default("PENDIENTE")
+  Estado            String  @default("PENDIENTE")
 
   auto              Inventario_Automoviles @relation(fields: [Consecutivo], references: [Consecutivo])
   empleado          Empleados              @relation(fields: [Email_Empleado], references: [Email])

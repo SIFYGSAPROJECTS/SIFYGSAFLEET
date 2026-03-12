@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react'; //  Importamos hooks
+import { useState, useEffect } from 'react'; 
 import { FileText, ArrowLeft, Car, Palette, CreditCard, ExternalLink, Loader2, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 
@@ -9,24 +9,19 @@ export default function MisChecklistsPage() {
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  //  LLAMADA A LA API REAL 
   useEffect(() => {
     const cargarMisChecklists = async () => {
       try {
-        // Asumimos que tienes una API que devuelve los datos del usuario logueado
         const res = await fetch('/api/mis-checklists');
         
         if (res.ok) {
           const data = await res.json();
-          // Si el usuario tiene unidad, guardamos los datos
           if (data.unidad) {
              setUnidadAsignada(data.unidad);
           } else {
-             // Si todo bien pero no tiene unidad asignada
              setUnidadAsignada(null);
           }
         } else {
-          // Si hubo un error en la respuesta del servidor (ej. 401, 500)
           const errorData = await res.json();
           setError(errorData.error || 'Error al cargar los datos.');
         }
@@ -74,14 +69,14 @@ export default function MisChecklistsPage() {
               <p className="font-bold tracking-widest uppercase text-xs">Buscando tu unidad asignada...</p>
            </div>
         ) : error ? (
-           /* ESTADO DE ERROR (Ej. no autorizado) */
+           /* ESTADO DE ERROR */
            <div className="bg-red-500/10 border border-red-500/50 rounded-xl p-8 flex flex-col items-center text-center">
               <AlertCircle className="w-12 h-12 text-red-500 mb-4" />
               <h2 className="text-white font-bold text-lg mb-2">Hubo un problema</h2>
               <p className="text-red-400 text-sm">{error}</p>
            </div>
         ) : !unidadAsignada ? (
-           /* ESTADO SIN UNIDAD (El empleado no tiene auto) */
+           /* ESTADO SIN UNIDAD */
            <div className="bg-slate-900 border-2 border-dashed border-slate-800 rounded-3xl p-16 flex flex-col items-center text-center">
               <Car className="w-16 h-16 text-slate-700 mb-4 opacity-50" />
               <h2 className="text-white font-bold text-xl mb-2">Sin unidad asignada</h2>
@@ -90,8 +85,8 @@ export default function MisChecklistsPage() {
               </p>
            </div>
         ) : (
-          /* ESTADO CON UNIDAD (Muestra datos reales) */
-          <div className="bg-slate-900 border-x border-b border-slate-800 rounded-xl shadow-2xl border-t-4 border-t-[#FF7420] overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
+          /* ESTADO CON UNIDAD (Totalmente estático, sin animaciones de entrada) */
+          <div className="bg-slate-900 border-x border-b border-slate-800 rounded-xl shadow-2xl border-t-4 border-t-[#FF7420] overflow-hidden">
             <div className="p-8">
               <h2 className="text-2xl font-bold text-white mb-8 flex items-center gap-3">
                 Unidad a tu cargo: <span className="text-[#FF7420]">{unidadAsignada.consecutivo}</span>
@@ -126,7 +121,7 @@ export default function MisChecklistsPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {unidadAsignada.checklists.map((check: any) => (
                     <div key={check.id} className="bg-slate-950 border border-slate-800 rounded-xl p-6 hover:border-[#FF7420]/50 transition-all group relative overflow-hidden flex flex-col justify-between h-full">
-                      {/* Efecto de luz */}
+                      {/* Efecto de luz hover (se mantiene porque da buena UX sin ser invasivo) */}
                       <div className="absolute -right-4 -top-4 w-16 h-16 bg-[#FF7420]/5 rounded-full blur-2xl group-hover:bg-[#FF7420]/10 transition-all" />
                       
                       <div className="flex items-start gap-4 mb-6">

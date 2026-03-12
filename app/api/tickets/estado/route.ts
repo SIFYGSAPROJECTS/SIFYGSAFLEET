@@ -4,10 +4,10 @@ import nodemailer from 'nodemailer';
 
 export async function PUT(request: Request) {
   try {
-    // 👈 EXTRAEMOS LOS NUEVOS CAMPOS (INCLUYENDO AL ASESOR)
-    const { folio, estado, lugar, fecha, hora, asesor } = await request.json();
+    
+    const { folio, estado, lugar, fecha, hora, asesor, numeroAsesor } = await request.json();
 
-    // 1. Actualizamos el ticket incluyendo los datos de la cita y el asesor
+    // 1. Actualizamos el ticket incluyendo el número de asesor
     const ticketActualizado = await prisma.solicitud.update({
       where: { Pk_folio_ticket: folio },
       data: { 
@@ -15,16 +15,16 @@ export async function PUT(request: Request) {
         Lugar_Cita: lugar || null,
         Fecha_Cita: fecha || null,
         Hora_Cita: hora || null,
-        Asesor: asesor || null // 🌟 AQUÍ SE GUARDA EL ASESOR EN LA BASE DE DATOS
+        Asesor: asesor || null,
+        Num_Asesor: numeroAsesor || null //  GUARDAMOS EL TELÉFONO
       },
       include: {
-        empleado: true, // Para sacar su correo y nombre
-        auto: true      // Para sacar la marca y placas
+        empleado: true, 
+        auto: true      
       }
     });
 
     // 2. ¡NOTIFICACIÓN POR CORREO!
-    // Enviamos el correo solo si el estado es LISTO
     if (estado === 'LISTO' && ticketActualizado.empleado?.Email) {
       
       const transporter = nodemailer.createTransport({
@@ -50,6 +50,7 @@ export async function PUT(request: Request) {
               <p style="margin: 5px 0;"><strong>Placas:</strong> ${ticketActualizado.auto?.Placa}</p>
               <p style="margin: 5px 0;"><strong>Folio de Servicio:</strong> ${folio}</p>
               ${asesor ? `<p style="margin: 5px 0;"><strong>Asesor a cargo:</strong> ${asesor}</p>` : ''}
+              ${numeroAsesor ? `<p style="margin: 5px 0;"><strong>Teléfono Asesor:</strong> ${numeroAsesor}</p>` : ''}
             </div>
             
             <p style="color: #64748b; font-size: 12px; text-align: center; margin-top: 30px;">
@@ -63,7 +64,6 @@ export async function PUT(request: Request) {
       console.log(`✉️ Correo de recolección enviado con éxito a: ${ticketActualizado.empleado.Email}`);
     }
 
-    // Retornamos el ticket actualizado para que la interfaz se refresque
     return NextResponse.json({ success: true, data: ticketActualizado });
     
   } catch (error) {
