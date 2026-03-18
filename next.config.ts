@@ -1,9 +1,10 @@
 import type { NextConfig } from "next";
 
-// 1. Refinamos la CSP para que sea lo más limpia posible
+// 1. CSP Nivel "Fortaleza"
+// Quitamos 'data:' de script-src y nos aseguramos de que object-src sea 'none'
 const cspHeader = `
     default-src 'self';
-    script-src 'self' 'unsafe-inline'; 
+    script-src 'self' 'unsafe-inline';
     style-src 'self' 'unsafe-inline';
     img-src 'self' blob: data: https://*.supabase.co;
     font-src 'self' data:;
@@ -43,24 +44,16 @@ const nextConfig: NextConfig = {
             value: 'camera=(), microphone=(), geolocation=(), interest-cohort=()',
           },
           {
-            // Máxima seguridad en transporte (HSTS)
             key: 'Strict-Transport-Security',
             value: 'max-age=63072000; includeSubDomains; preload',
           },
           {
-            // Evita que otros sitios abran tu app en una ventana nueva para espiar
             key: 'Cross-Origin-Opener-Policy',
             value: 'same-origin',
           },
           {
-            // Controla cómo se comparten recursos con otros dominios
             key: 'Cross-Origin-Resource-Policy',
             value: 'same-site',
-          },
-          {
-            // Bloquea intentos de carga de archivos PDF/Flash antiguos maliciosos
-            key: 'X-Permitted-Cross-Domain-Policies',
-            value: 'none',
           },
         ],
       },
