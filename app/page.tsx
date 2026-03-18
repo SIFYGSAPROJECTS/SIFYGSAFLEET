@@ -88,7 +88,7 @@ export default function LoginPage() {
             />
           </div>
           <h1 className="text-2xl font-bold text-white tracking-wide"> FLEET</h1>
-          <p className="text-slate-400 text-sm mt-1">Sistema para Mantenimiento de flota y Gestion vehícular  </p>
+          <p className="text-slate-400 text-sm mt-1">Sistema para Mantenimiento de Flota y Gestion vehícular  </p>
         </div>
 
         <div className="p-8 relative">
