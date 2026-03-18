@@ -17,7 +17,6 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Falta el consecutivo' }, { status: 400 });
     }
 
-    
     const vehiculo = await prisma.inventario_Automoviles.findUnique({
       where: { Consecutivo: consecutivo },
       include: {
@@ -118,5 +117,85 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Error POST:", error);
     return NextResponse.json({ error: 'Error al subir' }, { status: 500 });
+  }
+}
+
+// --- 3. ELIMINAR CHECKLIST (BD + SUPABASE) ---
+export async function DELETE(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+
+    if (!id) return NextResponse.json({ error: 'Falta el ID del checklist' }, { status: 400 });
+
+    // 1. Buscamos el checklist para saber la URL del archivo
+    const checklist = await prisma.checklist.findUnique({ where: { id: Number(id) } });
+    if (!checklist) return NextResponse.json({ error: 'Checklist no encontrado' }, { status: 404 });
+
+    // 2. Extraemos el nombre del archivo real desde la URL (lo que va después del último "/")
+    const nombreArchivo = checklist.Ruta_PDF.split('/').pop();
+
+    // 3. Lo borramos físicamente del "Bucket" de Supabase para ahorrar espacio
+    if (nombreArchivo) {
+      const { error: storageError } = await supabase.storage.from('checklists').remove([nombreArchivo]);
+      if (storageError) console.error("Error borrando de Supabase:", storageError);
+    }
+
+    // 4. Lo borramos de la base de datos de Prisma
+    await prisma.checklist.delete({ where: { id: Number(id) } });
+
+    return NextResponse.json({ success: true, mensaje: 'Checklist eliminado' });
+  } catch (error) {
+    console.error("Error DELETE:", error);
+    return NextResponse.json({ error: 'Error interno al eliminar' }, { status: 500 });
+  }
+}
+
+// --- 4. ACTUALIZAR/REEMPLAZAR CHECKLIST (BD + SUPABASE) ---
+export async function PUT(request: Request) {
+  try {
+    const formData = await request.formData();
+    const id = formData.get('id') as string;
+    const file = formData.get('file') as File;
+
+    if (!id || !file) return NextResponse.json({ error: 'Datos incompletos' }, { status: 400 });
+
+    // 1. Buscamos el registro actual
+    const checklistViejo = await prisma.checklist.findUnique({ where: { id: Number(id) } });
+    if (!checklistViejo) return NextResponse.json({ error: 'Checklist no encontrado' }, { status: 404 });
+
+    // 2. Borramos el archivo VIEJO de Supabase
+    const nombreArchivoViejo = checklistViejo.Ruta_PDF.split('/').pop();
+    if (nombreArchivoViejo) {
+      await supabase.storage.from('checklists').remove([nombreArchivoViejo]);
+    }
+
+    // 3. Preparamos y subimos el NUEVO archivo a Supabase
+    const bytes = await file.arrayBuffer();
+    const buffer = Buffer.from(bytes);
+    // Le ponemos una marca de tiempo nueva para que el navegador no cachee el PDF viejo
+    const nombreArchNuevo = `${checklistViejo.Consecutivo.toLowerCase()}-edit-${new Date().getTime()}.pdf`;
+
+    const { error: storageError } = await supabase.storage
+      .from('checklists')
+      .upload(nombreArchNuevo, buffer, { contentType: file.type });
+
+    if (storageError) throw storageError;
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('checklists')
+      .getPublicUrl(nombreArchNuevo);
+
+    // 4. Actualizamos el registro en la BD (Mantenemos el título original, solo cambiamos el PDF)
+    await prisma.checklist.update({
+      where: { id: Number(id) },
+      data: { Ruta_PDF: publicUrl }
+    });
+
+    return NextResponse.json({ success: true, mensaje: 'Checklist actualizado correctamente' });
+
+  } catch (error) {
+    console.error("Error PUT:", error);
+    return NextResponse.json({ error: 'Error interno al actualizar' }, { status: 500 });
   }
 }

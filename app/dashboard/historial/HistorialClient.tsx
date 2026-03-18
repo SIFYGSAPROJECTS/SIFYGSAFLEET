@@ -4,7 +4,8 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { 
   FileText, ArrowLeft, Filter, UploadCloud, CheckCircle, 
-  Loader2, History, Calendar, X, Eye, Download, ExternalLink 
+  Loader2, History, Calendar, X, Eye, Download, ExternalLink, 
+  Trash2, PencilLine, AlertTriangle 
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
@@ -22,6 +23,12 @@ export default function HistorialClient({ historial, rol }: Props) {
   /* ESTADOS PARA EL VISOR PDF */
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [mostrarVisor, setMostrarVisor] = useState(false);
+
+  /* 🌟 NUEVOS ESTADOS PARA EDICIÓN Y ELIMINACIÓN 🌟 */
+  const [editandoFolio, setEditandoFolio] = useState<string | null>(null);
+  const [modalEliminar, setModalEliminar] = useState(false);
+  const [evidenciaAEliminar, setEvidenciaAEliminar] = useState<{ folio: string, url: string } | null>(null);
+  const [procesando, setProcesando] = useState(false);
 
   const autosUnicos = Array.from(new Set(historial.map(t => t.auto?.Consecutivo)))
     .map(consecutivo => historial.find(t => t.auto?.Consecutivo === consecutivo)?.auto)
@@ -47,33 +54,80 @@ export default function HistorialClient({ historial, rol }: Props) {
     setMostrarVisor(true);
   };
 
-  const handleSubirEvidencia = async (e: React.ChangeEvent<HTMLInputElement>, folio: string, consecutivo: string) => {
+  /* 🌟 SUBIR / REEMPLAZAR EVIDENCIA 🌟 */
+  const handleSubirEvidencia = async (e: React.ChangeEvent<HTMLInputElement>, folio: string, consecutivo: string, esReemplazo: boolean = false) => {
     if (!e.target.files || e.target.files.length === 0) return;
     const file = e.target.files[0];
     if (file.type !== "application/pdf") {
       alert("Solo se permiten archivos PDF.");
       return;
     }
-    setSubiendoFolio(folio);
+
+    // Si es un reemplazo, marcamos el estado de edición, si no, el de subida nueva
+    if (esReemplazo) {
+      setEditandoFolio(folio);
+    } else {
+      setSubiendoFolio(folio);
+    }
+
     const formData = new FormData();
     formData.append('file', file);
     formData.append('folio', folio); 
     formData.append('consecutivo', consecutivo); 
-
+    
+    // Si la API actual de /api/evidencia no soporta PUT, asumiremos que POST 
+    // sobreescribe o maneja la lógica si ya existe un PDF. 
+    // NOTA: Asegúrate de revisar tu route.ts de evidencia después.
     try {
-      const res = await fetch('/api/evidencia', { method: 'POST', body: formData });
+      const res = await fetch('/api/evidencia', { 
+        // Usamos PUT si es edición, asumiendo que tu API lo soporte, si no usa POST.
+        method: esReemplazo ? 'PUT' : 'POST', 
+        body: formData 
+      });
+
       if (res.ok) {
-        alert("Evidencia subida con éxito.");
+        alert(esReemplazo ? "Evidencia actualizada con éxito." : "Evidencia subida con éxito.");
         router.refresh(); 
       } else {
         const errorData = await res.json();
         alert(`Error: ${errorData.error}`);
       }
     } catch (error) {
-      alert("Error de conexión al subir el archivo.");
+      alert("Error de conexión al procesar el archivo.");
     } finally {
       setSubiendoFolio(null);
+      setEditandoFolio(null);
     }
+  };
+
+  /* 🌟 ABRIR MODAL ELIMINAR 🌟 */
+  const abrirModalEliminar = (folio: string, url: string) => {
+    setEvidenciaAEliminar({ folio, url });
+    setModalEliminar(true);
+  };
+
+  /* 🌟 CONFIRMAR ELIMINACIÓN 🌟 */
+  const confirmarEliminacion = async () => {
+    if (!evidenciaAEliminar) return;
+    setProcesando(true);
+    
+    try {
+      const res = await fetch(`/api/evidencia?folio=${evidenciaAEliminar.folio}`, {
+        method: 'DELETE',
+      });
+
+      if (res.ok) {
+        setModalEliminar(false);
+        setEvidenciaAEliminar(null);
+        router.refresh(); 
+      } else {
+        const errorData = await res.json();
+        alert(`Error al eliminar: ${errorData.error}`);
+      }
+    } catch (error) {
+      alert("Error de conexión al intentar eliminar.");
+    }
+    setProcesando(false);
   };
 
   return (
@@ -141,14 +195,14 @@ export default function HistorialClient({ historial, rol }: Props) {
       {/* Tabla */}
       <div className="bg-slate-900 rounded-xl shadow-2xl border-x border-b border-slate-800 border-t-4 border-t-[#FF7420] overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+          <table className="min-w-[900px] w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-950 text-slate-300 text-xs uppercase tracking-wider border-b border-slate-800">
                 <th className="p-5 font-semibold">Folio</th>
                 <th className="p-5 font-semibold">Fecha</th>
                 <th className="p-5 font-semibold">Vehículo</th>
                 <th className="p-5 font-semibold">Solicitante</th>
-                <th className="p-5 font-semibold text-center">Evidencia</th>
+                <th className="p-5 font-semibold text-center w-64">Evidencia</th>
                 <th className="p-5 font-semibold text-center">Acción</th>
               </tr>
             </thead>
@@ -176,27 +230,59 @@ export default function HistorialClient({ historial, rol }: Props) {
                       <div className="text-slate-200 font-medium">{ticket.empleado?.Nombre_Empleado} {ticket.empleado?.A_Paterno}</div>
                       <div className="text-[10px] text-slate-500">{ticket.Email_Empleado}</div>
                     </td>
+                    
+                    {/* 🌟 CELDA DE EVIDENCIA ACTUALIZADA CON EDICIÓN/ELIMINACIÓN 🌟 */}
                     <td className="p-5 text-center">
                       {ticket.Evidencia ? (
-                        <button 
-                          onClick={() => abrirPrevisualizacion(ticket.Evidencia)} 
-                          className="inline-flex items-center gap-1.5 text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-emerald-400/20 transition-all shadow-sm"
-                        >
-                          <CheckCircle size={14} /> VER PDF
-                        </button>
+                        <div className="flex items-center justify-center gap-2">
+                          <button 
+                            onClick={() => abrirPrevisualizacion(ticket.Evidencia)} 
+                            className="inline-flex items-center gap-1.5 text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-emerald-400/20 transition-all shadow-sm"
+                          >
+                            <CheckCircle size={14} /> VER PDF
+                          </button>
+                          
+                          {/* Botón Reemplazar */}
+                          <label className="cursor-pointer p-1.5 text-slate-500 hover:text-yellow-400 hover:bg-yellow-400/10 rounded-lg border border-transparent hover:border-yellow-400/30 transition-all" title="Reemplazar PDF">
+                            {editandoFolio === ticket.Pk_folio_ticket ? <Loader2 size={16} className="animate-spin text-yellow-400" /> : <PencilLine size={16} />}
+                            <input 
+                              type="file" 
+                              accept=".pdf" 
+                              className="hidden" 
+                              onChange={(e) => handleSubirEvidencia(e, ticket.Pk_folio_ticket, ticket.auto?.Consecutivo || 'Unidad', true)} 
+                              disabled={editandoFolio === ticket.Pk_folio_ticket} 
+                            />
+                          </label>
+
+                          {/* Botón Eliminar */}
+                          <button 
+                            onClick={() => abrirModalEliminar(ticket.Pk_folio_ticket, ticket.Evidencia)}
+                            className="p-1.5 text-slate-500 hover:text-red-500 hover:bg-red-500/10 rounded-lg border border-transparent hover:border-red-500/30 transition-all"
+                            title="Eliminar Evidencia"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
                       ) : (
-                        <label className="cursor-pointer inline-flex items-center gap-1.5 text-slate-400 bg-slate-950 border border-slate-700 px-3 py-1.5 rounded-lg text-xs font-bold hover:border-[#FF7420] hover:text-[#FF7420] transition-all shadow-sm">
+                        <label className="cursor-pointer inline-flex items-center justify-center gap-1.5 text-slate-400 bg-slate-950 border border-slate-700 px-3 py-1.5 rounded-lg text-xs font-bold hover:border-[#FF7420] hover:text-[#FF7420] transition-all shadow-sm">
                           {subiendoFolio === ticket.Pk_folio_ticket ? (
                             <><Loader2 size={14} className="animate-spin text-[#FF7420]" /> SUBIENDO...</>
                           ) : (
                             <><UploadCloud size={14} /> SUBIR PDF</>
                           )}
-                          <input type="file" accept=".pdf" className="hidden" onChange={(e) => handleSubirEvidencia(e, ticket.Pk_folio_ticket, ticket.auto?.Consecutivo || 'Unidad')} disabled={subiendoFolio === ticket.Pk_folio_ticket} />
+                          <input 
+                            type="file" 
+                            accept=".pdf" 
+                            className="hidden" 
+                            onChange={(e) => handleSubirEvidencia(e, ticket.Pk_folio_ticket, ticket.auto?.Consecutivo || 'Unidad', false)} 
+                            disabled={subiendoFolio === ticket.Pk_folio_ticket} 
+                          />
                         </label>
                       )}
                     </td>
+
                     <td className="p-5 text-center">
-                      <Link href={`/dashboard/tickets/ver/${encodeURIComponent(ticket.Pk_folio_ticket)}`} className="inline-flex items-center gap-1.5 bg-[#FF7420]/10 text-[#FF7420] border border-[#FF7420]/20 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-[#FF7420] hover:text-white transition-all shadow-sm">
+                      <Link href={`/dashboard/tickets/ver/${encodeURIComponent(ticket.Pk_folio_ticket)}`} className="inline-flex items-center justify-center gap-1.5 bg-[#FF7420]/10 text-[#FF7420] border border-[#FF7420]/20 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-[#FF7420] hover:text-white transition-all shadow-sm w-[110px]">
                         <FileText size={14} /> VER TICKET
                       </Link>
                     </td>
@@ -207,6 +293,42 @@ export default function HistorialClient({ historial, rol }: Props) {
           </table>
         </div>
       </div>
+
+      {/* 🌟 MODAL DE CONFIRMACIÓN DE ELIMINACIÓN 🌟 */}
+      {modalEliminar && evidenciaAEliminar && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[200] flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 max-w-sm w-full shadow-2xl text-center transform transition-all animate-in zoom-in-95">
+            
+            <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-5 border border-red-500/20 shadow-[0_0_15px_rgba(239,68,68,0.2)]">
+              <AlertTriangle className="text-red-500 w-8 h-8" />
+            </div>
+            
+            <h3 className="text-xl font-black text-white mb-2">¿Eliminar Evidencia?</h3>
+            
+            <p className="text-slate-400 text-sm mb-6 leading-relaxed">
+              Estás a punto de eliminar el PDF del mantenimiento <strong className="text-white font-bold">#{evidenciaAEliminar.folio}</strong> de la base de datos y de la nube. Esta acción <span className="text-red-400 font-bold">no se puede deshacer</span>.
+            </p>
+            
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button 
+                onClick={() => setModalEliminar(false)}
+                disabled={procesando}
+                className="flex-1 bg-slate-950 border border-slate-700 hover:bg-slate-800 text-slate-300 font-bold py-3 px-4 rounded-xl transition-colors"
+              >
+                Cancelar
+              </button>
+              <button 
+                onClick={confirmarEliminacion} 
+                disabled={procesando}
+                className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-xl transition-colors disabled:opacity-50 flex justify-center items-center gap-2 shadow-lg shadow-red-600/20"
+              >
+                {procesando ? 'Borrando...' : 'Sí, eliminar'}
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
 
       {/* MODAL DE PREVISUALIZACION PDF */}
       {mostrarVisor && (

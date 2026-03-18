@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link'; 
-import { Search, Upload, FileText, AlertCircle, CheckCircle2, Car, User, Palette, Gauge, ArrowLeft, X, Eye, Download, ChevronRight } from 'lucide-react'; 
+import { Search, Upload, FileText, AlertCircle, CheckCircle2, Car, User, Palette, Gauge, ArrowLeft, X, Eye, Download, ChevronRight, Trash2, PencilLine, AlertTriangle } from 'lucide-react'; 
 
 export default function ChecklistsPage() {
   const [consecutivoInput, setConsecutivoInput] = useState('');
@@ -17,6 +17,13 @@ export default function ChecklistsPage() {
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [mostrarVisor, setMostrarVisor] = useState(false);
 
+  const [editandoChecklistId, setEditandoChecklistId] = useState<number | null>(null);
+  const [archivoReemplazo, setArchivoReemplazo] = useState<File | null>(null);
+
+  // 🌟 NUEVOS ESTADOS PARA EL MODAL DE ELIMINACIÓN 🌟
+  const [modalEliminar, setModalEliminar] = useState(false);
+  const [checklistAEliminar, setChecklistAEliminar] = useState<{ id: number; titulo: string } | null>(null);
+
   const buscarVehiculo = async () => {
     if (!consecutivoInput) return;
     setCargando(true);
@@ -24,6 +31,7 @@ export default function ChecklistsPage() {
     setErrorBusqueda(false);
     setVehiculoActivo(''); 
     setVehiculoInfo(null);
+    setEditandoChecklistId(null); 
     const idBusqueda = consecutivoInput.toUpperCase();
     
     try {
@@ -63,7 +71,6 @@ export default function ChecklistsPage() {
       });
 
       if (res.ok) {
-        alert("✅ Checklist subido con éxito.");
         setArchivo(null); 
         buscarVehiculo(); 
       } else {
@@ -76,6 +83,63 @@ export default function ChecklistsPage() {
     setCargando(false);
   };
 
+  // 🌟 FUNCIÓN QUE ABRE EL MODAL 🌟
+  const abrirModalEliminar = (idChecklist: number, titulo: string) => {
+    setChecklistAEliminar({ id: idChecklist, titulo });
+    setModalEliminar(true);
+  };
+
+  // 🌟 FUNCIÓN QUE EJECUTA EL BORRADO DESDE EL MODAL 🌟
+  const confirmarEliminacion = async () => {
+    if (!checklistAEliminar) return;
+    setCargando(true);
+    try {
+      const res = await fetch(`/api/checklists?id=${checklistAEliminar.id}`, {
+        method: 'DELETE',
+      });
+
+      if (res.ok) {
+        setModalEliminar(false);
+        setChecklistAEliminar(null);
+        buscarVehiculo(); 
+      } else {
+        const errorData = await res.json();
+        alert(`❌ Error al eliminar: ${errorData.error}`);
+      }
+    } catch (error) {
+      alert("Error de conexión al intentar eliminar.");
+    }
+    setCargando(false);
+  };
+
+  const actualizarPDF = async (idChecklist: number) => {
+    if (!archivoReemplazo) return;
+    setCargando(true);
+    
+    const formData = new FormData();
+    formData.append('id', idChecklist.toString());
+    formData.append('file', archivoReemplazo);
+
+    try {
+      const res = await fetch('/api/checklists', {
+        method: 'PUT',
+        body: formData,
+      });
+
+      if (res.ok) {
+        setEditandoChecklistId(null);
+        setArchivoReemplazo(null);
+        buscarVehiculo(); 
+      } else {
+        const errorData = await res.json();
+        alert(`❌ Error al actualizar: ${errorData.error}`);
+      }
+    } catch (error) {
+      alert("Error de conexión al actualizar el archivo.");
+    }
+    setCargando(false);
+  };
+
   const abrirPrevisualizacion = (url: string) => {
     setPdfUrl(url);
     setMostrarVisor(true);
@@ -83,7 +147,6 @@ export default function ChecklistsPage() {
 
   return (
     <div className="min-h-screen bg-black">
-      {/* 1. PADDING RESPONSIVO */}
       <div className="p-4 sm:p-8 max-w-5xl mx-auto">
         
         <div className="mb-6">
@@ -96,13 +159,11 @@ export default function ChecklistsPage() {
           </Link>
         </div>
 
-        {/* TITULO RESPONSIVO */}
         <h1 className="text-2xl sm:text-3xl font-bold text-white mb-8 flex items-center gap-3">
           <FileText className="w-7 h-7 sm:w-8 h-8 text-[#FF7420] shrink-0" />
           Gestión de Checklists
         </h1>
 
-        {/* BUSCADOR RESPONSIVO */}
         <div className="bg-slate-900 p-5 sm:p-8 rounded-2xl shadow-2xl border border-slate-800 mb-8 text-center">
           <label className="block text-base sm:text-lg font-medium text-slate-300 mb-4 tracking-tight">
             ¿De qué unidad quieres ver o subir Checklists?
@@ -136,7 +197,6 @@ export default function ChecklistsPage() {
           )}
         </div>
 
-        {/* PANEL DE UNIDAD ACTIVA RESPONSIVO */}
         {vehiculoActivo && (
           <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-8 shadow-2xl border-t-4 border-t-[#FF7420] animate-in slide-in-from-bottom-4 duration-500">
             
@@ -146,7 +206,6 @@ export default function ChecklistsPage() {
                 <span>Unidad: <span className="text-[#FF7420]">{vehiculoActivo}</span></span>
               </h2>
               
-              {/* AREA DE SUBIDA MEJORADA */}
               <div className="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto">
                 <div className="relative w-full sm:w-auto">
                   <input 
@@ -173,7 +232,6 @@ export default function ChecklistsPage() {
               </div>
             </div>
 
-            {/* INFO GRID RESPONSIVO */}
             {vehiculoInfo && (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 bg-slate-950 p-5 rounded-2xl border border-slate-800 shadow-inner mb-8">
                 <div className="flex flex-col gap-1">
@@ -197,12 +255,29 @@ export default function ChecklistsPage() {
 
             {mensaje && vehiculoActivo && <p className="text-slate-500 text-center py-6 border-t border-slate-800 italic text-sm">{mensaje}</p>}
 
-            {/* GRID DE CARDS RESPONSIVO */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
               {checklists.map((check) => (
-                <div key={check.id} className="bg-slate-950 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between hover:border-[#FF7420]/40 transition-all group">
-                  <div className="flex items-start gap-4 mb-6">
-                    <div className="bg-red-500/10 p-3 rounded-xl border border-red-500/20">
+                <div key={check.id} className="bg-slate-950 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between hover:border-[#FF7420]/40 transition-all group relative">
+                  
+                  <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button 
+                      onClick={() => setEditandoChecklistId(editandoChecklistId === check.id ? null : check.id)}
+                      className="text-slate-500 hover:text-yellow-400 p-1 bg-slate-900 rounded border border-slate-700 hover:border-yellow-400 transition-colors"
+                      title="Reemplazar PDF"
+                    >
+                      <PencilLine size={14} />
+                    </button>
+                    <button 
+                      onClick={() => abrirModalEliminar(check.id, check.Titulo)}
+                      className="text-slate-500 hover:text-red-500 p-1 bg-slate-900 rounded border border-slate-700 hover:border-red-500 transition-colors"
+                      title="Eliminar Checklist"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+
+                  <div className="flex items-start gap-4 mb-6 pr-14">
+                    <div className="bg-red-500/10 p-3 rounded-xl border border-red-500/20 shrink-0">
                       <FileText className="w-6 h-6 text-red-500" />
                     </div>
                     <div className="overflow-hidden">
@@ -218,19 +293,44 @@ export default function ChecklistsPage() {
                       )}
                     </div>
                   </div>
-                  <button 
-                    onClick={() => abrirPrevisualizacion(check.Ruta_PDF)}
-                    className="bg-slate-900 hover:bg-[#FF7420] text-slate-300 hover:text-white text-center py-3 rounded-xl text-xs font-bold w-full transition-all border border-slate-800 flex items-center justify-center gap-2 active:scale-95"
-                  >
-                    <Eye size={14} /> Ver Documento
-                  </button>
+
+                  {editandoChecklistId === check.id ? (
+                    <div className="flex flex-col gap-2 animate-in fade-in zoom-in-95 duration-200">
+                      <input 
+                        type="file" 
+                        accept=".pdf"
+                        id={`edit-file-${check.id}`}
+                        className="hidden"
+                        onChange={(e) => setArchivoReemplazo(e.target.files?.[0] || null)}
+                      />
+                      <label 
+                        htmlFor={`edit-file-${check.id}`}
+                        className="bg-slate-900 border border-slate-700 text-slate-400 text-xs text-center py-2 rounded-xl cursor-pointer hover:border-yellow-500 hover:text-yellow-500 transition-colors truncate px-2"
+                      >
+                        {archivoReemplazo ? archivoReemplazo.name : '1. Seleccionar nuevo PDF'}
+                      </label>
+                      <button 
+                        onClick={() => actualizarPDF(check.id)}
+                        disabled={!archivoReemplazo || cargando}
+                        className="bg-yellow-500 hover:bg-yellow-600 disabled:bg-slate-800 disabled:text-slate-500 text-black text-center py-2.5 rounded-xl text-xs font-bold w-full transition-all flex items-center justify-center gap-2 shadow-lg shadow-yellow-500/20"
+                      >
+                        <Upload size={14} /> 2. Guardar Reemplazo
+                      </button>
+                    </div>
+                  ) : (
+                    <button 
+                      onClick={() => abrirPrevisualizacion(check.Ruta_PDF)}
+                      className="bg-slate-900 hover:bg-[#FF7420] text-slate-300 hover:text-white text-center py-3 rounded-xl text-xs font-bold w-full transition-all border border-slate-800 flex items-center justify-center gap-2 active:scale-95"
+                    >
+                      <Eye size={14} /> Ver Documento
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
           </div>
         )}
 
-        {/* VISOR PDF RESPONSIVO */}
         {mostrarVisor && (
           <div className="fixed inset-0 bg-black/95 backdrop-blur-xl z-[100] flex flex-col p-4 animate-in fade-in duration-200">
             <div className="max-w-6xl mx-auto w-full flex justify-between items-center mb-4 gap-4">
@@ -270,6 +370,42 @@ export default function ChecklistsPage() {
             >
               Cerrar Vista Previa
             </button>
+          </div>
+        )}
+
+        {/* 🌟 MODAL DE CONFIRMACIÓN DE ELIMINACIÓN 🌟 */}
+        {modalEliminar && checklistAEliminar && (
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[200] flex items-center justify-center p-4 animate-in fade-in duration-200">
+            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 max-w-sm w-full shadow-2xl text-center transform transition-all animate-in zoom-in-95">
+              
+              <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-5 border border-red-500/20">
+                <AlertTriangle className="text-red-500 w-8 h-8" />
+              </div>
+              
+              <h3 className="text-xl font-black text-white mb-2">¿Eliminar Documento?</h3>
+              
+              <p className="text-slate-400 text-sm mb-6 leading-relaxed">
+                Estás a punto de eliminar el archivo <strong className="text-white font-bold">{checklistAEliminar.titulo}</strong> de la base de datos. Esta acción <span className="text-red-400 font-bold">no se puede deshacer</span>.
+              </p>
+              
+              <div className="flex flex-col sm:flex-row gap-3">
+                <button 
+                  onClick={() => setModalEliminar(false)}
+                  disabled={cargando}
+                  className="flex-1 bg-slate-950 border border-slate-700 hover:bg-slate-800 text-slate-300 font-bold py-3 px-4 rounded-xl transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button 
+                  onClick={confirmarEliminacion} 
+                  disabled={cargando}
+                  className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-xl transition-colors disabled:opacity-50 flex justify-center items-center gap-2 shadow-lg shadow-red-600/20"
+                >
+                  {cargando ? 'Borrando...' : 'Sí, eliminar'}
+                </button>
+              </div>
+
+            </div>
           </div>
         )}
 

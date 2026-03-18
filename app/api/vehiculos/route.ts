@@ -4,11 +4,35 @@ import { prisma } from '@/lib/db';
 export async function GET() {
   try {
     const vehiculos = await prisma.inventario_Automoviles.findMany({
-      include: { encargado: true },
+      include: { 
+        encargado: true,
+        //  CAMBIO AQUÍ: Probablemente en tu schema está en minúscula y plural 
+        solicitudes: { 
+          orderBy: {
+            Fecha_Realizacion: 'desc' 
+          },
+          take: 1, 
+          select: {
+            Kilometraje: true 
+          }
+        }
+      },
       orderBy: { Consecutivo: 'asc' }
     });
-    return NextResponse.json(vehiculos);
+
+    const vehiculosConKilometraje = vehiculos.map((auto: any) => {
+      //  CAMBIO AQUÍ TAMBIÉN 
+      const { solicitudes, ...datosAuto } = auto; 
+      
+      return {
+        ...datosAuto,
+        Kilometraje_Actual: solicitudes && solicitudes.length > 0 ? solicitudes[0].Kilometraje : null
+      };
+    });
+
+    return NextResponse.json(vehiculosConKilometraje);
   } catch (error) {
+    console.error("Error de Prisma en la API:", error); // Esto te dirá en consola el error real
     return NextResponse.json({ error: 'Error al cargar vehículos' }, { status: 500 });
   }
 }
@@ -32,7 +56,7 @@ export async function POST(request: Request) {
         Ubicacion: body.Ubicacion,
         Percance: body.Percance,
         Estatus_Operativo: body.Estatus_Operativo || 'Activo en flota',
-        Estado_Unidad: body.Estado_Unidad, // Aprovechamos para guardar el booleano viejo también
+        Estado_Unidad: body.Estado_Unidad, 
       }
     });
     return NextResponse.json({ success: true, data: vehiculo });

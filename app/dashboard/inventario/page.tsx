@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { Car, Plus, X, Pencil, ArrowLeft, ShieldCheck, AlertTriangle } from 'lucide-react';
+import { Car, Plus, X, Pencil, ArrowLeft, ShieldCheck, AlertTriangle, Wrench, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
 
 interface Vehiculo {
@@ -20,11 +20,14 @@ interface Vehiculo {
   Estado_Unidad: boolean; 
   Estatus_Operativo: string; 
   Email_encargado: string | null;
+  Kilometraje_Actual?: string | number | null; 
   encargado?: {
     Nombre_Empleado: string;
     A_Paterno: string;
   } | null;
 }
+
+type TipoFiltro = 'Activo en flota' | 'Siniestrado' | 'En Reparación' | 'Disponibles';
 
 export default function InventarioPage() {
   const [vehiculos, setVehiculos] = useState<Vehiculo[]>([]);
@@ -32,7 +35,7 @@ export default function InventarioPage() {
   const [modalAbierto, setModalAbierto] = useState(false);
   const [modoEdicion, setModoEdicion] = useState(false); 
   
-  const [filtroActivo, setFiltroActivo] = useState<'Activo en flota' | 'Siniestrado'>('Activo en flota');
+  const [filtroActivo, setFiltroActivo] = useState<TipoFiltro>('Activo en flota');
   
   const [formData, setFormData] = useState({
     Consecutivo: '', Placa: '', Marca: '', Modelo: '', Color: '', Linea: '', 
@@ -40,14 +43,23 @@ export default function InventarioPage() {
     Email_encargado: '', Estado_Unidad: true, Estatus_Operativo: 'Activo en flota'
   });
 
-  const cargarVehiculos = async () => {
+const cargarVehiculos = async () => {
     try {
       const res = await fetch('/api/vehiculos');
       const data = await res.json();
-      setVehiculos(data);
+      
+      //  EL BLINDAJE: Verificamos que 'data' sea un arreglo real antes de guardarlo
+      if (Array.isArray(data)) {
+        setVehiculos(data);
+      } else {
+        console.error('La API devolvió un error en lugar de un arreglo:', data);
+        setVehiculos([]); // Lo dejamos vacío para que no explote
+      }
+      
       setCargando(false);
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Error de conexión:', error);
+      setVehiculos([]); // Previene el crasheo
       setCargando(false);
     }
   };
@@ -57,9 +69,18 @@ export default function InventarioPage() {
   }, []);
 
   const vehiculosVisibles = vehiculos.filter(v => v.Estatus_Operativo !== 'Dado de baja');
-  const vehiculosFiltrados = vehiculosVisibles.filter(v => v.Estatus_Operativo === filtroActivo);
+  
   const totalActivos = vehiculosVisibles.filter(v => v.Estatus_Operativo === 'Activo en flota').length;
   const totalSiniestrados = vehiculosVisibles.filter(v => v.Estatus_Operativo === 'Siniestrado').length;
+  const totalReparacion = vehiculosVisibles.filter(v => v.Estatus_Operativo === 'En Reparación').length;
+  const totalDisponibles = vehiculosVisibles.filter(v => v.Estatus_Operativo === 'Activo en flota' && (!v.Email_encargado || v.Email_encargado.trim() === '')).length;
+
+  const vehiculosFiltrados = vehiculosVisibles.filter(v => {
+    if (filtroActivo === 'Disponibles') {
+      return v.Estatus_Operativo === 'Activo en flota' && (!v.Email_encargado || v.Email_encargado.trim() === '');
+    }
+    return v.Estatus_Operativo === filtroActivo;
+  });
 
   const abrirModalNuevo = () => {
     setModoEdicion(false);
@@ -120,16 +141,20 @@ export default function InventarioPage() {
     }
   };
 
+  const colorBordeTabla = 
+    filtroActivo === 'Siniestrado' ? 'border-t-red-500' : 
+    filtroActivo === 'En Reparación' ? 'border-t-yellow-500' :
+    filtroActivo === 'Disponibles' ? 'border-t-emerald-500' :
+    'border-t-[#FF7420]';
+
   return (
     <div className="min-h-screen bg-black">
-      {/* Ajuste de padding lateral para móviles */}
       <div className="p-4 sm:p-8 max-w-7xl mx-auto">
         
         <Link href="/dashboard" className="inline-flex items-center gap-2 text-slate-400 hover:text-[#FF7420] transition-colors mb-6 font-medium text-sm">
           <ArrowLeft className="w-4 h-4" /> Volver al Panel Maestro
         </Link>
 
-        {/* HEADER: Se vuelve vertical en móvil con gap-4 */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-3">
@@ -138,70 +163,67 @@ export default function InventarioPage() {
             </h1>
             <p className="text-slate-400 mt-1 text-sm sm:text-base">Gestiona las unidades operativas y siniestradas de SIFYGSA</p>
           </div>
-          {/* Botón ancho completo en móvil */}
           <button onClick={abrirModalNuevo} className="w-full md:w-auto bg-[#FF7420] hover:bg-[#E6681C] text-white px-5 py-2.5 rounded-lg font-bold flex items-center justify-center gap-2 transition-colors shadow-lg shadow-[#FF7420]/20 active:scale-95">
             <Plus className="w-5 h-5" /> Nuevo Vehículo
           </button>
         </div>
 
-        {/* PESTAÑAS: flex-wrap permite que caigan al siguiente renglón si no caben */}
+        {/* PESTAÑAS */}
         <div className="flex flex-wrap gap-2 sm:gap-4 mb-6 border-b border-slate-800 pb-4">
-          <button
-            onClick={() => setFiltroActivo('Activo en flota')}
-            className={`flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-lg font-bold transition-all text-sm sm:text-base flex-1 sm:flex-none ${
-              filtroActivo === 'Activo en flota' 
-                ? 'bg-[#FF7420]/10 text-[#FF7420] border border-[#FF7420]/50 shadow-[0_0_15px_rgba(255,116,32,0.15)]' 
-                : 'text-slate-500 hover:text-slate-300 hover:bg-slate-900'
-            }`}
-          >
+          <button onClick={() => setFiltroActivo('Activo en flota')} className={`flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-lg font-bold transition-all text-sm sm:text-base flex-1 sm:flex-none ${filtroActivo === 'Activo en flota' ? 'bg-[#FF7420]/10 text-[#FF7420] border border-[#FF7420]/50 shadow-[0_0_15px_rgba(255,116,32,0.15)]' : 'text-slate-500 hover:text-slate-300 hover:bg-slate-900'}`}>
             <ShieldCheck size={18} className="shrink-0" /> <span className="whitespace-nowrap">Activos</span>
-            <span className={`ml-1 px-2 py-0.5 rounded-full text-[10px] ${filtroActivo === 'Activo en flota' ? 'bg-[#FF7420] text-white' : 'bg-slate-800 text-slate-400'}`}>
-              {totalActivos}
-            </span>
+            <span className={`ml-1 px-2 py-0.5 rounded-full text-[10px] ${filtroActivo === 'Activo en flota' ? 'bg-[#FF7420] text-white' : 'bg-slate-800 text-slate-400'}`}>{totalActivos}</span>
           </button>
 
-          <button
-            onClick={() => setFiltroActivo('Siniestrado')}
-            className={`flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-lg font-bold transition-all text-sm sm:text-base flex-1 sm:flex-none ${
-              filtroActivo === 'Siniestrado' 
-                ? 'bg-red-500/10 text-red-500 border border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.15)]' 
-                : 'text-slate-500 hover:text-slate-300 hover:bg-slate-900'
-            }`}
-          >
+          <button onClick={() => setFiltroActivo('En Reparación')} className={`flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-lg font-bold transition-all text-sm sm:text-base flex-1 sm:flex-none ${filtroActivo === 'En Reparación' ? 'bg-yellow-500/10 text-yellow-500 border border-yellow-500/50 shadow-[0_0_15px_rgba(234,179,8,0.15)]' : 'text-slate-500 hover:text-slate-300 hover:bg-slate-900'}`}>
+            <Wrench size={18} className="shrink-0" /> <span className="whitespace-nowrap">En Reparación</span>
+            <span className={`ml-1 px-2 py-0.5 rounded-full text-[10px] ${filtroActivo === 'En Reparación' ? 'bg-yellow-500 text-black font-extrabold' : 'bg-slate-800 text-slate-400'}`}>{totalReparacion}</span>
+          </button>
+
+          <button onClick={() => setFiltroActivo('Disponibles')} className={`flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-lg font-bold transition-all text-sm sm:text-base flex-1 sm:flex-none ${filtroActivo === 'Disponibles' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/50 shadow-[0_0_15px_rgba(16,185,129,0.15)]' : 'text-slate-500 hover:text-slate-300 hover:bg-slate-900'}`}>
+            <CheckCircle2 size={18} className="shrink-0" /> <span className="whitespace-nowrap">Sin Asignar</span>
+            <span className={`ml-1 px-2 py-0.5 rounded-full text-[10px] ${filtroActivo === 'Disponibles' ? 'bg-emerald-500 text-black font-extrabold' : 'bg-slate-800 text-slate-400'}`}>{totalDisponibles}</span>
+          </button>
+
+          <button onClick={() => setFiltroActivo('Siniestrado')} className={`flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-lg font-bold transition-all text-sm sm:text-base flex-1 sm:flex-none ${filtroActivo === 'Siniestrado' ? 'bg-red-500/10 text-red-500 border border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.15)]' : 'text-slate-500 hover:text-slate-300 hover:bg-slate-900'}`}>
             <AlertTriangle size={18} className="shrink-0" /> <span className="whitespace-nowrap">Siniestrados</span>
-            <span className={`ml-1 px-2 py-0.5 rounded-full text-[10px] ${filtroActivo === 'Siniestrado' ? 'bg-red-500 text-white' : 'bg-slate-800 text-slate-400'}`}>
-              {totalSiniestrados}
-            </span>
+            <span className={`ml-1 px-2 py-0.5 rounded-full text-[10px] ${filtroActivo === 'Siniestrado' ? 'bg-red-500 text-white' : 'bg-slate-800 text-slate-400'}`}>{totalSiniestrados}</span>
           </button>
         </div>
 
-        {/* CONTENEDOR DE LA TABLA: Mantiene el scroll horizontal original */}
-        <div className={`bg-slate-900 rounded-xl shadow-2xl border-x border-b border-t-4 overflow-hidden transition-colors duration-500 ${filtroActivo === 'Siniestrado' ? 'border-t-red-500 border-slate-800/80' : 'border-t-[#FF7420] border-slate-800'}`}>
+        {/* TABLA PRINCIPAL */}
+        <div className={`bg-slate-900 rounded-xl shadow-2xl border-x border-b border-t-4 overflow-hidden transition-colors duration-500 ${colorBordeTabla}`}>
           <div className="overflow-x-auto">
-            <table className="min-w-[800px] w-full text-left border-collapse">
+            <table className="min-w-[1000px] w-full text-left border-collapse">
               <thead>
                 <tr className="bg-slate-950 border-b border-slate-800 text-slate-300 text-sm uppercase tracking-wider">
                   <th className="p-4 font-semibold">Unidad</th>
                   <th className="p-4 font-semibold">Vehículo</th>
                   <th className="p-4 font-semibold">Detalles Operativos</th>
+                  <th className="p-4 font-semibold text-center">Kilometraje</th>
                   <th className="p-4 font-semibold">Asignación</th>
                   <th className="p-4 font-semibold text-center">Acciones</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800">
                 {cargando ? (
-                  <tr><td colSpan={5} className="text-center p-8 text-slate-500">Cargando inventario... 🚙</td></tr>
+                  <tr><td colSpan={6} className="text-center p-8 text-slate-500">Cargando inventario... 🚙</td></tr>
                 ) : vehiculosFiltrados.length === 0 ? (
-                  <tr><td colSpan={5} className="text-center p-8 text-slate-500">No hay vehículos en esta categoría.</td></tr>
+                  <tr><td colSpan={6} className="text-center p-8 text-slate-500">No hay vehículos en esta categoría.</td></tr>
                 ) : (
                   vehiculosFiltrados.map((auto) => (
                     <tr key={auto.Consecutivo} className="hover:bg-slate-800/50 transition-colors">
                       <td className="p-4">
                         <div className="font-bold text-white text-lg flex items-center gap-2">
                           {auto.Consecutivo}
-                          {filtroActivo === 'Siniestrado' && <AlertTriangle size={16} className="text-red-500" />}
+                          {auto.Estatus_Operativo === 'Siniestrado' && <AlertTriangle size={16} className="text-red-500" />}
+                          {auto.Estatus_Operativo === 'En Reparación' && <Wrench size={16} className="text-yellow-500" />}
                         </div>
-                        <span className={`inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-bold border ${filtroActivo === 'Activo en flota' ? 'bg-[#FF7420]/10 text-[#FF7420] border-[#FF7420]/30' : 'bg-red-900/30 text-red-400 border-red-800'}`}>
+                        <span className={`inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-bold border ${
+                          auto.Estatus_Operativo === 'Activo en flota' ? 'bg-[#FF7420]/10 text-[#FF7420] border-[#FF7420]/30' : 
+                          auto.Estatus_Operativo === 'En Reparación' ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/30' :
+                          'bg-red-900/30 text-red-400 border-red-800'
+                        }`}>
                           {auto.Estatus_Operativo.toUpperCase()}
                         </span>
                       </td>
@@ -213,9 +235,14 @@ export default function InventarioPage() {
                         <div className="text-sm text-slate-400"><span className="font-semibold text-slate-500">VIN:</span> {auto.Numero_Serie || 'N/A'}</div>
                         <div className="text-sm text-slate-400"><span className="font-semibold text-slate-500">Póliza:</span> {auto.Poliza_Seguro || 'N/A'}</div>
                       </td>
+                      <td className="p-4 text-center">
+                        <div className="font-mono font-bold text-white bg-slate-950/50 py-1 px-2 rounded-lg border border-slate-800 inline-block">
+                          {auto.Kilometraje_Actual ? `${Number(auto.Kilometraje_Actual).toLocaleString()} km` : <span className="text-slate-600 text-xs">Sin registro</span>}
+                        </div>
+                      </td>
                       <td className="p-4">
                         <div className="text-sm font-medium text-slate-300">
-                          {auto.encargado ? `${auto.encargado.Nombre_Empleado} ${auto.encargado.A_Paterno}` : 'Sin chofer'}
+                          {auto.encargado ? `${auto.encargado.Nombre_Empleado} ${auto.encargado.A_Paterno}` : <span className="text-emerald-500 font-bold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/30">Sin Asignar</span>}
                         </div>
                         <div className="text-xs text-slate-500 mt-0.5">
                           {auto.Departamento ? `Depto: ${auto.Departamento}` : ''} {auto.Ubicacion ? `| Ubic: ${auto.Ubicacion}` : ''}
@@ -234,7 +261,7 @@ export default function InventarioPage() {
           </div>
         </div>
 
-        {/* MODAL: Se mantiene igual pero con anchos dinámicos para el form */}
+        {/* MODAL CON TU DISEÑO ORIGINAL RESTAURADO */}
         {modalAbierto && (
           <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div className="bg-slate-900 rounded-xl shadow-2xl border border-slate-800 w-full max-w-4xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
@@ -314,6 +341,7 @@ export default function InventarioPage() {
                       className="w-full bg-slate-950 border border-slate-700 text-white rounded-lg p-2.5 focus:ring-2 focus:ring-[#FF7420] outline-none cursor-pointer"
                     >
                       <option value="Activo en flota">🟢 Activo en Flota</option>
+                      <option value="En Reparación">🔧 En Reparación</option>
                       <option value="Siniestrado">🔴 Siniestrado</option>
                       <option value="Dado de baja">⚫ Dado de Baja</option>
                     </select>

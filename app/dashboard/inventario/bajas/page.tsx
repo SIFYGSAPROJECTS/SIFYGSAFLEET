@@ -8,6 +8,11 @@ export default function ArchivoBajasPage() {
   const [vehiculosBaja, setVehiculosBaja] = useState<any[]>([]);
   const [cargando, setCargando] = useState(true);
 
+  // 🌟 ESTADOS PARA EL MODAL DE RESTAURACIÓN 🌟
+  const [modalRestaurar, setModalRestaurar] = useState(false);
+  const [vehiculoARestaurar, setVehiculoARestaurar] = useState<any>(null);
+  const [procesando, setProcesando] = useState(false);
+
   const cargarVehiculos = async () => {
     try {
       const res = await fetch('/api/vehiculos');
@@ -25,21 +30,31 @@ export default function ArchivoBajasPage() {
     cargarVehiculos();
   }, []);
 
-  const restaurarVehiculo = async (vehiculo: any) => {
-    if (!confirm(`¿Estás seguro de reactivar la unidad ${vehiculo.Consecutivo} y regresarla al inventario principal?`)) return;
+  // 🌟 FUNCIÓN QUE ABRE EL MODAL 🌟
+  const abrirModalRestauracion = (vehiculo: any) => {
+    setVehiculoARestaurar(vehiculo);
+    setModalRestaurar(true);
+  };
+
+  // 🌟 FUNCIÓN QUE EJECUTA LA RESTAURACIÓN 🌟
+  const confirmarRestauracion = async () => {
+    if (!vehiculoARestaurar) return;
+    setProcesando(true);
 
     try {
       const res = await fetch('/api/vehiculos', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          ...vehiculo,
+          ...vehiculoARestaurar,
           Estatus_Operativo: 'Activo en flota',
           Estado_Unidad: true 
         }),
       });
 
       if (res.ok) {
+        setModalRestaurar(false);
+        setVehiculoARestaurar(null);
         cargarVehiculos();
       } else {
         alert('❌ Error al intentar restaurar la unidad.');
@@ -47,10 +62,11 @@ export default function ArchivoBajasPage() {
     } catch (error) {
       alert('Error de conexión al procesar la solicitud.');
     }
+    setProcesando(false);
   };
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-black relative">
       <div className="p-8 max-w-7xl mx-auto">
         
         {/* ENLACE DE REGRESO */}
@@ -101,8 +117,9 @@ export default function ArchivoBajasPage() {
                       <span className="bg-[#FF7420]/10 text-[#FF7420] px-3 py-1 rounded text-xs font-mono font-black tracking-widest border border-[#FF7420]/20">
                         {vehiculo.Consecutivo}
                       </span>
+                      {/* BOTÓN ACTUALIZADO PARA ABRIR MODAL */}
                       <button 
-                        onClick={() => restaurarVehiculo(vehiculo)}
+                        onClick={() => abrirModalRestauracion(vehiculo)}
                         title="Restaurar a Activo"
                         className="text-slate-600 hover:text-emerald-400 hover:bg-emerald-400/10 p-1.5 rounded transition-all"
                       >
@@ -138,6 +155,43 @@ export default function ArchivoBajasPage() {
         )}
 
       </div>
+
+      {/* 🌟 MODAL DE CONFIRMACIÓN DE RESTAURACIÓN 🌟 */}
+      {modalRestaurar && vehiculoARestaurar && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[200] flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 max-w-sm w-full shadow-2xl text-center transform transition-all animate-in zoom-in-95">
+            
+            <div className="w-16 h-16 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-5 border border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.2)]">
+              <RotateCcw className="text-emerald-500 w-8 h-8" />
+            </div>
+            
+            <h3 className="text-xl font-black text-white mb-2">¿Restaurar Unidad?</h3>
+            
+            <p className="text-slate-400 text-sm mb-6 leading-relaxed">
+              Estás a punto de reactivar la unidad <strong className="text-emerald-400 font-bold">{vehiculoARestaurar.Consecutivo}</strong>. Esta volverá a estar disponible en el Inventario Maestro como "Activa en flota".
+            </p>
+            
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button 
+                onClick={() => setModalRestaurar(false)}
+                disabled={procesando}
+                className="flex-1 bg-slate-950 border border-slate-700 hover:bg-slate-800 text-slate-300 font-bold py-3 px-4 rounded-xl transition-colors"
+              >
+                Cancelar
+              </button>
+              <button 
+                onClick={confirmarRestauracion} 
+                disabled={procesando}
+                className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-xl transition-colors disabled:opacity-50 flex justify-center items-center gap-2 shadow-lg shadow-emerald-600/20"
+              >
+                {procesando ? 'Procesando...' : 'Sí, restaurar'}
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

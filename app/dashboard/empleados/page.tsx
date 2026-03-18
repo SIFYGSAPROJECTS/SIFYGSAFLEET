@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { Users, UserPlus, X, Pencil, ShieldAlert, ShieldCheck, ArrowLeft, UserMinus, UserCheck, Loader2 } from 'lucide-react';
+import { Users, UserPlus, X, Pencil, ShieldAlert, ShieldCheck, ArrowLeft, UserMinus, UserCheck, Loader2, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
 
 interface Empleado {
@@ -25,6 +25,11 @@ export default function PersonalPage() {
   const [modoEdicion, setModoEdicion] = useState(false); 
   const [guardando, setGuardando] = useState(false);
   
+  // 🌟 NUEVOS ESTADOS PARA EL MODAL DE ACCESO 🌟
+  const [modalAccesoAbierto, setModalAccesoAbierto] = useState(false);
+  const [empleadoSeleccionado, setEmpleadoSeleccionado] = useState<Empleado | null>(null);
+  const [procesandoAcceso, setProcesandoAcceso] = useState(false);
+
   const [formData, setFormData] = useState({
     Email: '', Nombre_Empleado: '', A_Paterno: '', A_Materno: '', Cargo: '', Departamento: '', Rol: 'USER', Estatus_Acceso: 'Activo'
   });
@@ -70,20 +75,37 @@ export default function PersonalPage() {
     setModalAbierto(true);
   };
 
-  const alternarAcceso = async (emp: Empleado) => {
-    const nuevoEstado = emp.Estatus_Acceso === 'Inactivo' ? 'Activo' : 'Inactivo';
-    if (!confirm(`¿Confirmas cambiar el acceso de ${emp.Nombre_Empleado} a ${nuevoEstado}?`)) return;
+  // 🌟 FUNCIÓN QUE ABRE EL MODAL DE CONFIRMACIÓN 🌟
+  const solicitarCambioAcceso = (emp: Empleado) => {
+    setEmpleadoSeleccionado(emp);
+    setModalAccesoAbierto(true);
+  };
+
+  // 🌟 FUNCIÓN QUE EJECUTA EL CAMBIO DE ACCESO 🌟
+  const confirmarCambioAcceso = async () => {
+    if (!empleadoSeleccionado) return;
+    setProcesandoAcceso(true);
+    
+    const nuevoEstado = empleadoSeleccionado.Estatus_Acceso === 'Inactivo' ? 'Activo' : 'Inactivo';
 
     try {
       const res = await fetch('/api/empleados', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...emp, Estatus_Acceso: nuevoEstado }),
+        body: JSON.stringify({ ...empleadoSeleccionado, Estatus_Acceso: nuevoEstado }),
       });
-      if (res.ok) cargarEmpleados();
+      
+      if (res.ok) {
+        setModalAccesoAbierto(false);
+        setEmpleadoSeleccionado(null);
+        cargarEmpleados();
+      } else {
+        alert('Error al procesar el cambio de acceso.');
+      }
     } catch (error) {
-      alert('Error al procesar el cambio de acceso.');
+      alert('Error de conexión al procesar el cambio.');
     }
+    setProcesandoAcceso(false);
   };
 
   const guardarEmpleado = async (e: React.FormEvent) => {
@@ -117,14 +139,12 @@ export default function PersonalPage() {
 
   return (
     <div className="min-h-screen bg-black">
-      {/*  PADDING DINÁMICO */}
       <div className="p-4 sm:p-8 max-w-7xl mx-auto">
         
         <Link href="/dashboard" className="inline-flex items-center gap-2 text-slate-400 hover:text-[#FF7420] transition-colors mb-6 font-medium text-sm py-2">
           <ArrowLeft className="w-4 h-4" /> Volver al Panel Maestro
         </Link>
 
-        {/*  HEADER RESPONSIVE */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-3">
@@ -142,7 +162,6 @@ export default function PersonalPage() {
           </button>
         </div>
 
-        {/*  TABS CON SCROLL HORIZONTAL EN MÓVIL */}
         <div className="flex gap-3 mb-6 border-b border-slate-800 pb-4 overflow-x-auto scrollbar-hide">
           <button
             onClick={() => setFiltroTab('Activo')}
@@ -221,7 +240,7 @@ export default function PersonalPage() {
                           <Pencil className="w-4 h-4" />
                         </button>
                         <button 
-                          onClick={() => alternarAcceso(emp)} 
+                          onClick={() => solicitarCambioAcceso(emp)} 
                           className={`p-2 rounded-lg transition-colors ${filtroTab === 'Activo' ? 'text-slate-500 hover:text-red-500 hover:bg-red-500/10' : 'text-slate-500 hover:text-emerald-500 hover:bg-emerald-500/10'}`}
                           title={filtroTab === 'Activo' ? "Revocar Acceso" : "Restaurar Acceso"}
                         >
@@ -273,7 +292,7 @@ export default function PersonalPage() {
                        <Pencil size={16} /> Editar
                      </button>
                      <button 
-                       onClick={() => alternarAcceso(emp)} 
+                       onClick={() => solicitarCambioAcceso(emp)} 
                        className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-xl text-white font-bold transition-colors text-sm ${filtroTab === 'Activo' ? 'bg-red-500/10 text-red-500 hover:bg-red-500/20' : 'bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20'}`}
                      >
                        {filtroTab === 'Activo' ? <><UserMinus size={16} /> Bloquear</> : <><UserCheck size={16} /> Activar</>}
@@ -285,7 +304,7 @@ export default function PersonalPage() {
           </div>
         </div>
 
-        {/* MODAL RESPONSIVE (Bottom Sheet en Móvil) */}
+        {/* 🌟 MODAL DE EDICIÓN / NUEVO EMPLEADO 🌟 */}
         {modalAbierto && (
           <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-0 sm:p-4 animate-in fade-in duration-200">
             <div className="bg-slate-900 w-full max-w-2xl rounded-t-3xl sm:rounded-xl shadow-2xl border-t sm:border border-slate-800 overflow-hidden flex flex-col max-h-[95vh]">
@@ -363,6 +382,56 @@ export default function PersonalPage() {
             </div>
           </div>
         )}
+
+        {/* 🌟 MODAL DE CONFIRMACIÓN DE CAMBIO DE ACCESO 🌟 */}
+        {modalAccesoAbierto && empleadoSeleccionado && (
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[200] flex items-center justify-center p-4 animate-in fade-in duration-200">
+            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 max-w-sm w-full shadow-2xl text-center transform transition-all animate-in zoom-in-95">
+              
+              {/* Ícono dinámico basado en la acción */}
+              <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-5 border ${
+                empleadoSeleccionado.Estatus_Acceso === 'Inactivo' 
+                  ? 'bg-emerald-500/10 border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.2)] text-emerald-500' 
+                  : 'bg-red-500/10 border-red-500/20 shadow-[0_0_15px_rgba(239,68,68,0.2)] text-red-500'
+              }`}>
+                {empleadoSeleccionado.Estatus_Acceso === 'Inactivo' ? <UserCheck className="w-8 h-8" /> : <AlertTriangle className="w-8 h-8" />}
+              </div>
+              
+              <h3 className="text-xl font-black text-white mb-2">
+                {empleadoSeleccionado.Estatus_Acceso === 'Inactivo' ? '¿Restaurar Acceso?' : '¿Revocar Acceso?'}
+              </h3>
+              
+              <p className="text-slate-400 text-sm mb-6 leading-relaxed">
+                Estás a punto de <strong className={empleadoSeleccionado.Estatus_Acceso === 'Inactivo' ? 'text-emerald-400' : 'text-red-400'}>
+                  {empleadoSeleccionado.Estatus_Acceso === 'Inactivo' ? 'reactivar' : 'bloquear'}
+                </strong> el acceso al sistema para el usuario <strong className="text-white font-bold">{empleadoSeleccionado.Nombre_Empleado} {empleadoSeleccionado.A_Paterno}</strong>.
+              </p>
+              
+              <div className="flex flex-col sm:flex-row gap-3">
+                <button 
+                  onClick={() => setModalAccesoAbierto(false)}
+                  disabled={procesandoAcceso}
+                  className="flex-1 bg-slate-950 border border-slate-700 hover:bg-slate-800 text-slate-300 font-bold py-3 px-4 rounded-xl transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button 
+                  onClick={confirmarCambioAcceso} 
+                  disabled={procesandoAcceso}
+                  className={`flex-1 text-white font-bold py-3 px-4 rounded-xl transition-colors disabled:opacity-50 flex justify-center items-center gap-2 shadow-lg ${
+                    empleadoSeleccionado.Estatus_Acceso === 'Inactivo'
+                      ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/20'
+                      : 'bg-red-600 hover:bg-red-700 shadow-red-600/20'
+                  }`}
+                >
+                  {procesandoAcceso ? <Loader2 className="w-5 h-5 animate-spin" /> : (empleadoSeleccionado.Estatus_Acceso === 'Inactivo' ? 'Sí, Restaurar' : 'Sí, Bloquear')}
+                </button>
+              </div>
+
+            </div>
+          </div>
+        )}
+
       </div>
     </div>
   );

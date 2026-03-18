@@ -29,24 +29,39 @@ export default async function NuevoTicketPage() {
     ? {} 
     : { Email_encargado: userEmail };
 
-  const misVehiculos = await prisma.inventario_Automoviles.findMany({
-    where: condicionDeBusqueda,
+  // 🌟 CONSULTA CORREGIDA: Cambiamos 'Solicitud' por 'solicitudes' 🌟
+  const vehiculosRaw = await prisma.inventario_Automoviles.findMany({
+    where: {
+      ...condicionDeBusqueda,
+      Estado_Unidad: true 
+    },
+    include: {
+      solicitudes: { // 👈 Nombre exacto según tu esquema
+        orderBy: { Fecha_Realizacion: 'desc' },
+        take: 1,
+        select: { Kilometraje: true }
+      }
+    },
     orderBy: { Marca: 'asc' } 
   });
 
+  // 🌟 FORMATEO CORREGIDO: También usamos 'solicitudes' aquí
+  const misVehiculos = vehiculosRaw.map(auto => ({
+    ...auto,
+    Kilometraje_Actual: auto.solicitudes && auto.solicitudes.length > 0 
+      ? auto.solicitudes[0].Kilometraje 
+      : 0
+  }));
+
   return (
-    //  FONDO NEGRO TOTAL PARA TODA LA PANTALLA 
     <div className="min-h-screen bg-black py-8">
       <div className="max-w-3xl mx-auto p-6">
         <div className="mb-8">
           
-          {/* --- BOTÓN DE REGRESO ADAPTADO AL NARANJA --- */}
           <Link href="/dashboard" className="text-slate-400 hover:text-[#FF7420] flex items-center gap-2 text-sm mb-6 w-fit transition-colors">
             <ArrowLeft size={16} /> Volver al Panel de Inicio
           </Link>
-          {/* ------------------------------ */}
 
-          {/*  TÍTULOS EN BLANCO Y GRIS CLARO  */}
           <h1 className="text-3xl font-black text-white tracking-tight">Programar Mantenimiento</h1>
           <p className="text-sm text-slate-400 mt-2">
             {usuario?.Rol === 'ADMIN' 
@@ -56,7 +71,6 @@ export default async function NuevoTicketPage() {
         </div>
 
         {misVehiculos.length === 0 ? (
-          //  ALERTA "SIN VEHÍCULOS" EN MODO OSCURO CORPORATIVO 
           <div className="bg-[#FF7420]/10 border border-[#FF7420]/30 text-[#FF7420] p-6 rounded-xl text-center shadow-lg">
             <p className="font-bold text-lg mb-2">No tienes vehículos asignados</p>
             <p className="text-sm text-slate-300">Contacta a tu administrador para que te asigne una unidad antes de solicitar mantenimiento.</p>
