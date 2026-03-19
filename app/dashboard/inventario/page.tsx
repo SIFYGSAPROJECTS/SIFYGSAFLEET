@@ -261,7 +261,7 @@ const cargarVehiculos = async () => {
           </div>
         </div>
 
-        {/* MODAL CON TU DISEÑO ORIGINAL RESTAURADO */}
+        {/* MODAL DISEÑO  */}
         {modalAbierto && (
           <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div className="bg-slate-900 rounded-xl shadow-2xl border border-slate-800 w-full max-w-4xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">

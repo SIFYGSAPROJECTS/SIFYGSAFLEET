@@ -19,10 +19,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: true }); // Falso positivo por seguridad
     }
 
-    // VERIFICACIÓN ANTI-SPAM (COOLDOWN DE 30 MINUTOS)
-    if (empleado.Ultimo_Cambio_Password) {
+    //  VERIFICACIÓN ANTI-SPAM CORREGIDA 
+    // Usamos la fecha del PIN en lugar de la fecha de la contraseña
+    if (empleado.Expiracion_Pin) {
+      // Como el PIN expira en 10 mins, le restamos 10 mins a esa fecha para saber a qué hora exacta se pidió
+      const fechaCreacionPin = new Date(empleado.Expiracion_Pin).getTime() - (10 * 60 * 1000);
       const treintaMinutos = 30 * 60 * 1000;
-      const tiempoPasado = new Date().getTime() - new Date(empleado.Ultimo_Cambio_Password).getTime();
+      const tiempoPasado = new Date().getTime() - fechaCreacionPin;
 
       if (tiempoPasado < treintaMinutos) {
         return NextResponse.json(
@@ -40,13 +43,12 @@ export async function POST(request: Request) {
     const fechaExpiracion = new Date();
     fechaExpiracion.setMinutes(fechaExpiracion.getMinutes() + 10);
 
-    //GUARDAMOS EN LOS CAMPOS TEMPORALES
+    // GUARDAMOS EN LOS CAMPOS TEMPORALES
     await prisma.empleados.update({
       where: { Email: email.toLowerCase() },
       data: {
         Pin_Temporal: hashedPin,
-        Expiracion_Pin: fechaExpiracion,
-        Ultimo_Cambio_Password: new Date() // Sigue sirviendo para el bloqueo de 30 mins
+        Expiracion_Pin: fechaExpiracion
       }
     });
 
@@ -77,7 +79,7 @@ export async function POST(request: Request) {
           </div>
           
           <p style="color: #dc2626; font-size: 14px; font-weight: bold; text-align: center;">⏱️ Esta clave expirará en 10 minutos.</p>
-          <p style="color: #64748b; font-size: 14px;">Usa este PIN en lugar de tu contraseña habitual para iniciar sesión. Recuerda que solo puedes solicitar este PIN cada 30 minutos</p>
+          <p style="color: #64748b; font-size: 14px;">Usa este PIN en lugar de tu contraseña habitual para iniciar sesión. Recuerda que solo puedes solicitar este PIN cada 30 minutos.</p>
           
           <p style="color: #94a3b8; font-size: 12px; text-align: center; margin-top: 40px; border-top: 1px solid #e2e8f0; padding-top: 15px;">
             Si tú no solicitaste este cambio, puedes ignorar este correo de forma segura.
