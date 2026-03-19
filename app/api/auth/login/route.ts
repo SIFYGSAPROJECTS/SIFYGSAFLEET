@@ -3,7 +3,7 @@ import { prisma } from '@/lib/db';
 import { cookies } from 'next/headers'; 
 import bcrypt from 'bcryptjs';
 
-//  MAPA GLOBAL EN MEMORIA PARA EL RATE LIMITING 
+//  MAPA GLOBAL EN MEMORIA PARA EL RATE LIMITING 
 // Guarda la IP del atacante, cuántas veces falló y hasta qué hora está bloqueado.
 const rateLimitMap = new Map<string, { intentos: number; bloqueoHasta: number }>();
 
@@ -106,16 +106,16 @@ export async function POST(request: Request) {
   }
 }
 
-//  FUNCIÓN AYUDANTE PARA REGISTRAR FALLOS 
+//  FUNCIÓN AYUDANTE PARA REGISTRAR FALLOS 
 function registrarFallo(ip: string) {
-  const limiteIntentos = 5;
+  const limiteIntentos = 10; //  Ajustado a 10 intentos
   const tiempoBloqueoMs = 15 * 60 * 1000; // 15 minutos en milisegundos
 
   const dataActual = rateLimitMap.get(ip) || { intentos: 0, bloqueoHasta: 0 };
   const nuevosIntentos = dataActual.intentos + 1;
 
   if (nuevosIntentos >= limiteIntentos) {
-    // Si llega al límite, lo bloqueamos 15 minutos
+    // Si llega al límite de 10, lo bloqueamos 15 minutos
     rateLimitMap.set(ip, { intentos: nuevosIntentos, bloqueoHasta: Date.now() + tiempoBloqueoMs });
   } else {
     // Si no, solo subimos el contador
