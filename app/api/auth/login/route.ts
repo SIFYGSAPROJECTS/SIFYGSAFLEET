@@ -3,37 +3,40 @@ import { prisma } from '@/lib/db';
 import { cookies } from 'next/headers'; 
 import bcrypt from 'bcryptjs';
 
-//  MAPA GLOBAL EN MEMORIA PARA EL RATE LIMITING 
-// Guarda la IP del atacante, cuántas veces falló y hasta qué hora está bloqueado.
+//  MAPA GLOBAL: Ahora rastreamos por CORREO, no por IP
 const rateLimitMap = new Map<string, { intentos: number; bloqueoHasta: number }>();
 
 export async function POST(request: Request) {
   try {
-    // 1. CAPTURAMOS LA IP DEL USUARIO
-    const ip = request.headers.get('x-forwarded-for') || 'ip-desconocida';
-    const ahora = Date.now();
-    const limitData = rateLimitMap.get(ip);
-
-    // 2. VERIFICAMOS SI LA IP ESTÁ BLOQUEADA
-    if (limitData && limitData.bloqueoHasta > ahora) {
-      const minutosRestantes = Math.ceil((limitData.bloqueoHasta - ahora) / 60000);
-      return NextResponse.json(
-        { error: `Demasiados intentos fallidos. Tu IP está bloqueada por seguridad. Intenta en ${minutosRestantes} minutos.` }, 
-        { status: 429 } // 429 = Too Many Requests
-      );
-    }
-
     const body = await request.json();
     const { email, password } = body;
 
+    // Validación básica inicial
+    if (!email) {
+      return NextResponse.json({ error: 'El correo es requerido' }, { status: 400 });
+    }
+
+    const identifier = email.toLowerCase(); // Nuestra llave de seguridad única por usuario
+    const ahora = Date.now();
+    const limitData = rateLimitMap.get(identifier);
+
+    // 1. VERIFICAMOS SI ESTA CUENTA ESPECÍFICA ESTÁ BLOQUEADA
+    if (limitData && limitData.bloqueoHasta > ahora) {
+      const minutosRestantes = Math.ceil((limitData.bloqueoHasta - ahora) / 60000);
+      return NextResponse.json(
+        { error: `Demasiados intentos para esta cuenta. Bloqueada por seguridad. Intenta en ${minutosRestantes} minutos.` }, 
+        { status: 429 } 
+      );
+    }
+
     // Buscamos al usuario real en la DB
     const usuario = await prisma.empleados.findUnique({
-      where: { Email: email.toLowerCase() },
+      where: { Email: identifier },
     });
 
-    // Validamos que el usuario exista
+    // 2. SI EL USUARIO NO EXISTE
     if (!usuario) {
-      registrarFallo(ip); // Registramos el fallo si el usuario no existe
+      registrarFallo(identifier); // Registramos el fallo para ese correo inexistente
       return NextResponse.json({ error: 'Credenciales inválidas' }, { status: 401 });
     }
 
@@ -59,7 +62,6 @@ export async function POST(request: Request) {
     else if (usuario.Pin_Temporal && usuario.Expiracion_Pin) {
       const fechaActual = new Date();
       
-      // Comparamos si la fecha actual es menor a la fecha de expiración (los 10 mins)
       if (fechaActual <= new Date(usuario.Expiracion_Pin)) {
         const pinValido = await bcrypt.compare(password, usuario.Pin_Temporal);
         if (pinValido) {
@@ -69,19 +71,19 @@ export async function POST(request: Request) {
       }
     }
 
-    // Si ninguna de las dos cerraduras abrió...
+    // 3. SI FALLÓ EL ACCESO (Password o PIN incorrectos)
     if (!accesoConcedido) {
-      registrarFallo(ip); // Registramos el fallo si la contraseña/PIN está mal
+      registrarFallo(identifier); 
       return NextResponse.json({ error: 'Credenciales inválidas o PIN expirado' }, { status: 401 });
     }
 
-    // Borramos su historial de fallos porque ya logró entrar bien
-    rateLimitMap.delete(ip);
+    //  ÉXITO: Borramos el historial de fallos de ESTA cuenta porque ya entró bien
+    rateLimitMap.delete(identifier);
 
     // DESTRUCCIÓN DEL PIN (Token de un solo uso) 
     if (usoPinTemporal) {
       await prisma.empleados.update({
-        where: { Email: email.toLowerCase() },
+        where: { Email: identifier },
         data: {
           Pin_Temporal: null,
           Expiracion_Pin: null
@@ -106,19 +108,19 @@ export async function POST(request: Request) {
   }
 }
 
-//  FUNCIÓN AYUDANTE PARA REGISTRAR FALLOS 
-function registrarFallo(ip: string) {
-  const limiteIntentos = 10; //  Ajustado a 10 intentos
-  const tiempoBloqueoMs = 15 * 60 * 1000; // 15 minutos en milisegundos
+//  FUNCIÓN AYUDANTE: REGISTRO POR CORREO
+function registrarFallo(email: string) {
+  const limiteIntentos = 10; 
+  const tiempoBloqueoMs = 15 * 60 * 1000; // 15 minutos
 
-  const dataActual = rateLimitMap.get(ip) || { intentos: 0, bloqueoHasta: 0 };
+  const dataActual = rateLimitMap.get(email) || { intentos: 0, bloqueoHasta: 0 };
   const nuevosIntentos = dataActual.intentos + 1;
 
   if (nuevosIntentos >= limiteIntentos) {
-    // Si llega al límite de 10, lo bloqueamos 15 minutos
-    rateLimitMap.set(ip, { intentos: nuevosIntentos, bloqueoHasta: Date.now() + tiempoBloqueoMs });
+    // Si llega al límite de 10, bloqueamos ese correo específico
+    rateLimitMap.set(email, { intentos: nuevosIntentos, bloqueoHasta: Date.now() + tiempoBloqueoMs });
   } else {
-    // Si no, solo subimos el contador
-    rateLimitMap.set(ip, { intentos: nuevosIntentos, bloqueoHasta: 0 });
+    // Si no, solo subimos el contador para ese correo
+    rateLimitMap.set(email, { intentos: nuevosIntentos, bloqueoHasta: 0 });
   }
 }
