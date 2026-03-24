@@ -1,15 +1,15 @@
 import { prisma } from '@/lib/db';
-import { Car, Users, Wrench, History, ShieldCheck, Activity, FileText, Archive, Key, User } from 'lucide-react'; // 👈 Agregué 'User'
+import { Car, Users, Wrench, History, ShieldCheck, Activity, FileText, Archive, Key, User } from 'lucide-react'; 
 import Link from 'next/link';
 import { cookies } from 'next/headers';
-import LogoutButton from './LogoutButton'; // 👈 Importamos nuestro nuevo botón inteligente
+import LogoutButton from './LogoutButton'; 
 
 export default async function Dashboard() {
   const cookieStore = await cookies();
   const userRole = cookieStore.get('user_role')?.value || 'USER';
   const userName = cookieStore.get('user_name')?.value || 'Usuario';
 
-  // TUS MÉTRICAS INTACTAS 🚀
+  // TUS MÉTRICAS INTACTAS 
   const totalAutos = userRole === 'ADMIN' ? await prisma.inventario_Automoviles.count() : 0;
   const totalEmpleados = userRole === 'ADMIN' ? await prisma.empleados.count() : 0;
   
@@ -36,7 +36,6 @@ export default async function Dashboard() {
                 {userRole === 'ADMIN' ? 'ADMINISTRADOR' : 'EMPLEADO'}
               </span>
             </div>
-            {/* 👈 AQUÍ USAMOS EL COMPONENTE CLIENTE */}
             <LogoutButton /> 
           </div>
         </div>
@@ -50,7 +49,7 @@ export default async function Dashboard() {
           <p className="text-slate-400">Gestión de flota SIFYGSA</p>
         </div>
 
-        {/* TARJETAS DE METRICAS (YA DE REGRESO) */}
+        {/* TARJETAS DE METRICAS */}
         {userRole === 'ADMIN' && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             
