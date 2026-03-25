@@ -68,7 +68,7 @@ export default async function Dashboard() {
                 <Users className="text-purple-500" />
               </div>
               <p className="text-4xl font-bold text-white">{totalEmpleados}</p>
-              <p className="text-xs text-slate-500 mt-2">Usuarios con acceso al sistema</p>
+              <p className="text-xs text-slate-500 mt-2">Usuarios con acceso</p>
             </div>
 
             <div className="bg-slate-900 p-6 rounded-2xl shadow-lg border-x border-b border-slate-800 border-t-4 border-t-[#FF7420]">
