@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/db';
-import { CheckCircle2, ArrowLeft, Calendar, Gauge, Car } from 'lucide-react';
+import { CheckCircle2, ArrowLeft, Calendar, Gauge, Car, Wrench, AlertTriangle, Search } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import PrintButton from './PrintButton';
@@ -12,11 +12,31 @@ export default async function VerTicketPage({ params }: { params: Promise<{ foli
   const folioReal = decodeURIComponent(folio);
 
   const ticket = await prisma.solicitud.findUnique({
-    where: { Pk_folio_ticket: folioReal }, // Buscamos con el folio real (F&G-...)
+    where: { Pk_folio_ticket: folioReal }, 
     include: { auto: true } 
   });
 
   if (!ticket) notFound();
+
+  // 1. LÓGICA DE ESTILOS PARA EL TIPO DE SERVICIO
+  let tipoServicioColor = "bg-slate-100 text-slate-700 border-slate-300";
+  let IconoServicio = Wrench;
+  
+  if (ticket.Tipo_Servicio === 'preventivo') {
+    tipoServicioColor = "bg-blue-100 text-blue-700 border-blue-300";
+    IconoServicio = Calendar; // Calendario porque es programado
+  } else if (ticket.Tipo_Servicio === 'correctivo') {
+    tipoServicioColor = "bg-red-100 text-red-700 border-red-300";
+    IconoServicio = AlertTriangle; // Alerta porque es una falla
+  } else if (ticket.Tipo_Servicio === 'revision') {
+    tipoServicioColor = "bg-amber-100 text-amber-700 border-amber-300";
+    IconoServicio = Search; // Lupa porque es una inspección
+  }
+
+  // Capitalizamos la primera letra (ej. preventivo -> Preventivo)
+  const tipoServicioTexto = ticket.Tipo_Servicio 
+    ? ticket.Tipo_Servicio.charAt(0).toUpperCase() + ticket.Tipo_Servicio.slice(1) 
+    : 'No especificado';
 
   return (
     <div className="min-h-screen bg-slate-100 p-6 flex flex-col items-center">
@@ -46,17 +66,29 @@ export default async function VerTicketPage({ params }: { params: Promise<{ foli
             <p className="text-green-800 font-bold text-sm print:text-black">Solicitud Registrada Exitosamente</p>
           </div>
 
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-3 gap-6">
             <div>
               <p className="text-[10px] font-bold text-slate-400 uppercase">Fecha</p>
               <p className="text-sm font-semibold flex items-center gap-2 mt-1">
-                <Calendar size={14} className="text-slate-400" /> {ticket.Fecha_Realizacion.toLocaleDateString()}
+                <Calendar size={14} className="text-slate-400" /> {ticket.Fecha_Realizacion.toLocaleDateString('es-MX', { timeZone: 'UTC' })}
               </p>
             </div>
+            
+            {/* 2. ETIQUETA DEL TIPO DE SERVICIO */}
+            <div>
+              <p className="text-[10px] font-bold text-slate-400 uppercase">Tipo</p>
+              <div className={`mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-bold border print:border-slate-400 print:text-slate-800 ${tipoServicioColor}`}>
+                <IconoServicio size={12} />
+                {tipoServicioTexto}
+              </div>
+            </div>
+
+            {/* 3. LÓGICA INTELIGENTE DEL KILOMETRAJE */}
             <div>
               <p className="text-[10px] font-bold text-slate-400 uppercase">Kilometraje</p>
               <p className="text-sm font-semibold flex items-center gap-2 mt-1">
-                <Gauge size={14} className="text-slate-400" /> {ticket.Kilometraje?.toLocaleString() || 0} KM
+                <Gauge size={14} className="text-slate-400" /> 
+                {ticket.Kilometraje ? `${ticket.Kilometraje.toLocaleString()} KM` : <span className="text-slate-400 italic">N/A</span>}
               </p>
             </div>
           </div>

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { 
   FileText, ArrowLeft, Filter, UploadCloud, CheckCircle, 
   Loader2, History, Calendar, X, Eye, Download, ExternalLink, 
-  Trash2, PencilLine, AlertTriangle 
+  Trash2, PencilLine, AlertTriangle, Wrench, Search 
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
@@ -24,7 +24,7 @@ export default function HistorialClient({ historial, rol }: Props) {
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [mostrarVisor, setMostrarVisor] = useState(false);
 
-  /* 🌟 NUEVOS ESTADOS PARA EDICIÓN Y ELIMINACIÓN 🌟 */
+  /* NUEVOS ESTADOS PARA EDICIÓN Y ELIMINACIÓN  */
   const [editandoFolio, setEditandoFolio] = useState<string | null>(null);
   const [modalEliminar, setModalEliminar] = useState(false);
   const [evidenciaAEliminar, setEvidenciaAEliminar] = useState<{ folio: string, url: string } | null>(null);
@@ -54,7 +54,7 @@ export default function HistorialClient({ historial, rol }: Props) {
     setMostrarVisor(true);
   };
 
-  /* 🌟 SUBIR / REEMPLAZAR EVIDENCIA 🌟 */
+  /* SUBIR / REEMPLAZAR EVIDENCIA  */
   const handleSubirEvidencia = async (e: React.ChangeEvent<HTMLInputElement>, folio: string, consecutivo: string, esReemplazo: boolean = false) => {
     if (!e.target.files || e.target.files.length === 0) return;
     const file = e.target.files[0];
@@ -63,7 +63,6 @@ export default function HistorialClient({ historial, rol }: Props) {
       return;
     }
 
-    // Si es un reemplazo, marcamos el estado de edición, si no, el de subida nueva
     if (esReemplazo) {
       setEditandoFolio(folio);
     } else {
@@ -75,12 +74,8 @@ export default function HistorialClient({ historial, rol }: Props) {
     formData.append('folio', folio); 
     formData.append('consecutivo', consecutivo); 
     
-    // Si la API actual de /api/evidencia no soporta PUT, asumiremos que POST 
-    // sobreescribe o maneja la lógica si ya existe un PDF. 
-    // NOTA: Asegúrate de revisar tu route.ts de evidencia después.
     try {
       const res = await fetch('/api/evidencia', { 
-        // Usamos PUT si es edición, asumiendo que tu API lo soporte, si no usa POST.
         method: esReemplazo ? 'PUT' : 'POST', 
         body: formData 
       });
@@ -100,13 +95,13 @@ export default function HistorialClient({ historial, rol }: Props) {
     }
   };
 
-  /* 🌟 ABRIR MODAL ELIMINAR 🌟 */
+  /* ABRIR MODAL ELIMINAR  */
   const abrirModalEliminar = (folio: string, url: string) => {
     setEvidenciaAEliminar({ folio, url });
     setModalEliminar(true);
   };
 
-  /* 🌟 CONFIRMAR ELIMINACIÓN 🌟 */
+  /* CONFIRMAR ELIMINACIÓN  */
   const confirmarEliminacion = async () => {
     if (!evidenciaAEliminar) return;
     setProcesando(true);
@@ -128,6 +123,16 @@ export default function HistorialClient({ historial, rol }: Props) {
       alert("Error de conexión al intentar eliminar.");
     }
     setProcesando(false);
+  };
+
+  // Función auxiliar para el color del tipo de servicio
+  const obtenerEstiloTipoServicio = (tipo: string | null) => {
+    switch(tipo) {
+      case 'preventivo': return { bg: 'bg-blue-500/10', text: 'text-blue-400', border: 'border-blue-500/20', icon: <Calendar size={12} /> };
+      case 'correctivo': return { bg: 'bg-red-500/10', text: 'text-red-400', border: 'border-red-500/20', icon: <AlertTriangle size={12} /> };
+      case 'revision': return { bg: 'bg-amber-500/10', text: 'text-amber-400', border: 'border-amber-500/20', icon: <Search size={12} /> };
+      default: return { bg: 'bg-slate-800', text: 'text-slate-400', border: 'border-slate-700', icon: <Wrench size={12} /> };
+    }
   };
 
   return (
@@ -195,13 +200,15 @@ export default function HistorialClient({ historial, rol }: Props) {
       {/* Tabla */}
       <div className="bg-slate-900 rounded-xl shadow-2xl border-x border-b border-slate-800 border-t-4 border-t-[#FF7420] overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="min-w-[900px] w-full text-left border-collapse">
+          <table className="min-w-[1000px] w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-950 text-slate-300 text-xs uppercase tracking-wider border-b border-slate-800">
                 <th className="p-5 font-semibold">Folio</th>
                 <th className="p-5 font-semibold">Fecha</th>
                 <th className="p-5 font-semibold">Vehículo</th>
                 <th className="p-5 font-semibold">Solicitante</th>
+                {/* 1. NUEVO ENCABEZADO */}
+                <th className="p-5 font-semibold text-center">Tipo Servicio</th>
                 <th className="p-5 font-semibold text-center w-64">Evidencia</th>
                 <th className="p-5 font-semibold text-center">Acción</th>
               </tr>
@@ -209,12 +216,19 @@ export default function HistorialClient({ historial, rol }: Props) {
             <tbody className="divide-y divide-slate-800">
               {historialFiltrado.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="p-12 text-center text-slate-500 italic">
+                  <td colSpan={7} className="p-12 text-center text-slate-500 italic">
                     No se encontraron registros con los filtros seleccionados.
                   </td>
                 </tr>
               ) : (
-                historialFiltrado.map((ticket) => (
+                historialFiltrado.map((ticket) => {
+                  // Preparamos el estilo del tipo de servicio para esta fila
+                  const estiloServicio = obtenerEstiloTipoServicio(ticket.Tipo_Servicio);
+                  const tipoTexto = ticket.Tipo_Servicio 
+                    ? ticket.Tipo_Servicio.charAt(0).toUpperCase() + ticket.Tipo_Servicio.slice(1) 
+                    : 'S/N';
+
+                  return (
                   <tr key={ticket.Pk_folio_ticket} className="hover:bg-slate-800/40 transition-colors group">
                     <td className="p-5 font-mono text-sm font-bold text-[#FF7420]">#{ticket.Pk_folio_ticket}</td>
                     <td className="p-5 text-sm text-slate-300 font-medium">
@@ -231,7 +245,15 @@ export default function HistorialClient({ historial, rol }: Props) {
                       <div className="text-[10px] text-slate-500">{ticket.Email_Empleado}</div>
                     </td>
                     
-                    {/* 🌟 CELDA DE EVIDENCIA ACTUALIZADA CON EDICIÓN/ELIMINACIÓN 🌟 */}
+                    {/* 2. NUEVA CELDA: TIPO DE SERVICIO */}
+                    <td className="p-5 text-center">
+                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-xs font-bold ${estiloServicio.bg} ${estiloServicio.text} ${estiloServicio.border}`}>
+                        {estiloServicio.icon}
+                        {tipoTexto}
+                      </span>
+                    </td>
+                    
+                    {/* CELDA DE EVIDENCIA ACTUALIZADA CON EDICIÓN/ELIMINACIÓN */}
                     <td className="p-5 text-center">
                       {ticket.Evidencia ? (
                         <div className="flex items-center justify-center gap-2">
@@ -287,14 +309,15 @@ export default function HistorialClient({ historial, rol }: Props) {
                       </Link>
                     </td>
                   </tr>
-                ))
+                )}
+                )
               )}
             </tbody>
           </table>
         </div>
       </div>
 
-      {/* 🌟 MODAL DE CONFIRMACIÓN DE ELIMINACIÓN 🌟 */}
+      {/* MODAL DE CONFIRMACIÓN DE ELIMINACIÓN  */}
       {modalEliminar && evidenciaAEliminar && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[200] flex items-center justify-center p-4 animate-in fade-in duration-200">
           <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 max-w-sm w-full shadow-2xl text-center transform transition-all animate-in zoom-in-95">

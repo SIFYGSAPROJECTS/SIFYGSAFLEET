@@ -138,6 +138,7 @@ model Solicitud {
   Hora_Cita         String?  @db.VarChar(20)
   Num_Asesor        String?
   Kilometraje       Int?
+  Tipo_Servicio     String?  @db.VarChar(30)
   Evidencia         String?
   Descripcion       String?  @db.Text
   Fecha_Realizacion DateTime @default(now()) @db.Date

@@ -29,14 +29,14 @@ export default async function NuevoTicketPage() {
     ? {} 
     : { Email_encargado: userEmail };
 
-  // 🌟 CONSULTA CORREGIDA: Cambiamos 'Solicitud' por 'solicitudes' 🌟
+  //  CONSULTA CORREGIDA: Cambiamos 'Solicitud' por 'solicitudes' 
   const vehiculosRaw = await prisma.inventario_Automoviles.findMany({
     where: {
       ...condicionDeBusqueda,
       Estado_Unidad: true 
     },
     include: {
-      solicitudes: { // 👈 Nombre exacto según tu esquema
+      solicitudes: { //
         orderBy: { Fecha_Realizacion: 'desc' },
         take: 1,
         select: { Kilometraje: true }
@@ -45,7 +45,6 @@ export default async function NuevoTicketPage() {
     orderBy: { Marca: 'asc' } 
   });
 
-  // 🌟 FORMATEO CORREGIDO: También usamos 'solicitudes' aquí
   const misVehiculos = vehiculosRaw.map(auto => ({
     ...auto,
     Kilometraje_Actual: auto.solicitudes && auto.solicitudes.length > 0 
