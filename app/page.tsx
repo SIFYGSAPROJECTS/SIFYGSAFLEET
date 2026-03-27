@@ -81,14 +81,14 @@ export default function LoginPage() {
             <Image 
               src="/logo.png" 
               alt="Logo SIFYGSA"
-              width={150} 
-              height={150}
-              className="object-contain drop-shadow-[0_0_15px_rgba(255,255,255,0.1)]"
+              width={180} 
+              height={200}
+              className="object-contain drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]"
               priority
             />
           </div>
-          <h1 className="text-2xl font-bold text-white tracking-wide"> FLEET</h1>
-          <p className="text-slate-400 text-sm mt-1">Sistema para Mantenimiento de Flota y Gestion vehícular  </p>
+         { /*<h1 className="text-2xl font-bold text-white tracking-wide"> Fleet</h1>*/}
+          <p className="text-slate-400 text-sm mt-1">Sistema para mantenimiento de flota y gestion vehícular  </p>
         </div>
 
         <div className="p-8 relative">
@@ -215,7 +215,7 @@ export default function LoginPage() {
           )}
 
           <div className="mt-8 text-center border-t border-slate-800 pt-6">
-            <p className="text-xs text-slate-500">© 2026 SIFYGSA Control de Flotas v1.0</p>
+            <p className="text-xs text-slate-500">© 2026 SIFYGSA Control de Flotas v0.0</p>
           </div>
         </div>
       </div>

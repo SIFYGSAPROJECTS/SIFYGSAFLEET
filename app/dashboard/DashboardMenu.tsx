@@ -133,7 +133,7 @@ export default function DashboardMenu({ userRole, totalAutos, totalEmpleados, ti
         {activeTab === '' && (
           <div className="flex flex-col items-center justify-center py-12 text-slate-600 animate-in fade-in duration-700">
             <MousePointerClick size={48} className="mb-4 opacity-50" />
-            <h3 className="text-xl font-bold text-slate-500 italic">Selecciona un módulo</h3>
+            <h3 className="text-xl font-bold text-slate-500 italic">Seleccione una etiqueta</h3>
           </div>
         )}
 
