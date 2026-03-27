@@ -4,7 +4,7 @@ import path from 'path';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const ruta = searchParams.get('ruta'); // Recibe algo como: /uploads/checklists/F&G-002-123.pdf
+  const ruta = searchParams.get('ruta'); 
 
   if (!ruta) {
     return new NextResponse("Ruta del archivo no proporcionada", { status: 400 });
@@ -19,11 +19,10 @@ export async function GET(request: Request) {
     // Leemos el archivo físico
     const fileBuffer = fs.readFileSync(filePath);
     
-    // Se lo mandamos al navegador diciéndole "Oye, esto es un PDF, muéstralo"
     return new NextResponse(fileBuffer, {
       headers: {
         'Content-Type': 'application/pdf',
-        'Content-Disposition': `inline; filename="${nombreArchivo}"`, // 'inline' hace que se vea en el navegador
+        'Content-Disposition': `inline; filename="${nombreArchivo}"`, 
       },
     });
   } catch (error) {

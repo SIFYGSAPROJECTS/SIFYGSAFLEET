@@ -27,7 +27,6 @@ export default function ServiciosTabs({ tickets, vehiculos, isAdmin, rol }: Prop
   return (
     <div className="space-y-6">
       
-{/* 🌟 ENCABEZADO: TEXTO IZQUIERDA, BARRA CENTRADA EN MÓVIL 🌟 */}
       <div className="flex flex-col md:flex-row justify-between md:items-center gap-5 mb-8">
         
         {/* TEXTO ALINEADO A LA IZQUIERDA SIEMPRE */}
@@ -82,7 +81,7 @@ export default function ServiciosTabs({ tickets, vehiculos, isAdmin, rol }: Prop
               activeTab === 'seguimiento' ? 'border-cyan-500 text-cyan-500' : 'border-transparent text-slate-500 hover:text-slate-300'
             }`}
           >
-            <Activity size={20} /> Seguimiento en Vivo
+            <Activity size={20} /> Seguimiento
             {/* Solo contamos los activos en el globito de notificaciones */}
             <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${activeTab === 'seguimiento' ? 'bg-cyan-500 text-black' : 'bg-slate-800 text-slate-400'}`}>
               {activos.length}

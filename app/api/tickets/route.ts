@@ -6,7 +6,7 @@ import nodemailer from 'nodemailer';
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    // 1. AHORA RECIBIMOS TAMBIÉN EL TIPO DE SERVICIO
+    // RECIBIMOS TAMBIÉN EL TIPO DE SERVICIO
     const { consecutivo, tipo_servicio, descripcion, kilometraje } = body;
 
     const cookieStore = await cookies();

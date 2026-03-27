@@ -18,8 +18,7 @@ export async function GET(request: Request) {
       include: { encargado: true }
     });
 
-    //  CAMBIO CLAVE: Si no tiene auto, regresamos un 200 con unidad en null.
-    // Así el Frontend mostrará la pantalla amistosa de "Sin unidad asignada" en vez de un error rojo.
+    //  Si no tiene auto, regresamos un 200 con unidad en null.
     if (!autoAsignado) {
       return NextResponse.json({ unidad: null }, { status: 200 });
     }
@@ -39,9 +38,9 @@ export async function GET(request: Request) {
       placas: autoAsignado.Placa || 'S/N',
       checklists: checklistsDb.map(check => ({
         id: check.id,
-        titulo: check.Titulo,         // Traducimos de DB a Frontend
-        fecha: check.Fecha_Subida,    // Traducimos de DB a Frontend
-        url: check.Ruta_PDF           // Traducimos de DB a Frontend
+        titulo: check.Titulo,         
+        fecha: check.Fecha_Subida,    
+        url: check.Ruta_PDF           
       }))
     };
 

@@ -25,7 +25,6 @@ export default function UsuariosTabs({ isAdmin, empleadosIniciales }: Props) {
   return (
     <div className="space-y-6">
       
-{/* 🌟 ENCABEZADO: TODO A LA IZQUIERDA 🌟 */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-5 mb-8">
         
         {/* TEXTO ALINEADO A LA IZQUIERDA */}
@@ -41,7 +40,7 @@ export default function UsuariosTabs({ isAdmin, empleadosIniciales }: Props) {
           </p>
         </div>
 
-        {/* BARRA DE ACCESO DIRECTO (Sigue centrada solo en móvil para que no se corte) */}
+        {/* BARRA DE ACCESO DIRECTO */}
         <div className="w-full md:w-auto overflow-x-auto scrollbar-hide pb-2 md:pb-0 flex justify-center md:justify-end">
           <div className="inline-flex items-center bg-slate-900 border border-slate-800 rounded-full p-1.5 shadow-lg shrink-0">
             <div className="px-4 py-1.5 text-xs font-bold rounded-full bg-slate-800 text-white cursor-default flex items-center gap-2 shadow-inner whitespace-nowrap">
@@ -79,7 +78,7 @@ export default function UsuariosTabs({ isAdmin, empleadosIniciales }: Props) {
                   activeTab === 'personal' ? 'border-purple-500 text-purple-500' : 'border-transparent text-slate-500 hover:text-slate-300'
                 }`}
               >
-                <Users size={20} /> Directorio de Personal
+                <Users size={20} /> Gestion de Personal
                 <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${activeTab === 'personal' ? 'bg-purple-500 text-white' : 'bg-slate-800 text-slate-400'}`}>
                   {empleadosIniciales.length}
                 </span>

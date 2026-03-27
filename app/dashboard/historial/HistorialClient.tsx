@@ -125,7 +125,7 @@ export default function HistorialClient({ historial, rol }: Props) {
   return (
     <div className="w-full">
       
-      {/* 🌟 BARRA DE FILTROS REDISEÑADA (Sutil y minimalista) 🌟 */}
+      {/*  BARRA DE FILTROS REDISEÑADA (Sutil y minimalista)  */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 px-1 gap-3">
         <div className="flex items-center gap-2 text-slate-500">
           <Filter size={14} className="text-purple-500" />

@@ -93,7 +93,7 @@ export default function TicketForm({ vehiculos }: Props) {
       router.refresh();
 
     } catch (error: any) {
-      alert(`⚠️ ${error.message}`);
+      alert(` ${error.message}`);
     } finally {
       setLoading(false);
     }

@@ -181,7 +181,7 @@ export default function InventarioMaestroPage() {
     <div className="min-h-screen bg-black relative">
       <div className="p-4 sm:p-8 max-w-7xl mx-auto">
         
-{/* 🌟 ENCABEZADO: TEXTO IZQUIERDA, BARRA CENTRADA EN MÓVIL 🌟 */}
+{/* ENCABEZADO: TEXTO IZQUIERDA, BARRA CENTRADA EN MÓVIL */}
         <div className="flex flex-col lg:flex-row justify-between lg:items-center gap-5 mb-8">
           
           {/* TEXTO ALINEADO A LA IZQUIERDA SIEMPRE */}
@@ -238,9 +238,7 @@ export default function InventarioMaestroPage() {
           </button>
         </div>
 
-        {/* =========================================
-            VISTA 1: INVENTARIO ACTIVO
-            ========================================= */}
+        {/* VISTA 1: INVENTARIO ACTIVO*/}
         {tabPrincipal === 'activos' && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 w-full">
             
@@ -336,9 +334,7 @@ export default function InventarioMaestroPage() {
           </div>
         )}
 
-        {/* =========================================
-            VISTA 2: ARCHIVO HISTÓRICO (BAJAS)
-            ========================================= */}
+        {/* VISTA 2: ARCHIVO HISTÓRICO (BAJAS)*/}
         {tabPrincipal === 'bajas' && (
           <div className="animate-in fade-in slide-in-from-right-8 duration-500">
             {cargando ? (

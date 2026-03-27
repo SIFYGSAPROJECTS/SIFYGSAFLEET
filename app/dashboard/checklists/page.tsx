@@ -20,7 +20,7 @@ export default function ChecklistsPage() {
   const [editandoChecklistId, setEditandoChecklistId] = useState<number | null>(null);
   const [archivoReemplazo, setArchivoReemplazo] = useState<File | null>(null);
 
-  // 🌟 NUEVOS ESTADOS PARA EL MODAL DE ELIMINACIÓN 🌟
+  // ESTADOS PARA EL MODAL DE ELIMINACIÓN 
   const [modalEliminar, setModalEliminar] = useState(false);
   const [checklistAEliminar, setChecklistAEliminar] = useState<{ id: number; titulo: string } | null>(null);
 
@@ -83,13 +83,13 @@ export default function ChecklistsPage() {
     setCargando(false);
   };
 
-  // 🌟 FUNCIÓN QUE ABRE EL MODAL 🌟
+  // FUNCIÓN QUE ABRE EL MODAL 
   const abrirModalEliminar = (idChecklist: number, titulo: string) => {
     setChecklistAEliminar({ id: idChecklist, titulo });
     setModalEliminar(true);
   };
 
-  // 🌟 FUNCIÓN QUE EJECUTA EL BORRADO DESDE EL MODAL 🌟
+  //  FUNCIÓN QUE EJECUTA EL BORRADO DESDE EL MODAL 
   const confirmarEliminacion = async () => {
     if (!checklistAEliminar) return;
     setCargando(true);
@@ -373,7 +373,7 @@ export default function ChecklistsPage() {
           </div>
         )}
 
-        {/* 🌟 MODAL DE CONFIRMACIÓN DE ELIMINACIÓN 🌟 */}
+        {/*  MODAL DE CONFIRMACIÓN DE ELIMINACIÓN  */}
         {modalEliminar && checklistAEliminar && (
           <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[200] flex items-center justify-center p-4 animate-in fade-in duration-200">
             <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 max-w-sm w-full shadow-2xl text-center transform transition-all animate-in zoom-in-95">

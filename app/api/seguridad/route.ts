@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import bcrypt from 'bcryptjs';
 import nodemailer from 'nodemailer';
-import { cookies } from 'next/headers'; //  IMPORTADO PARA LEER QUIÉN HACE LA PETICIÓN
+import { cookies } from 'next/headers'; 
 
 // PLANTILLA DEL CORREO 
 const generarPlantillaCorreo = (nombreUsuario: string, nuevaPassword: string) => {

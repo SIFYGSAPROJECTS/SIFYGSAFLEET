@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { Check, X, MapPin, Calendar, Clock, User, Phone } from 'lucide-react'; // 👈 Agregamos el icono Phone
+import { Check, X, MapPin, Calendar, Clock, User, Phone } from 'lucide-react'; 
 
 export default function StatusUpdater({ folio, estadoActual, lugarActual, fechaActual, horaActual, asesorActual, numeroAsesorActual, onUpdateTemporal }: any) {
   const router = useRouter();
@@ -13,7 +13,7 @@ export default function StatusUpdater({ folio, estadoActual, lugarActual, fechaA
   const [fecha, setFecha] = useState(fechaActual || '');
   const [hora, setHora] = useState(horaActual || '');
   const [asesor, setAsesor] = useState(asesorActual || ''); 
-  const [numeroAsesor, setNumeroAsesor] = useState(numeroAsesorActual || ''); // 👈 Nuevo estado para el Teléfono
+  const [numeroAsesor, setNumeroAsesor] = useState(numeroAsesorActual || '');
 
   // Detectamos si hay cambios
   const hayCambios = estado !== estadoActual || lugar !== (lugarActual || '') || fecha !== (fechaActual || '') || hora !== (horaActual || '') || asesor !== (asesorActual || '') || numeroAsesor !== (numeroAsesorActual || '');
@@ -24,7 +24,6 @@ export default function StatusUpdater({ folio, estadoActual, lugarActual, fechaA
       const res = await fetch('/api/tickets/estado', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        // 👇 Ahora enviamos también el numeroAsesor
         body: JSON.stringify({ folio, estado, lugar, fecha, hora, asesor, numeroAsesor }), 
       });
       if (res.ok) {
@@ -43,7 +42,7 @@ export default function StatusUpdater({ folio, estadoActual, lugarActual, fechaA
     setFecha(fechaActual || '');
     setHora(horaActual || '');
     setAsesor(asesorActual || '');
-    setNumeroAsesor(numeroAsesorActual || ''); // 👈 Reiniciamos
+    setNumeroAsesor(numeroAsesorActual || ''); 
     onUpdateTemporal?.(null);
   };
 
@@ -103,7 +102,7 @@ export default function StatusUpdater({ folio, estadoActual, lugarActual, fechaA
               value={asesor}
               onChange={(e) => { setAsesor(e.target.value); onUpdateTemporal?.({ estado: 'CITA', lugar, fecha, hora, asesor: e.target.value, numeroAsesor }); }}
             />
-            {/* 🌟 EL NUEVO INPUT PARA EL NÚMERO DEL ASESOR */}
+            {/*INPUT PARA EL NÚMERO DEL ASESOR */}
             <input 
               className="w-1/2 bg-slate-950 border border-slate-800 text-[10px] text-white p-1.5 rounded outline-none focus:border-cyan-500"
               placeholder="Teléfono (Ej. 55 1234 5678)"
