@@ -57,7 +57,7 @@ export default function MisChecklistsPage() {
             <FileText className="w-8 h-8 text-[#FF7420]" />
           </div>
           <div>
-            <h1 className="text-3xl font-black text-white tracking-tight">Mis Checklists Asignados</h1>
+            <h1 className="text-3xl font-black text-white tracking-tight">Mis Checklists</h1>
             <p className="text-slate-500 text-sm mt-1">Consulta el historial de revisiones de tu unidad a cargo.</p>
           </div>
         </div>

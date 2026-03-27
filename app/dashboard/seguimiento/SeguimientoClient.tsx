@@ -7,14 +7,63 @@ import Link from 'next/link';
 
 export default function SeguimientoClient({ ticketsIniciales = [], isAdmin }: any) {
   const [datosTemporales, setDatosTemporales] = useState<Record<string, any>>({});
+  const [vista, setVista] = useState<'proceso' | 'finalizadas'>('proceso');
 
   if (!ticketsIniciales || ticketsIniciales.length === 0) {
-    return <div className="bg-slate-900 p-12 rounded-xl text-center text-slate-500 font-bold">No hay unidades en mantenimiento.</div>;
+    return <div className="bg-slate-900 p-12 rounded-xl text-center text-slate-500 font-bold border border-slate-800">No hay unidades en el sistema.</div>;
   }
 
+  //  LÓGICA DE FILTRADO EN TIEMPO REAL 
+  const ticketsFiltrados = ticketsIniciales.filter((ticket: any) => {
+    // Revisamos si acabamos de cambiar su estado ahorita mismo (datosTemporales) o si ya venía así
+    const infoMemoria = datosTemporales[ticket.Pk_folio_ticket] || {};
+    const estadoVisual = infoMemoria.estado || ticket.Estado || 'PENDIENTE';
+    
+    if (vista === 'proceso') {
+      return estadoVisual !== 'LISTO';
+    } else {
+      return estadoVisual === 'LISTO';
+    }
+  });
+
   return (
-    <div className="space-y-8">
-      {ticketsIniciales.map((ticket: any) => {
+    <div className="space-y-6">
+      
+      {/*  BOTONES SUB-FILTRO  */}
+      <div className="flex gap-3 mb-6 border-b border-slate-800 pb-4">
+        <button 
+          onClick={() => setVista('proceso')}
+          className={`px-4 py-2 rounded-lg font-bold text-sm transition-all flex items-center gap-2 ${
+            vista === 'proceso' 
+              ? 'bg-cyan-500/10 text-cyan-500 border border-cyan-500/30 shadow-[0_0_10px_rgba(6,182,212,0.15)]' 
+              : 'text-slate-500 hover:text-slate-300 hover:bg-slate-800 border border-transparent'
+          }`}
+        >
+          <Activity size={16} /> En Proceso
+        </button>
+        <button 
+          onClick={() => setVista('finalizadas')}
+          className={`px-4 py-2 rounded-lg font-bold text-sm transition-all flex items-center gap-2 ${
+            vista === 'finalizadas' 
+              ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/30 shadow-[0_0_10px_rgba(16,185,129,0.15)]' 
+              : 'text-slate-500 hover:text-slate-300 hover:bg-slate-800 border border-transparent'
+          }`}
+        >
+          <CheckCircle2 size={16} /> Finalizadas
+        </button>
+      </div>
+
+      {/* MENSAJE SI ESTÁ VACÍO */}
+      {ticketsFiltrados.length === 0 && (
+        <div className="bg-slate-900/50 p-12 rounded-xl text-center border border-slate-800 border-dashed">
+          <p className="text-slate-500 font-bold">
+            {vista === 'proceso' ? ' No hay unidades en mantenimiento actualmente.' : 'No hay mantenimientos finalizados recientemente.'}
+          </p>
+        </div>
+      )}
+
+      {/* LISTA DE TICKETS */}
+      {ticketsFiltrados.map((ticket: any) => {
         const infoMemoria = datosTemporales[ticket.Pk_folio_ticket] || {};
         const estadoVisual = infoMemoria.estado || ticket.Estado || 'PENDIENTE';
         
@@ -27,17 +76,22 @@ export default function SeguimientoClient({ ticketsIniciales = [], isAdmin }: an
         const estados = ['PENDIENTE', 'CITA', 'EN TALLER', 'LISTO'];
         const pasoActual = estados.indexOf(estadoVisual);
 
+        // Estilo condicional si está finalizado
+        const esFinalizado = estadoVisual === 'LISTO';
+
         return (
-          <div key={ticket.Pk_folio_ticket} className="bg-slate-900 rounded-xl shadow-2xl border-x border-b border-slate-800 border-t-4 border-t-[#FF7420] p-5 sm:p-8">
+          <div key={ticket.Pk_folio_ticket} className={`bg-slate-900 rounded-xl shadow-2xl border-x border-b border-slate-800 border-t-4 p-5 sm:p-8 transition-colors ${esFinalizado ? 'border-t-emerald-500' : 'border-t-[#FF7420]'}`}>
             <div className="flex flex-col md:flex-row justify-between items-start mb-10 gap-6">
               <div>
-                <span className="bg-[#FF7420]/10 text-[#FF7420] px-2 py-1 rounded text-[10px] font-mono font-black mb-3 inline-block tracking-[0.2em]">FOLIO: {ticket.Pk_folio_ticket}</span>
+                <span className={`px-2 py-1 rounded text-[10px] font-mono font-black mb-3 inline-block tracking-[0.2em] ${esFinalizado ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'bg-[#FF7420]/10 text-[#FF7420] border border-[#FF7420]/20'}`}>
+                  FOLIO: {ticket.Pk_folio_ticket}
+                </span>
                 <h3 className="text-xl sm:text-2xl font-bold text-white">{ticket.auto?.Marca} {ticket.auto?.Modelo}</h3>
                 <p className="text-sm text-slate-400 mt-2 italic">"{ticket.Descripcion}"</p>
               </div>
 
-              {isAdmin && (
-                <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 shadow-inner w-full md:w-auto">
+              {isAdmin && !esFinalizado && (
+                <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 shadow-inner w-full md:w-auto animate-in fade-in">
                   <StatusUpdater 
                     folio={ticket.Pk_folio_ticket} 
                     estadoActual={ticket.Estado}
@@ -50,10 +104,15 @@ export default function SeguimientoClient({ ticketsIniciales = [], isAdmin }: an
                   />
                 </div>
               )}
+              {isAdmin && esFinalizado && (
+                <div className="flex items-center gap-2 bg-emerald-500/10 text-emerald-500 px-4 py-2 rounded-lg border border-emerald-500/20 font-bold text-sm">
+                  <CheckCircle2 size={18} /> Mantenimiento Concluido
+                </div>
+              )}
             </div>
 
             {/* LÍNEA DE TIEMPO RESPONSIVE */}
-            <div className="w-full overflow-x-auto pb-4 scrollbar-hide">
+            <div className={`w-full overflow-x-auto pb-4 scrollbar-hide ${esFinalizado ? 'opacity-70' : ''}`}>
               <div className="relative py-4 px-2 sm:px-6 mb-4 min-w-[320px] sm:min-w-[400px]">
                 <div className="absolute top-10 left-0 w-full h-1.5 bg-slate-800 rounded-full"></div>
                 <div className="absolute top-10 left-0 h-1.5 rounded-full transition-all duration-1000 bg-gradient-to-r from-[#FF7420] via-cyan-500 via-yellow-500 to-emerald-500"
@@ -76,18 +135,15 @@ export default function SeguimientoClient({ ticketsIniciales = [], isAdmin }: an
               </div>
             </div>
 
-            {/* 🌟 CUADRO DE CITA RESPONSIVE (Ajustado sin recortes) */}
+            {/* CUADRO DE CITA RESPONSIVE */}
             {estadoVisual === 'CITA' && (lugar || fecha || hora || asesor || numeroAsesor) && (
               <div className="mt-6 sm:mt-8 bg-cyan-500/5 border border-cyan-500/20 rounded-xl p-4 sm:p-6 animate-in slide-in-from-top-4 duration-500">
-                
-                {/* Modificamos los gap y padding en lg/xl para darles espacio a las 5 columnas */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 lg:gap-3 xl:gap-6 text-white">
                   
                   <div className="flex items-center gap-3">
                     <MapPin className="text-cyan-500 shrink-0" size={22}/> 
                     <div>
                       <p className="text-[10px] text-slate-500 font-bold uppercase">Lugar</p>
-                      {/* Sin truncate: si el texto es muy largo, bajará de renglón elegantemente */}
                       <p className="font-bold text-sm xl:text-base leading-tight break-words">{lugar || 'Por definir'}</p>
                     </div>
                   </div>

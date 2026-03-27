@@ -1,19 +1,16 @@
 "use client";
 
 import { useState } from 'react';
-import Link from 'next/link';
-import { Search, ShieldCheck, ArrowLeft, User, Mail, Lock, AlertCircle, CheckCircle2, RefreshCcw, Wand2, ChevronRight } from 'lucide-react';
+import { Search, User, Mail, Lock, AlertCircle, CheckCircle2, RefreshCcw, Wand2 } from 'lucide-react';
 
 export default function SeguridadPage() {
   const [busqueda, setBusqueda] = useState('');
   const [cargando, setCargando] = useState(false);
   const [empleadoEncontrado, setEmpleadoEncontrado] = useState<any>(null);
   const [mensaje, setMensaje] = useState({ texto: '', tipo: '' }); 
-
   const [nuevaPassword, setNuevaPassword] = useState('');
   const [guardando, setGuardando] = useState(false);
 
-  // FUNCIÓN: BUSCAR EN LA DB
   const buscarEmpleado = async () => {
     if (!busqueda) return;
     setCargando(true);
@@ -24,7 +21,6 @@ export default function SeguridadPage() {
     try {
       const res = await fetch(`/api/seguridad?q=${encodeURIComponent(busqueda)}`);
       const data = await res.json();
-
       if (res.ok && data.empleado) {
         setEmpleadoEncontrado(data.empleado);
       } else {
@@ -36,7 +32,6 @@ export default function SeguridadPage() {
     setCargando(false);
   };
 
-  // FUNCIÓN: EL GENERADOR ALEATORIO
   const generarPassword = () => {
     const mayusculas = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     const minusculas = 'abcdefghijklmnopqrstuvwxyz';
@@ -58,7 +53,6 @@ export default function SeguridadPage() {
     setNuevaPassword(passwordMezclada);
   };
 
-  // FUNCIÓN: GUARDAR
   const actualizarPassword = async () => {
     if (!nuevaPassword || nuevaPassword.length < 6) {
       setMensaje({ texto: 'La contraseña debe tener al menos 6 caracteres.', tipo: 'error' });
@@ -72,10 +66,7 @@ export default function SeguridadPage() {
       const res = await fetch('/api/seguridad', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          email: empleadoEncontrado.Email, 
-          nuevaPassword: nuevaPassword 
-        }),
+        body: JSON.stringify({ email: empleadoEncontrado.Email, nuevaPassword: nuevaPassword }),
       });
 
       const data = await res.json();
@@ -92,138 +83,110 @@ export default function SeguridadPage() {
   };
 
   return (
-    <div className="min-h-screen bg-black">
-      {/* Ajustamos el padding: p-4 en móvil, p-8 en escritorio */}
-      <div className="max-w-5xl mx-auto p-4 sm:p-8">
+    <div className="w-full">
+      {/* BUSCADOR RESPONSIVE */}
+      <div className="bg-slate-900 p-5 sm:p-8 rounded-2xl border border-slate-800 shadow-xl mb-8 border-t-4 border-t-yellow-500">
+        <label className="block text-base sm:text-lg font-medium text-slate-300 mb-4 text-center">
+          ¿De qué colaborador deseas actualizar la contraseña?
+        </label>
         
-        {/* BOTÓN VOLVER */}
-        <div className="mb-6 sm:mb-8">
-          <Link href="/dashboard" className="inline-flex items-center gap-2 text-slate-400 hover:text-[#FF7420] transition-colors font-medium text-sm py-2">
-            <ArrowLeft className="w-4 h-4" /> <span>Volver al Panel Maestro</span>
-          </Link>
+        <div className="flex flex-col sm:flex-row max-w-2xl mx-auto gap-3">
+          <input 
+            type="text" 
+            placeholder="Ej. Nombre o correo@sifygsa.com" 
+            className="w-full bg-slate-950 border-2 border-slate-700 rounded-xl px-4 py-3 text-white focus:border-[#FF7420] outline-none transition-all font-medium placeholder:text-slate-600 text-sm sm:text-base"
+            value={busqueda}
+            onChange={(e) => setBusqueda(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && buscarEmpleado()}
+          />
+          <button 
+            onClick={buscarEmpleado}
+            disabled={cargando}
+            className="w-full sm:w-auto bg-[#FF7420] hover:bg-[#E6681C] disabled:bg-slate-800 text-white px-8 py-3 rounded-xl flex items-center justify-center gap-2 font-bold transition-all shadow-lg active:scale-95"
+          >
+            {cargando ? <RefreshCcw size={20} className="animate-spin" /> : <Search size={20} />} 
+            <span>{cargando ? 'Buscando...' : 'Buscar'}</span>
+          </button>
         </div>
 
-        {/* ENCABEZADO */}
-        <div className="mb-8 sm:mb-10">
-          <h1 className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-3">
-            <ShieldCheck className="text-[#FF7420] w-7 h-7 sm:w-8 h-8 shrink-0" />
-            Seguridad y Accesos
-          </h1>
-          <p className="text-slate-400 mt-2 text-sm sm:text-base">
-            Restablecimiento de contraseñas y control de credenciales de la flota.
-          </p>
-        </div>
-
-        {/* BUSCADOR RESPONSIVE */}
-        <div className="bg-slate-900 p-5 sm:p-8 rounded-2xl border border-slate-800 shadow-2xl mb-8">
-          <label className="block text-base sm:text-lg font-medium text-slate-300 mb-4 text-center">
-            ¿De qué colaborador deseas actualizar la contraseña?
-          </label>
-          
-          {/* Cambiamos a flex-col en móvil */}
-          <div className="flex flex-col sm:flex-row max-w-2xl mx-auto gap-3">
-            <input 
-              type="text" 
-              placeholder="Ej. Nombre o correo@sifygsa.com" 
-              className="w-full bg-slate-950 border-2 border-slate-700 rounded-xl px-4 py-3 text-white focus:border-[#FF7420] outline-none transition-all font-medium placeholder:text-slate-600 text-sm sm:text-base"
-              value={busqueda}
-              onChange={(e) => setBusqueda(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && buscarEmpleado()}
-            />
-            <button 
-              onClick={buscarEmpleado}
-              disabled={cargando}
-              className="w-full sm:w-auto bg-[#FF7420] hover:bg-[#E6681C] disabled:bg-slate-800 text-white px-8 py-3 rounded-xl flex items-center justify-center gap-2 font-bold transition-all shadow-lg active:scale-95"
-            >
-              {cargando ? <RefreshCcw size={20} className="animate-spin" /> : <Search size={20} />} 
-              <span>{cargando ? 'Buscando...' : 'Buscar'}</span>
-            </button>
+        {/* MENSAJES DEL SISTEMA */}
+        {mensaje.texto && (
+          <div className={`mt-6 p-4 rounded-xl border flex items-center justify-center gap-3 animate-in fade-in zoom-in duration-300 ${
+            mensaje.tipo === 'error' ? 'bg-red-500/10 border-red-500/50 text-red-400' : 'bg-emerald-500/10 border-emerald-500/50 text-emerald-400'
+          }`}>
+            {mensaje.tipo === 'error' ? <AlertCircle size={20} className="shrink-0" /> : <CheckCircle2 size={20} className="shrink-0" />}
+            <span className="font-bold text-xs sm:text-sm text-center">{mensaje.texto}</span>
           </div>
+        )}
+      </div>
 
-          {/* MENSAJES DEL SISTEMA */}
-          {mensaje.texto && (
-            <div className={`mt-6 p-4 rounded-xl border flex items-center justify-center gap-3 animate-in fade-in zoom-in duration-300 ${
-              mensaje.tipo === 'error' ? 'bg-red-500/10 border-red-500/50 text-red-400' : 'bg-emerald-500/10 border-emerald-500/50 text-emerald-400'
-            }`}>
-              {mensaje.tipo === 'error' ? <AlertCircle size={20} className="shrink-0" /> : <CheckCircle2 size={20} className="shrink-0" />}
-              <span className="font-bold text-xs sm:text-sm text-center">{mensaje.texto}</span>
-            </div>
-          )}
-        </div>
-
-        {/* RESULTADO DE BÚSQUEDA RESPONSIVE */}
-        {empleadoEncontrado ? (
-          <div className="bg-slate-900 border-x border-b border-slate-800 rounded-2xl p-5 sm:p-8 shadow-2xl border-t-4 border-t-emerald-500 animate-in slide-in-from-bottom-4 duration-500">
-            <div className="flex flex-col lg:flex-row justify-between items-center lg:items-start gap-8">
-              
-              {/* Datos del Usuario - Centrado en móvil, izquierda en desktop */}
-              <div className="flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left w-full">
-                <div className="bg-slate-950 p-4 rounded-2xl border border-slate-800 shadow-inner shrink-0">
-                  <User className="w-10 h-10 text-emerald-500" />
-                </div>
-                <div className="overflow-hidden w-full">
-                  <h2 className="text-xl sm:text-2xl font-black text-white truncate">
-                    {empleadoEncontrado.Nombre_Empleado} {empleadoEncontrado.A_Paterno}
-                  </h2>
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 mt-1 text-slate-400 text-xs sm:text-sm font-mono">
-                    <span className="flex items-center justify-center sm:justify-start gap-1 truncate">
-                      <Mail size={14} className="text-[#FF7420] shrink-0"/> {empleadoEncontrado.Email}
-                    </span>
-                  </div>
-                  <span className={`inline-block mt-3 text-[10px] px-3 py-1 rounded-full font-black tracking-widest uppercase ${empleadoEncontrado.Rol === 'ADMIN' ? 'bg-[#FF7420] text-white' : 'bg-slate-800 text-slate-300 border border-slate-700'}`}>
-                    {empleadoEncontrado.Rol}
+      {/* RESULTADO DE BÚSQUEDA RESPONSIVE */}
+      {empleadoEncontrado ? (
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 sm:p-8 shadow-xl animate-in slide-in-from-bottom-4 duration-500">
+          <div className="flex flex-col lg:flex-row justify-between items-center lg:items-start gap-8">
+            
+            <div className="flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left w-full">
+              <div className="bg-slate-950 p-4 rounded-2xl border border-slate-800 shadow-inner shrink-0">
+                <User className="w-10 h-10 text-emerald-500" />
+              </div>
+              <div className="overflow-hidden w-full">
+                <h2 className="text-xl sm:text-2xl font-black text-white truncate">
+                  {empleadoEncontrado.Nombre_Empleado} {empleadoEncontrado.A_Paterno}
+                </h2>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 mt-1 text-slate-400 text-xs sm:text-sm font-mono">
+                  <span className="flex items-center justify-center sm:justify-start gap-1 truncate">
+                    <Mail size={14} className="text-[#FF7420] shrink-0"/> {empleadoEncontrado.Email}
                   </span>
                 </div>
+                <span className={`inline-block mt-3 text-[10px] px-3 py-1 rounded-full font-black tracking-widest uppercase ${empleadoEncontrado.Rol === 'ADMIN' ? 'bg-[#FF7420] text-white' : 'bg-slate-800 text-slate-300 border border-slate-700'}`}>
+                  {empleadoEncontrado.Rol}
+                </span>
               </div>
+            </div>
 
-              {/* Formulario de Nueva Contraseña - Ancho completo en móvil */}
-              <div className="flex flex-col gap-4 w-full lg:w-auto lg:min-w-[350px] bg-slate-950/50 p-4 sm:p-6 rounded-2xl border border-slate-800">
-                <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">
-                  Establecer Nueva Contraseña
-                </label>
-                
-                <div className="flex gap-2">
-                  <input 
-                    type="text" 
-                    placeholder="Mínimo 6 caracteres..."
-                    className="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-3.5 text-white focus:border-emerald-500 outline-none transition-all text-sm font-mono"
-                    value={nuevaPassword}
-                    onChange={(e) => setNuevaPassword(e.target.value)}
-                  />
-                  
-                  <button 
-                    onClick={generarPassword}
-                    className="bg-slate-800 hover:bg-[#FF7420] text-slate-300 hover:text-white px-4 py-3.5 rounded-xl flex items-center justify-center transition-all shadow-lg active:scale-90"
-                    title="Generar contraseña aleatoria"
-                  >
-                    <Wand2 size={20} />
-                  </button>
-                </div>
-
+            <div className="flex flex-col gap-4 w-full lg:w-auto lg:min-w-[350px] bg-slate-950/50 p-4 sm:p-6 rounded-2xl border border-slate-800">
+              <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">
+                Establecer Nueva Contraseña
+              </label>
+              <div className="flex gap-2">
+                <input 
+                  type="text" 
+                  placeholder="Mínimo 6 caracteres..."
+                  className="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-3.5 text-white focus:border-emerald-500 outline-none transition-all text-sm font-mono"
+                  value={nuevaPassword}
+                  onChange={(e) => setNuevaPassword(e.target.value)}
+                />
                 <button 
-                  onClick={actualizarPassword}
-                  disabled={guardando || nuevaPassword.length < 6}
-                  className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:bg-slate-800 disabled:text-slate-500 text-white py-4 rounded-xl flex items-center justify-center gap-3 font-bold transition-all shadow-lg active:scale-95"
+                  onClick={generarPassword}
+                  className="bg-slate-800 hover:bg-[#FF7420] text-slate-300 hover:text-white px-4 py-3.5 rounded-xl flex items-center justify-center transition-all shadow-lg active:scale-90"
+                  title="Generar contraseña aleatoria"
                 >
-                  {guardando ? <RefreshCcw size={20} className="animate-spin" /> : <Lock size={20} />}
-                  <span>{guardando ? 'Guardando...' : 'Guardar y Autorizar'}</span>
+                  <Wand2 size={20} />
                 </button>
               </div>
 
+              <button 
+                onClick={actualizarPassword}
+                disabled={guardando || nuevaPassword.length < 6}
+                className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:bg-slate-800 disabled:text-slate-500 text-white py-4 rounded-xl flex items-center justify-center gap-3 font-bold transition-all shadow-lg active:scale-95"
+              >
+                {guardando ? <RefreshCcw size={20} className="animate-spin" /> : <Lock size={20} />}
+                <span>{guardando ? 'Guardando...' : 'Guardar y Autorizar'}</span>
+              </button>
             </div>
-          </div>
-        ) : (
-          !cargando && !mensaje.texto && (
-            <div className="bg-slate-900/40 border-2 border-dashed border-slate-800 rounded-2xl p-10 sm:p-20 text-center">
-              <Lock className="w-10 h-10 sm:w-12 h-12 text-slate-700 mx-auto mb-4 opacity-30" />
-              <p className="text-slate-600 font-bold uppercase tracking-[0.2em] text-[10px] sm:text-xs">
-                El panel de restablecimiento aparecerá aquí
-              </p>
-            </div>
-          )
-        )}
 
-      </div>
+          </div>
+        </div>
+      ) : (
+        !cargando && !mensaje.texto && (
+          <div className="bg-slate-900/40 border-2 border-dashed border-slate-800 rounded-2xl p-10 sm:p-20 text-center">
+            <Lock className="w-10 h-10 sm:w-12 h-12 text-slate-700 mx-auto mb-4 opacity-30" />
+            <p className="text-slate-600 font-bold uppercase tracking-[0.2em] text-[10px] sm:text-xs">
+              El panel de restablecimiento aparecerá aquí
+            </p>
+          </div>
+        )
+      )}
     </div>
   );
 }
