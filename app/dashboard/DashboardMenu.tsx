@@ -14,10 +14,8 @@ interface Props {
 export default function DashboardMenu({ userRole, totalAutos, totalEmpleados, ticketsPendientes }: Props) {
   const isAdmin = userRole === 'ADMIN';
 
-  // 🌟 Inicia en 'servicios' para empleados para darles rapidez, o en blanco para Admin
   const [activeTab, setActiveTab] = useState(isAdmin ? '' : 'servicios');
 
-  // --- TARJETAS POR SECCIÓN ---
 
   const tarjetasMantenimiento = (
     <>
