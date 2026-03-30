@@ -24,14 +24,12 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // 2. LEEMOS EL BOLETO SECRETO (NONCE) QUE GENERÓ EL MIDDLEWARE
   const headerList = await headers();
   const nonce = headerList.get('x-nonce') || '';
 
   return (
     <html lang="es">
       <head>
-        {/* 3. LE PEGAMOS EL BOLETO A LA CONFIGURACIÓN DE LA PÁGINA */}
         <meta property="csp-nonce" content={nonce} />
       </head>
       <body
