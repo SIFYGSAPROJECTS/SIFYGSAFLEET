@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { Car, Plus, X, Pencil, ArrowLeft, ShieldCheck, AlertTriangle, Wrench, CheckCircle2, Archive, RotateCcw, AlertCircle, User } from 'lucide-react';
+import { Car, Plus, X, Pencil, ArrowLeft, ShieldCheck, AlertTriangle, Wrench, CheckCircle2, Archive, RotateCcw, AlertCircle, User, FileText } from 'lucide-react';
 import Link from 'next/link';
 
 interface Vehiculo {
@@ -181,10 +181,8 @@ export default function InventarioMaestroPage() {
     <div className="min-h-screen bg-black relative">
       <div className="p-4 sm:p-8 max-w-7xl mx-auto">
         
-{/* ENCABEZADO: TEXTO IZQUIERDA, BARRA CENTRADA EN MÓVIL */}
         <div className="flex flex-col lg:flex-row justify-between lg:items-center gap-5 mb-8">
           
-          {/* TEXTO ALINEADO A LA IZQUIERDA SIEMPRE */}
           <div className="flex-1 flex flex-col items-start w-full text-left">
             <Link href="/dashboard" className="inline-flex items-center gap-2 text-slate-400 hover:text-[#FF7420] transition-colors mb-3 font-medium text-sm">
               <ArrowLeft className="w-4 h-4" /> Volver al Panel Maestro
@@ -196,9 +194,8 @@ export default function InventarioMaestroPage() {
           </div>
 
           <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-end gap-4 w-full lg:w-auto">
-            {/* BARRA DE ACCESO DIRECTO CENTRADA EN MÓVIL */}
             <div className="w-full sm:w-auto overflow-x-auto scrollbar-hide pb-2 sm:pb-0 flex justify-center">
-              <div className="inline-flex items-center bg-slate-900 border border-slate-800 rounded-full p-1.5 shadow-lg shrink-0">
+              <div className="inline-flex items-center bg-slate-900 border border-slate-800 rounded-full p-1.5 shadow-lg shrink-0 gap-1">
                 <Link href="/dashboard/usuarios" className="px-4 py-1.5 text-xs font-bold rounded-full text-slate-500 hover:text-slate-300 hover:bg-slate-800 transition-colors flex items-center gap-2 whitespace-nowrap">
                   <User size={14} /> Usuarios
                 </Link>
@@ -208,10 +205,12 @@ export default function InventarioMaestroPage() {
                 <Link href="/dashboard/servicios" className="px-4 py-1.5 text-xs font-bold rounded-full text-slate-500 hover:text-slate-300 hover:bg-slate-800 transition-colors flex items-center gap-2 whitespace-nowrap">
                   <Wrench size={14} /> Servicios
                 </Link>
+                <Link href="/dashboard/checklists" className="px-4 py-1.5 text-xs font-bold rounded-full text-slate-500 hover:text-cyan-400 hover:bg-slate-800 transition-colors flex items-center gap-2 whitespace-nowrap">
+                  <FileText size={14} /> Checklists
+                </Link>
               </div>
             </div>
 
-            {/* BOTÓN NUEVO VEHÍCULO */}
             {tabPrincipal === 'activos' && (
               <button onClick={abrirModalNuevo} className="w-full sm:w-auto bg-[#FF7420] hover:bg-[#E6681C] text-white px-5 py-2.5 rounded-lg font-bold flex items-center justify-center gap-2 transition-colors shadow-lg active:scale-95 shrink-0">
                 <Plus className="w-5 h-5" /> Nuevo Vehículo
@@ -220,7 +219,6 @@ export default function InventarioMaestroPage() {
           </div>
         </div>
 
-        {/* NAVEGADOR PRINCIPAL */}
         <div className="flex space-x-1 sm:space-x-4 border-b border-slate-800 mb-8 overflow-x-auto scrollbar-hide w-full">
           <button 
             onClick={() => setTabPrincipal('activos')}
@@ -238,7 +236,6 @@ export default function InventarioMaestroPage() {
           </button>
         </div>
 
-        {/* VISTA 1: INVENTARIO ACTIVO*/}
         {tabPrincipal === 'activos' && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 w-full">
             
@@ -380,8 +377,6 @@ export default function InventarioMaestroPage() {
       </div>
 
       {/* MODALES COMPARTIDOS */}
-      
-      {/* 1. MODAL DE CREAR / EDITAR */}
       {modalAbierto && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
           <div className="bg-slate-900 rounded-xl shadow-2xl border border-slate-800 w-full max-w-4xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">

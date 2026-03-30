@@ -1,7 +1,11 @@
 import { prisma } from '@/lib/db';
+import { cookies } from 'next/headers';
 import ChecklistsClient from './ChecklistsClient';
 
 export default async function ChecklistsPage() {
+  const cookieStore = await cookies();
+  const isAdmin = cookieStore.get('user_role')?.value === 'ADMIN';
+
   const vehiculosDB = await prisma.inventario_Automoviles.findMany({
     select: {
       Consecutivo: true, 
@@ -12,12 +16,11 @@ export default async function ChecklistsPage() {
     }
   });
 
-  // 2. Traducimos los nombres para que el Buscador del Cliente los entienda
   const vehiculosMapeados = vehiculosDB.map((v) => ({
     id_Vehiculo: v.Consecutivo, 
     Num_Eco: v.Consecutivo,     
     Placas: v.Placa || ''       
   }));
 
-  return <ChecklistsClient vehiculos={vehiculosMapeados} />;
+  return <ChecklistsClient vehiculos={vehiculosMapeados} isAdmin={isAdmin} />;
 }
