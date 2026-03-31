@@ -40,31 +40,34 @@ export default function UsuariosTabs({ isAdmin, empleadosIniciales }: Props) {
           </p>
         </div>
 
-        {/*  BARRA DE ACCESOS DIRECTOS SUPERIOR DERECHA  */}
-        <div className="w-full md:w-auto overflow-x-auto scrollbar-hide pb-2 md:pb-0 flex justify-center md:justify-end">
-          <div className="inline-flex items-center bg-slate-900 border border-slate-800 rounded-full p-1.5 shadow-lg shrink-0 gap-1">
-            
-            <div className="px-4 py-1.5 text-xs font-bold rounded-full bg-slate-800 text-white cursor-default flex items-center gap-2 shadow-inner whitespace-nowrap">
-              <User size={14} className="text-[#FF7420]" /> Usuarios
-            </div>
-            
-            {isAdmin && (
-              <Link href="/dashboard/inventario" className="px-4 py-1.5 text-xs font-bold rounded-full text-slate-500 hover:text-slate-300 hover:bg-slate-800 transition-colors flex items-center gap-2 whitespace-nowrap">
-                <Car size={14} /> Flota
+        {/*  BARRA DE ACCESOS DIRECTOS RESPONSIVA  */}
+        <div className="w-full md:w-auto overflow-x-auto scrollbar-hide pb-3">
+          {/* Aquí está la magia: justify-start en móvil, y center/end en pantallas grandes */}
+          <div className="flex w-full justify-start sm:justify-center md:justify-end min-w-max px-1">
+            <div className="inline-flex items-center bg-slate-900 border border-slate-800 rounded-full p-1.5 shadow-lg shrink-0 gap-1">
+              
+              <div className="px-4 py-1.5 text-xs font-bold rounded-full bg-slate-800 text-white cursor-default flex items-center gap-2 shadow-inner whitespace-nowrap">
+                <User size={14} className="text-[#FF7420]" /> Usuarios
+              </div>
+              
+              {isAdmin && (
+                <Link href="/dashboard/inventario" className="px-4 py-1.5 text-xs font-bold rounded-full text-slate-500 hover:text-slate-300 hover:bg-slate-800 transition-colors flex items-center gap-2 whitespace-nowrap">
+                  <Car size={14} /> Flota
+                </Link>
+              )}
+              
+              <Link href="/dashboard/servicios" className="px-4 py-1.5 text-xs font-bold rounded-full text-slate-500 hover:text-slate-300 hover:bg-slate-800 transition-colors flex items-center gap-2 whitespace-nowrap">
+                <Wrench size={14} /> Servicios
               </Link>
-            )}
-            
-            <Link href="/dashboard/servicios" className="px-4 py-1.5 text-xs font-bold rounded-full text-slate-500 hover:text-slate-300 hover:bg-slate-800 transition-colors flex items-center gap-2 whitespace-nowrap">
-              <Wrench size={14} /> Servicios
-            </Link>
 
-            <Link 
-              href={isAdmin ? '/dashboard/checklists' : '/dashboard/mis-checklists'} 
-              className="px-4 py-1.5 text-xs font-bold rounded-full text-slate-500 hover:text-cyan-400 hover:bg-slate-800 transition-colors flex items-center gap-2 whitespace-nowrap"
-            >
-              <FileText size={14} /> Checklists
-            </Link>
+              <Link 
+                href={isAdmin ? '/dashboard/checklists' : '/dashboard/mis-checklists'} 
+                className="px-4 py-1.5 text-xs font-bold rounded-full text-slate-500 hover:text-cyan-400 hover:bg-slate-800 transition-colors flex items-center gap-2 whitespace-nowrap"
+              >
+                <FileText size={14} /> Checklists
+              </Link>
 
+            </div>
           </div>
         </div>
       </div>

@@ -194,20 +194,24 @@ export default function InventarioMaestroPage() {
           </div>
 
           <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-end gap-4 w-full lg:w-auto">
-            <div className="w-full sm:w-auto overflow-x-auto scrollbar-hide pb-2 sm:pb-0 flex justify-center">
-              <div className="inline-flex items-center bg-slate-900 border border-slate-800 rounded-full p-1.5 shadow-lg shrink-0 gap-1">
-                <Link href="/dashboard/usuarios" className="px-4 py-1.5 text-xs font-bold rounded-full text-slate-500 hover:text-slate-300 hover:bg-slate-800 transition-colors flex items-center gap-2 whitespace-nowrap">
-                  <User size={14} /> Usuarios
-                </Link>
-                <div className="px-4 py-1.5 text-xs font-bold rounded-full bg-slate-800 text-white cursor-default flex items-center gap-2 shadow-inner whitespace-nowrap">
-                  <Car size={14} className="text-[#FF7420]" /> Flota
+            {/* RESPONSIVIDAD */}
+            <div className="w-full sm:w-auto overflow-x-auto scrollbar-hide pb-3">
+              {/* min-w-max y justify-start para móviles */}
+              <div className="flex w-full justify-start sm:justify-center lg:justify-end min-w-max px-1">
+                <div className="inline-flex items-center bg-slate-900 border border-slate-800 rounded-full p-1.5 shadow-lg shrink-0 gap-1">
+                  <Link href="/dashboard/usuarios" className="px-4 py-1.5 text-xs font-bold rounded-full text-slate-500 hover:text-slate-300 hover:bg-slate-800 transition-colors flex items-center gap-2 whitespace-nowrap">
+                    <User size={14} /> Usuarios
+                  </Link>
+                  <div className="px-4 py-1.5 text-xs font-bold rounded-full bg-slate-800 text-white cursor-default flex items-center gap-2 shadow-inner whitespace-nowrap">
+                    <Car size={14} className="text-[#FF7420]" /> Flota
+                  </div>
+                  <Link href="/dashboard/servicios" className="px-4 py-1.5 text-xs font-bold rounded-full text-slate-500 hover:text-slate-300 hover:bg-slate-800 transition-colors flex items-center gap-2 whitespace-nowrap">
+                    <Wrench size={14} /> Servicios
+                  </Link>
+                  <Link href="/dashboard/checklists" className="px-4 py-1.5 text-xs font-bold rounded-full text-slate-500 hover:text-cyan-400 hover:bg-slate-800 transition-colors flex items-center gap-2 whitespace-nowrap">
+                    <FileText size={14} /> Checklists
+                  </Link>
                 </div>
-                <Link href="/dashboard/servicios" className="px-4 py-1.5 text-xs font-bold rounded-full text-slate-500 hover:text-slate-300 hover:bg-slate-800 transition-colors flex items-center gap-2 whitespace-nowrap">
-                  <Wrench size={14} /> Servicios
-                </Link>
-                <Link href="/dashboard/checklists" className="px-4 py-1.5 text-xs font-bold rounded-full text-slate-500 hover:text-cyan-400 hover:bg-slate-800 transition-colors flex items-center gap-2 whitespace-nowrap">
-                  <FileText size={14} /> Checklists
-                </Link>
               </div>
             </div>
 
@@ -331,7 +335,6 @@ export default function InventarioMaestroPage() {
           </div>
         )}
 
-        {/* VISTA 2: ARCHIVO HISTÓRICO (BAJAS)*/}
         {tabPrincipal === 'bajas' && (
           <div className="animate-in fade-in slide-in-from-right-8 duration-500">
             {cargando ? (
@@ -471,7 +474,6 @@ export default function InventarioMaestroPage() {
         </div>
       )}
 
-      {/* 2. MODAL DE RESTAURAR BAJA */}
       {modalRestaurar && vehiculoARestaurar && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[200] flex items-center justify-center p-4 animate-in fade-in duration-200">
           <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 max-w-sm w-full shadow-2xl text-center transform transition-all animate-in zoom-in-95">

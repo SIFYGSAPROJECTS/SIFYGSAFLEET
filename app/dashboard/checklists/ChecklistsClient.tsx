@@ -206,29 +206,33 @@ export default function ChecklistsPage({ vehiculos = [], isAdmin = false }: Prop
             </h1>
           </div>
 
-          <div className="w-full md:w-auto overflow-x-auto scrollbar-hide pb-2 md:pb-0 flex justify-center md:justify-end">
-            <div className="inline-flex items-center bg-slate-900 border border-slate-800 rounded-full p-1.5 shadow-lg shrink-0 gap-1">
-              
-              {isAdmin && (
-                <>
-                  <Link href="/dashboard/usuarios" className="px-4 py-1.5 text-xs font-bold rounded-full text-slate-500 hover:text-slate-300 hover:bg-slate-800 transition-colors flex items-center gap-2 whitespace-nowrap">
-                    <User size={14} /> Usuarios
-                  </Link>
-                  <Link href="/dashboard/inventario" className="px-4 py-1.5 text-xs font-bold rounded-full text-slate-500 hover:text-slate-300 hover:bg-slate-800 transition-colors flex items-center gap-2 whitespace-nowrap">
-                    <Car size={14} /> Flota
-                  </Link>
-                </>
-              )}
-              
-              <Link href="/dashboard/servicios" className="px-4 py-1.5 text-xs font-bold rounded-full text-slate-500 hover:text-slate-300 hover:bg-slate-800 transition-colors flex items-center gap-2 whitespace-nowrap">
-                <Wrench size={14} /> Servicios
-              </Link>
+          {/*  BARRA DE ACCESOS DIRECTOS RESPONSIVA  */}
+          <div className="w-full md:w-auto overflow-x-auto scrollbar-hide pb-3">
+            {/* Aquí aplicamos el min-w-max y justify-start para el scroll en celular */}
+            <div className="flex w-full justify-start sm:justify-center md:justify-end min-w-max px-1">
+              <div className="inline-flex items-center bg-slate-900 border border-slate-800 rounded-full p-1.5 shadow-lg shrink-0 gap-1">
+                
+                {isAdmin && (
+                  <>
+                    <Link href="/dashboard/usuarios" className="px-4 py-1.5 text-xs font-bold rounded-full text-slate-500 hover:text-slate-300 hover:bg-slate-800 transition-colors flex items-center gap-2 whitespace-nowrap">
+                      <User size={14} /> Usuarios
+                    </Link>
+                    <Link href="/dashboard/inventario" className="px-4 py-1.5 text-xs font-bold rounded-full text-slate-500 hover:text-slate-300 hover:bg-slate-800 transition-colors flex items-center gap-2 whitespace-nowrap">
+                      <Car size={14} /> Flota
+                    </Link>
+                  </>
+                )}
+                
+                <Link href="/dashboard/servicios" className="px-4 py-1.5 text-xs font-bold rounded-full text-slate-500 hover:text-slate-300 hover:bg-slate-800 transition-colors flex items-center gap-2 whitespace-nowrap">
+                  <Wrench size={14} /> Servicios
+                </Link>
 
-              {/* BOTÓN ACTIVO: CHECKLISTS */}
-              <div className="px-4 py-1.5 text-xs font-bold rounded-full bg-slate-800 text-white cursor-default flex items-center gap-2 shadow-inner whitespace-nowrap">
-                <FileText size={14} className="text-cyan-500" /> Checklists
+                {/* BOTÓN ACTIVO: CHECKLISTS */}
+                <div className="px-4 py-1.5 text-xs font-bold rounded-full bg-slate-800 text-white cursor-default flex items-center gap-2 shadow-inner whitespace-nowrap">
+                  <FileText size={14} className="text-cyan-500" /> Checklists
+                </div>
+
               </div>
-
             </div>
           </div>
         </div>

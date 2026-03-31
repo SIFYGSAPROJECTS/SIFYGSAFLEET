@@ -1,7 +1,7 @@
 'use client'; 
 
 import { useState } from 'react';
-import { Lock, User, Loader2, Mail, ArrowLeft, CheckCircle2 } from 'lucide-react';
+import { Lock, User, Loader2, Mail, ArrowLeft, CheckCircle2, Eye, EyeOff } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 
@@ -11,8 +11,9 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  
+  const [showPassword, setShowPassword] = useState(false);
 
-  // ESTADOS PARA RECUPERACIÓN 
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [resetMessage, setResetMessage] = useState({ text: '', type: '' });
 
@@ -43,7 +44,6 @@ export default function LoginPage() {
     }
   };
 
-  //  FUNCIÓN PARA SOLICITAR RESTABLECIMIENTO 
   const handlePasswordReset = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -72,28 +72,47 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center p-4">
+    <div className="min-h-screen bg-black flex items-center justify-center p-4 relative overflow-hidden">
       
-      <div className="max-w-md w-full bg-slate-900 rounded-xl shadow-2xl overflow-hidden border border-slate-800">
+      <style>{`
+        @keyframes resplandor-naranja {
+          0%, 100% { opacity: 0.4; transform: translate(-50%, -50%) scale(1); }
+          50% { opacity: 0.8; transform: translate(-50%, -50%) scale(1.2); }
+        }
+        .efecto-resplandor {
+          animation: resplandor-naranja 6s ease-in-out infinite;
+        }
+      `}</style>
+
+      {/*  EL DIV DEL RESPLANDOR */}
+      <div 
+        className="efecto-resplandor absolute top-1/2 left-1/2 w-[800px] h-[800px] pointer-events-none z-0"
+        style={{
+          background: 'radial-gradient(circle, rgba(255,116,32,0.35) 0%, rgba(255,116,32,0.1) 40%, rgba(0,0,0,0) 70%)',
+        }}
+      />
+
+      {/*  TARJETA PRINCIPAL: Ahora con efecto "Cristal" (backdrop-blur-xl y fondo semi-transparente)  */}
+      <div className="max-w-md w-full bg-slate-900/60 backdrop-blur-xl rounded-xl shadow-[0_0_50px_rgba(255,116,32,0.15)] overflow-hidden border border-slate-700/50 relative z-10">
         
-        <div className="bg-slate-950 p-8 text-center border-b border-slate-800">
-          <div className="mx-auto flex justify-center mb-6">
+        <div className="bg-slate-950/40 p-8 text-center border-b border-slate-700/50">
+          <div className="mx-auto flex justify-center mb-6 relative">
+            <div className="absolute inset-0 bg-[#FF7420] blur-[50px] opacity-40 rounded-full w-24 h-24 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></div>
             <Image 
               src="/logo.png" 
               alt="Logo SIFYGSA"
               width={180} 
               height={200}
-              className="object-contain drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]"
+              className="object-contain relative z-10 drop-shadow-[0_0_20px_rgba(255,255,255,0.2)]"
               priority
             />
           </div>
-         { /*<h1 className="text-2xl font-bold text-white tracking-wide"> Fleet</h1>*/}
-          <p className="text-slate-400 text-sm mt-1">Sistema para mantenimiento de flota y gestion vehícular  </p>
+          <p className="text-slate-300 text-sm mt-1 font-medium">Sistema para mantenimiento de flota y gestión vehicular</p>
         </div>
 
-        <div className="p-8 relative">
+        <div className="p-8 relative bg-slate-900/40">
           
-          {/*  VISTA DE RECUPERACIÓN DE CONTRASEÑA  */}
+          {/* VISTA DE RECUPERACIÓN DE CONTRASEÑA */}
           {isForgotPassword ? (
             <form onSubmit={handlePasswordReset} className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
               <div className="text-center mb-6">
@@ -104,7 +123,7 @@ export default function LoginPage() {
               </div>
 
               {resetMessage.text && (
-                <div className={`p-3 text-sm rounded-lg border text-center flex flex-col items-center gap-2 ${resetMessage.type === 'error' ? 'bg-red-900/30 text-red-400 border-red-800/50' : 'bg-emerald-900/30 text-emerald-400 border-emerald-800/50'}`}>
+                <div className={`p-3 text-sm rounded-lg border text-center flex flex-col items-center gap-2 ${resetMessage.type === 'error' ? 'bg-red-900/50 text-red-400 border-red-800' : 'bg-emerald-900/50 text-emerald-400 border-emerald-800'}`}>
                   {resetMessage.type === 'success' && <CheckCircle2 className="w-5 h-5" />}
                   {resetMessage.text}
                 </div>
@@ -114,14 +133,14 @@ export default function LoginPage() {
                 <label className="block text-sm font-medium text-slate-300 mb-1">Correo Corporativo</label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Mail className="h-5 w-5 text-slate-500" />
+                    <Mail className="h-5 w-5 text-slate-400" />
                   </div>
                   <input 
                     type="email" 
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="block w-full pl-10 pr-3 py-3 bg-slate-950 border border-slate-700 rounded-lg text-white focus:ring-2 focus:ring-[#FF7420] focus:border-[#FF7420] transition-colors placeholder-slate-600 outline-none" 
+                    className="block w-full pl-10 pr-3 py-3 bg-slate-950/80 border border-slate-700/80 rounded-lg text-white focus:ring-2 focus:ring-[#FF7420] focus:border-[#FF7420] transition-colors placeholder-slate-500 outline-none backdrop-blur-md" 
                     placeholder="usuario@sifygsa.com"
                   />
                 </div>
@@ -130,7 +149,7 @@ export default function LoginPage() {
               <button 
                 type="submit" 
                 disabled={loading}
-                className="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-lg shadow-lg text-sm font-bold text-white bg-[#FF7420] hover:bg-[#E6681C] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 focus:ring-[#FF7420] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-lg shadow-[0_0_20px_rgba(255,116,32,0.3)] text-sm font-bold text-white bg-[#FF7420] hover:bg-[#E6681C] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 focus:ring-[#FF7420] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? <Loader2 className="animate-spin h-5 w-5 text-white" /> : 'Enviar Clave Temporal'}
               </button>
@@ -145,10 +164,10 @@ export default function LoginPage() {
             </form>
           ) : (
 
-            /*  VISTA NORMAL DE LOGIN  */
+            /* VISTA NORMAL DE LOGIN */
             <form onSubmit={handleLogin} className="space-y-6 animate-in fade-in slide-in-from-left-4 duration-300">
               {error && (
-                <div className="p-3 bg-red-900/30 text-red-400 text-sm rounded-lg border border-red-800/50 text-center">
+                <div className="p-3 bg-red-900/50 text-red-300 text-sm rounded-lg border border-red-800 text-center font-medium">
                   {error}
                 </div>
               )}
@@ -157,14 +176,14 @@ export default function LoginPage() {
                 <label className="block text-sm font-medium text-slate-300 mb-1">Correo Corporativo</label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <User className="h-5 w-5 text-slate-500" />
+                    <User className="h-5 w-5 text-slate-400" />
                   </div>
                   <input 
                     type="email" 
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="block w-full pl-10 pr-3 py-3 bg-slate-950 border border-slate-700 rounded-lg text-white focus:ring-2 focus:ring-[#FF7420] focus:border-[#FF7420] transition-colors placeholder-slate-600 outline-none" 
+                    className="block w-full pl-10 pr-3 py-3 bg-slate-950/80 border border-slate-700/80 rounded-lg text-white focus:ring-2 focus:ring-[#FF7420] focus:border-[#FF7420] transition-colors placeholder-slate-500 outline-none backdrop-blur-md" 
                     placeholder="usuario@sifygsa.com"
                   />
                 </div>
@@ -173,7 +192,6 @@ export default function LoginPage() {
               <div>
                 <div className="flex justify-between items-center mb-1">
                   <label className="block text-sm font-medium text-slate-300">Contraseña</label>
-                  {/*  BOTÓN DE OLVIDÉ MI CONTRASEÑA  */}
                   <button 
                     type="button"
                     onClick={() => setIsForgotPassword(true)}
@@ -184,23 +202,35 @@ export default function LoginPage() {
                 </div>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Lock className="h-5 w-5 text-slate-500" />
+                    <Lock className="h-5 w-5 text-slate-400" />
                   </div>
                   <input 
-                    type="password" 
+                    type={showPassword ? "text" : "password"} 
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="block w-full pl-10 pr-3 py-3 bg-slate-950 border border-slate-700 rounded-lg text-white focus:ring-2 focus:ring-[#FF7420] focus:border-[#FF7420] transition-colors placeholder-slate-600 outline-none" 
+                    className="block w-full pl-10 pr-12 py-3 bg-slate-950/80 border border-slate-700/80 rounded-lg text-white focus:ring-2 focus:ring-[#FF7420] focus:border-[#FF7420] transition-colors placeholder-slate-500 outline-none backdrop-blur-md" 
                     placeholder="••••••••"
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-white transition-colors focus:outline-none"
+                    tabIndex={-1}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-5 w-5" />
+                    ) : (
+                      <Eye className="h-5 w-5" />
+                    )}
+                  </button>
                 </div>
               </div>
 
               <button 
                 type="submit" 
                 disabled={loading}
-                className="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-lg shadow-lg text-sm font-bold text-white bg-[#FF7420] hover:bg-[#E6681C] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 focus:ring-[#FF7420] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-lg shadow-[0_0_20px_rgba(255,116,32,0.3)] text-sm font-bold text-white bg-[#FF7420] hover:bg-[#E6681C] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 focus:ring-[#FF7420] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? (
                   <>
@@ -214,8 +244,8 @@ export default function LoginPage() {
             </form>
           )}
 
-          <div className="mt-8 text-center border-t border-slate-800 pt-6">
-            <p className="text-xs text-slate-500">© 2026 SIFYGSA Control de Flotas v0.0</p>
+          <div className="mt-8 text-center border-t border-slate-700/50 pt-6 relative z-10">
+            <p className="text-xs text-slate-400">© 2026 SIFYGSA Control de Flotas v0.0</p>
           </div>
         </div>
       </div>
