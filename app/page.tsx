@@ -46,7 +46,6 @@ export default function LoginPage() {
     }
   };
 
-  // FUNCIÓN PARA SOLICITAR RESTABLECIMIENTO 
   const handlePasswordReset = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -78,33 +77,39 @@ export default function LoginPage() {
     <div className="min-h-screen bg-black flex items-center justify-center p-4 relative overflow-hidden">
       
       <style>{`
-        @keyframes pulso-neon {
-          0%, 100% { opacity: 0.4; transform: translate(-50%, -50%) scale(0.9); }
-          50% { opacity: 0.85; transform: translate(-50%, -50%) scale(1.1); }
+        @keyframes breath-suelo {
+          0%, 100% { opacity: 0.5; transform: scaleY(1); }
+          50% { opacity: 0.85; transform: scaleY(1.15); }
         }
-        .efecto-neon-logo {
-          animation: pulso-neon 4s ease-in-out infinite;
+        .efecto-suelo {
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          height: 45vh; /* Sube hasta casi la mitad de la pantalla */
+          /* Nace fuerte abajo en el centro y se difumina al 100% hacia los lados y arriba */
+          background: radial-gradient(ellipse at bottom center, rgba(255,116,32,0.4) 0%, rgba(255,116,32,0) 70%);
+          pointer-events: none;
+          z-index: 0;
+          animation: breath-suelo 6s ease-in-out infinite;
+          transform-origin: bottom center;
         }
       `}</style>
 
-      {/* Tarjeta de login estática */}
-      <div className="max-w-md w-full bg-slate-900 rounded-xl shadow-2xl overflow-hidden border border-slate-800">
+      <div className="efecto-suelo" />
+
+      {/* Tarjeta de login estática y sólida (con relative z-10 para estar sobre el suelo) */}
+      <div className="max-w-md w-full bg-slate-900 rounded-xl shadow-2xl overflow-hidden border border-slate-800 relative z-10">
         
+        {/* Encabezado sólido, logo estático */}
         <div className="bg-slate-950 p-8 text-center border-b border-slate-800">
-          
-          {/* Contenedor del logo con efecto detrás */}
-          <div className="relative mx-auto flex justify-center mb-6 w-full">
-            
-            {/*  RESPLANDOR TIPO NEÓN */}
-            <div className="efecto-neon-logo absolute top-1/2 left-1/2 w-[160px] h-[80px] bg-[#FF7420] rounded-full blur-[60px] pointer-events-none"></div>
-            
-            {/* SIFYGSA Logo Image */}
+          <div className="mx-auto flex justify-center mb-6">
             <Image 
               src="/logo.png" 
               alt="Logo SIFYGSA"
               width={180} 
               height={200}
-              className="object-contain relative z-10 drop-shadow-[0_0_15px_rgba(0,0,0,0.5)]" 
+              className="object-contain" 
               priority
             />
           </div>
@@ -113,7 +118,7 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <div className="p-8 relative">
+        <div className="p-8 relative bg-slate-900">
           
           {/* VISTA DE RECUPERACIÓN DE CONTRASEÑA */}
           {isForgotPassword ? (
@@ -215,11 +220,11 @@ export default function LoginPage() {
                     className="block w-full pl-10 pr-12 py-3 bg-slate-950 border border-slate-700 rounded-lg text-white focus:ring-2 focus:ring-[#FF7420] focus:border-[#FF7420] transition-colors placeholder-slate-600 outline-none" 
                     placeholder="••••••••"
                   />
-                  {/* Botón ojo / no ojo */}
+                  {/* Botón ojo / no ojo funcional */}
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-500 hover:text-slate-300 transition-colors focus:outline-none"
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-500 hover:text-white transition-colors focus:outline-none"
                     tabIndex={-1}
                   >
                     {showPassword ? (
@@ -249,7 +254,7 @@ export default function LoginPage() {
           )}
 
           <div className="mt-8 text-center border-t border-slate-800 pt-6">
-            <p className="text-xs text-slate-500">© 2026 SIFYGSA Control de Flotas v0.0</p>
+            <p className="text-xs text-slate-400">© 2026 SIFYGSA Control de Flotas v0.0</p>
           </div>
         </div>
       </div>
