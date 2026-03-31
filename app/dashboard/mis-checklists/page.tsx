@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react'; 
-import { FileText, ArrowLeft, Car, Palette, CreditCard, ExternalLink, Loader2, AlertCircle } from 'lucide-react';
+import { FileText, ArrowLeft, Car, Palette, CreditCard, ExternalLink, Loader2, AlertCircle, User, Wrench } from 'lucide-react';
 import Link from 'next/link';
 
 export default function MisChecklistsPage() {
@@ -38,28 +38,54 @@ export default function MisChecklistsPage() {
 
   return (
     <div className="min-h-screen bg-black">
-      <div className="p-8 max-w-5xl mx-auto">
+      <div className="p-4 sm:p-8 max-w-5xl mx-auto">
         
-        {/* Enlace de regreso */}
-        <div className="mb-6">
-          <Link 
-            href="/dashboard" 
-            className="inline-flex items-center gap-2 text-slate-400 hover:text-[#FF7420] transition-colors font-medium text-sm"
-          >
-            <ArrowLeft className="w-4 h-4" /> 
-            Volver al Panel Maestro
-          </Link>
-        </div>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-5 mb-10">
+          
+          <div className="flex-1 flex flex-col items-start w-full text-left">
+            {/* Enlace de regreso */}
+            <Link 
+              href="/dashboard" 
+              className="inline-flex items-center gap-2 text-slate-400 hover:text-[#FF7420] transition-colors font-medium text-sm mb-4"
+            >
+              <ArrowLeft className="w-4 h-4" /> 
+              Volver al Panel Maestro
+            </Link>
 
-        {/* Encabezado Principal */}
-        <div className="flex items-center gap-4 mb-10">
-          <div className="bg-[#FF7420]/10 p-3 rounded-xl border border-[#FF7420]/20">
-            <FileText className="w-8 h-8 text-[#FF7420]" />
+            {/* Encabezado Principal integrado a la izquierda */}
+            <div className="flex items-center gap-4">
+              <div className="bg-[#FF7420]/10 p-3 rounded-xl border border-[#FF7420]/20 shrink-0">
+                <FileText className="w-8 h-8 text-[#FF7420]" />
+              </div>
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">Mis Checklists</h1>
+                <p className="text-slate-500 text-sm mt-1">Consulta el historial de revisiones de tu unidad a cargo.</p>
+              </div>
+            </div>
           </div>
-          <div>
-            <h1 className="text-3xl font-black text-white tracking-tight">Mis Checklists</h1>
-            <p className="text-slate-500 text-sm mt-1">Consulta el historial de revisiones de tu unidad a cargo.</p>
+
+          {/* BARRA DE ACCESOS DIRECTOS RESPONSIVA  */}
+          <div className="w-full md:w-auto overflow-x-auto scrollbar-hide pb-3 pt-2 md:pt-0">
+            <div className="flex w-full justify-start sm:justify-center md:justify-end min-w-max px-1">
+              <div className="inline-flex items-center bg-slate-900 border border-slate-800 rounded-full p-1.5 shadow-lg shrink-0 gap-1">
+                
+                <Link href="/dashboard/usuarios" className="px-4 py-1.5 text-xs font-bold rounded-full text-slate-500 hover:text-slate-300 hover:bg-slate-800 transition-colors flex items-center gap-2 whitespace-nowrap">
+                  <User size={14} /> Usuarios
+                </Link>
+
+                <Link href="/dashboard/servicios" className="px-4 py-1.5 text-xs font-bold rounded-full text-slate-500 hover:text-slate-300 hover:bg-slate-800 transition-colors flex items-center gap-2 whitespace-nowrap">
+                  <Wrench size={14} /> Servicios
+                </Link>
+
+                {/* BOTÓN ACTIVO: CHECKLISTS */}
+                <div className="px-4 py-1.5 text-xs font-bold rounded-full bg-slate-800 text-white cursor-default flex items-center gap-2 shadow-inner whitespace-nowrap">
+                  <FileText size={14} className="text-cyan-500" /> Checklists
+                </div>
+
+              </div>
+            </div>
           </div>
+
         </div>
 
         {/* ESTADO DE CARGA */}

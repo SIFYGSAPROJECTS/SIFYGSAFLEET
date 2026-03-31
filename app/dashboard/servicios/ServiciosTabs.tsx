@@ -48,16 +48,16 @@ export default function ServiciosTabs({ tickets, vehiculos, isAdmin, rol }: Prop
           <div className="flex w-full justify-start sm:justify-center md:justify-end min-w-max px-1">
             <div className="inline-flex items-center bg-slate-900 border border-slate-800 rounded-full p-1.5 shadow-lg shrink-0 gap-1">
               
-              {/* Solo mostramos Usuarios y Flota si es Admin */}
+              {/*  BOTÓN DE USUARIOS SIEMPRE VISIBLE PARA TODOS  */}
+              <Link href="/dashboard/usuarios" className="px-4 py-1.5 text-xs font-bold rounded-full text-slate-500 hover:text-slate-300 hover:bg-slate-800 transition-colors flex items-center gap-2 whitespace-nowrap">
+                <User size={14} /> Usuarios
+              </Link>
+
+              {/*  FLOTA SOLO PARA ADMIN  */}
               {isAdmin && (
-                <>
-                  <Link href="/dashboard/usuarios" className="px-4 py-1.5 text-xs font-bold rounded-full text-slate-500 hover:text-slate-300 hover:bg-slate-800 transition-colors flex items-center gap-2 whitespace-nowrap">
-                    <User size={14} /> Usuarios
-                  </Link>
-                  <Link href="/dashboard/inventario" className="px-4 py-1.5 text-xs font-bold rounded-full text-slate-500 hover:text-slate-300 hover:bg-slate-800 transition-colors flex items-center gap-2 whitespace-nowrap">
-                    <Car size={14} /> Flota
-                  </Link>
-                </>
+                <Link href="/dashboard/inventario" className="px-4 py-1.5 text-xs font-bold rounded-full text-slate-500 hover:text-slate-300 hover:bg-slate-800 transition-colors flex items-center gap-2 whitespace-nowrap">
+                  <Car size={14} /> Flota
+                </Link>
               )}
               
               {/* BOTÓN ACTIVO: SERVICIOS */}
