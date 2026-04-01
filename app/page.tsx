@@ -12,12 +12,13 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   
-  // ESTADO PARA CONTROLAR LA VISIBILIDAD DE LA CONTRASEÑA
   const [showPassword, setShowPassword] = useState(false);
-
-  // ESTADOS PARA RECUPERACIÓN 
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [resetMessage, setResetMessage] = useState({ text: '', type: '' });
+
+  //  ESTADOS PARA LA TRANSICIÓN SUAVE
+  const [loginSuccess, setLoginSuccess] = useState(false);
+  const [isFadingOut, setIsFadingOut] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,13 +38,23 @@ export default function LoginPage() {
         throw new Error(data.error || 'Error al iniciar sesión');
       }
 
-      router.push('/dashboard'); 
+      // 1. Éxito: El botón se pone verde
+      setLoginSuccess(true);
+      
+      // 2. Medio segundo después, empezamos a oscurecer la pantalla suavemente
+      setTimeout(() => {
+        setIsFadingOut(true);
+      }, 500);
+
+      // 3. Un segundo después (cuando la pantalla ya está negra), cambiamos de ruta
+      setTimeout(() => {
+        router.push('/dashboard'); 
+      }, 1500);
       
     } catch (err: any) {
       setError(err.message);
-    } finally {
-      setLoading(false);
-    }
+      setLoading(false); 
+    } 
   };
 
   const handlePasswordReset = async (e: React.FormEvent) => {
@@ -74,190 +85,198 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center p-4 relative overflow-hidden">
-      
-      <style>{`
-        @keyframes breath-suelo {
-          0%, 100% { opacity: 0.5; transform: scaleY(1); }
-          50% { opacity: 0.85; transform: scaleY(1.15); }
-        }
-        .efecto-suelo {
-          position: absolute;
-          bottom: 0;
-          left: 0;
-          right: 0;
-          height: 45vh; /* Sube hasta casi la mitad de la pantalla */
-          /* Nace fuerte abajo en el centro y se difumina al 100% hacia los lados y arriba */
-          background: radial-gradient(ellipse at bottom center, rgba(255,116,32,0.4) 0%, rgba(255,116,32,0) 70%);
-          pointer-events: none;
-          z-index: 0;
-          animation: breath-suelo 6s ease-in-out infinite;
-          transform-origin: bottom center;
-        }
-      `}</style>
+    <>
+      <div 
+        className={`fixed inset-0 bg-black z-[999] transition-opacity duration-1000 ease-in-out ${isFadingOut ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} 
+      />
 
-      <div className="efecto-suelo" />
-
-      {/* Tarjeta de login estática y sólida (con relative z-10 para estar sobre el suelo) */}
-      <div className="max-w-md w-full bg-slate-900 rounded-xl shadow-2xl overflow-hidden border border-slate-800 relative z-10">
+      <div className="min-h-screen bg-black flex items-center justify-center p-4 relative overflow-hidden">
         
-        {/* Encabezado sólido, logo estático */}
-        <div className="bg-slate-950 p-8 text-center border-b border-slate-800">
-          <div className="mx-auto flex justify-center mb-6">
-            <Image 
-              src="/logo.png" 
-              alt="Logo SIFYGSA"
-              width={180} 
-              height={200}
-              className="object-contain" 
-              priority
-            />
-          </div>
-          <p className="text-slate-400 text-sm mt-1 leading-relaxed">
-            Sistema para mantenimiento de flota y gestion vehícular  
-          </p>
-        </div>
+        <style>{`
+          @keyframes breath-suelo {
+            0%, 100% { opacity: 0.5; transform: scaleY(1); }
+            50% { opacity: 0.85; transform: scaleY(1.15); }
+          }
+          .efecto-suelo {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 45vh;
+            background: radial-gradient(ellipse at bottom center, rgba(255,116,32,0.4) 0%, rgba(255,116,32,0) 70%);
+            pointer-events: none;
+            z-index: 0;
+            animation: breath-suelo 6s ease-in-out infinite;
+            transform-origin: bottom center;
+          }
+        `}</style>
 
-        <div className="p-8 relative bg-slate-900">
+        <div className="efecto-suelo" />
+
+        <div className="max-w-md w-full bg-slate-900 rounded-xl shadow-2xl overflow-hidden border border-slate-800 relative z-10">
           
-          {/* VISTA DE RECUPERACIÓN DE CONTRASEÑA */}
-          {isForgotPassword ? (
-            <form onSubmit={handlePasswordReset} className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-              <div className="text-center mb-6">
-                <h2 className="text-lg font-bold text-white tracking-wide">Recuperar Acceso</h2>
-                <p className="text-slate-400 text-xs mt-2">
-                  Ingresa tu correo corporativo. Te enviaremos una clave temporal de 6 dígitos.
-                </p>
-              </div>
+          <div className="bg-slate-950 p-8 text-center border-b border-slate-800">
+            <div className="mx-auto flex justify-center mb-6">
+              <Image 
+                src="/logo.png" 
+                alt="Logo SIFYGSA"
+                width={180} 
+                height={200}
+                className="object-contain" 
+                priority
+              />
+            </div>
+            <p className="text-slate-400 text-sm mt-1 leading-relaxed">
+              Sistema para mantenimiento de flota y gestion vehícular  
+            </p>
+          </div>
 
-              {resetMessage.text && (
-                <div className={`p-3 text-sm rounded-lg border text-center flex flex-col items-center gap-2 ${resetMessage.type === 'error' ? 'bg-red-900/30 text-red-400 border-red-800/50' : 'bg-emerald-900/30 text-emerald-400 border-emerald-800/50'}`}>
-                  {resetMessage.type === 'success' && <CheckCircle2 className="w-5 h-5" />}
-                  {resetMessage.text}
+          <div className="p-8 relative bg-slate-900">
+            
+            {isForgotPassword ? (
+              <form onSubmit={handlePasswordReset} className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
+                <div className="text-center mb-6">
+                  <h2 className="text-lg font-bold text-white tracking-wide">Recuperar Acceso</h2>
+                  <p className="text-slate-400 text-xs mt-2">
+                    Ingresa tu correo corporativo. Te enviaremos una clave temporal de 6 dígitos.
+                  </p>
                 </div>
-              )}
 
-              <div className="space-y-1">
-                <label className="block text-sm font-medium text-slate-300">Correo Corporativo</label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Mail className="h-5 w-5 text-slate-500" />
+                {resetMessage.text && (
+                  <div className={`p-3 text-sm rounded-lg border text-center flex flex-col items-center gap-2 ${resetMessage.type === 'error' ? 'bg-red-900/30 text-red-400 border-red-800/50' : 'bg-emerald-900/30 text-emerald-400 border-emerald-800/50'}`}>
+                    {resetMessage.type === 'success' && <CheckCircle2 className="w-5 h-5" />}
+                    {resetMessage.text}
                   </div>
-                  <input 
-                    type="email" 
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="block w-full pl-10 pr-3 py-3 bg-slate-950 border border-slate-700 rounded-lg text-white focus:ring-2 focus:ring-[#FF7420] focus:border-[#FF7420] transition-colors placeholder-slate-600 outline-none" 
-                    placeholder="usuario@sifygsa.com"
-                  />
-                </div>
-              </div>
-
-              <button 
-                type="submit" 
-                disabled={loading}
-                className="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-lg shadow-lg text-sm font-bold text-white bg-[#FF7420] hover:bg-[#E6681C] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 focus:ring-[#FF7420] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading ? <Loader2 className="animate-spin h-5 w-5 text-white" /> : 'Enviar Clave Temporal'}
-              </button>
-
-              <button 
-                type="button"
-                onClick={() => { setIsForgotPassword(false); setResetMessage({text:'', type:''}); setError(''); }}
-                className="w-full flex items-center justify-center gap-2 text-sm text-slate-400 hover:text-white transition-colors mt-2"
-              >
-                <ArrowLeft className="w-4 h-4" /> Volver al Login
-              </button>
-            </form>
-          ) : (
-
-            /* VISTA NORMAL DE LOGIN */
-            <form onSubmit={handleLogin} className="space-y-6 animate-in fade-in slide-in-from-left-4 duration-300 relative z-10">
-              {error && (
-                <div className="p-3 bg-red-900/30 text-red-400 text-sm rounded-lg border border-red-800/50 text-center font-medium">
-                  {error}
-                </div>
-              )}
-
-              <div className="space-y-1">
-                <label className="block text-sm font-medium text-slate-300">Correo Corporativo</label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <User className="h-5 w-5 text-slate-500" />
-                  </div>
-                  <input 
-                    type="email" 
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="block w-full pl-10 pr-3 py-3 bg-slate-950 border border-slate-700 rounded-lg text-white focus:ring-2 focus:ring-[#FF7420] focus:border-[#FF7420] transition-colors placeholder-slate-600 outline-none" 
-                    placeholder="usuario@sifygsa.com"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <div className="flex justify-between items-center">
-                  <label className="block text-sm font-medium text-slate-300">Contraseña</label>
-                  <button 
-                    type="button"
-                    onClick={() => setIsForgotPassword(true)}
-                    className="text-xs text-[#FF7420] hover:text-[#E6681C] font-semibold transition-colors"
-                  >
-                    ¿Olvidaste tu contraseña?
-                  </button>
-                </div>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Lock className="h-5 w-5 text-slate-500" />
-                  </div>
-                  <input 
-                    type={showPassword ? "text" : "password"} 
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="block w-full pl-10 pr-12 py-3 bg-slate-950 border border-slate-700 rounded-lg text-white focus:ring-2 focus:ring-[#FF7420] focus:border-[#FF7420] transition-colors placeholder-slate-600 outline-none" 
-                    placeholder="••••••••"
-                  />
-                  {/* Botón ojo / no ojo funcional */}
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-500 hover:text-white transition-colors focus:outline-none"
-                    tabIndex={-1}
-                  >
-                    {showPassword ? (
-                      <EyeOff className="h-5 w-5" />
-                    ) : (
-                      <Eye className="h-5 w-5" />
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              <button 
-                type="submit" 
-                disabled={loading}
-                className="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-lg shadow-lg text-sm font-bold text-white bg-[#FF7420] hover:bg-[#E6681C] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 focus:ring-[#FF7420] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="animate-spin -ml-1 mr-2 h-5 w-5 text-white" />
-                    Verificando...
-                  </>
-                ) : (
-                  'Iniciar Sesión'
                 )}
-              </button>
-            </form>
-          )}
 
-          <div className="mt-8 text-center border-t border-slate-800 pt-6">
-            <p className="text-xs text-slate-400">© 2026 SIFYGSA Control de Flotas v1.0</p>
+                <div className="space-y-1">
+                  <label className="block text-sm font-medium text-slate-300">Correo Corporativo</label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Mail className="h-5 w-5 text-slate-500" />
+                    </div>
+                    <input 
+                      type="email" 
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="block w-full pl-10 pr-3 py-3 bg-slate-950 border border-slate-700 rounded-lg text-white focus:ring-2 focus:ring-[#FF7420] focus:border-[#FF7420] transition-colors placeholder-slate-600 outline-none" 
+                      placeholder="usuario@sifygsa.com"
+                    />
+                  </div>
+                </div>
+
+                <button 
+                  type="submit" 
+                  disabled={loading}
+                  className="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-lg shadow-lg text-sm font-bold text-white bg-[#FF7420] hover:bg-[#E6681C] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 focus:ring-[#FF7420] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {loading ? <Loader2 className="animate-spin h-5 w-5 text-white" /> : 'Enviar Clave Temporal'}
+                </button>
+
+                <button 
+                  type="button"
+                  onClick={() => { setIsForgotPassword(false); setResetMessage({text:'', type:''}); setError(''); }}
+                  className="w-full flex items-center justify-center gap-2 text-sm text-slate-400 hover:text-white transition-colors mt-2"
+                >
+                  <ArrowLeft className="w-4 h-4" /> Volver al Login
+                </button>
+              </form>
+            ) : (
+
+              <form onSubmit={handleLogin} className="space-y-6 animate-in fade-in slide-in-from-left-4 duration-300 relative z-10">
+                {error && (
+                  <div className="p-3 bg-red-900/30 text-red-400 text-sm rounded-lg border border-red-800/50 text-center font-medium">
+                    {error}
+                  </div>
+                )}
+
+                <div className="space-y-1">
+                  <label className="block text-sm font-medium text-slate-300">Correo Corporativo</label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <User className="h-5 w-5 text-slate-500" />
+                    </div>
+                    <input 
+                      type="email" 
+                      required
+                      disabled={loading || loginSuccess}
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="block w-full pl-10 pr-3 py-3 bg-slate-950 border border-slate-700 rounded-lg text-white focus:ring-2 focus:ring-[#FF7420] focus:border-[#FF7420] transition-colors placeholder-slate-600 outline-none disabled:opacity-50" 
+                      placeholder="usuario@sifygsa.com"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <div className="flex justify-between items-center">
+                    <label className="block text-sm font-medium text-slate-300">Contraseña</label>
+                    <button 
+                      type="button"
+                      onClick={() => setIsForgotPassword(true)}
+                      className="text-xs text-[#FF7420] hover:text-[#E6681C] font-semibold transition-colors"
+                    >
+                      ¿Olvidaste tu contraseña?
+                    </button>
+                  </div>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Lock className="h-5 w-5 text-slate-500" />
+                    </div>
+                    <input 
+                      type={showPassword ? "text" : "password"} 
+                      required
+                      disabled={loading || loginSuccess}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="block w-full pl-10 pr-12 py-3 bg-slate-950 border border-slate-700 rounded-lg text-white focus:ring-2 focus:ring-[#FF7420] focus:border-[#FF7420] transition-colors placeholder-slate-600 outline-none disabled:opacity-50" 
+                      placeholder="••••••••"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-500 hover:text-white transition-colors focus:outline-none"
+                      tabIndex={-1}
+                    >
+                      {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Botón con transición suave de colores y contenido */}
+                <button 
+                  type="submit" 
+                  disabled={loading || loginSuccess}
+                  className={`w-full flex justify-center items-center gap-2 py-3.5 px-4 border border-transparent rounded-lg shadow-lg text-sm font-bold text-white transition-colors duration-500 focus:outline-none disabled:cursor-not-allowed ${
+                    loginSuccess 
+                      ? 'bg-emerald-600 hover:bg-emerald-600' 
+                      : 'bg-[#FF7420] hover:bg-[#E6681C]'
+                  }`}
+                >
+                  {loginSuccess ? (
+                    <>
+                      <CheckCircle2 className="h-5 w-5 text-white" />
+                      ¡Iniciando!
+                    </>
+                  ) : loading ? (
+                    <>
+                      <Loader2 className="animate-spin h-5 w-5 text-white" />
+                      Verificando...
+                    </>
+                  ) : (
+                    'Iniciar Sesión'
+                  )}
+                </button>
+              </form>
+            )}
+
+            <div className="mt-8 text-center border-t border-slate-800 pt-6">
+              <p className="text-xs text-slate-400">© 2026 SIFYGSA Control de Flotas v1.0</p>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
