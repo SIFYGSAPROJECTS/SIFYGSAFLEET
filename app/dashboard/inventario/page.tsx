@@ -35,8 +35,11 @@ export default function InventarioMaestroPage() {
   const [cargando, setCargando] = useState(true);
   
   const [tabPrincipal, setTabPrincipal] = useState<TabPrincipal>('activos');
-
   const [filtroActivo, setFiltroActivo] = useState<TipoFiltroActivo>('Activo en flota');
+  
+  //  ESTADO PARA EL FILTRO DE EMPRESA
+  const [filtroEmpresa, setFiltroEmpresa] = useState<string>('Todas');
+
   const [modalAbierto, setModalAbierto] = useState(false);
   const [modoEdicion, setModoEdicion] = useState(false); 
   const [formData, setFormData] = useState({
@@ -71,8 +74,19 @@ export default function InventarioMaestroPage() {
     cargarVehiculos();
   }, []);
 
-  const vehiculosActivosFlota = vehiculos.filter(v => v.Estatus_Operativo !== 'Dado de baja');
-  const vehiculosBaja = vehiculos.filter(v => v.Estatus_Operativo === 'Dado de baja');
+  // Extraemos automáticamente los prefijos 
+  const empresasDisponibles = Array.from(
+    new Set(vehiculos.map(v => v.Consecutivo?.split('-')[0]))
+  ).filter(Boolean).sort();
+
+  //  FILTRAMOS TODA LA DATA POR LA EMPRESA SELECCIONADA 
+  const vehiculosSegunEmpresa = vehiculos.filter(v => 
+    filtroEmpresa === 'Todas' ? true : v.Consecutivo?.startsWith(filtroEmpresa + '-')
+  );
+
+  //  LAS PESTAÑAS Y LOS CONTADORES SE BASAN EN LA EMPRESA FILTRADA
+  const vehiculosActivosFlota = vehiculosSegunEmpresa.filter(v => v.Estatus_Operativo !== 'Dado de baja');
+  const vehiculosBaja = vehiculosSegunEmpresa.filter(v => v.Estatus_Operativo === 'Dado de baja');
   
   const totalActivos = vehiculosActivosFlota.filter(v => v.Estatus_Operativo === 'Activo en flota').length;
   const totalSiniestrados = vehiculosActivosFlota.filter(v => v.Estatus_Operativo === 'Siniestrado').length;
@@ -194,9 +208,7 @@ export default function InventarioMaestroPage() {
           </div>
 
           <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-end gap-4 w-full lg:w-auto">
-            {/* RESPONSIVIDAD */}
             <div className="w-full sm:w-auto overflow-x-auto scrollbar-hide pb-3">
-              {/* min-w-max y justify-start para móviles */}
               <div className="flex w-full justify-start sm:justify-center lg:justify-end min-w-max px-1">
                 <div className="inline-flex items-center bg-slate-900 border border-slate-800 rounded-full p-1.5 shadow-lg shrink-0 gap-1">
                   <Link href="/dashboard/usuarios" className="px-4 py-1.5 text-xs font-bold rounded-full text-slate-500 hover:text-slate-300 hover:bg-slate-800 transition-colors flex items-center gap-2 whitespace-nowrap">
@@ -223,21 +235,43 @@ export default function InventarioMaestroPage() {
           </div>
         </div>
 
-        <div className="flex space-x-1 sm:space-x-4 border-b border-slate-800 mb-8 overflow-x-auto scrollbar-hide w-full">
-          <button 
-            onClick={() => setTabPrincipal('activos')}
-            className={`px-4 sm:px-6 py-3.5 font-bold text-sm sm:text-base flex items-center gap-2 border-b-2 transition-all whitespace-nowrap shrink-0 ${tabPrincipal === 'activos' ? 'border-[#FF7420] text-[#FF7420]' : 'border-transparent text-slate-500 hover:text-slate-300'}`}
-          >
-            <ShieldCheck size={20} /> Flota Activa 
-            <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${tabPrincipal === 'activos' ? 'bg-[#FF7420] text-white' : 'bg-slate-800 text-slate-400'}`}>{vehiculosActivosFlota.length}</span>
-          </button>
-          <button 
-            onClick={() => setTabPrincipal('bajas')}
-            className={`px-4 sm:px-6 py-3.5 font-bold text-sm sm:text-base flex items-center gap-2 border-b-2 transition-all whitespace-nowrap shrink-0 ${tabPrincipal === 'bajas' ? 'border-red-500 text-red-500' : 'border-transparent text-slate-500 hover:text-slate-300'}`}
-          >
-            <Archive size={20} /> Unidades (bajas)
-            <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${tabPrincipal === 'bajas' ? 'bg-red-500 text-white' : 'bg-slate-800 text-slate-400'}`}>{vehiculosBaja.length}</span>
-          </button>
+        {/* FILTRO DE EMPRESAS */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end border-b border-slate-800 mb-8 w-full gap-4 sm:gap-0">
+          <div className="flex space-x-1 sm:space-x-4 overflow-x-auto scrollbar-hide w-full sm:w-auto">
+            <button 
+              onClick={() => setTabPrincipal('activos')}
+              className={`px-4 sm:px-6 py-3.5 font-bold text-sm sm:text-base flex items-center gap-2 border-b-2 transition-all whitespace-nowrap shrink-0 ${tabPrincipal === 'activos' ? 'border-[#FF7420] text-[#FF7420]' : 'border-transparent text-slate-500 hover:text-slate-300'}`}
+            >
+              <ShieldCheck size={20} /> Flota Activa 
+              <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${tabPrincipal === 'activos' ? 'bg-[#FF7420] text-white' : 'bg-slate-800 text-slate-400'}`}>{vehiculosActivosFlota.length}</span>
+            </button>
+            <button 
+              onClick={() => setTabPrincipal('bajas')}
+              className={`px-4 sm:px-6 py-3.5 font-bold text-sm sm:text-base flex items-center gap-2 border-b-2 transition-all whitespace-nowrap shrink-0 ${tabPrincipal === 'bajas' ? 'border-red-500 text-red-500' : 'border-transparent text-slate-500 hover:text-slate-300'}`}
+            >
+              <Archive size={20} /> Unidades (bajas)
+              <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${tabPrincipal === 'bajas' ? 'bg-red-500 text-white' : 'bg-slate-800 text-slate-400'}`}>{vehiculosBaja.length}</span>
+            </button>
+          </div>
+          
+          {/* NUEVO COMPONENTE: SELECTOR DE EMPRESA */}
+          <div className="pb-3 w-full sm:w-auto shrink-0 flex items-center justify-end">
+            <div className="relative">
+              <select
+                value={filtroEmpresa}
+                onChange={(e) => setFiltroEmpresa(e.target.value)}
+                className="w-full sm:w-auto bg-slate-900 border border-slate-700 text-slate-300 text-sm font-bold rounded-xl px-4 py-2 outline-none focus:border-[#FF7420] transition-colors cursor-pointer appearance-none pr-10 shadow-lg"
+              >
+                <option value="Todas"> Todas las Empresas</option>
+                {empresasDisponibles.map((emp) => (
+                  <option key={emp} value={emp}> Flota: {emp}</option>
+                ))}
+              </select>
+              <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none text-slate-500">
+                ▼
+              </div>
+            </div>
+          </div>
         </div>
 
         {tabPrincipal === 'activos' && (

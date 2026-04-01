@@ -16,28 +16,43 @@ export async function GET() {
   }
 }
 
-// 2. REGISTRAR UN NUEVO EMPLEADO
+// 2. REGISTRAR UN NUEVO EMPLEADO + ASIGNAR VEHÍCULO
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { Email, Nombre_Empleado, A_Paterno, A_Materno, Cargo, Departamento, Rol, Estatus_Acceso } = body;
+    //  AGREGAMOS Consecutivo_Vehiculo A LA EXTRACCIÓN DE DATOS
+    const { Email, Nombre_Empleado, A_Paterno, A_Materno, Cargo, Departamento, Rol, Estatus_Acceso, Consecutivo_Vehiculo } = body;
 
     // GENERAMOS UNA CONTRASEÑA TEMPORAL Y LA ENCRIPTAMOS
     const passwordTemporal = Math.random().toString(36).slice(-8) + "S!fy";
     const hashedPassword = await bcrypt.hash(passwordTemporal, 12);
 
-    const nuevoEmpleado = await prisma.empleados.create({
-      data: {
-        Email: Email.toLowerCase(),
-        Nombre_Empleado,
-        A_Paterno,
-        A_Materno,
-        Cargo,
-        Departamento,
-        Rol: Rol || 'USER',
-        Estatus_Acceso: Estatus_Acceso || 'Activo',
-        Password: hashedPassword, 
+    //  USAMOS UNA TRANSACCIÓN PARA CREAR AL EMPLEADO Y ASIGNARLE EL CARRO DE FORMA SEGURA
+    const nuevoEmpleado = await prisma.$transaction(async (tx) => {
+      // Creamos el empleado
+      const empleado = await tx.empleados.create({
+        data: {
+          Email: Email.toLowerCase(),
+          Nombre_Empleado,
+          A_Paterno,
+          A_Materno,
+          Cargo,
+          Departamento,
+          Rol: Rol || 'USER',
+          Estatus_Acceso: Estatus_Acceso || 'Activo',
+          Password: hashedPassword, 
+        }
+      });
+
+      // Si seleccionaron un vehículo, lo asignamos a este correo
+      if (Consecutivo_Vehiculo) {
+        await tx.inventario_Automoviles.update({
+          where: { Consecutivo: Consecutivo_Vehiculo },
+          data: { Email_encargado: Email.toLowerCase() }
+        });
       }
+
+      return empleado;
     });
 
     //  ¡NUEVO: ENVÍO DE CORREO AL EMPLEADO! 
@@ -81,30 +96,52 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true, data: nuevoEmpleado });
   } catch (error: any) {
     if (error.code === 'P2002') {
-      return NextResponse.json({ error: 'Este correo electrónico ya está registrado en el sistema.' }, { status: 400 });
+      return NextResponse.json({ error: 'Este correo electrónico ya está registrado o el vehículo ya está asignado.' }, { status: 400 });
     }
     console.error('❌ Error interno:', error);
     return NextResponse.json({ error: 'Error interno en el servidor' }, { status: 500 });
   }
 }
 
-// 3. ACTUALIZAR UN EMPLEADO (Rol, Cargo, Estatus, etc.)
+// 3. ACTUALIZAR UN EMPLEADO + CAMBIO INTELIGENTE DE VEHÍCULO
 export async function PUT(request: Request) {
   try {
     const body = await request.json();
-    const { Email, Nombre_Empleado, A_Paterno, A_Materno, Cargo, Departamento, Rol, Estatus_Acceso } = body;
+    //  AGREGAMOS Consecutivo_Vehiculo
+    const { Email, Nombre_Empleado, A_Paterno, A_Materno, Cargo, Departamento, Rol, Estatus_Acceso, Consecutivo_Vehiculo } = body;
 
-    const empleadoActualizado = await prisma.empleados.update({
-      where: { Email },
-      data: {
-        Nombre_Empleado,
-        A_Paterno,
-        A_Materno,
-        Cargo,
-        Departamento,
-        Rol,
-        Estatus_Acceso, 
+    //  USAMOS TRANSACCIÓN PARA LIMPIAR Y ASIGNAR SIN ROMPER LA BD
+    const empleadoActualizado = await prisma.$transaction(async (tx) => {
+      
+      // 1. Limpiamos cualquier vehículo que tuviera asignado este empleado antes
+      await tx.inventario_Automoviles.updateMany({
+        where: { Email_encargado: Email },
+        data: { Email_encargado: null }
+      });
+
+      // 2. Actualizamos la información del empleado
+      const emp = await tx.empleados.update({
+        where: { Email },
+        data: {
+          Nombre_Empleado,
+          A_Paterno,
+          A_Materno,
+          Cargo,
+          Departamento,
+          Rol,
+          Estatus_Acceso, 
+        }
+      });
+
+      // 3. Si eligieron un vehículo nuevo en el buscador, se lo asignamos
+      if (Consecutivo_Vehiculo) {
+        await tx.inventario_Automoviles.update({
+          where: { Consecutivo: Consecutivo_Vehiculo },
+          data: { Email_encargado: Email }
+        });
       }
+
+      return emp;
     });
 
     return NextResponse.json({ success: true, data: empleadoActualizado });

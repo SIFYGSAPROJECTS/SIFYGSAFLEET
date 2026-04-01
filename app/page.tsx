@@ -254,7 +254,7 @@ export default function LoginPage() {
           )}
 
           <div className="mt-8 text-center border-t border-slate-800 pt-6">
-            <p className="text-xs text-slate-400">© 2026 SIFYGSA Control de Flotas v0.0</p>
+            <p className="text-xs text-slate-400">© 2026 SIFYGSA Control de Flotas v1.0</p>
           </div>
         </div>
       </div>
