@@ -3,7 +3,7 @@ import type { NextRequest } from 'next/server';
 
 // (Dominios Permitidos para la API)
 const allowedOrigins = [
-  'https://sifygsa-projects-ksq4.vercel.app',
+  'https://flota.sifygsa.com',
   'http://localhost:3000'
 ];
 
