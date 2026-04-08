@@ -2,11 +2,11 @@
   "name": "sifygsa-fleet",
   "version": "0.1.0",
   "private": true,
-  "scripts": {
+"scripts": {
     "dev": "next dev",
     "prebuild": "node -e \"const fs = require('fs'); ['.next/server', '.next/static', '.next/types'].forEach(p => { try { fs.rmSync(p, { recursive: true, force: true }); } catch (e) {} });\"",
-    "build": "next build",
-    "start": "next start",
+    "build": "prisma generate && next build",
+    "start": "next start -H 0.0.0.0 -p 3000",
     "lint": "next lint"
   },
   "dependencies": {
