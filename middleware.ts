@@ -17,13 +17,14 @@ export function middleware(request: NextRequest) {
     default-src 'self';
     script-src 'self' 'nonce-${nonce}' 'strict-dynamic';
     style-src 'self' 'unsafe-inline';
-    img-src 'self' blob: data: https://*.supabase.co;
+    img-src 'self' blob: data: https://*.supabase.co https://*.easypanel.host;
     font-src 'self' data:;
-    object-src 'none';
+    object-src 'self' https://*.easypanel.host;
     base-uri 'self';
     form-action 'self';
     frame-ancestors 'none';
-    connect-src 'self' https://*.supabase.co;
+    frame-src 'self' https://*.easypanel.host;
+    connect-src 'self' https://*.supabase.co https://*.easypanel.host;
     upgrade-insecure-requests;
   `.replace(/\s{2,}/g, ' ').trim();
 

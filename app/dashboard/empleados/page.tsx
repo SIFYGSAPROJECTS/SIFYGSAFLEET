@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { UserPlus, X, Pencil, ShieldAlert, ShieldCheck, UserMinus, UserCheck, Loader2, AlertTriangle, Car, PlusCircle } from 'lucide-react';
+import SystemModal, { ModalType } from '@/components/ui/SystemModal';
 
 interface Empleado {
   Email: string;
@@ -33,6 +34,7 @@ export default function PersonalPage() {
   const [modalAccesoAbierto, setModalAccesoAbierto] = useState(false);
   const [empleadoSeleccionado, setEmpleadoSeleccionado] = useState<Empleado | null>(null);
   const [procesandoAcceso, setProcesandoAcceso] = useState(false);
+  const [sysModal, setSysModal] = useState<{isOpen: boolean, type: ModalType, title: string, message: React.ReactNode, confirmText?: string, onConfirm?: () => void}>({ isOpen: false, type: 'info', title: '', message: '' });
 
   // ESTADOS DEL BUSCADOR INTELIGENTE
   const [busquedaVehiculo, setBusquedaVehiculo] = useState('');
@@ -120,8 +122,12 @@ export default function PersonalPage() {
       });
       if (res.ok) {
         setModalAccesoAbierto(false); setEmpleadoSeleccionado(null); cargarEmpleados();
-      } else alert('Error al procesar el cambio de acceso.');
-    } catch (error) { alert('Error de conexión.'); }
+      } else {
+        setSysModal({ isOpen: true, type: 'error', title: 'Error', message: 'Error al procesar el cambio de acceso.' });
+      }
+    } catch (error) { 
+      setSysModal({ isOpen: true, type: 'error', title: 'Error', message: 'Error de conexión.' }); 
+    }
     setProcesandoAcceso(false);
   };
 
@@ -144,11 +150,16 @@ export default function PersonalPage() {
         setModalAbierto(false); 
         cargarEmpleados(); 
         cargarVehiculos(); // Recargamos para refrescar quién tiene qué carro
-        if (!modoEdicion) alert('✅ Colaborador registrado y accesos enviados.');
+        if (!modoEdicion) {
+          setSysModal({ isOpen: true, type: 'success', title: 'Usuario Creado', message: '✅ Colaborador registrado y accesos enviados.' });
+        }
       } else {
-        const errorData = await res.json(); alert(`❌ Error: ${errorData.error}`);
+        const errorData = await res.json(); 
+        setSysModal({ isOpen: true, type: 'error', title: 'Error', message: errorData.error });
       }
-    } catch (error) { alert('Error de conexión.'); } finally { setGuardando(false); }
+    } catch (error) { 
+      setSysModal({ isOpen: true, type: 'error', title: 'Error', message: 'Error de conexión.' }); 
+    } finally { setGuardando(false); }
   };
 
   return (
@@ -409,23 +420,27 @@ export default function PersonalPage() {
       )}
 
       {/* MODAL DE BLOQUEAR ACCESO */}
-      {modalAccesoAbierto && empleadoSeleccionado && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[200] flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 max-w-sm w-full shadow-2xl text-center transform transition-all animate-in zoom-in-95">
-            <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-5 border ${empleadoSeleccionado.Estatus_Acceso === 'Inactivo' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' : 'bg-red-500/10 border-red-500/20 text-red-500'}`}>
-              {empleadoSeleccionado.Estatus_Acceso === 'Inactivo' ? <UserCheck className="w-8 h-8" /> : <AlertTriangle className="w-8 h-8" />}
-            </div>
-            <h3 className="text-xl font-black text-white mb-2">{empleadoSeleccionado.Estatus_Acceso === 'Inactivo' ? '¿Restaurar Acceso?' : '¿Revocar Acceso?'}</h3>
-            <p className="text-slate-400 text-sm mb-6 leading-relaxed">Estás a punto de <strong className={empleadoSeleccionado.Estatus_Acceso === 'Inactivo' ? 'text-emerald-400' : 'text-red-400'}>{empleadoSeleccionado.Estatus_Acceso === 'Inactivo' ? 'reactivar' : 'bloquear'}</strong> el acceso para <strong className="text-white font-bold">{empleadoSeleccionado.Nombre_Empleado}</strong>.</p>
-            <div className="flex flex-col sm:flex-row gap-3">
-              <button onClick={() => setModalAccesoAbierto(false)} disabled={procesandoAcceso} className="flex-1 bg-slate-950 border border-slate-700 hover:bg-slate-800 text-slate-300 font-bold py-3 px-4 rounded-xl transition-colors">Cancelar</button>
-              <button onClick={confirmarCambioAcceso} disabled={procesandoAcceso} className={`flex-1 text-white font-bold py-3 px-4 rounded-xl transition-colors disabled:opacity-50 flex justify-center items-center gap-2 shadow-lg ${empleadoSeleccionado.Estatus_Acceso === 'Inactivo' ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-red-600 hover:bg-red-700'}`}>
-                {procesandoAcceso ? <Loader2 className="w-5 h-5 animate-spin" /> : (empleadoSeleccionado.Estatus_Acceso === 'Inactivo' ? 'Sí, Restaurar' : 'Sí, Bloquear')}
-              </button>
-            </div>
-          </div>
-        </div>
+      {empleadoSeleccionado && (
+        <SystemModal
+          isOpen={modalAccesoAbierto}
+          type={empleadoSeleccionado.Estatus_Acceso === 'Inactivo' ? 'success' : 'error'}
+          title={empleadoSeleccionado.Estatus_Acceso === 'Inactivo' ? '¿Restaurar Acceso?' : '¿Revocar Acceso?'}
+          message={<>Estás a punto de <strong className={empleadoSeleccionado.Estatus_Acceso === 'Inactivo' ? 'text-emerald-400' : 'text-red-400'}>{empleadoSeleccionado.Estatus_Acceso === 'Inactivo' ? 'reactivar' : 'bloquear'}</strong> el acceso para <strong className="text-white font-bold">{empleadoSeleccionado.Nombre_Empleado}</strong>.</>}
+          onCancel={() => setModalAccesoAbierto(false)}
+          onConfirm={confirmarCambioAcceso}
+          isProcessing={procesandoAcceso}
+          confirmText={empleadoSeleccionado.Estatus_Acceso === 'Inactivo' ? 'Sí, Restaurar' : 'Sí, Bloquear'}
+        />
       )}
+
+      <SystemModal
+        isOpen={sysModal.isOpen}
+        type={sysModal.type}
+        title={sysModal.title}
+        message={sysModal.message}
+        confirmText={sysModal.confirmText}
+        onConfirm={sysModal.onConfirm || (() => setSysModal({ ...sysModal, isOpen: false }))}
+      />
     </div>
   );
 }

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Car, Plus, X, Pencil, ArrowLeft, ShieldCheck, AlertTriangle, Wrench, CheckCircle2, Archive, RotateCcw, AlertCircle, User, FileText } from 'lucide-react';
 import Link from 'next/link';
+import SystemModal, { ModalType } from '@/components/ui/SystemModal';
 
 interface Vehiculo {
   Consecutivo: string;
@@ -42,6 +43,7 @@ export default function InventarioMaestroPage() {
 
   const [modalAbierto, setModalAbierto] = useState(false);
   const [modoEdicion, setModoEdicion] = useState(false); 
+  const [sysModal, setSysModal] = useState<{isOpen: boolean, type: ModalType, title: string, message: React.ReactNode}>({ isOpen: false, type: 'info', title: '', message: '' }); 
   const [formData, setFormData] = useState({
     Consecutivo: '', Placa: '', Marca: '', Modelo: '', Color: '', Linea: '', 
     Numero_Serie: '', Poliza_Seguro: '', Departamento: '', Contrato: '', Ubicacion: '', Percance: '',
@@ -150,10 +152,10 @@ export default function InventarioMaestroPage() {
         if (formData.Estatus_Operativo === 'Dado de baja') setTabPrincipal('bajas');
       } else {
         const errorData = await res.json();
-        alert(`❌ Error: ${errorData.error}`);
+        setSysModal({ isOpen: true, type: 'error', title: 'Error', message: errorData.error });
       }
     } catch (error) {
-      alert('Error de conexión al procesar el vehículo.');
+      setSysModal({ isOpen: true, type: 'error', title: 'Error de Conexión', message: 'Hubo un error de conexión al procesar el vehículo.' });
     }
   };
 
@@ -177,10 +179,10 @@ export default function InventarioMaestroPage() {
         cargarVehiculos();
         setTabPrincipal('activos'); 
       } else {
-        alert('❌ Error al intentar restaurar la unidad.');
+        setSysModal({ isOpen: true, type: 'error', title: 'Error', message: 'No se pudo restaurar la unidad.' });
       }
     } catch (error) {
-      alert('Error de conexión al procesar la solicitud.');
+      setSysModal({ isOpen: true, type: 'error', title: 'Error de Conexión', message: 'Fallo al conectar con el servidor.' });
     }
     setProcesando(false);
   };
@@ -508,27 +510,26 @@ export default function InventarioMaestroPage() {
         </div>
       )}
 
-      {modalRestaurar && vehiculoARestaurar && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[200] flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 max-w-sm w-full shadow-2xl text-center transform transition-all animate-in zoom-in-95">
-            <div className="w-16 h-16 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-5 border border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.2)]">
-              <RotateCcw className="text-emerald-500 w-8 h-8" />
-            </div>
-            <h3 className="text-xl font-black text-white mb-2">¿Restaurar Unidad?</h3>
-            <p className="text-slate-400 text-sm mb-6 leading-relaxed">
-              Estás a punto de reactivar la unidad <strong className="text-emerald-400 font-bold">{vehiculoARestaurar.Consecutivo}</strong>. Esta volverá a estar disponible en el Inventario Maestro como "Activa en flota".
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3">
-              <button onClick={() => setModalRestaurar(false)} disabled={procesando} className="flex-1 bg-slate-950 border border-slate-700 hover:bg-slate-800 text-slate-300 font-bold py-3 px-4 rounded-xl transition-colors">
-                Cancelar
-              </button>
-              <button onClick={confirmarRestauracion} disabled={procesando} className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-xl transition-colors disabled:opacity-50 flex justify-center items-center gap-2 shadow-lg shadow-emerald-600/20">
-                {procesando ? 'Procesando...' : 'Sí, restaurar'}
-              </button>
-            </div>
-          </div>
-        </div>
+      {vehiculoARestaurar && (
+        <SystemModal
+          isOpen={modalRestaurar}
+          type="confirm"
+          title="¿Restaurar Unidad?"
+          message={<>Estás a punto de reactivar la unidad <strong className="text-indigo-400 font-bold">{vehiculoARestaurar.Consecutivo}</strong>. Esta volverá a estar disponible en el Inventario Maestro como "Activa en flota".</>}
+          onCancel={() => setModalRestaurar(false)}
+          onConfirm={confirmarRestauracion}
+          isProcessing={procesando}
+          confirmText="Sí, restaurar"
+        />
       )}
+
+      <SystemModal
+        isOpen={sysModal.isOpen}
+        type={sysModal.type}
+        title={sysModal.title}
+        message={sysModal.message}
+        onConfirm={() => setSysModal({ ...sysModal, isOpen: false })}
+      />
 
     </div>
   );

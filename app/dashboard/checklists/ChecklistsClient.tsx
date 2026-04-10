@@ -2,6 +2,7 @@
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link'; 
 import { Search, Upload, FileText, AlertCircle, CheckCircle2, Car, User, Palette, Gauge, ArrowLeft, X, Eye, Download, ChevronRight, Trash2, PencilLine, AlertTriangle, Wrench } from 'lucide-react'; 
+import SystemModal, { ModalType } from '@/components/ui/SystemModal';
 
 interface Props {
   vehiculos?: any[];
@@ -28,6 +29,8 @@ export default function ChecklistsPage({ vehiculos = [], isAdmin = false }: Prop
   // ESTADOS PARA EL MODAL DE ELIMINACIÓN 
   const [modalEliminar, setModalEliminar] = useState(false);
   const [checklistAEliminar, setChecklistAEliminar] = useState<{ id: number; titulo: string } | null>(null);
+  
+  const [sysModal, setSysModal] = useState<{isOpen: boolean, type: ModalType, title: string, message: React.ReactNode}>({ isOpen: false, type: 'info', title: '', message: '' });
 
   const [filteredVehiculos, setFilteredVehiculos] = useState<any[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
@@ -123,10 +126,10 @@ export default function ChecklistsPage({ vehiculos = [], isAdmin = false }: Prop
         buscarVehiculo(); 
       } else {
         const errorData = await res.json();
-        alert(`❌ Error: ${errorData.error || "Hubo un error al guardar el PDF."}`);
+        setSysModal({ isOpen: true, type: 'error', title: 'Error al Subir', message: errorData.error || "Hubo un error al guardar el PDF." });
       }
     } catch (error) {
-      alert("Error de conexión al subir el archivo.");
+      setSysModal({ isOpen: true, type: 'error', title: 'Error de Conexión', message: "No se pudo conectar para subir el archivo." });
     }
     setCargando(false);
   };
@@ -150,10 +153,10 @@ export default function ChecklistsPage({ vehiculos = [], isAdmin = false }: Prop
         buscarVehiculo(); 
       } else {
         const errorData = await res.json();
-        alert(`❌ Error al eliminar: ${errorData.error}`);
+        setSysModal({ isOpen: true, type: 'error', title: 'Error al Eliminar', message: errorData.error });
       }
     } catch (error) {
-      alert("Error de conexión al intentar eliminar.");
+      setSysModal({ isOpen: true, type: 'error', title: 'Error de Conexión', message: "Hubo un error de conexión al intentar eliminar." });
     }
     setCargando(false);
   };
@@ -178,10 +181,10 @@ export default function ChecklistsPage({ vehiculos = [], isAdmin = false }: Prop
         buscarVehiculo(); 
       } else {
         const errorData = await res.json();
-        alert(`❌ Error al actualizar: ${errorData.error}`);
+        setSysModal({ isOpen: true, type: 'error', title: 'Error al Actualizar', message: errorData.error });
       }
     } catch (error) {
-      alert("Error de conexión al actualizar el archivo.");
+      setSysModal({ isOpen: true, type: 'error', title: 'Error de Conexión', message: "No se pudo conectar para actualizar el archivo." });
     }
     setCargando(false);
   };
@@ -474,40 +477,26 @@ export default function ChecklistsPage({ vehiculos = [], isAdmin = false }: Prop
         )}
 
         {/* MODAL DE CONFIRMACIÓN DE ELIMINACIÓN  */}
-        {modalEliminar && checklistAEliminar && (
-          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[200] flex items-center justify-center p-4 animate-in fade-in duration-200">
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 max-w-sm w-full shadow-2xl text-center transform transition-all animate-in zoom-in-95">
-              
-              <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-5 border border-red-500/20">
-                <AlertTriangle className="text-red-500 w-8 h-8" />
-              </div>
-              
-              <h3 className="text-xl font-black text-white mb-2">¿Eliminar Documento?</h3>
-              
-              <p className="text-slate-400 text-sm mb-6 leading-relaxed">
-                Estás a punto de eliminar el archivo <strong className="text-white font-bold">{checklistAEliminar.titulo}</strong> de la base de datos. Esta acción <span className="text-red-400 font-bold">no se puede deshacer</span>.
-              </p>
-              
-              <div className="flex flex-col sm:flex-row gap-3">
-                <button 
-                  onClick={() => setModalEliminar(false)}
-                  disabled={cargando}
-                  className="flex-1 bg-slate-950 border border-slate-700 hover:bg-slate-800 text-slate-300 font-bold py-3 px-4 rounded-xl transition-colors"
-                >
-                  Cancelar
-                </button>
-                <button 
-                  onClick={confirmarEliminacion} 
-                  disabled={cargando}
-                  className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-xl transition-colors disabled:opacity-50 flex justify-center items-center gap-2 shadow-lg shadow-red-600/20"
-                >
-                  {cargando ? 'Borrando...' : 'Sí, eliminar'}
-                </button>
-              </div>
-
-            </div>
-          </div>
+        {checklistAEliminar && (
+          <SystemModal
+            isOpen={modalEliminar}
+            type="error"
+            title="¿Eliminar Documento?"
+            message={<>Estás a punto de eliminar el archivo <strong className="text-white font-bold">{checklistAEliminar.titulo}</strong> de la base de datos. Esta acción <span className="text-red-400 font-bold">no se puede deshacer</span>.</>}
+            onCancel={() => setModalEliminar(false)}
+            onConfirm={confirmarEliminacion}
+            isProcessing={cargando}
+            confirmText="Sí, eliminar"
+          />
         )}
+        
+        <SystemModal
+          isOpen={sysModal.isOpen}
+          type={sysModal.type}
+          title={sysModal.title}
+          message={sysModal.message}
+          onConfirm={() => setSysModal({ ...sysModal, isOpen: false })}
+        />
 
       </div>
     </div>

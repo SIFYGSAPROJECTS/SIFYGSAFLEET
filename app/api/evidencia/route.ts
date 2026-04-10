@@ -1,11 +1,6 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { minioClient } from '@/lib/minio';
 import { prisma } from '@/lib/db'; 
-
-// Conexión a Supabase
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!; 
-const supabase = createClient(supabaseUrl, supabaseKey);
 
 // --- 1. SUBIR EVIDENCIA NUEVA ---
 export async function POST(request: Request) {
@@ -25,22 +20,21 @@ export async function POST(request: Request) {
     // Nombre: unidad + fecha + timestamp para evitar duplicados exactos
     const nombreArchivo = `${consecutivo.toLowerCase()}-${folio}-${new Date().getTime()}.pdf`;
 
-    const { error: uploadError } = await supabase.storage
-      .from('evidencias')
-      .upload(nombreArchivo, buffer, { contentType: file.type });
+    // Subir a Minio
+    await minioClient.putObject('evidencias', nombreArchivo, buffer, file.size, { 'Content-Type': file.type });
 
-    if (uploadError) throw uploadError;
-
-    const { data: { publicUrl } } = supabase.storage
-      .from('evidencias')
-      .getPublicUrl(nombreArchivo);
+    // Construir la URL pública (ya que los buckets serán públicos en acceso de lectura)
+    const protocol = process.env.MINIO_USE_SSL === 'true' ? 'https' : 'http';
+    const minioHost = process.env.MINIO_ENDPOINT;
+    const minioPort = process.env.MINIO_PORT === '80' || process.env.MINIO_PORT === '443' ? '' : `:${process.env.MINIO_PORT}`;
+    const publicUrl = `${protocol}://${minioHost}${minioPort}/evidencias/${nombreArchivo}`;
 
     await prisma.solicitud.update({
       where: { Pk_folio_ticket: folio },
       data: { Evidencia: publicUrl }
     });
 
-    return NextResponse.json({ url: publicUrl, mensaje: 'Evidencia guardada exitosamente' });
+    return NextResponse.json({ url: publicUrl, mensaje: 'Evidencia guardada exitosamente en MinIO' });
   } catch (error) {
     console.error("Error POST Evidencia:", error);
     return NextResponse.json({ error: 'Error interno' }, { status: 500 });
@@ -66,11 +60,12 @@ export async function PUT(request: Request) {
 
     if (!solicitud) return NextResponse.json({ error: 'Ticket no encontrado' }, { status: 404 });
 
-    // 2. Si ya tenía un PDF, lo borramos de Supabase físicamente
-    if (solicitud.Evidencia) {
-      const nombreViejo = solicitud.Evidencia.split('/').pop();
-      if (nombreViejo) {
-        await supabase.storage.from('evidencias').remove([nombreViejo]);
+    // 2. Si ya tenía un PDF, lo borramos de MinIO
+    if (solicitud.Evidencia && solicitud.Evidencia.includes('/evidencias/')) {
+      const parts = solicitud.Evidencia.split('/evidencias/');
+      if (parts.length > 1) {
+        const nombreViejo = parts[1];
+        await minioClient.removeObject('evidencias', nombreViejo).catch(console.error);
       }
     }
 
@@ -79,15 +74,12 @@ export async function PUT(request: Request) {
     const buffer = Buffer.from(bytes);
     const nombreNuevo = `${solicitud.auto?.Consecutivo.toLowerCase() || 'unidad'}-${folio}-${new Date().getTime()}.pdf`;
 
-    const { error: uploadError } = await supabase.storage
-      .from('evidencias')
-      .upload(nombreNuevo, buffer, { contentType: file.type });
+    await minioClient.putObject('evidencias', nombreNuevo, buffer, file.size, { 'Content-Type': file.type });
 
-    if (uploadError) throw uploadError;
-
-    const { data: { publicUrl } } = supabase.storage
-      .from('evidencias')
-      .getPublicUrl(nombreNuevo);
+    const protocol = process.env.MINIO_USE_SSL === 'true' ? 'https' : 'http';
+    const minioHost = process.env.MINIO_ENDPOINT;
+    const minioPort = process.env.MINIO_PORT === '80' || process.env.MINIO_PORT === '443' ? '' : `:${process.env.MINIO_PORT}`;
+    const publicUrl = `${protocol}://${minioHost}${minioPort}/evidencias/${nombreNuevo}`;
 
     // 4. Actualizamos el link en la BD
     await prisma.solicitud.update({
@@ -95,7 +87,7 @@ export async function PUT(request: Request) {
       data: { Evidencia: publicUrl }
     });
 
-    return NextResponse.json({ mensaje: 'Evidencia actualizada' });
+    return NextResponse.json({ mensaje: 'Evidencia actualizada en MinIO' });
   } catch (error) {
     console.error("Error PUT Evidencia:", error);
     return NextResponse.json({ error: 'Error al actualizar' }, { status: 500 });
@@ -120,10 +112,13 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: 'No hay evidencia para eliminar' }, { status: 404 });
     }
 
-    // 2. Borramos de Supabase
-    const nombreArchivo = solicitud.Evidencia.split('/').pop();
-    if (nombreArchivo) {
-      await supabase.storage.from('evidencias').remove([nombreArchivo]);
+    // 2. Borramos de MinIO
+    if (solicitud.Evidencia.includes('/evidencias/')) {
+       const parts = solicitud.Evidencia.split('/evidencias/');
+       if (parts.length > 1) {
+         const nombreArchivo = parts[1];
+         await minioClient.removeObject('evidencias', nombreArchivo).catch(console.error);
+       }
     }
 
     // 3. Limpiamos el campo en Prisma (poniéndolo en null)
@@ -132,7 +127,7 @@ export async function DELETE(request: Request) {
       data: { Evidencia: null }
     });
 
-    return NextResponse.json({ mensaje: 'Evidencia eliminada correctamente' });
+    return NextResponse.json({ mensaje: 'Evidencia eliminada correctamente de MinIO' });
   } catch (error) {
     console.error("Error DELETE Evidencia:", error);
     return NextResponse.json({ error: 'Error al eliminar' }, { status: 500 });

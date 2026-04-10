@@ -8,6 +8,7 @@ import {
   Trash2, PencilLine, AlertTriangle, Wrench, Search, Calendar
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import SystemModal, { ModalType } from '@/components/ui/SystemModal';
 
 interface Props {
   historial: any[];
@@ -19,6 +20,8 @@ export default function HistorialClient({ historial, rol }: Props) {
   const [filtroAuto, setFiltroAuto] = useState('');
   const [filtroMeses, setFiltroMeses] = useState(''); 
   const [subiendoFolio, setSubiendoFolio] = useState<string | null>(null);
+  
+  const [sysModal, setSysModal] = useState<{isOpen: boolean, type: ModalType, title: string, message: React.ReactNode}>({ isOpen: false, type: 'info', title: '', message: '' });
 
   /* ESTADOS PARA EL VISOR PDF */
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
@@ -56,7 +59,7 @@ export default function HistorialClient({ historial, rol }: Props) {
     if (!e.target.files || e.target.files.length === 0) return;
     const file = e.target.files[0];
     if (file.type !== "application/pdf") {
-      alert("Solo se permiten archivos PDF.");
+      setSysModal({ isOpen: true, type: 'warning', title: 'Archivo Invalido', message: "Solo se permiten archivos en formato PDF." });
       return;
     }
 
@@ -75,14 +78,14 @@ export default function HistorialClient({ historial, rol }: Props) {
       });
 
       if (res.ok) {
-        alert(esReemplazo ? "Evidencia actualizada." : "Evidencia subida.");
+        setSysModal({ isOpen: true, type: 'success', title: 'Éxito', message: esReemplazo ? "Evidencia actualizada correctamente." : "Evidencia subida correctamente." });
         router.refresh(); 
       } else {
         const errorData = await res.json();
-        alert(`Error: ${errorData.error}`);
+        setSysModal({ isOpen: true, type: 'error', title: 'Error', message: errorData.error });
       }
     } catch (error) {
-      alert("Error de conexión al procesar el archivo.");
+      setSysModal({ isOpen: true, type: 'error', title: 'Error de Conexión', message: "Hubo un error de conexión al procesar el archivo." });
     } finally {
       setSubiendoFolio(null);
       setEditandoFolio(null);
@@ -105,10 +108,10 @@ export default function HistorialClient({ historial, rol }: Props) {
         router.refresh(); 
       } else {
         const errorData = await res.json();
-        alert(`Error al eliminar: ${errorData.error}`);
+        setSysModal({ isOpen: true, type: 'error', title: 'Error al Eliminar', message: errorData.error });
       }
     } catch (error) {
-      alert("Error de conexión al intentar eliminar.");
+      setSysModal({ isOpen: true, type: 'error', title: 'Error de Conexión', message: "No se pudo conectar para eliminar la evidencia." });
     }
     setProcesando(false);
   };
@@ -248,24 +251,27 @@ export default function HistorialClient({ historial, rol }: Props) {
         </div>
       </div>
 
-      {/* MODAL DE CONFIRMACIÓN DE ELIMINACIÓN */}
-      {modalEliminar && evidenciaAEliminar && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[200] flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-sm w-full shadow-2xl text-center transform transition-all animate-in zoom-in-95">
-            <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-5 border border-red-500/20 shadow-[0_0_15px_rgba(239,68,68,0.2)]">
-              <AlertTriangle className="text-red-500 w-8 h-8" />
-            </div>
-            <h3 className="text-xl font-black text-white mb-2">¿Eliminar Evidencia?</h3>
-            <p className="text-slate-400 text-sm mb-6 leading-relaxed">
-              Borrarás el PDF del mantenimiento <strong className="text-white font-bold">#{evidenciaAEliminar.folio}</strong> permanentemente.
-            </p>
-            <div className="flex gap-3">
-              <button onClick={() => setModalEliminar(false)} disabled={procesando} className="flex-1 bg-slate-950 border border-slate-700 hover:bg-slate-800 text-slate-300 font-bold py-2.5 rounded-lg transition-colors">Cancelar</button>
-              <button onClick={confirmarEliminacion} disabled={procesando} className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-lg transition-colors disabled:opacity-50">{procesando ? 'Borrando...' : 'Sí, eliminar'}</button>
-            </div>
-          </div>
-        </div>
+      {/* MODALES DEL SISTEMA */}
+      {evidenciaAEliminar && (
+        <SystemModal
+          isOpen={modalEliminar}
+          type="error"
+          title="¿Eliminar Evidencia?"
+          message={<>Borrarás el PDF del mantenimiento <strong className="text-white font-bold">#{evidenciaAEliminar.folio}</strong> permanentemente.</>}
+          onCancel={() => setModalEliminar(false)}
+          onConfirm={confirmarEliminacion}
+          isProcessing={procesando}
+          confirmText="Sí, eliminar"
+        />
       )}
+
+      <SystemModal
+        isOpen={sysModal.isOpen}
+        type={sysModal.type}
+        title={sysModal.title}
+        message={sysModal.message}
+        onConfirm={() => setSysModal({ ...sysModal, isOpen: false })}
+      />
 
       {/* MODAL DE PREVISUALIZACION PDF */}
       {mostrarVisor && (

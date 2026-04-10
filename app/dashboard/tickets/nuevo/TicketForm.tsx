@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2, Wrench, AlertCircle, Search, ChevronDown } from 'lucide-react';
+import SystemModal, { ModalType } from '@/components/ui/SystemModal';
 
 interface Props {
   vehiculos: any[];
@@ -12,7 +13,8 @@ export default function TicketForm({ vehiculos }: Props) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [minKm, setMinKm] = useState(0); 
-  
+  const [sysModal, setSysModal] = useState<{isOpen: boolean, type: ModalType, title: string, message: React.ReactNode, confirmText?: string, onConfirm?: () => void}>({ isOpen: false, type: 'info', title: '', message: '' });
+
   // 1. Estados para el Buscador Inteligente
   const [searchTerm, setSearchTerm] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -55,13 +57,13 @@ export default function TicketForm({ vehiculos }: Props) {
 
     // Validamos que haya seleccionado un vehículo real
     if (!formData.consecutivo) {
-      alert('❌ Por favor, selecciona un vehículo de la lista.');
+      setSysModal({ isOpen: true, type: 'warning', title: 'Aviso', message: 'Por favor, selecciona un vehículo de la lista.', onConfirm: () => setSysModal(prev => ({...prev, isOpen: false})) });
       return;
     }
 
     // Validación de seguridad SOLO para mantenimientos preventivos
     if (formData.tipo_servicio === 'preventivo' && Number(formData.kilometraje) < minKm) {
-      alert(`❌ Error: El kilometraje no puede ser menor al último registro (${minKm.toLocaleString()} km).`);
+      setSysModal({ isOpen: true, type: 'error', title: 'Datos Inválidos', message: `El kilometraje no puede ser menor al último registro (${minKm.toLocaleString()} km).`, onConfirm: () => setSysModal(prev => ({...prev, isOpen: false})) });
       return;
     }
 
@@ -88,12 +90,21 @@ export default function TicketForm({ vehiculos }: Props) {
       const resultado = await res.json(); 
       const folioGenerado = resultado.data.Pk_folio_ticket;
 
-      alert(`¡Mantenimiento programado! Folio: ${folioGenerado}`);
-      router.push(`/dashboard/tickets/ver/${folioGenerado}`);
+      setSysModal({
+        isOpen: true,
+        type: 'success',
+        title: '¡Mantenimiento programado!',
+        message: `Se ha generado exitosamente el ticket con Folio: #${folioGenerado}`,
+        confirmText: 'Ver Ticket',
+        onConfirm: () => {
+          setSysModal(prev => ({...prev, isOpen: false}));
+          router.push(`/dashboard/tickets/ver/${folioGenerado}`);
+        }
+      });
       router.refresh();
 
     } catch (error: any) {
-      alert(` ${error.message}`);
+      setSysModal({ isOpen: true, type: 'error', title: 'Error', message: error.message, onConfirm: () => setSysModal(prev => ({...prev, isOpen: false})) });
     } finally {
       setLoading(false);
     }
@@ -232,6 +243,15 @@ export default function TicketForm({ vehiculos }: Props) {
         {loading ? <Loader2 className="animate-spin" /> : <Wrench size={20} />}
         Agendar Mantenimiento
       </button>
+
+      <SystemModal
+        isOpen={sysModal.isOpen}
+        type={sysModal.type}
+        title={sysModal.title}
+        message={sysModal.message}
+        confirmText={sysModal.confirmText}
+        onConfirm={sysModal.onConfirm || (() => setSysModal({ ...sysModal, isOpen: false }))}
+      />
     </form>
   );
 }

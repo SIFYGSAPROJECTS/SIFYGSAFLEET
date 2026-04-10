@@ -1,11 +1,6 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-import { prisma } from '@/lib/db'; 
-
-// Conexión a Supabase
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!; 
-const supabase = createClient(supabaseUrl, supabaseKey);
+import { minioClient } from '@/lib/minio';
+import { prisma } from '@/lib/db';
 
 // --- 1. BUSCADOR DE UNIDAD Y KILOMETRAJE ---
 export async function GET(request: Request) {
@@ -94,15 +89,12 @@ export async function POST(request: Request) {
 
     const nombreArch = `${consecutivo.toLowerCase()}-${new Date().getTime()}.pdf`;
 
-    const { error: storageError } = await supabase.storage
-      .from('checklists')
-      .upload(nombreArch, buffer, { contentType: file.type });
+    await minioClient.putObject('checklists', nombreArch, buffer, file.size, { 'Content-Type': file.type });
 
-    if (storageError) throw storageError;
-
-    const { data: { publicUrl } } = supabase.storage
-      .from('checklists')
-      .getPublicUrl(nombreArch);
+    const protocol = process.env.MINIO_USE_SSL === 'true' ? 'https' : 'http';
+    const minioHost = process.env.MINIO_ENDPOINT;
+    const minioPort = process.env.MINIO_PORT === '80' || process.env.MINIO_PORT === '443' ? '' : `:${process.env.MINIO_PORT}`;
+    const publicUrl = `${protocol}://${minioHost}${minioPort}/checklists/${nombreArch}`;
 
     await prisma.checklist.create({
       data: {
@@ -132,13 +124,13 @@ export async function DELETE(request: Request) {
     const checklist = await prisma.checklist.findUnique({ where: { id: Number(id) } });
     if (!checklist) return NextResponse.json({ error: 'Checklist no encontrado' }, { status: 404 });
 
-    // 2. Extraemos el nombre del archivo real desde la URL (lo que va después del último "/")
-    const nombreArchivo = checklist.Ruta_PDF.split('/').pop();
-
-    // 3. Lo borramos físicamente del "Bucket" de Supabase para ahorrar espacio
-    if (nombreArchivo) {
-      const { error: storageError } = await supabase.storage.from('checklists').remove([nombreArchivo]);
-      if (storageError) console.error("Error borrando de Supabase:", storageError);
+    // 2. Extraemos el nombre del archivo y lo borramos de MinIO
+    if (checklist.Ruta_PDF.includes('/checklists/')) {
+       const parts = checklist.Ruta_PDF.split('/checklists/');
+       if (parts.length > 1) {
+         const nombreArchivo = parts[1];
+         await minioClient.removeObject('checklists', nombreArchivo).catch(console.error);
+       }
     }
 
     // 4. Lo borramos de la base de datos de Prisma
@@ -164,27 +156,27 @@ export async function PUT(request: Request) {
     const checklistViejo = await prisma.checklist.findUnique({ where: { id: Number(id) } });
     if (!checklistViejo) return NextResponse.json({ error: 'Checklist no encontrado' }, { status: 404 });
 
-    // 2. Borramos el archivo VIEJO de Supabase
-    const nombreArchivoViejo = checklistViejo.Ruta_PDF.split('/').pop();
-    if (nombreArchivoViejo) {
-      await supabase.storage.from('checklists').remove([nombreArchivoViejo]);
+    // 2. Borramos el archivo VIEJO de MinIO
+    if (checklistViejo.Ruta_PDF.includes('/checklists/')) {
+      const parts = checklistViejo.Ruta_PDF.split('/checklists/');
+      if (parts.length > 1) {
+         const nombreArchivoViejo = parts[1];
+         await minioClient.removeObject('checklists', nombreArchivoViejo).catch(console.error);
+      }
     }
 
-    // 3. Preparamos y subimos el NUEVO archivo a Supabase
+    // 3. Preparamos y subimos el NUEVO archivo a MinIO
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
     // Le ponemos una marca de tiempo nueva para que el navegador no cachee el PDF viejo
     const nombreArchNuevo = `${checklistViejo.Consecutivo.toLowerCase()}-edit-${new Date().getTime()}.pdf`;
 
-    const { error: storageError } = await supabase.storage
-      .from('checklists')
-      .upload(nombreArchNuevo, buffer, { contentType: file.type });
+    await minioClient.putObject('checklists', nombreArchNuevo, buffer, file.size, { 'Content-Type': file.type });
 
-    if (storageError) throw storageError;
-
-    const { data: { publicUrl } } = supabase.storage
-      .from('checklists')
-      .getPublicUrl(nombreArchNuevo);
+    const protocol = process.env.MINIO_USE_SSL === 'true' ? 'https' : 'http';
+    const minioHost = process.env.MINIO_ENDPOINT;
+    const minioPort = process.env.MINIO_PORT === '80' || process.env.MINIO_PORT === '443' ? '' : `:${process.env.MINIO_PORT}`;
+    const publicUrl = `${protocol}://${minioHost}${minioPort}/checklists/${nombreArchNuevo}`;
 
     // 4. Actualizamos el registro en la BD (Mantenemos el título original, solo cambiamos el PDF)
     await prisma.checklist.update({
