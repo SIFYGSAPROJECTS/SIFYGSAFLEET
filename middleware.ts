@@ -3,14 +3,14 @@ import type { NextRequest } from 'next/server';
 
 // (Dominios Permitidos para la API)
 const allowedOrigins = [
-  'https://flota.sifygsa.com',
+  'https://fleet.sifygsa.com',
   'http://localhost:3000'
 ];
 
 export function middleware(request: NextRequest) {
   // --- 1. GENERACIÓN DEL BOLETO ÚNICO (NONCE) ---
   const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
-  
+
   // --- 2. DEFINICIÓN DE LA POLÍTICA CSP ESTRICTA ---
   // Aquí es donde eliminamos el 'unsafe-inline' que te quitaba puntos
   const cspHeader = `
@@ -39,7 +39,7 @@ export function middleware(request: NextRequest) {
   // ==========================================
   if (pathname.startsWith('/dashboard')) {
     const session = request.cookies.get('user_email');
-    
+
     if (!session || !session.value) {
       const loginUrl = new URL("/", request.url);
       return NextResponse.redirect(loginUrl);
@@ -56,9 +56,9 @@ export function middleware(request: NextRequest) {
     if (origin && !allowedOrigins.includes(origin)) {
       return new NextResponse(
         JSON.stringify({ error: 'Acceso denegado: Dominio no autorizado (CORS Blocked)' }),
-        { 
-          status: 403, 
-          headers: { 'Content-Type': 'application/json' } 
+        {
+          status: 403,
+          headers: { 'Content-Type': 'application/json' }
         }
       );
     }
@@ -66,7 +66,7 @@ export function middleware(request: NextRequest) {
     const response = NextResponse.next({
       request: { headers: requestHeaders },
     });
-    
+
     // Agregamos encabezados CORS a la respuesta de la API
     if (origin) {
       response.headers.set('Access-Control-Allow-Origin', origin);
@@ -90,7 +90,7 @@ export function middleware(request: NextRequest) {
   const response = NextResponse.next({
     request: { headers: requestHeaders },
   });
-  
+
   // Inyectamos la política de seguridad en el navegador
   response.headers.set('Content-Security-Policy', cspHeader);
 
