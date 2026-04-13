@@ -16,7 +16,7 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-[#0B101E]">
       {/* 2. Colocamos el cronómetro invisible para que vigile todas las pantallas */}
       <IdleTimer /> 
       

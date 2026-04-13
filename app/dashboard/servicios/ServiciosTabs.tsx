@@ -31,11 +31,11 @@ export default function ServiciosTabs({ tickets, vehiculos, isAdmin, rol }: Prop
         
         {/* TEXTO ALINEADO A LA IZQUIERDA SIEMPRE */}
         <div className="flex-1 flex flex-col items-start w-full text-left">
-          <Link href="/dashboard" className="inline-flex items-center gap-2 text-slate-400 hover:text-[#FF7420] transition-colors mb-3 font-medium text-sm">
+          <Link href="/dashboard" className="inline-flex items-center gap-2 text-slate-400 hover:text-[#6366F1] transition-colors mb-3 font-medium text-sm">
             <ArrowLeft className="w-4 h-4" /> Volver al Panel Maestro
           </Link>
           <h1 className="text-2xl sm:text-3xl font-black text-white flex items-center gap-3">
-            <Wrench className="text-[#FF7420]" size={32} /> Central de Servicios
+            <Wrench className="text-[#6366F1]" size={32} /> Central de Servicios
           </h1>
           <p className="text-slate-400 mt-2 font-medium text-sm sm:text-base">
             {isAdmin ? 'Panel unificado para gestión de órdenes y seguimiento.' : 'Solicita mantenimientos y rastrea tu unidad.'}
@@ -85,7 +85,7 @@ export default function ServiciosTabs({ tickets, vehiculos, isAdmin, rol }: Prop
           <button
             onClick={() => setActiveTab('nueva')}
             className={`px-4 sm:px-6 py-3.5 font-bold text-sm sm:text-base flex items-center gap-2 border-b-2 transition-all whitespace-nowrap ${
-              activeTab === 'nueva' ? 'border-[#FF7420] text-[#FF7420]' : 'border-transparent text-slate-500 hover:text-slate-300'
+              activeTab === 'nueva' ? 'border-[#6366F1] text-[#6366F1]' : 'border-transparent text-slate-500 hover:text-slate-300'
             }`}
           >
             <PlusCircle size={20} /> Nueva Orden
@@ -122,7 +122,7 @@ export default function ServiciosTabs({ tickets, vehiculos, isAdmin, rol }: Prop
         {activeTab === 'nueva' && (
           <div className="max-w-3xl mx-auto">
              {vehiculos.length === 0 ? (
-                <div className="bg-[#FF7420]/10 border border-[#FF7420]/30 text-[#FF7420] p-6 rounded-xl text-center shadow-lg">
+                <div className="bg-[#6366F1]/10 border border-[#6366F1]/30 text-[#6366F1] p-6 rounded-xl text-center shadow-lg">
                   <p className="font-bold text-lg mb-2">No tienes vehículos asignados</p>
                   <p className="text-sm">Contacta a tu administrador para que te asigne una unidad.</p>
                 </div>

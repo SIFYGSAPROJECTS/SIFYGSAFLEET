@@ -47,11 +47,11 @@ export default async function SeguimientoPage() {
         
         {/* ENCABEZADO PREMIUM DARK */}
         <div className="mb-10">
-          <Link href="/dashboard" className="text-slate-400 hover:text-[#FF7420] flex items-center gap-2 text-sm mb-6 w-fit transition-colors font-medium">
+          <Link href="/dashboard" className="text-slate-400 hover:text-[#6366F1] flex items-center gap-2 text-sm mb-6 w-fit transition-colors font-medium">
             <ArrowLeft size={16} /> Volver al Panel Maestro
           </Link>
           <h1 className="text-3xl font-black text-white tracking-tight flex items-center gap-3">
-            <Activity className="text-[#FF7420]" size={32} /> Seguimiento de Unidades
+            <Activity className="text-[#6366F1]" size={32} /> Seguimiento de Unidades
           </h1>
           <p className="text-slate-400 mt-2 font-medium">
             {isAdmin 

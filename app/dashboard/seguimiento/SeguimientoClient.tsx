@@ -80,10 +80,10 @@ export default function SeguimientoClient({ ticketsIniciales = [], isAdmin }: an
         const esFinalizado = estadoVisual === 'LISTO';
 
         return (
-          <div key={ticket.Pk_folio_ticket} className={`bg-slate-900 rounded-xl shadow-2xl border-x border-b border-slate-800 border-t-4 p-5 sm:p-8 transition-colors ${esFinalizado ? 'border-t-emerald-500' : 'border-t-[#FF7420]'}`}>
+          <div key={ticket.Pk_folio_ticket} className={`bg-slate-900 rounded-xl shadow-2xl border-x border-b border-slate-800 border-t-4 p-5 sm:p-8 transition-colors ${esFinalizado ? 'border-t-emerald-500' : 'border-t-[#6366F1]'}`}>
             <div className="flex flex-col md:flex-row justify-between items-start mb-10 gap-6">
               <div>
-                <span className={`px-2 py-1 rounded text-[10px] font-mono font-black mb-3 inline-block tracking-[0.2em] ${esFinalizado ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'bg-[#FF7420]/10 text-[#FF7420] border border-[#FF7420]/20'}`}>
+                <span className={`px-2 py-1 rounded text-[10px] font-mono font-black mb-3 inline-block tracking-[0.2em] ${esFinalizado ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'bg-[#6366F1]/10 text-[#6366F1] border border-[#6366F1]/20'}`}>
                   FOLIO: {ticket.Pk_folio_ticket}
                 </span>
                 <h3 className="text-xl sm:text-2xl font-bold text-white">{ticket.auto?.Marca} {ticket.auto?.Modelo}</h3>
@@ -115,11 +115,11 @@ export default function SeguimientoClient({ ticketsIniciales = [], isAdmin }: an
             <div className={`w-full overflow-x-auto pb-4 scrollbar-hide ${esFinalizado ? 'opacity-70' : ''}`}>
               <div className="relative py-4 px-2 sm:px-6 mb-4 min-w-[320px] sm:min-w-[400px]">
                 <div className="absolute top-10 left-0 w-full h-1.5 bg-slate-800 rounded-full"></div>
-                <div className="absolute top-10 left-0 h-1.5 rounded-full transition-all duration-1000 bg-gradient-to-r from-[#FF7420] via-cyan-500 via-yellow-500 to-emerald-500"
+                <div className="absolute top-10 left-0 h-1.5 rounded-full transition-all duration-1000 bg-gradient-to-r from-[#6366F1] via-cyan-500 via-yellow-500 to-emerald-500"
                   style={{ width: `${(pasoActual / 3) * 100}%` }}></div>
                 <div className="relative flex justify-between">
                   {[
-                    { l: 'Pendiente', i: Timer, c: 'text-[#FF7420]', b: 'bg-[#FF7420]' },
+                    { l: 'Pendiente', i: Timer, c: 'text-[#6366F1]', b: 'bg-[#6366F1]' },
                     { l: 'Cita', i: Calendar, c: 'text-cyan-400', b: 'bg-cyan-500' },
                     { l: 'En Taller', i: Wrench, c: 'text-yellow-400', b: 'bg-yellow-500' },
                     { l: 'Listo', i: CheckCircle2, c: 'text-emerald-400', b: 'bg-emerald-500' }

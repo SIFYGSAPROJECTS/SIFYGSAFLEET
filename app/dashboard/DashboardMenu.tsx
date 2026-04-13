@@ -16,8 +16,8 @@ export default function DashboardMenu({ userRole, totalAutos, totalEmpleados, ti
 
   const tarjetasUsuario = (
     <>
-      <Link href="/dashboard/usuarios" className="p-6 bg-slate-900 border-x border-b border-slate-800 border-t-4 border-t-[#FF7420] rounded-xl hover:border-[#FF7420] hover:shadow-[0_0_15px_rgba(255,116,32,0.15)] transition-all duration-300 group text-left block">
-        <User className="w-8 h-8 text-[#FF7420] mb-4" />
+      <Link href="/dashboard/usuarios" className="p-6 bg-slate-900 border-x border-b border-slate-800 border-t-4 border-t-[#6366F1] rounded-xl hover:border-[#6366F1] hover:shadow-[0_0_15px_rgba(99,102,241,0.15)] transition-all duration-300 group text-left block">
+        <User className="w-8 h-8 text-[#6366F1] mb-4" />
         <span className="block font-bold text-lg text-white">Configuración de Usuario</span>
         <span className="text-sm text-slate-400">Ver perfil, directorio de personal y seguridad.</span>
       </Link>
@@ -94,7 +94,7 @@ export default function DashboardMenu({ userRole, totalAutos, totalEmpleados, ti
           <Link
             href="/dashboard/usuarios"
             className={`flex-1 flex justify-center px-4 sm:px-6 py-4 font-bold text-sm sm:text-base items-center gap-2 border-b-2 transition-all whitespace-nowrap ${
-              activeTab === 'usuario' ? 'border-[#FF7420] text-[#FF7420]' : 'border-transparent text-slate-500 hover:text-slate-300'
+              activeTab === 'usuario' ? 'border-[#6366F1] text-[#6366F1]' : 'border-transparent text-slate-500 hover:text-slate-300'
             }`}
           >
             <User size={20} /> Gestión de Usuario
@@ -136,13 +136,13 @@ export default function DashboardMenu({ userRole, totalAutos, totalEmpleados, ti
           </Link>
 
           {/* KPI 3 -> Va a Servicios */}
-          <Link href="/dashboard/servicios" className="bg-slate-900 p-5 rounded-xl shadow-lg border-x border-b border-slate-800 border-t-4 border-t-[#FF7420] hover:bg-slate-800 hover:scale-[1.02] hover:shadow-[0_0_20px_rgba(255,116,32,0.15)] transition-all cursor-pointer group">
+          <Link href="/dashboard/servicios" className="bg-slate-900 p-5 rounded-xl shadow-lg border-x border-b border-slate-800 border-t-4 border-t-[#6366F1] hover:bg-slate-800 hover:scale-[1.02] hover:shadow-[0_0_20px_rgba(99,102,241,0.15)] transition-all cursor-pointer group">
             <div className="flex justify-between items-start mb-2">
-              <h2 className="text-xs font-bold text-slate-400 group-hover:text-[#FF7420] transition-colors uppercase tracking-widest">SERVICIOS PENDIENTES</h2>
-              <Wrench className="text-[#FF7420]" size={18} />
+              <h2 className="text-xs font-bold text-slate-400 group-hover:text-[#6366F1] transition-colors uppercase tracking-widest">SERVICIOS PENDIENTES</h2>
+              <Wrench className="text-[#6366F1]" size={18} />
             </div>
             <p className="text-3xl font-black text-white">{ticketsPendientes}</p>
-            <p className="text-[10px] text-[#FF7420] mt-1 font-bold uppercase tracking-wider">Ir a órdenes en espera &rarr;</p>
+            <p className="text-[10px] text-[#6366F1] mt-1 font-bold uppercase tracking-wider">Ir a órdenes en espera &rarr;</p>
           </Link>
         </div>
       )}

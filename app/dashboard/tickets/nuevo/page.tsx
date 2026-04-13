@@ -57,20 +57,20 @@ export default async function NuevoTicketPage() {
       <div className="max-w-3xl mx-auto p-6">
         <div className="mb-8">
           
-          <Link href="/dashboard" className="text-slate-400 hover:text-[#FF7420] flex items-center gap-2 text-sm mb-6 w-fit transition-colors">
+          <Link href="/dashboard" className="text-slate-400 hover:text-[#6366F1] flex items-center gap-2 text-sm mb-6 w-fit transition-colors">
             <ArrowLeft size={16} /> Volver al Panel de Inicio
           </Link>
 
           <h1 className="text-3xl font-black text-white tracking-tight">Programar Mantenimiento</h1>
           <p className="text-sm text-slate-400 mt-2">
             {usuario?.Rol === 'ADMIN' 
-              ? <><span className="text-[#FF7420] font-bold"> Administrador:</span> Puedes agendar servicio para cualquier unidad de la flota.</> 
-              : <><span className="text-[#FF7420] font-bold"> Usuario:</span> Solo puedes solicitar servicio para las unidades que tienes asignadas.</>}
+              ? <><span className="text-[#6366F1] font-bold"> Administrador:</span> Puedes agendar servicio para cualquier unidad de la flota.</> 
+              : <><span className="text-[#6366F1] font-bold"> Usuario:</span> Solo puedes solicitar servicio para las unidades que tienes asignadas.</>}
           </p>
         </div>
 
         {misVehiculos.length === 0 ? (
-          <div className="bg-[#FF7420]/10 border border-[#FF7420]/30 text-[#FF7420] p-6 rounded-xl text-center shadow-lg">
+          <div className="bg-[#6366F1]/10 border border-[#6366F1]/30 text-[#6366F1] p-6 rounded-xl text-center shadow-lg">
             <p className="font-bold text-lg mb-2">No tienes vehículos asignados</p>
             <p className="text-sm text-slate-300">Contacta a tu administrador para que te asigne una unidad antes de solicitar mantenimiento.</p>
           </div>

@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2, Wrench, AlertCircle, Search, ChevronDown } from 'lucide-react';
 import SystemModal, { ModalType } from '@/components/ui/SystemModal';
+import PremiumSelect from '@/components/ui/PremiumSelect';
 
 interface Props {
   vehiculos: any[];
@@ -13,12 +14,18 @@ export default function TicketForm({ vehiculos }: Props) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [minKm, setMinKm] = useState(0); 
+  const [selectedTier, setSelectedTier] = useState<string>(''); // Nuevo estado para controlar tier
   const [sysModal, setSysModal] = useState<{isOpen: boolean, type: ModalType, title: string, message: React.ReactNode, confirmText?: string, onConfirm?: () => void}>({ isOpen: false, type: 'info', title: '', message: '' });
 
   // 1. Estados para el Buscador Inteligente
   const [searchTerm, setSearchTerm] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // 1.5 Estados para el nuevo Selector de Tier Custom
+  const [isTierDropdownOpen, setIsTierDropdownOpen] = useState(false);
+  const tierDropdownRef = useRef<HTMLDivElement>(null);
+  const [customTierText, setCustomTierText] = useState('');
   
   // 2. Agregamos tipo_servicio al estado
   const [formData, setFormData] = useState({
@@ -34,21 +41,35 @@ export default function TicketForm({ vehiculos }: Props) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsDropdownOpen(false);
       }
+      if (tierDropdownRef.current && !tierDropdownRef.current.contains(event.target as Node)) {
+        setIsTierDropdownOpen(false);
+      }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Lógica de kilometraje mínimo
+  // Lógica de kilometraje mínimo y recomendación inteligente
   useEffect(() => {
     if (formData.consecutivo) {
       const autoSeleccionado = vehiculos.find(v => v.Consecutivo === formData.consecutivo);
-      const kmBase = autoSeleccionado?.Kilometraje_Actual || 0;
-      setMinKm(Number(kmBase));
+      const kmBase = Number(autoSeleccionado?.Kilometraje_Actual || 0);
+      setMinKm(kmBase);
       
-      if (Number(formData.kilometraje) < Number(kmBase)) {
+      let recomendado = Math.ceil(kmBase / 5000) * 5000;
+      if (recomendado === 0) recomendado = 5000;
+
+      if (recomendado > 200000) {
+        setSelectedTier('MANUAL');
         setFormData(prev => ({ ...prev, kilometraje: '' }));
+      } else {
+        setSelectedTier(recomendado.toString());
+        // No forzamos un valor al kilometraje, para que el usuario escriba su km exacto
       }
+    } else {
+      setSelectedTier('');
+      setMinKm(0);
+      setFormData(prev => ({ ...prev, kilometraje: '' }));
     }
   }, [formData.consecutivo, vehiculos]);
 
@@ -61,8 +82,8 @@ export default function TicketForm({ vehiculos }: Props) {
       return;
     }
 
-    // Validación de seguridad SOLO para mantenimientos preventivos
-    if (formData.tipo_servicio === 'preventivo' && Number(formData.kilometraje) < minKm) {
+    // Validación de seguridad para kilometraje
+    if (Number(formData.kilometraje) < minKm) {
       setSysModal({ isOpen: true, type: 'error', title: 'Datos Inválidos', message: `El kilometraje no puede ser menor al último registro (${minKm.toLocaleString()} km).`, onConfirm: () => setSysModal(prev => ({...prev, isOpen: false})) });
       return;
     }
@@ -70,10 +91,18 @@ export default function TicketForm({ vehiculos }: Props) {
     setLoading(true);
 
     try {
-      // Preparamos los datos, enviando null en kilometraje si no es preventivo
+      // Preparamos los datos
+      let tierFinal = '';
+      if (selectedTier === 'MANUAL') {
+        tierFinal = customTierText ? `\n[Nota: Corresponde a ${customTierText}]` : '';
+      } else if (selectedTier) {
+        tierFinal = `\n[Nota: Corresponde a Servicio de los ${Number(selectedTier).toLocaleString()} km]`;
+      }
+
       const payload = {
         ...formData,
-        kilometraje: formData.tipo_servicio === 'preventivo' ? Number(formData.kilometraje) : null,
+        descripcion: formData.descripcion + tierFinal,
+        kilometraje: Number(formData.kilometraje),
       };
 
       const res = await fetch('/api/tickets', {
@@ -117,7 +146,7 @@ export default function TicketForm({ vehiculos }: Props) {
   );
 
   return (
-    <form onSubmit={handleSubmit} className="bg-slate-900 p-8 rounded-xl shadow-[0_0_20px_rgba(255,116,32,0.1)] border border-slate-800 border-t-4 border-t-[#FF7420]">
+    <form onSubmit={handleSubmit} className="bg-slate-900 p-8 rounded-xl shadow-[0_0_20px_rgba(99,102,241,0.1)] border border-slate-800 border-t-4 border-t-[#6366F1]">
       
       {/* 1. BUSCADOR INTELIGENTE DE VEHÍCULOS */}
       <div className="mb-6 relative" ref={dropdownRef}>
@@ -128,7 +157,7 @@ export default function TicketForm({ vehiculos }: Props) {
             type="text"
             required={!formData.consecutivo}
             placeholder="Buscar Automovil por consecutivo"
-            className="w-full p-3 pl-10 pr-10 bg-slate-950 border border-slate-700 text-white rounded-lg focus:ring-2 focus:ring-[#FF7420] outline-none transition-all"
+            className="w-full p-3 pl-10 pr-10 bg-slate-950 border border-slate-700 text-white rounded-lg focus:ring-2 focus:ring-[#6366F1] outline-none transition-all"
             value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value);
@@ -155,7 +184,7 @@ export default function TicketForm({ vehiculos }: Props) {
                     setIsDropdownOpen(false);
                   }}
                 >
-                  <span className="font-bold text-[#FF7420]">({auto.Consecutivo})</span> - {auto.Marca} {auto.Modelo}
+                  <span className="font-bold text-[#6366F1]">({auto.Consecutivo})</span> - {auto.Marca} {auto.Modelo}
                 </div>
               ))
             ) : (
@@ -168,59 +197,155 @@ export default function TicketForm({ vehiculos }: Props) {
       {/* 2. TIPO DE SERVICIO (Nuevo) */}
       <div className="mb-6">
         <label className="block text-sm font-medium text-slate-400 mb-2">Tipo de Servicio</label>
-        <select 
+        <PremiumSelect
           required
-          className="w-full p-3 bg-slate-950 border border-slate-700 text-white rounded-lg focus:ring-2 focus:ring-[#FF7420] outline-none transition-all"
+          placeholder="-- Selecciona el tipo de servicio --"
+          accent="indigo"
           value={formData.tipo_servicio}
-          onChange={(e) => setFormData({...formData, tipo_servicio: e.target.value})}
-        >
-          <option value="" className="text-slate-500">-- Selecciona el tipo de servicio --</option>
-          <option value="preventivo">Preventivo</option>
-          <option value="correctivo">Correctivo</option>
-          <option value="revision">Revisión</option>
-        </select>
+          onChange={(val) => setFormData({...formData, tipo_servicio: val})}
+          options={[
+            { value: 'preventivo', label: 'Preventivo' },
+            { value: 'correctivo', label: 'Correctivo' },
+            { value: 'revision', label: 'Revisión' },
+          ]}
+        />
       </div>
 
-      {/* 3. KILOMETRAJE (Oculto a menos que sea Preventivo) */}
-      {formData.tipo_servicio === 'preventivo' && (
-        <div className="mb-6 animate-in fade-in slide-in-from-top-4 duration-300">
-          <div className="flex justify-between items-center mb-2">
-            <label className="block text-sm font-medium text-slate-400">Kilometraje Actual</label>
-            {minKm > 0 && (
-              <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest">
+      {/* 3. KILOMETRAJE ACTUAL Y TIER */}
+      <div className="mb-6 animate-in fade-in slide-in-from-top-4 duration-300 bg-slate-900/50 p-4 rounded-xl border border-slate-800/80">
+        <div className="flex justify-between items-center mb-3">
+          <label className="block text-sm font-medium text-slate-300">Registro de Kilometraje</label>
+          <div className="flex items-center gap-2">
+            {minKm > 0 ? (
+              <span className="px-2.5 py-1 bg-emerald-500/10 border border-emerald-500/30 rounded-md text-[10px] font-bold text-emerald-400 uppercase tracking-widest shadow-sm">
                 Último: {minKm.toLocaleString()} km
               </span>
-            )}
+            ) : formData.consecutivo ? (
+              <span className="px-2.5 py-1 bg-[#6366F1]/10 border border-[#6366F1]/30 rounded-md text-[10px] font-bold text-[#6366F1] uppercase tracking-widest shadow-sm transition-all">
+                Sin registro (Ingreso Inicial)
+              </span>
+            ) : null}
           </div>
-          <div className="relative">
+        </div>
+        
+        <div className="flex flex-col sm:flex-row gap-4">
+          {/* Ingreso real de KM */}
+          <div className="relative flex-1">
+            <span className="absolute left-4 top-3.5 text-slate-500 text-sm font-medium select-none">Actual:</span>
             <input 
               type="number" 
-              required={formData.tipo_servicio === 'preventivo'}
+              required
               min={minKm}
-              className={`w-full p-3 pl-4 bg-slate-950 border rounded-lg outline-none transition-all ${
+              className={`w-full p-3 pl-16 bg-slate-950 border rounded-lg outline-none transition-all focus:shadow-[0_0_10px_rgba(99,102,241,0.2)] ${
                 formData.kilometraje && Number(formData.kilometraje) < minKm 
                   ? 'border-red-500 focus:ring-red-500 text-red-500' 
-                  : 'border-slate-700 focus:ring-[#FF7420] text-white'
+                  : 'border-slate-700/80 focus:ring-[#6366F1] text-white'
               }`}
-              placeholder={minKm > 0 ? `Debe ser mayor a ${minKm}` : "Ej: 150000"}
+              placeholder={minKm > 0 ? `+${minKm}` : "Ej: 15300"}
               value={formData.kilometraje}
-              onChange={(e) => setFormData({...formData, kilometraje: e.target.value})}
+              onChange={(e) => {
+                const val = e.target.value;
+                setFormData({...formData, kilometraje: val});
+                
+                // Auto-calcular la pequeña ventana del tier
+                if (val && !isNaN(Number(val))) {
+                  const kmVal = Number(val);
+                  let recomendado = Math.ceil(kmVal / 5000) * 5000;
+                  if (recomendado === 0) recomendado = 5000;
+                  if (recomendado > 200000) {
+                     setSelectedTier('MANUAL');
+                  } else {
+                     setSelectedTier(recomendado.toString());
+                  }
+                }
+              }}
             />
-            <span className="absolute right-4 top-3.5 text-slate-500 text-sm font-medium">km</span>
+            <span className="absolute right-4 top-3.5 text-slate-500 text-sm font-medium pointer-events-none">km</span>
           </div>
-          {formData.kilometraje && Number(formData.kilometraje) < minKm && (
-            <p className="mt-2 text-[10px] text-red-500 flex items-center gap-1 font-bold animate-pulse">
-              <AlertCircle size={12} /> El kilometraje no puede ser menor al registro anterior.
-            </p>
-          )}
+
+          {/* Selector Elegante de Tier */}
+          <div className="w-full sm:w-[220px] relative" ref={tierDropdownRef}>
+            {selectedTier === 'MANUAL' ? (
+              <div className="relative animate-in flip-in-y duration-300">
+                <input 
+                  type="text" 
+                  autoFocus
+                  placeholder="Ej: Servicio de 210,000km"
+                  className="w-full p-3 pl-4 bg-indigo-950/40 border border-[#6366F1]/50 text-white rounded-lg focus:ring-2 focus:ring-[#6366F1] outline-none transition-all text-xs font-medium placeholder-indigo-300/30"
+                  value={customTierText}
+                  onChange={(e) => setCustomTierText(e.target.value)}
+                  required
+                />
+                <button 
+                  type="button"
+                  onClick={() => {
+                    setSelectedTier('');
+                    setCustomTierText('');
+                  }}
+                  className="absolute right-2 top-2 text-[#6366F1]/60 hover:text-red-400 p-1"
+                  title="Cancelar Ingreso Manual"
+                >
+                  ✖
+                </button>
+              </div>
+            ) : (
+              <div 
+                className="w-full p-3 bg-gradient-to-r from-indigo-950/40 to-slate-900 border border-[#6366F1]/30 hover:border-[#6366F1]/60 text-indigo-300 font-bold rounded-lg cursor-pointer transition-all text-xs flex justify-between items-center group shadow-inner"
+                onClick={() => setIsTierDropdownOpen(!isTierDropdownOpen)}
+              >
+                <span>
+                  {selectedTier 
+                    ? `Servicio: ${Number(selectedTier)/1000}K` 
+                    : "Aplica para..."}
+                </span>
+                <ChevronDown className={`text-[#6366F1] transition-transform duration-300 ${isTierDropdownOpen ? 'rotate-180' : ''}`} size={16} />
+              </div>
+            )}
+
+            {/* Menú Desplegable Personalizado */}
+            {isTierDropdownOpen && selectedTier !== 'MANUAL' && (
+              <div className="absolute z-20 w-full mt-2 bg-slate-900 border border-slate-700/80 rounded-xl shadow-[0_10px_40px_-10px_rgba(99,102,241,0.5)] max-h-56 overflow-y-auto scrollbar-thin scrollbar-thumb-[#6366F1]/50 scrollbar-track-slate-900 animate-in fade-in slide-in-from-top-2">
+                <div className="p-2 border-b border-slate-800 bg-slate-950/50 sticky top-0 z-10">
+                  <span className="text-[10px] uppercase font-black text-slate-500 tracking-wider">Selecciona Servicio</span>
+                </div>
+                {Array.from({ length: 40 }, (_, i) => (i + 1) * 5000).map(tier => (
+                  <div 
+                    key={tier} 
+                    className={`px-4 py-2.5 text-xs font-semibold cursor-pointer transition-all border-b border-slate-800/50 hover:bg-[#6366F1]/20 hover:text-white ${selectedTier === tier.toString() ? 'bg-[#6366F1]/20 text-[#6366F1]' : 'text-slate-300'}`}
+                    onClick={() => {
+                      setSelectedTier(tier.toString());
+                      setIsTierDropdownOpen(false);
+                    }}
+                  >
+                    Servicio de {tier.toLocaleString()} km
+                  </div>
+                ))}
+                <div 
+                  className="px-4 py-3 text-xs font-bold cursor-pointer text-amber-500 hover:bg-amber-500/10 transition-all sticky bottom-0 bg-slate-900 border-t border-slate-800/80"
+                  onClick={() => {
+                    setSelectedTier('MANUAL');
+                    setIsTierDropdownOpen(false);
+                  }}
+                >
+                  Mantenimiento Especial / +200k
+                </div>
+              </div>
+            )}
+          </div>
         </div>
-      )}
+
+        {formData.kilometraje && Number(formData.kilometraje) < minKm && (
+          <p className="mt-2 text-[10.5px] text-red-500 flex items-center gap-1.5 font-bold animate-pulse bg-red-500/10 p-2 rounded border border-red-500/20">
+            <AlertCircle size={14} /> El kilometraje no puede ser menor al último registro ({minKm.toLocaleString()}).
+          </p>
+        )}
+      </div>
 
       {/* 4. DESCRIPCIÓN */}
       <div className="mb-8">
         <div className="flex justify-between items-center mb-2">
           <label className="block text-sm font-medium text-slate-400">Detalles del Mantenimiento</label>
-          <span className={`text-[10px] font-black uppercase tracking-widest ${formData.descripcion.length >= 240 ? 'text-[#FF7420]' : 'text-slate-600'}`}>
+          <span className={`text-[10px] font-black uppercase tracking-widest ${formData.descripcion.length >= 240 ? 'text-[#6366F1]' : 'text-slate-600'}`}>
             {formData.descripcion.length} / 255
           </span>
         </div>
@@ -228,7 +353,7 @@ export default function TicketForm({ vehiculos }: Props) {
           required
           maxLength={255}
           rows={4}
-          className="w-full p-3 bg-slate-950 border border-slate-700 text-white rounded-lg focus:ring-2 focus:ring-[#FF7420] outline-none placeholder-slate-600 transition-all resize-none"
+          className="w-full p-3 bg-slate-950 border border-slate-700 text-white rounded-lg focus:ring-2 focus:ring-[#6366F1] outline-none placeholder-slate-600 transition-all resize-none"
           placeholder="Describa los trabajos o fallas reportadas..."
           value={formData.descripcion}
           onChange={(e) => setFormData({...formData, descripcion: e.target.value})}
@@ -237,8 +362,8 @@ export default function TicketForm({ vehiculos }: Props) {
 
       <button 
         type="submit" 
-        disabled={loading || (formData.tipo_servicio === 'preventivo' && !!formData.kilometraje && Number(formData.kilometraje) < minKm)}
-        className="w-full bg-[#FF7420] hover:bg-[#E6681C] text-white font-bold py-3.5 rounded-lg flex items-center justify-center gap-2 transition-all shadow-lg shadow-[#FF7420]/20 disabled:opacity-50 disabled:cursor-not-allowed uppercase text-sm tracking-wider"
+        disabled={loading || (!!formData.kilometraje && Number(formData.kilometraje) < minKm)}
+        className="w-full bg-[#6366F1] hover:bg-[#4F46E5] text-white font-bold py-3.5 rounded-lg flex items-center justify-center gap-2 transition-all shadow-lg shadow-[#6366F1]/20 disabled:opacity-50 disabled:cursor-not-allowed uppercase text-sm tracking-wider"
       >
         {loading ? <Loader2 className="animate-spin" /> : <Wrench size={20} />}
         Agendar Mantenimiento

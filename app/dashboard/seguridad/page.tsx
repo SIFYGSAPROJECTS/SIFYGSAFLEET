@@ -94,7 +94,7 @@ export default function SeguridadPage() {
           <input 
             type="text" 
             placeholder="Ej. Nombre o correo@sifygsa.com" 
-            className="w-full bg-slate-950 border-2 border-slate-700 rounded-xl px-4 py-3 text-white focus:border-[#FF7420] outline-none transition-all font-medium placeholder:text-slate-600 text-sm sm:text-base"
+            className="w-full bg-slate-950 border-2 border-slate-700 rounded-xl px-4 py-3 text-white focus:border-[#6366F1] outline-none transition-all font-medium placeholder:text-slate-600 text-sm sm:text-base"
             value={busqueda}
             onChange={(e) => setBusqueda(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && buscarEmpleado()}
@@ -102,7 +102,7 @@ export default function SeguridadPage() {
           <button 
             onClick={buscarEmpleado}
             disabled={cargando}
-            className="w-full sm:w-auto bg-[#FF7420] hover:bg-[#E6681C] disabled:bg-slate-800 text-white px-8 py-3 rounded-xl flex items-center justify-center gap-2 font-bold transition-all shadow-lg active:scale-95"
+            className="w-full sm:w-auto bg-[#6366F1] hover:bg-[#4F46E5] disabled:bg-slate-800 text-white px-8 py-3 rounded-xl flex items-center justify-center gap-2 font-bold transition-all shadow-lg active:scale-95"
           >
             {cargando ? <RefreshCcw size={20} className="animate-spin" /> : <Search size={20} />} 
             <span>{cargando ? 'Buscando...' : 'Buscar'}</span>
@@ -135,10 +135,10 @@ export default function SeguridadPage() {
                 </h2>
                 <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 mt-1 text-slate-400 text-xs sm:text-sm font-mono">
                   <span className="flex items-center justify-center sm:justify-start gap-1 truncate">
-                    <Mail size={14} className="text-[#FF7420] shrink-0"/> {empleadoEncontrado.Email}
+                    <Mail size={14} className="text-[#6366F1] shrink-0"/> {empleadoEncontrado.Email}
                   </span>
                 </div>
-                <span className={`inline-block mt-3 text-[10px] px-3 py-1 rounded-full font-black tracking-widest uppercase ${empleadoEncontrado.Rol === 'ADMIN' ? 'bg-[#FF7420] text-white' : 'bg-slate-800 text-slate-300 border border-slate-700'}`}>
+                <span className={`inline-block mt-3 text-[10px] px-3 py-1 rounded-full font-black tracking-widest uppercase ${empleadoEncontrado.Rol === 'ADMIN' ? 'bg-[#6366F1] text-white' : 'bg-slate-800 text-slate-300 border border-slate-700'}`}>
                   {empleadoEncontrado.Rol}
                 </span>
               </div>
@@ -158,7 +158,7 @@ export default function SeguridadPage() {
                 />
                 <button 
                   onClick={generarPassword}
-                  className="bg-slate-800 hover:bg-[#FF7420] text-slate-300 hover:text-white px-4 py-3.5 rounded-xl flex items-center justify-center transition-all shadow-lg active:scale-90"
+                  className="bg-slate-800 hover:bg-[#6366F1] text-slate-300 hover:text-white px-4 py-3.5 rounded-xl flex items-center justify-center transition-all shadow-lg active:scale-90"
                   title="Generar contraseña aleatoria"
                 >
                   <Wand2 size={20} />

@@ -201,11 +201,11 @@ export default function ChecklistsPage({ vehiculos = [], isAdmin = false }: Prop
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-5 mb-8">
           
           <div className="flex-1 flex flex-col items-start w-full text-left">
-            <Link href="/dashboard" className="inline-flex items-center gap-2 text-slate-400 hover:text-[#FF7420] transition-colors mb-3 font-medium text-sm">
+            <Link href="/dashboard" className="inline-flex items-center gap-2 text-slate-400 hover:text-[#6366F1] transition-colors mb-3 font-medium text-sm">
               <ArrowLeft className="w-4 h-4" /> Volver al Panel Maestro
             </Link>
             <h1 className="text-2xl sm:text-3xl font-black text-white flex items-center gap-3">
-              <FileText className="text-[#FF7420] shrink-0" size={32} /> Gestión de Checklists
+              <FileText className="text-[#6366F1] shrink-0" size={32} /> Gestión de Checklists
             </h1>
           </div>
 
@@ -253,7 +253,7 @@ export default function ChecklistsPage({ vehiculos = [], isAdmin = false }: Prop
                 <input 
                   type="text" 
                   placeholder="Ej. F&G-002" 
-                  className={`w-full bg-slate-950 border-2 rounded-xl px-4 py-3 outline-none uppercase text-center font-bold text-white transition-all placeholder:text-slate-600 ${errorBusqueda ? 'border-red-500 focus:ring-4 focus:ring-red-500/10' : 'border-slate-700 focus:border-[#FF7420]'}`}
+                  className={`w-full bg-slate-950 border-2 rounded-xl px-4 py-3 outline-none uppercase text-center font-bold text-white transition-all placeholder:text-slate-600 ${errorBusqueda ? 'border-red-500 focus:ring-4 focus:ring-red-500/10' : 'border-slate-700 focus:border-[#6366F1]'}`}
                   value={consecutivoInput}
                   onChange={handleSearchChange}
                   onFocus={() => { if(consecutivoInput && filteredVehiculos.length > 0) setShowDropdown(true) }}
@@ -271,7 +271,7 @@ export default function ChecklistsPage({ vehiculos = [], isAdmin = false }: Prop
                         className="px-4 py-3 hover:bg-slate-700 cursor-pointer text-slate-300 hover:text-white flex items-center justify-between transition-colors border-b border-slate-700/50 last:border-0"
                       >
                         <div className="flex items-center gap-3">
-                          <Car size={16} className="text-[#FF7420]" />
+                          <Car size={16} className="text-[#6366F1]" />
                           <span className="font-bold">{v.Num_Eco}</span>
                         </div>
                         <span className="text-xs text-slate-400">{v.Placas || 'Sin placas'}</span>
@@ -283,7 +283,7 @@ export default function ChecklistsPage({ vehiculos = [], isAdmin = false }: Prop
 
               <button 
                 onClick={buscarVehiculo}
-                className="bg-[#FF7420] hover:bg-[#E6681C] text-white px-6 py-3 rounded-xl flex items-center justify-center gap-2 font-bold transition-all shadow-lg active:scale-95 shrink-0"
+                className="bg-[#6366F1] hover:bg-[#4F46E5] text-white px-6 py-3 rounded-xl flex items-center justify-center gap-2 font-bold transition-all shadow-lg active:scale-95 shrink-0"
                 disabled={cargando}
               >
                 <Search className="w-5 h-5" /> {cargando ? '...' : 'Buscar'}
@@ -291,7 +291,7 @@ export default function ChecklistsPage({ vehiculos = [], isAdmin = false }: Prop
             </div>
 
             {mensaje && !vehiculoActivo && (
-              <div className={`mt-6 p-4 rounded-xl border flex items-center justify-center gap-3 animate-in fade-in zoom-in duration-300 ${errorBusqueda ? 'bg-red-500/10 border-red-500/50 text-red-400' : 'bg-[#FF7420]/10 border-[#FF7420]/50 text-[#FF7420]'}`}>
+              <div className={`mt-6 p-4 rounded-xl border flex items-center justify-center gap-3 animate-in fade-in zoom-in duration-300 ${errorBusqueda ? 'bg-red-500/10 border-red-500/50 text-red-400' : 'bg-[#6366F1]/10 border-[#6366F1]/50 text-[#6366F1]'}`}>
                 <AlertCircle size={20} className="shrink-0" />
                 <span className="font-bold text-xs uppercase tracking-wide">{mensaje}</span>
               </div>
@@ -300,12 +300,12 @@ export default function ChecklistsPage({ vehiculos = [], isAdmin = false }: Prop
 
           {/* ... EL RESTO DE TUS RESULTADOS DE CHECKLISTS ... */}
           {vehiculoActivo && (
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-8 shadow-2xl border-t-4 border-t-[#FF7420] animate-in slide-in-from-bottom-4 duration-500">
+            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-8 shadow-2xl border-t-4 border-t-[#6366F1] animate-in slide-in-from-bottom-4 duration-500">
               
               <div className="flex flex-col lg:flex-row justify-between items-center mb-8 gap-6">
                 <h2 className="text-xl sm:text-2xl font-black text-white flex items-center gap-2 text-center sm:text-left">
                   <CheckCircle2 className="w-6 h-6 text-emerald-400 shrink-0" />
-                  <span>Unidad: <span className="text-[#FF7420]">{vehiculoActivo}</span></span>
+                  <span>Unidad: <span className="text-[#6366F1]">{vehiculoActivo}</span></span>
                 </h2>
                 
                 <div className="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto">
@@ -327,7 +327,7 @@ export default function ChecklistsPage({ vehiculos = [], isAdmin = false }: Prop
                   <button 
                     onClick={subirPDF}
                     disabled={cargando || !archivo}
-                    className="w-full sm:w-auto bg-[#FF7420] hover:bg-[#E6681C] disabled:bg-slate-800 text-white px-6 py-2.5 rounded-xl flex items-center justify-center gap-2 font-bold transition-all shadow-lg text-sm"
+                    className="w-full sm:w-auto bg-[#6366F1] hover:bg-[#4F46E5] disabled:bg-slate-800 text-white px-6 py-2.5 rounded-xl flex items-center justify-center gap-2 font-bold transition-all shadow-lg text-sm"
                   >
                     <Upload className="w-4 h-4" /> {cargando ? '...' : 'Subir'}
                   </button>
@@ -337,19 +337,19 @@ export default function ChecklistsPage({ vehiculos = [], isAdmin = false }: Prop
               {vehiculoInfo && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 bg-slate-950 p-5 rounded-2xl border border-slate-800 shadow-inner mb-8">
                   <div className="flex flex-col gap-1">
-                    <span className="text-[10px] font-black text-[#FF7420] uppercase tracking-widest flex items-center gap-1"><Car size={12}/> Vehículo</span>
+                    <span className="text-[10px] font-black text-[#6366F1] uppercase tracking-widest flex items-center gap-1"><Car size={12}/> Vehículo</span>
                     <span className="font-bold text-white text-sm sm:text-base">{vehiculoInfo.marca} {vehiculoInfo.modelo}</span>
                   </div>
                   <div className="flex flex-col gap-1 sm:border-l sm:border-slate-800 sm:pl-4">
-                    <span className="text-[10px] font-black text-[#FF7420] uppercase tracking-widest flex items-center gap-1"><Palette size={12}/> Color</span>
+                    <span className="text-[10px] font-black text-[#6366F1] uppercase tracking-widest flex items-center gap-1"><Palette size={12}/> Color</span>
                     <span className="font-bold text-white text-sm sm:text-base">{vehiculoInfo.color}</span>
                   </div>
                   <div className="flex flex-col gap-1 lg:border-l lg:border-slate-800 lg:pl-4">
-                    <span className="text-[10px] font-black text-[#FF7420] uppercase tracking-widest flex items-center gap-1"><User size={12}/> Conductor</span>
+                    <span className="text-[10px] font-black text-[#6366F1] uppercase tracking-widest flex items-center gap-1"><User size={12}/> Conductor</span>
                     <span className="font-bold text-white text-sm sm:text-base truncate">{vehiculoInfo.nombreConductor || 'Sin asignar'}</span>
                   </div>
                   <div className="flex flex-col gap-1 lg:border-l lg:border-slate-800 lg:pl-4">
-                    <span className="text-[10px] font-black text-[#FF7420] uppercase tracking-widest flex items-center gap-1"><Gauge size={12}/> Kilometraje</span>
+                    <span className="text-[10px] font-black text-[#6366F1] uppercase tracking-widest flex items-center gap-1"><Gauge size={12}/> Kilometraje</span>
                     <span className="font-bold text-white text-sm sm:text-base">{vehiculoInfo.kilometraje ? `${vehiculoInfo.kilometraje} ` : 'N/A'}</span>
                   </div>
                 </div>
@@ -359,7 +359,7 @@ export default function ChecklistsPage({ vehiculos = [], isAdmin = false }: Prop
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
                 {checklists.map((check) => (
-                  <div key={check.id} className="bg-slate-950 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between hover:border-[#FF7420]/40 transition-all group relative">
+                  <div key={check.id} className="bg-slate-950 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between hover:border-[#6366F1]/40 transition-all group relative">
                     
                     <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button 
@@ -383,7 +383,7 @@ export default function ChecklistsPage({ vehiculos = [], isAdmin = false }: Prop
                         <FileText className="w-6 h-6 text-red-500" />
                       </div>
                       <div className="overflow-hidden">
-                        <h3 className="font-bold text-white leading-tight text-sm truncate group-hover:text-[#FF7420] transition-colors">
+                        <h3 className="font-bold text-white leading-tight text-sm truncate group-hover:text-[#6366F1] transition-colors">
                           {check.Titulo}
                         </h3>
                         {check.Fecha_Subida && (
@@ -422,7 +422,7 @@ export default function ChecklistsPage({ vehiculos = [], isAdmin = false }: Prop
                     ) : (
                       <button 
                         onClick={() => abrirPrevisualizacion(check.Ruta_PDF)}
-                        className="bg-slate-900 hover:bg-[#FF7420] text-slate-300 hover:text-white text-center py-3 rounded-xl text-xs font-bold w-full transition-all border border-slate-800 flex items-center justify-center gap-2 active:scale-95"
+                        className="bg-slate-900 hover:bg-[#6366F1] text-slate-300 hover:text-white text-center py-3 rounded-xl text-xs font-bold w-full transition-all border border-slate-800 flex items-center justify-center gap-2 active:scale-95"
                       >
                         <Eye size={14} /> Ver Documento
                       </button>
@@ -438,7 +438,7 @@ export default function ChecklistsPage({ vehiculos = [], isAdmin = false }: Prop
           <div className="fixed inset-0 bg-black/95 backdrop-blur-xl z-[100] flex flex-col p-4 animate-in fade-in duration-200">
             <div className="max-w-6xl mx-auto w-full flex justify-between items-center mb-4 gap-4">
               <div className="flex items-center gap-3 overflow-hidden">
-                <div className="bg-[#FF7420] p-2 rounded-lg shrink-0">
+                <div className="bg-[#6366F1] p-2 rounded-lg shrink-0">
                   <FileText className="text-white" size={18} />
                 </div>
                 <h3 className="font-bold text-sm sm:text-lg text-white truncate">Checklist Digital</h3>
@@ -447,7 +447,7 @@ export default function ChecklistsPage({ vehiculos = [], isAdmin = false }: Prop
               <div className="flex items-center gap-2">
                 <button 
                   onClick={() => window.open(pdfUrl!, '_blank')}
-                  className="bg-slate-800 hover:bg-[#FF7420] p-2.5 rounded-xl transition-colors text-slate-300 hover:text-white"
+                  className="bg-slate-800 hover:bg-[#6366F1] p-2.5 rounded-xl transition-colors text-slate-300 hover:text-white"
                 >
                   <Download size={18} />
                 </button>

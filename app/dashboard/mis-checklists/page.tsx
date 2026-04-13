@@ -46,7 +46,7 @@ export default function MisChecklistsPage() {
             {/* Enlace de regreso */}
             <Link 
               href="/dashboard" 
-              className="inline-flex items-center gap-2 text-slate-400 hover:text-[#FF7420] transition-colors font-medium text-sm mb-4"
+              className="inline-flex items-center gap-2 text-slate-400 hover:text-[#6366F1] transition-colors font-medium text-sm mb-4"
             >
               <ArrowLeft className="w-4 h-4" /> 
               Volver al Panel Maestro
@@ -54,8 +54,8 @@ export default function MisChecklistsPage() {
 
             {/* Encabezado Principal integrado a la izquierda */}
             <div className="flex items-center gap-4">
-              <div className="bg-[#FF7420]/10 p-3 rounded-xl border border-[#FF7420]/20 shrink-0">
-                <FileText className="w-8 h-8 text-[#FF7420]" />
+              <div className="bg-[#6366F1]/10 p-3 rounded-xl border border-[#6366F1]/20 shrink-0">
+                <FileText className="w-8 h-8 text-[#6366F1]" />
               </div>
               <div>
                 <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">Mis Checklists</h1>
@@ -91,7 +91,7 @@ export default function MisChecklistsPage() {
         {/* ESTADO DE CARGA */}
         {cargando ? (
            <div className="flex flex-col items-center justify-center p-20 text-slate-500 gap-4">
-              <Loader2 className="w-8 h-8 animate-spin text-[#FF7420]" />
+              <Loader2 className="w-8 h-8 animate-spin text-[#6366F1]" />
               <p className="font-bold tracking-widest uppercase text-xs">Buscando tu unidad asignada...</p>
            </div>
         ) : error ? (
@@ -112,30 +112,30 @@ export default function MisChecklistsPage() {
            </div>
         ) : (
           /* ESTADO CON UNIDAD (Totalmente estático, sin animaciones de entrada) */
-          <div className="bg-slate-900 border-x border-b border-slate-800 rounded-xl shadow-2xl border-t-4 border-t-[#FF7420] overflow-hidden">
+          <div className="bg-slate-900 border-x border-b border-slate-800 rounded-xl shadow-2xl border-t-4 border-t-[#6366F1] overflow-hidden">
             <div className="p-8">
               <h2 className="text-2xl font-bold text-white mb-8 flex items-center gap-3">
-                Unidad a tu cargo: <span className="text-[#FF7420]">{unidadAsignada.consecutivo}</span>
+                Unidad a tu cargo: <span className="text-[#6366F1]">{unidadAsignada.consecutivo}</span>
               </h2>
 
               {/* Grid de Información del Vehículo */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
-                <div className="bg-slate-950 border border-slate-800 p-5 rounded-xl group hover:border-[#FF7420]/30 transition-all">
-                  <span className="text-[10px] font-black text-[#FF7420] uppercase tracking-widest mb-2 flex items-center gap-2">
+                <div className="bg-slate-950 border border-slate-800 p-5 rounded-xl group hover:border-[#6366F1]/30 transition-all">
+                  <span className="text-[10px] font-black text-[#6366F1] uppercase tracking-widest mb-2 flex items-center gap-2">
                     <Car size={12} /> Vehículo
                   </span>
                   <p className="text-white font-bold text-lg truncate">{unidadAsignada.vehiculo}</p>
                 </div>
 
-                <div className="bg-slate-950 border border-slate-800 p-5 rounded-xl group hover:border-[#FF7420]/30 transition-all">
-                  <span className="text-[10px] font-black text-[#FF7420] uppercase tracking-widest mb-2 flex items-center gap-2">
+                <div className="bg-slate-950 border border-slate-800 p-5 rounded-xl group hover:border-[#6366F1]/30 transition-all">
+                  <span className="text-[10px] font-black text-[#6366F1] uppercase tracking-widest mb-2 flex items-center gap-2">
                     <Palette size={12} /> Color
                   </span>
                   <p className="text-white font-bold text-lg truncate">{unidadAsignada.color || 'N/A'}</p>
                 </div>
 
-                <div className="bg-slate-950 border border-slate-800 p-5 rounded-xl group hover:border-[#FF7420]/30 transition-all">
-                  <span className="text-[10px] font-black text-[#FF7420] uppercase tracking-widest mb-2 flex items-center gap-2">
+                <div className="bg-slate-950 border border-slate-800 p-5 rounded-xl group hover:border-[#6366F1]/30 transition-all">
+                  <span className="text-[10px] font-black text-[#6366F1] uppercase tracking-widest mb-2 flex items-center gap-2">
                     <CreditCard size={12} /> Placas
                   </span>
                   <p className="text-white font-bold text-lg uppercase font-mono">{unidadAsignada.placas}</p>
@@ -146,16 +146,16 @@ export default function MisChecklistsPage() {
               {unidadAsignada.checklists && unidadAsignada.checklists.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {unidadAsignada.checklists.map((check: any) => (
-                    <div key={check.id} className="bg-slate-950 border border-slate-800 rounded-xl p-6 hover:border-[#FF7420]/50 transition-all group relative overflow-hidden flex flex-col justify-between h-full">
+                    <div key={check.id} className="bg-slate-950 border border-slate-800 rounded-xl p-6 hover:border-[#6366F1]/50 transition-all group relative overflow-hidden flex flex-col justify-between h-full">
                       {/* Efecto de luz hover (se mantiene porque da buena UX sin ser invasivo) */}
-                      <div className="absolute -right-4 -top-4 w-16 h-16 bg-[#FF7420]/5 rounded-full blur-2xl group-hover:bg-[#FF7420]/10 transition-all" />
+                      <div className="absolute -right-4 -top-4 w-16 h-16 bg-[#6366F1]/5 rounded-full blur-2xl group-hover:bg-[#6366F1]/10 transition-all" />
                       
                       <div className="flex items-start gap-4 mb-6">
                         <div className="bg-red-500/10 p-2.5 rounded-lg border border-red-500/20 shrink-0">
                           <FileText className="w-6 h-6 text-red-500" />
                         </div>
                         <div className="overflow-hidden">
-                          <h3 className="text-white font-bold text-sm leading-tight group-hover:text-[#FF7420] transition-colors truncate">
+                          <h3 className="text-white font-bold text-sm leading-tight group-hover:text-[#6366F1] transition-colors truncate">
                             {check.titulo}
                           </h3>
                           <p className="text-[10px] text-slate-500 font-mono mt-1 uppercase">
@@ -170,7 +170,7 @@ export default function MisChecklistsPage() {
                         href={check.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="w-full bg-slate-900 hover:bg-[#FF7420] text-slate-300 hover:text-white border border-slate-800 hover:border-[#FF7420] py-2.5 rounded-lg text-xs font-black transition-all flex items-center justify-center gap-2 shadow-sm mt-auto"
+                        className="w-full bg-slate-900 hover:bg-[#6366F1] text-slate-300 hover:text-white border border-slate-800 hover:border-[#6366F1] py-2.5 rounded-lg text-xs font-black transition-all flex items-center justify-center gap-2 shadow-sm mt-auto"
                       >
                         VER PDF <ExternalLink size={14} />
                       </a>

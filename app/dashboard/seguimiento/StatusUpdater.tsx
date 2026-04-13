@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { Check, X, MapPin, Calendar, Clock, User, Phone } from 'lucide-react'; 
+import PremiumSelect from '@/components/ui/PremiumSelect';
 
 export default function StatusUpdater({ folio, estadoActual, lugarActual, fechaActual, horaActual, asesorActual, numeroAsesorActual, onUpdateTemporal }: any) {
   const router = useRouter();
@@ -49,17 +50,20 @@ export default function StatusUpdater({ folio, estadoActual, lugarActual, fechaA
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center gap-3">
-        <label className="text-[10px] font-black text-[#FF7420] uppercase tracking-widest">Estatus:</label>
-        <select 
+        <label className="text-[10px] font-black text-[#6366F1] uppercase tracking-widest">Estatus:</label>
+        <PremiumSelect
+          compact
+          accent="indigo"
           value={estado}
-          onChange={(e) => { setEstado(e.target.value); onUpdateTemporal?.({ estado: e.target.value, lugar, fecha, hora, asesor, numeroAsesor }); }}
-          className="bg-slate-950 border border-slate-800 text-white text-xs font-bold rounded px-2 py-1.5 outline-none focus:border-[#FF7420]"
-        >
-          <option value="PENDIENTE">PENDIENTE</option>
-          <option value="CITA">CITA</option>
-          <option value="EN TALLER">EN TALLER</option>
-          <option value="LISTO">LISTO</option>
-        </select>
+          onChange={(val) => { setEstado(val); onUpdateTemporal?.({ estado: val, lugar, fecha, hora, asesor, numeroAsesor }); }}
+          options={[
+            { value: 'PENDIENTE', label: 'PENDIENTE' },
+            { value: 'CITA', label: 'CITA' },
+            { value: 'EN TALLER', label: 'EN TALLER' },
+            { value: 'LISTO', label: 'LISTO' },
+          ]}
+          className="w-40"
+        />
 
         {hayCambios && (
           <div className="flex items-center gap-2 animate-in fade-in zoom-in duration-200">

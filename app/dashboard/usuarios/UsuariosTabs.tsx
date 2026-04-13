@@ -29,11 +29,11 @@ export default function UsuariosTabs({ isAdmin, empleadosIniciales }: Props) {
         
         {/* TEXTO ALINEADO A LA IZQUIERDA */}
         <div className="flex-1 flex flex-col items-start w-full text-left">
-          <Link href="/dashboard" className="inline-flex items-center gap-2 text-slate-400 hover:text-[#FF7420] transition-colors mb-3 font-medium text-sm">
+          <Link href="/dashboard" className="inline-flex items-center gap-2 text-slate-400 hover:text-[#6366F1] transition-colors mb-3 font-medium text-sm">
             <ArrowLeft className="w-4 h-4" /> Volver al Panel Maestro
           </Link>
           <h1 className="text-2xl sm:text-3xl font-black text-white flex items-center gap-3">
-            <User className="text-[#FF7420] shrink-0" size={32} /> Configuración de Usuario
+            <User className="text-[#6366F1] shrink-0" size={32} /> Configuración de Usuario
           </h1>
           <p className="text-slate-400 mt-2 font-medium text-sm sm:text-base leading-relaxed">
             {isAdmin ? 'Gestión global de perfiles, permisos y seguridad de credenciales.' : 'Administra tus datos personales y contraseña.'}
@@ -47,7 +47,7 @@ export default function UsuariosTabs({ isAdmin, empleadosIniciales }: Props) {
             <div className="inline-flex items-center bg-slate-900 border border-slate-800 rounded-full p-1.5 shadow-lg shrink-0 gap-1">
               
               <div className="px-4 py-1.5 text-xs font-bold rounded-full bg-slate-800 text-white cursor-default flex items-center gap-2 shadow-inner whitespace-nowrap">
-                <User size={14} className="text-[#FF7420]" /> Usuarios
+                <User size={14} className="text-[#6366F1]" /> Usuarios
               </div>
               
               {isAdmin && (
@@ -78,7 +78,7 @@ export default function UsuariosTabs({ isAdmin, empleadosIniciales }: Props) {
           <button
             onClick={() => setActiveTab('perfil')}
             className={`px-4 sm:px-6 py-3.5 font-bold text-sm sm:text-base flex items-center gap-2 border-b-2 transition-all whitespace-nowrap ${
-              activeTab === 'perfil' ? 'border-[#FF7420] text-[#FF7420]' : 'border-transparent text-slate-500 hover:text-slate-300'
+              activeTab === 'perfil' ? 'border-[#6366F1] text-[#6366F1]' : 'border-transparent text-slate-500 hover:text-slate-300'
             }`}
           >
             <User size={20} /> Mi Perfil

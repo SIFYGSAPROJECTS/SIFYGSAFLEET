@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import SystemModal, { ModalType } from '@/components/ui/SystemModal';
+import PremiumSelect from '@/components/ui/PremiumSelect';
 
 interface Props {
   historial: any[];
@@ -136,29 +137,36 @@ export default function HistorialClient({ historial, rol }: Props) {
         </div>
         
         <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto scrollbar-hide">
-          <select 
-            className="text-[11px] font-bold py-1.5 pl-3 pr-8 bg-slate-900 border border-slate-800 rounded-full text-slate-300 focus:border-purple-500/50 outline-none transition-all cursor-pointer hover:bg-slate-800"
+          <PremiumSelect
+            compact
+            accent="purple"
+            placeholder="Todas las unidades"
             value={filtroAuto}
-            onChange={(e) => setFiltroAuto(e.target.value)}
-          >
-            <option value="">Todas las unidades</option>
-            {autosUnicos.map((auto: any) => (
-              <option key={auto.Consecutivo} value={auto.Consecutivo}>
-                {auto.Consecutivo} - {auto.Marca}
-              </option>
-            ))}
-          </select>
+            onChange={(val) => setFiltroAuto(val)}
+            options={[
+              { value: '', label: 'Todas las unidades' },
+              ...autosUnicos.map((auto: any) => ({
+                value: auto.Consecutivo,
+                label: `${auto.Consecutivo} - ${auto.Marca}`
+              }))
+            ]}
+            className="w-48"
+          />
 
-          <select 
-            className="text-[11px] font-bold py-1.5 pl-3 pr-8 bg-slate-900 border border-slate-800 rounded-full text-slate-300 focus:border-purple-500/50 outline-none transition-all cursor-pointer hover:bg-slate-800"
+          <PremiumSelect
+            compact
+            accent="purple"
+            placeholder="Rango: Todo"
             value={filtroMeses}
-            onChange={(e) => setFiltroMeses(e.target.value)}
-          >
-            <option value="">Rango: Todo</option>
-            <option value="2">Últimos 2 meses</option>
-            <option value="6">Últimos 6 meses</option>
-            <option value="12">Último año</option>
-          </select>
+            onChange={(val) => setFiltroMeses(val)}
+            options={[
+              { value: '', label: 'Rango: Todo' },
+              { value: '2', label: 'Últimos 2 meses' },
+              { value: '6', label: 'Últimos 6 meses' },
+              { value: '12', label: 'Último año' },
+            ]}
+            className="w-44"
+          />
         </div>
       </div>
 
@@ -193,7 +201,7 @@ export default function HistorialClient({ historial, rol }: Props) {
 
                   return (
                   <tr key={ticket.Pk_folio_ticket} className="hover:bg-slate-800/40 transition-colors group">
-                    <td className="p-4 font-mono text-sm font-bold text-[#FF7420]">#{ticket.Pk_folio_ticket}</td>
+                    <td className="p-4 font-mono text-sm font-bold text-[#6366F1]">#{ticket.Pk_folio_ticket}</td>
                     <td className="p-4 text-sm text-slate-300 font-medium">
                       {new Date(ticket.Fecha_Realizacion).toLocaleDateString('es-MX', { 
                         day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' 
@@ -231,14 +239,14 @@ export default function HistorialClient({ historial, rol }: Props) {
                           </button>
                         </div>
                       ) : (
-                        <label className="cursor-pointer inline-flex items-center justify-center gap-1.5 text-slate-400 bg-slate-950 border border-slate-700 px-3 py-1.5 rounded-md text-xs font-bold hover:border-[#FF7420] hover:text-[#FF7420] transition-all shadow-sm">
+                        <label className="cursor-pointer inline-flex items-center justify-center gap-1.5 text-slate-400 bg-slate-950 border border-slate-700 px-3 py-1.5 rounded-md text-xs font-bold hover:border-[#6366F1] hover:text-[#6366F1] transition-all shadow-sm">
                           {subiendoFolio === ticket.Pk_folio_ticket ? <><Loader2 size={14} className="animate-spin" /> SUBIENDO</> : <><UploadCloud size={14} /> SUBIR</>}
                           <input type="file" accept=".pdf" className="hidden" onChange={(e) => handleSubirEvidencia(e, ticket.Pk_folio_ticket, ticket.auto?.Consecutivo || 'Unidad', false)} disabled={subiendoFolio === ticket.Pk_folio_ticket} />
                         </label>
                       )}
                     </td>
                     <td className="p-4 text-center">
-                      <Link href={`/dashboard/tickets/ver/${encodeURIComponent(ticket.Pk_folio_ticket)}`} className="inline-flex items-center justify-center gap-1.5 bg-slate-800 text-slate-300 border border-slate-700 px-3 py-1.5 rounded-md text-xs font-bold hover:bg-[#FF7420] hover:text-white hover:border-[#FF7420] transition-all shadow-sm">
+                      <Link href={`/dashboard/tickets/ver/${encodeURIComponent(ticket.Pk_folio_ticket)}`} className="inline-flex items-center justify-center gap-1.5 bg-slate-800 text-slate-300 border border-slate-700 px-3 py-1.5 rounded-md text-xs font-bold hover:bg-[#6366F1] hover:text-white hover:border-[#6366F1] transition-all shadow-sm">
                         <FileText size={14} /> TICKET
                       </Link>
                     </td>
@@ -278,7 +286,7 @@ export default function HistorialClient({ historial, rol }: Props) {
         <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-[100] flex flex-col p-4 md:p-8 animate-in fade-in zoom-in-95 duration-200">
           <div className="max-w-6xl mx-auto w-full flex justify-between items-center mb-4">
             <div className="flex items-center gap-3">
-              <div className="bg-[#FF7420] p-2 rounded-lg shadow-lg shadow-[#FF7420]/20"><History className="text-white" size={20} /></div>
+              <div className="bg-[#6366F1] p-2 rounded-lg shadow-lg shadow-[#6366F1]/20"><History className="text-white" size={20} /></div>
               <h3 className="font-bold text-lg text-white tracking-tight">Evidencia de Mantenimiento</h3>
             </div>
             <div className="flex gap-2">
