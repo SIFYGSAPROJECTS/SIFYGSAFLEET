@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import StatusUpdater from './StatusUpdater';
-import { Activity, ArrowLeft, MapPin, Calendar, Clock, Info, Timer, Wrench, CheckCircle2, User, Phone } from 'lucide-react'; 
+import { Activity, ArrowLeft, MapPin, Calendar, Clock, Info, Timer, Wrench, CheckCircle2, User, Phone, ExternalLink } from 'lucide-react'; 
 import Link from 'next/link';
 
 export default function SeguimientoClient({ ticketsIniciales = [], isAdmin }: any) {
@@ -72,6 +72,7 @@ export default function SeguimientoClient({ ticketsIniciales = [], isAdmin }: an
         const hora = infoMemoria.hora || ticket.Hora_Cita || '';
         const asesor = infoMemoria.asesor || ticket.Asesor || ''; 
         const numeroAsesor = infoMemoria.numeroAsesor || ticket.Num_Asesor || ''; 
+        const linkTaller = infoMemoria.linkTaller || ticket.Link_Taller || '';
 
         const estados = ['PENDIENTE', 'CITA', 'EN TALLER', 'LISTO'];
         const pasoActual = estados.indexOf(estadoVisual);
@@ -86,7 +87,16 @@ export default function SeguimientoClient({ ticketsIniciales = [], isAdmin }: an
                 <span className={`px-2 py-1 rounded text-[10px] font-mono font-black mb-3 inline-block tracking-[0.2em] ${esFinalizado ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'bg-[#6366F1]/10 text-[#6366F1] border border-[#6366F1]/20'}`}>
                   FOLIO: {ticket.Pk_folio_ticket}
                 </span>
-                <h3 className="text-xl sm:text-2xl font-bold text-white">{ticket.auto?.Marca} {ticket.auto?.Modelo}</h3>
+                <h3 className="text-xl sm:text-2xl font-bold text-white leading-tight">
+                  {ticket.auto?.Linea ? `(${ticket.auto.Linea}) ` : ''}{ticket.auto?.Marca} {ticket.auto?.Modelo}
+                </h3>
+                <div className="flex gap-2 items-center mt-1.5">
+                  <p className="text-sm text-slate-400 font-medium">
+                    Placa: <span className="text-slate-200 font-bold font-mono">{ticket.auto?.Placa || 'S/P'}</span>
+                    <span className="mx-2 text-slate-600">•</span>
+                    Color: <span className="text-slate-200">{ticket.auto?.Color || 'Sin especificar'}</span>
+                  </p>
+                </div>
                 <p className="text-sm text-slate-400 mt-2 italic">"{ticket.Descripcion}"</p>
               </div>
 
@@ -99,7 +109,8 @@ export default function SeguimientoClient({ ticketsIniciales = [], isAdmin }: an
                     fechaActual={ticket.Fecha_Cita}
                     horaActual={ticket.Hora_Cita}
                     asesorActual={ticket.Asesor} 
-                    numeroAsesorActual={ticket.Num_Asesor} 
+                    numeroAsesorActual={ticket.Num_Asesor}
+                    linkTallerActual={ticket.Link_Taller} 
                     onUpdateTemporal={(info: any) => setDatosTemporales(prev => ({ ...prev, [ticket.Pk_folio_ticket]: info }))}
                   />
                 </div>
@@ -144,7 +155,20 @@ export default function SeguimientoClient({ ticketsIniciales = [], isAdmin }: an
                     <MapPin className="text-cyan-500 shrink-0" size={22}/> 
                     <div>
                       <p className="text-[10px] text-slate-500 font-bold uppercase">Lugar</p>
-                      <p className="font-bold text-sm xl:text-base leading-tight break-words">{lugar || 'Por definir'}</p>
+                      <p className="font-bold text-sm xl:text-base leading-tight break-words">
+                        {lugar || 'Por definir'}
+                        {linkTaller && (
+                          <a 
+                            href={linkTaller} 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            className="inline-flex items-center gap-1 ml-2 text-cyan-400 hover:text-cyan-300 transition-colors"
+                            title="Ver ubicación en el mapa"
+                          >
+                            <ExternalLink size={14} className="inline" />
+                          </a>
+                        )}
+                      </p>
                     </div>
                   </div>
                   

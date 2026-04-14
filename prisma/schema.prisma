@@ -37,14 +37,14 @@ model Empleados {
 // 2. INVENTARIO DE UNIDADES [cite: 2]
 model Inventario_Automoviles {
   Consecutivo      String   @id @db.VarChar(10)
-  Placa            String   @unique @db.VarChar(20) // Aumentamos a 20
-  Marca            String?  @db.VarChar(50)         // Aumentamos a 50
-  Modelo           String?  @db.VarChar(50)         // Aumentamos a 50
-  Color            String?  @db.VarChar(40)         // Aumentamos a 40 para colores largos
-  Linea            String?  @db.VarChar(20)         // Aumentamos a 20
+  Placa            String   @unique @db.VarChar(20) 
+  Marca            String?  @db.VarChar(50)         
+  Modelo           String?  @db.VarChar(50)        
+  Color            String?  @db.VarChar(40)         
+  Linea            String?  @db.VarChar(20)         
   Estado_Unidad    Boolean  @default(true)
   Estatus_Operativo String   @default("Activo en flota") @db.VarChar(30)
-  Email_encargado  String?  @db.VarChar(100)        // Aumentamos a 100 por correos largos
+  Email_encargado  String?  @db.VarChar(100)        
   Numero_Serie     String?
   Poliza_Seguro    String?
   Departamento     String?
@@ -137,6 +137,7 @@ model Solicitud {
   Fecha_Cita        String?  @db.VarChar(50)
   Hora_Cita         String?  @db.VarChar(20)
   Num_Asesor        String?
+  Link_Taller       String?  @db.Text
   Kilometraje       Int?
   Tipo_Servicio     String?  @db.VarChar(30)
   Evidencia         String?

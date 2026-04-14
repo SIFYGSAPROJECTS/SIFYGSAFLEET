@@ -147,7 +147,7 @@ export default function HistorialClient({ historial, rol }: Props) {
               { value: '', label: 'Todas las unidades' },
               ...autosUnicos.map((auto: any) => ({
                 value: auto.Consecutivo,
-                label: `${auto.Consecutivo} - ${auto.Marca}`
+                label: `${auto.Consecutivo} - ${auto.Marca} ${auto.Modelo || ''}`
               }))
             ]}
             className="w-48"

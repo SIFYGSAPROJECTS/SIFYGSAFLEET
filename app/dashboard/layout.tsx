@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import IdleTimer from '@/components/security/IdleTimer'; 
+import IdleTimer from '@/components/security/IdleTimer';
+import RoleGuard from '@/components/security/RoleGuard';
 
 export default async function DashboardLayout({
   children,
@@ -17,9 +18,12 @@ export default async function DashboardLayout({
 
   return (
     <div className="min-h-screen bg-[#0B101E]">
-      {/* 2. Colocamos el cronómetro invisible para que vigile todas las pantallas */}
-      <IdleTimer /> 
-      
+      {/* 1. Cronómetro de inactividad (15 min sin actividad = logout) */}
+      <IdleTimer />
+
+      {/* 2. (cada 5s verifica si el rol cambió) */}
+      <RoleGuard />
+
       {/* Todo lo que pongas aquí se verá en todas las páginas del dashboard */}
       {children}
     </div>

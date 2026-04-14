@@ -5,7 +5,7 @@ import nodemailer from 'nodemailer';
 export async function PUT(request: Request) {
   try {
     
-    const { folio, estado, lugar, fecha, hora, asesor, numeroAsesor } = await request.json();
+    const { folio, estado, lugar, fecha, hora, asesor, numeroAsesor, linkTaller } = await request.json();
 
     // 1. Actualizamos el ticket incluyendo el número de asesor
     const ticketActualizado = await prisma.solicitud.update({
@@ -16,7 +16,8 @@ export async function PUT(request: Request) {
         Fecha_Cita: fecha || null,
         Hora_Cita: hora || null,
         Asesor: asesor || null,
-        Num_Asesor: numeroAsesor || null //  GUARDAMOS EL TELÉFONO
+        Num_Asesor: numeroAsesor || null, //  GUARDAMOS EL TELÉFONO
+        Link_Taller: linkTaller || null
       },
       include: {
         empleado: true, 
@@ -51,6 +52,7 @@ export async function PUT(request: Request) {
               <p style="margin: 5px 0;"><strong>Folio de Servicio:</strong> ${folio}</p>
               ${asesor ? `<p style="margin: 5px 0;"><strong>Asesor a cargo:</strong> ${asesor}</p>` : ''}
               ${numeroAsesor ? `<p style="margin: 5px 0;"><strong>Teléfono Asesor:</strong> ${numeroAsesor}</p>` : ''}
+              ${linkTaller ? `<p style="margin: 5px 0;"><strong>Ubicación del Taller:</strong> <a href="${linkTaller}" style="color: #0ea5e9; text-decoration: underline;">Ver en Mapa</a></p>` : ''}
             </div>
             
             <p style="color: #64748b; font-size: 12px; text-align: center; margin-top: 30px;">

@@ -338,7 +338,9 @@ export default function InventarioMaestroPage() {
                             }`}>{auto.Estatus_Operativo}</span>
                           </td>
                           <td className="p-4">
-                            <div className="font-medium text-white">{auto.Marca} {auto.Modelo} ({auto.Linea})</div>
+                            <div className="font-medium text-white">
+                              {auto.Linea ? `(${auto.Linea}) ` : ''}{auto.Marca} {auto.Modelo}
+                            </div>
                             <div className="text-sm text-slate-400">Placa: <span className="font-mono text-slate-300 font-bold">{auto.Placa}</span> • Color: {auto.Color}</div>
                           </td>
                           <td className="p-4">
@@ -398,10 +400,12 @@ export default function InventarioMaestroPage() {
                         </div>
                         <span className="flex items-center gap-1 text-[10px] font-bold bg-red-900/30 text-red-400 px-2 py-1 rounded border border-red-800/50 uppercase tracking-widest">INACTIVO</span>
                       </div>
-                      <h3 className="text-xl font-bold text-white mb-1">{vehiculo.Marca} {vehiculo.Linea}</h3>
+                      <h3 className="text-xl font-bold text-white mb-1">
+                        {vehiculo.Linea ? `(${vehiculo.Linea}) ` : ''}{vehiculo.Marca} {vehiculo.Modelo}
+                      </h3>
                       <div className="flex gap-4 text-slate-400 font-mono text-sm mb-6 border-b border-slate-800 pb-4">
                         <p>Placa: <span className="text-slate-300">{vehiculo.Placa}</span></p>
-                        <p>Año: <span className="text-slate-300">{vehiculo.Modelo || 'N/A'}</span></p>
+                          <p>Año/Obs: <span className="text-slate-300">Detalle Completo en Título</span></p>
                       </div>
                       <div className="bg-red-950/30 border border-red-900/50 p-4 rounded-lg">
                         <p className="text-[10px] font-bold text-red-400 flex items-center gap-2 uppercase tracking-wider mb-2"><AlertCircle size={14} /> Motivo de Baja</p>
@@ -453,12 +457,12 @@ export default function InventarioMaestroPage() {
                   <input type="text" value={formData.Marca} onChange={e => setFormData({...formData, Marca: e.target.value})} className="w-full bg-slate-950 border border-slate-700 text-white rounded-lg p-2.5 focus:ring-2 focus:ring-[#6366F1] outline-none placeholder-slate-600" placeholder="Ej. Ford" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-400 mb-1">Línea / Modelo</label>
-                  <input type="text" value={formData.Modelo} onChange={e => setFormData({...formData, Modelo: e.target.value})} className="w-full bg-slate-950 border border-slate-700 text-white rounded-lg p-2.5 focus:ring-2 focus:ring-[#6366F1] outline-none placeholder-slate-600" placeholder="Ej. Ranger" />
+                  <label className="block text-sm font-medium text-slate-400 mb-1">Año</label>
+                  <input type="text" value={formData.Modelo} onChange={e => setFormData({...formData, Modelo: e.target.value})} className="w-full bg-slate-950 border border-slate-700 text-white rounded-lg p-2.5 focus:ring-2 focus:ring-[#6366F1] outline-none placeholder-slate-600" placeholder="Ej. 2024" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-400 mb-1">Año</label>
-                  <input type="text" value={formData.Linea} onChange={e => setFormData({...formData, Linea: e.target.value})} className="w-full bg-slate-950 border border-slate-700 text-white rounded-lg p-2.5 focus:ring-2 focus:ring-[#6366F1] outline-none placeholder-slate-600" placeholder="Ej. 2024" />
+                  <label className="block text-sm font-medium text-slate-400 mb-1">Línea / Modelo</label>
+                  <input type="text" value={formData.Linea} onChange={e => setFormData({...formData, Linea: e.target.value})} className="w-full bg-slate-950 border border-slate-700 text-white rounded-lg p-2.5 focus:ring-2 focus:ring-[#6366F1] outline-none placeholder-slate-600" placeholder="Ej. Ranger" />
                 </div>
                 <div className="sm:col-span-2">
                   <label className="block text-sm font-medium text-slate-400 mb-1">Número de Serie (VIN)</label>

@@ -1,11 +1,11 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
-import { Check, X, MapPin, Calendar, Clock, User, Phone } from 'lucide-react'; 
+import { useState, useEffect } from 'react';
+import { Check, X, MapPin, Calendar, Clock, User, Phone, ExternalLink } from 'lucide-react'; 
 import PremiumSelect from '@/components/ui/PremiumSelect';
 
-export default function StatusUpdater({ folio, estadoActual, lugarActual, fechaActual, horaActual, asesorActual, numeroAsesorActual, onUpdateTemporal }: any) {
+export default function StatusUpdater({ folio, estadoActual, lugarActual, fechaActual, horaActual, asesorActual, numeroAsesorActual, linkTallerActual, onUpdateTemporal }: any) {
   const router = useRouter();
   const [cargando, setCargando] = useState(false);
   
@@ -15,9 +15,23 @@ export default function StatusUpdater({ folio, estadoActual, lugarActual, fechaA
   const [hora, setHora] = useState(horaActual || '');
   const [asesor, setAsesor] = useState(asesorActual || ''); 
   const [numeroAsesor, setNumeroAsesor] = useState(numeroAsesorActual || '');
+  const [linkTaller, setLinkTaller] = useState(linkTallerActual || '');
 
   // Detectamos si hay cambios
-  const hayCambios = estado !== estadoActual || lugar !== (lugarActual || '') || fecha !== (fechaActual || '') || hora !== (horaActual || '') || asesor !== (asesorActual || '') || numeroAsesor !== (numeroAsesorActual || '');
+  const hayCambios = estado !== estadoActual || lugar !== (lugarActual || '') || fecha !== (fechaActual || '') || hora !== (horaActual || '') || asesor !== (asesorActual || '') || numeroAsesor !== (numeroAsesorActual || '') || linkTaller !== (linkTallerActual || '');
+
+  // Sincronizar estado cuando las props cambien (después de un refresh exitoso)
+  useEffect(() => {
+    setEstado(estadoActual);
+    setLugar(lugarActual || '');
+    setFecha(fechaActual || '');
+    setHora(horaActual || '');
+    setAsesor(asesorActual || '');
+    setNumeroAsesor(numeroAsesorActual || '');
+    setLinkTaller(linkTallerActual || '');
+    // Al sincronizar, limpiamos el estado temporal del padre
+    onUpdateTemporal?.(null);
+  }, [estadoActual, lugarActual, fechaActual, horaActual, asesorActual, numeroAsesorActual, linkTallerActual]);
 
   const guardarCambios = async () => {
     setCargando(true);
@@ -25,13 +39,19 @@ export default function StatusUpdater({ folio, estadoActual, lugarActual, fechaA
       const res = await fetch('/api/tickets/estado', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ folio, estado, lugar, fecha, hora, asesor, numeroAsesor }), 
+        body: JSON.stringify({ folio, estado, lugar, fecha, hora, asesor, numeroAsesor, linkTaller }), 
       });
       if (res.ok) {
+        // En lugar de esperar el refresh, podemos limpiar localmente para feedback inmediato
+        onUpdateTemporal?.(null); 
         router.refresh(); 
+      } else {
+        const errorData = await res.json();
+        alert("Error al actualizar: " + (errorData.error || "Error desconocido"));
       }
     } catch (error) {
       console.error("Error al actualizar", error);
+      alert("Error de conexión al servidor.");
     } finally {
       setCargando(false);
     }
@@ -43,7 +63,8 @@ export default function StatusUpdater({ folio, estadoActual, lugarActual, fechaA
     setFecha(fechaActual || '');
     setHora(horaActual || '');
     setAsesor(asesorActual || '');
-    setNumeroAsesor(numeroAsesorActual || ''); 
+    setNumeroAsesor(numeroAsesorActual || '');
+    setLinkTaller(linkTallerActual || ''); 
     onUpdateTemporal?.(null);
   };
 
@@ -55,7 +76,7 @@ export default function StatusUpdater({ folio, estadoActual, lugarActual, fechaA
           compact
           accent="indigo"
           value={estado}
-          onChange={(val) => { setEstado(val); onUpdateTemporal?.({ estado: val, lugar, fecha, hora, asesor, numeroAsesor }); }}
+          onChange={(val) => { setEstado(val); onUpdateTemporal?.({ estado: val, lugar, fecha, hora, asesor, numeroAsesor, linkTaller }); }}
           options={[
             { value: 'PENDIENTE', label: 'PENDIENTE' },
             { value: 'CITA', label: 'CITA' },
@@ -83,20 +104,20 @@ export default function StatusUpdater({ folio, estadoActual, lugarActual, fechaA
             className="bg-slate-950 border border-slate-800 text-[10px] text-white p-1.5 rounded outline-none focus:border-cyan-500"
             placeholder="¿Dónde será la cita?"
             value={lugar}
-            onChange={(e) => { setLugar(e.target.value); onUpdateTemporal?.({ estado: 'CITA', lugar: e.target.value, fecha, hora, asesor, numeroAsesor }); }}
+            onChange={(e) => { setLugar(e.target.value); onUpdateTemporal?.({ estado: 'CITA', lugar: e.target.value, fecha, hora, asesor, numeroAsesor, linkTaller }); }}
           />
           <div className="flex gap-2">
             <input 
               className="w-1/2 bg-slate-950 border border-slate-800 text-[10px] text-white p-1.5 rounded outline-none focus:border-cyan-500"
               placeholder="Fecha"
               value={fecha}
-              onChange={(e) => { setFecha(e.target.value); onUpdateTemporal?.({ estado: 'CITA', lugar, fecha: e.target.value, hora, asesor, numeroAsesor }); }}
+              onChange={(e) => { setFecha(e.target.value); onUpdateTemporal?.({ estado: 'CITA', lugar, fecha: e.target.value, hora, asesor, numeroAsesor, linkTaller }); }}
             />
             <input 
               className="w-1/2 bg-slate-950 border border-slate-800 text-[10px] text-white p-1.5 rounded outline-none focus:border-cyan-500"
               placeholder="Hora"
               value={hora}
-              onChange={(e) => { setHora(e.target.value); onUpdateTemporal?.({ estado: 'CITA', lugar, fecha, hora: e.target.value, asesor, numeroAsesor }); }}
+              onChange={(e) => { setHora(e.target.value); onUpdateTemporal?.({ estado: 'CITA', lugar, fecha, hora: e.target.value, asesor, numeroAsesor, linkTaller }); }}
             />
           </div>
           <div className="flex gap-2">
@@ -104,14 +125,23 @@ export default function StatusUpdater({ folio, estadoActual, lugarActual, fechaA
               className="w-1/2 bg-slate-950 border border-slate-800 text-[10px] text-white p-1.5 rounded outline-none focus:border-cyan-500"
               placeholder="Nombre del Asesor"
               value={asesor}
-              onChange={(e) => { setAsesor(e.target.value); onUpdateTemporal?.({ estado: 'CITA', lugar, fecha, hora, asesor: e.target.value, numeroAsesor }); }}
+              onChange={(e) => { setAsesor(e.target.value); onUpdateTemporal?.({ estado: 'CITA', lugar, fecha, hora, asesor: e.target.value, numeroAsesor, linkTaller }); }}
             />
             {/*INPUT PARA EL NÚMERO DEL ASESOR */}
             <input 
               className="w-1/2 bg-slate-950 border border-slate-800 text-[10px] text-white p-1.5 rounded outline-none focus:border-cyan-500"
               placeholder="Teléfono (Ej. 55 1234 5678)"
               value={numeroAsesor}
-              onChange={(e) => { setNumeroAsesor(e.target.value); onUpdateTemporal?.({ estado: 'CITA', lugar, fecha, hora, asesor, numeroAsesor: e.target.value }); }}
+              onChange={(e) => { setNumeroAsesor(e.target.value); onUpdateTemporal?.({ estado: 'CITA', lugar, fecha, hora, asesor, numeroAsesor: e.target.value, linkTaller }); }}
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <ExternalLink size={12} className="text-cyan-500 shrink-0" />
+            <input 
+              className="flex-1 bg-slate-950 border border-slate-800 text-[10px] text-white p-1.5 rounded outline-none focus:border-cyan-500 placeholder:text-slate-600"
+              placeholder="Link de ubicación (Google Maps)"
+              value={linkTaller}
+              onChange={(e) => { setLinkTaller(e.target.value); onUpdateTemporal?.({ estado: 'CITA', lugar, fecha, hora, asesor, numeroAsesor, linkTaller: e.target.value }); }}
             />
           </div>
         </div>
