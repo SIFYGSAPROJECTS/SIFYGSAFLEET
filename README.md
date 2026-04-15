@@ -1,36 +1,97 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SIFYGSA Control de Flotas v2.0
 
-## Getting Started
+![SIFYGSA Logo](public/logo.png)
 
-First, run the development server:
+### **Plataforma Integral de Gestión Vehicular y Diagnóstico Predictivo**
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+**SIFYGSA Control de Flotas** es una solución empresarial avanzada diseñada para centralizar, optimizar y monitorear operativamente las unidades vehiculares de la corporación. Desde el control de inventarios hasta el mantenimiento predictivo, la plataforma ofrece una experiencia de "Control Room" de alto nivel.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Características Principales
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+La plataforma está dividida en módulos estratégicos para garantizar una gestión 360°:
 
-## Learn More
+*   **Gestión de Inventario:** Control detallado de cada unidad (Placa, Marca, Modelo, Color, Línea, Número de Serie y Póliza).
+*   **Mantenimiento Predictivo:** Bitácora de servicios automatizada con seguimiento de kilometraje para recomendaciones preventivas.
+*   **Inspecciones Digitales (Checklists):** Generación y almacenamiento de certificados de inspección en formato PDF integrados con el historial del vehículo.
+*   **Sistema de Tickets:** Gestión de solicitudes de soporte y mantenimiento con estados en tiempo real (Pendiente, En Proceso, Finalizado).
+*   **Seguimiento en Tiempo Real:** Monitoreo detallado de procesos operativos y asignación de encargados por unidad.
+*   **Seguridad Avanzada:** Control de acceso basado en roles (Admin/User), verificación de sesiones en tiempo real y encriptación de credenciales.
+*   **Gestión de Empleados:** Directorio corporativo con perfiles detallados y asignación de responsabilidades.
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Stack Tecnológico
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Desarrollado con las tecnologías más modernas para garantizar escalabilidad, velocidad y una experiencia de usuario premium:
 
-## Deploy on Vercel
+*   **Frontend:** [Next.js 16](https://nextjs.org/) (App Router), [React 19](https://react.dev/)
+*   **Estilos:** [Tailwind CSS 4](https://tailwindcss.com/) & [Lucide React](https://lucide.dev/)
+*   **ORM:** [Prisma](https://www.prisma.io/)
+*   **Base de Datos:** [PostgreSQL](https://www.postgresql.org/)
+*   **Infraestructura:** [Docker](https://www.docker.com/) & [Docker Compose](https://docs.docker.com/compose/)
+*   **Almacenamiento:** [MinIO](https://min.io/) / Sistema de archivos local para reportes
+*   **Utilidades:** Nodemailer (Notificaciones), BCrypt.js (Seguridad), React-PDF (Generación de Reportes)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Instalación y Configuración
+
+### Opción 1: Docker (Recomendado)
+
+La forma más rápida de levantar el entorno completo (App + DB):
+
+1.  Copia el archivo `.env.example` a `.env` y configura tus variables.
+2.  Ejecuta el siguiente comando:
+    ```bash
+    docker-compose up --build
+    ```
+    *La aplicación estará disponible en `http://localhost:3000`.*
+
+### Opción 2: Desarrollo Local
+
+Si prefieres ejecutarlo sin Docker:
+
+1.  **Instalar dependencias:**
+    ```bash
+    npm install
+    ```
+2.  **Configurar Base de Datos:**
+    Asegúrate de tener PostgreSQL corriendo y configura el `DATABASE_URL` en tu `.env`. Luego sincroniza el esquema:
+    ```bash
+    npx prisma generate
+    npx prisma db push
+    ```
+3.  **Iniciar Servidor de Desarrollo:**
+    ```bash
+    npm run dev
+    ```
+
+---
+
+## Estructura del Proyecto
+
+*   `/app`: Rutas principales y lógica del Dashboard.
+*   `/components`: Componentes de UI reutilizables y lógica de visualización.
+*   `/prisma`: Esquema de la base de datos y migraciones.
+*   `/public`: Recursos estáticos (Logos, imágenes, SVG dinámicos).
+*   `/lib`: Utilidades, controladores de base de datos y lógica de servidor.
+*   `/api`: Endpoints para autenticación y gestión de datos.
+
+---
+
+## Seguridad y Privacidad
+
+El sistema implementa:
+- **Middleware de Autenticación:** Verificación constante de JWT y roles.
+- **CSP (Content Security Policy):** Protección contra ataques XSS.
+- **Rate Limiting:** Prevención de ataques de fuerza bruta en el login.
+- **Validación de Roles:** Los usuarios solo acceden a los módulos permitidos según su cargo.
+
+---
+
+## Licencia
+
+© 2026 SIFYGSA. Todos los derechos reservados.
+Propiedad intelectual orientada a la gestión de flotas corporativas.
