@@ -2,12 +2,12 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
 async function main() {
-  console.log('--- 🧹 LIMPIEZA TOTAL DE TABLAS ---')
+  console.log('-- LIMPIEZA TOTAL DE TABLAS ---')
   // El orden es importante por las relaciones entre tablas
   await prisma.solicitud.deleteMany({})
   await prisma.inventario_Automoviles.deleteMany({})
   await prisma.empleados.deleteMany({})
-  
+
   console.log('---  CREANDO ADMINISTRADORES ---')
   await prisma.empleados.createMany({
     data: [
@@ -16,12 +16,12 @@ async function main() {
         A_Paterno: "Mendez",
         Email: "mike.mendez2908@gmail.com",
         Rol: "ADMIN",
-        Password: "123456" 
+        Password: "123456"
       },
       {
         Nombre_Empleado: "Alan",
         A_Paterno: "Montiel",
-        Email: "coco42748@gmail.com", 
+        Email: "coco42748@gmail.com",
         Rol: "ADMIN",
         Password: "123456"
       }
@@ -139,7 +139,7 @@ async function main() {
     ]
   })
 
-  console.log('--- ✅ BASE DE DATOS RECONSTRUIDA Y LISTA ---')
+  console.log('---  BASE DE DATOS RECONSTRUIDA Y LISTA ---')
 }
 
 main()
