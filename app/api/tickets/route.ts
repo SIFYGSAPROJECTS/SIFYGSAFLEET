@@ -27,12 +27,12 @@ export async function POST(request: Request) {
 
     if (vehiculoRequerido.Estado_Unidad === false) {
       return NextResponse.json(
-        { error: `El vehículo ${consecutivo} está dado de baja. No se pueden programar servicios hasta que sea reactivado.` }, 
+        { error: `El vehículo ${consecutivo} está dado de baja. No se pueden programar servicios hasta que sea reactivado.` },
         { status: 400 }
       );
     }
 
-    // --- FILTRO VIP ---
+    // --- FILTRO  ---
     const usuario = await prisma.empleados.findUnique({
       where: { Email: userEmail }
     });
@@ -40,7 +40,7 @@ export async function POST(request: Request) {
     if (usuario?.Rol !== 'ADMIN') {
       const inicioDeHoy = new Date();
       inicioDeHoy.setHours(0, 0, 0, 0);
-      
+
       const finDeHoy = new Date();
       finDeHoy.setHours(23, 59, 59, 999);
 
@@ -56,7 +56,7 @@ export async function POST(request: Request) {
 
       if (ticketDeHoy) {
         return NextResponse.json(
-          { error: 'Ya has registrado una solicitud de mantenimiento el día de hoy. Solo se permite una por día.' }, 
+          { error: 'Ya has registrado una solicitud de mantenimiento el día de hoy. Solo se permite una por día.' },
           { status: 400 }
         );
       }
@@ -70,15 +70,15 @@ export async function POST(request: Request) {
         auto: { connect: { Consecutivo: consecutivo } },
         empleado: { connect: { Email: userEmail } },
         // 2. GUARDAMOS EL NUEVO CAMPO EN LA BASE DE DATOS
-        Tipo_Servicio: tipo_servicio, 
+        Tipo_Servicio: tipo_servicio,
         Descripcion: descripcion,
         // Si no es preventivo, el kilometraje puede venir como null o undefined
         Kilometraje: kilometraje ? parseInt(kilometraje) : null,
         Fecha_Realizacion: new Date(),
-        Estado: "PENDIENTE", 
-        Pk_folio_ticket: folioGenerado, 
+        Estado: "PENDIENTE",
+        Pk_folio_ticket: folioGenerado,
       },
-      include: { auto: true } 
+      include: { auto: true }
     });
 
     // --- ENVÍO DE CORREOS ---
@@ -89,7 +89,7 @@ export async function POST(request: Request) {
     const correosAdmins = administradores.map(admin => admin.Email);
 
     const encargadoVehiculo = nuevoMantenimiento.auto?.Email_encargado;
-    
+
     const todosLosCorreos = [userEmail, encargadoVehiculo, ...correosAdmins].filter(Boolean);
     const destinatariosFinales = Array.from(new Set(todosLosCorreos)).join(', ');
 
@@ -108,7 +108,7 @@ export async function POST(request: Request) {
 
     const mailOptions = {
       from: `"SIFYGSA Fleet" <${process.env.EMAIL_USER}>`,
-      to: destinatariosFinales, 
+      to: destinatariosFinales,
       subject: `🔧 Nueva Orden de Servicio (${tipoServicioCapitalizado}): ${nuevoMantenimiento.auto?.Placa}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 8px;">
