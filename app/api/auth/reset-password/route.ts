@@ -67,11 +67,11 @@ export async function POST(request: Request) {
       subject: '🔐 Clave Temporal de Acceso - SIFYGSA Fleet',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #333; border: 1px solid #e2e8f0; border-radius: 10px;">
-          <h2 style="color: #6366F1; text-align: center;">Recuperación de Acceso 🚛</h2>
+          <h2 style="color: #01c38e; text-align: center;">Recuperación de Acceso 🚛</h2>
           <p>Hola <strong>${empleado.Nombre_Empleado}</strong>,</p>
           <p>Hemos recibido una solicitud para acceder a tu cuenta en SIFYGSA Fleet.</p>
           
-          <div style="background-color: #f8fafc; padding: 15px; border-left: 4px solid #6366F1; border-radius: 4px; margin: 20px 0; text-align: center;">
+          <div style="background-color: #f8fafc; padding: 15px; border-left: 4px solid #01c38e; border-radius: 4px; margin: 20px 0; text-align: center;">
             <p style="margin: 5px 0; color: #64748b; font-size: 14px;">Tu clave temporal de un solo uso es:</p>
             <p style="margin: 10px 0; font-family: monospace; font-size: 28px; font-weight: bold; letter-spacing: 5px; color: #0f172a;">
               ${pinTemporal}

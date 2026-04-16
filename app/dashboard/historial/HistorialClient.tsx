@@ -122,7 +122,7 @@ export default function HistorialClient({ historial, rol }: Props) {
       case 'preventivo': return { bg: 'bg-blue-500/10', text: 'text-blue-400', border: 'border-blue-500/20', icon: <Calendar size={12} /> };
       case 'correctivo': return { bg: 'bg-red-500/10', text: 'text-red-400', border: 'border-red-500/20', icon: <AlertTriangle size={12} /> };
       case 'revision': return { bg: 'bg-amber-500/10', text: 'text-amber-400', border: 'border-amber-500/20', icon: <Search size={12} /> };
-      default: return { bg: 'bg-slate-800', text: 'text-slate-400', border: 'border-slate-700', icon: <Wrench size={12} /> };
+      default: return { bg: 'bg-[#132d46]', text: 'text-slate-400', border: 'border-slate-700', icon: <Wrench size={12} /> };
     }
   };
 
@@ -132,14 +132,14 @@ export default function HistorialClient({ historial, rol }: Props) {
       {/*  BARRA DE FILTROS REDISEÑADA (Sutil y minimalista)  */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 px-1 gap-3">
         <div className="flex items-center gap-2 text-slate-500">
-          <Filter size={14} className="text-purple-500" />
+          <Filter size={14} className="text-[#01c38e]" />
           <span className="text-[10px] font-black uppercase tracking-[0.2em]">Historial de Servicios</span>
         </div>
         
-        <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto scrollbar-hide">
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
           <PremiumSelect
             compact
-            accent="purple"
+            accent="indigo"
             placeholder="Todas las unidades"
             value={filtroAuto}
             onChange={(val) => setFiltroAuto(val)}
@@ -155,7 +155,7 @@ export default function HistorialClient({ historial, rol }: Props) {
 
           <PremiumSelect
             compact
-            accent="purple"
+            accent="indigo"
             placeholder="Rango: Todo"
             value={filtroMeses}
             onChange={(val) => setFiltroMeses(val)}
@@ -171,11 +171,11 @@ export default function HistorialClient({ historial, rol }: Props) {
       </div>
 
       {/* TABLA DE HISTORIAL */}
-      <div className="bg-slate-900 rounded-xl shadow-2xl border-x border-b border-slate-800 border-t-4 border-t-purple-500 overflow-hidden">
+      <div className="bg-[#132d46] rounded-xl shadow-2xl border-x border-b border-[#132d46] border-t-4 border-t-[#01c38e] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-[1000px] w-full text-left border-collapse">
             <thead>
-              <tr className="bg-slate-950 text-slate-300 text-xs uppercase tracking-wider border-b border-slate-800">
+              <tr className="bg-[#1a1e29] text-slate-300 text-xs uppercase tracking-wider border-b border-[#132d46]">
                 <th className="p-4 font-semibold">Folio</th>
                 <th className="p-4 font-semibold">Fecha</th>
                 <th className="p-4 font-semibold">Vehículo</th>
@@ -185,7 +185,7 @@ export default function HistorialClient({ historial, rol }: Props) {
                 <th className="p-4 font-semibold text-center">Acción</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800">
+            <tbody className="divide-y divide-[#132d46]">
               {historialFiltrado.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="p-12 text-center text-slate-500 italic">
@@ -200,8 +200,8 @@ export default function HistorialClient({ historial, rol }: Props) {
                     : 'S/N';
 
                   return (
-                  <tr key={ticket.Pk_folio_ticket} className="hover:bg-slate-800/40 transition-colors group">
-                    <td className="p-4 font-mono text-sm font-bold text-[#6366F1]">#{ticket.Pk_folio_ticket}</td>
+                  <tr key={ticket.Pk_folio_ticket} className="hover:bg-[#132d46]/40 transition-colors group">
+                    <td className="p-4 font-mono text-sm font-bold text-[#01c38e]">#{ticket.Pk_folio_ticket}</td>
                     <td className="p-4 text-sm text-slate-300 font-medium">
                       {new Date(ticket.Fecha_Realizacion).toLocaleDateString('es-MX', { 
                         day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' 
@@ -239,14 +239,14 @@ export default function HistorialClient({ historial, rol }: Props) {
                           </button>
                         </div>
                       ) : (
-                        <label className="cursor-pointer inline-flex items-center justify-center gap-1.5 text-slate-400 bg-slate-950 border border-slate-700 px-3 py-1.5 rounded-md text-xs font-bold hover:border-[#6366F1] hover:text-[#6366F1] transition-all shadow-sm">
+                        <label className="cursor-pointer inline-flex items-center justify-center gap-1.5 text-slate-400 bg-[#1a1e29] border border-slate-700 px-3 py-1.5 rounded-md text-xs font-bold hover:border-[#01c38e] hover:text-[#01c38e] transition-all shadow-sm">
                           {subiendoFolio === ticket.Pk_folio_ticket ? <><Loader2 size={14} className="animate-spin" /> SUBIENDO</> : <><UploadCloud size={14} /> SUBIR</>}
                           <input type="file" accept=".pdf" className="hidden" onChange={(e) => handleSubirEvidencia(e, ticket.Pk_folio_ticket, ticket.auto?.Consecutivo || 'Unidad', false)} disabled={subiendoFolio === ticket.Pk_folio_ticket} />
                         </label>
                       )}
                     </td>
                     <td className="p-4 text-center">
-                      <Link href={`/dashboard/tickets/ver/${encodeURIComponent(ticket.Pk_folio_ticket)}`} className="inline-flex items-center justify-center gap-1.5 bg-slate-800 text-slate-300 border border-slate-700 px-3 py-1.5 rounded-md text-xs font-bold hover:bg-[#6366F1] hover:text-white hover:border-[#6366F1] transition-all shadow-sm">
+                      <Link href={`/dashboard/tickets/ver/${encodeURIComponent(ticket.Pk_folio_ticket)}`} className="inline-flex items-center justify-center gap-1.5 bg-[#132d46] text-slate-300 border border-slate-700 px-3 py-1.5 rounded-md text-xs font-bold hover:bg-[#01c38e] hover:text-white hover:border-[#01c38e] transition-all shadow-sm">
                         <FileText size={14} /> TICKET
                       </Link>
                     </td>
@@ -286,15 +286,15 @@ export default function HistorialClient({ historial, rol }: Props) {
         <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-[100] flex flex-col p-4 md:p-8 animate-in fade-in zoom-in-95 duration-200">
           <div className="max-w-6xl mx-auto w-full flex justify-between items-center mb-4">
             <div className="flex items-center gap-3">
-              <div className="bg-[#6366F1] p-2 rounded-lg shadow-lg shadow-[#6366F1]/20"><History className="text-white" size={20} /></div>
+              <div className="bg-[#01c38e] p-2 rounded-lg shadow-lg shadow-[#01c38e]/20"><History className="text-white" size={20} /></div>
               <h3 className="font-bold text-lg text-white tracking-tight">Evidencia de Mantenimiento</h3>
             </div>
             <div className="flex gap-2">
-              <button onClick={() => window.open(pdfUrl!, '_blank')} className="bg-slate-800 hover:bg-slate-700 p-2.5 rounded-lg transition-colors text-slate-300" title="Abrir fuera"><ExternalLink size={20} /></button>
+              <button onClick={() => window.open(pdfUrl!, '_blank')} className="bg-[#132d46] hover:bg-slate-700 p-2.5 rounded-lg transition-colors text-slate-300" title="Abrir fuera"><ExternalLink size={20} /></button>
               <button onClick={() => setMostrarVisor(false)} className="bg-red-600 hover:bg-red-700 text-white p-2.5 rounded-lg transition-colors shadow-lg"><X size={20} /></button>
             </div>
           </div>
-          <div className="max-w-6xl mx-auto w-full flex-1 bg-white rounded-xl overflow-hidden shadow-2xl border border-slate-800">
+          <div className="max-w-6xl mx-auto w-full flex-1 bg-white rounded-xl overflow-hidden shadow-2xl border border-[#132d46]">
             <iframe src={`${pdfUrl}#toolbar=0`} className="w-full h-full border-none" />
           </div>
         </div>

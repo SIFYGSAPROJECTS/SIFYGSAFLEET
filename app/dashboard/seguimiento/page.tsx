@@ -11,7 +11,7 @@ export default async function SeguimientoPage() {
   // 1. Verificación de Seguridad
   if (!userEmail) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center p-8">
+      <div className="min-h-screen bg-transparent flex items-center justify-center p-8">
         <div className="bg-red-900/20 border border-red-900 text-red-500 p-6 rounded-xl font-bold font-mono uppercase tracking-tighter">
           Error de sesión: Por favor inicia sesión nuevamente.
         </div>
@@ -42,16 +42,16 @@ export default async function SeguimientoPage() {
   });
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-transparent">
       <div className="max-w-5xl mx-auto p-8">
         
         {/* ENCABEZADO PREMIUM DARK */}
         <div className="mb-10">
-          <Link href="/dashboard" className="text-slate-400 hover:text-[#6366F1] flex items-center gap-2 text-sm mb-6 w-fit transition-colors font-medium">
+          <Link href="/dashboard" className="text-slate-400 hover:text-[#01c38e] flex items-center gap-2 text-sm mb-6 w-fit transition-colors font-medium">
             <ArrowLeft size={16} /> Volver al Panel Maestro
           </Link>
           <h1 className="text-3xl font-black text-white tracking-tight flex items-center gap-3">
-            <Activity className="text-[#6366F1]" size={32} /> Seguimiento de Unidades
+            <Activity className="text-[#01c38e]" size={32} /> Seguimiento de Unidades
           </h1>
           <p className="text-slate-400 mt-2 font-medium">
             {isAdmin 
@@ -62,7 +62,7 @@ export default async function SeguimientoPage() {
 
         {/* 3. Renderizado del Cliente */}
         {tickets.length === 0 ? (
-          <div className="bg-slate-900 p-12 rounded-xl border border-slate-800 text-center text-slate-500 font-bold shadow-2xl">
+          <div className="bg-[#132d46] p-12 rounded-xl border border-[#132d46] text-center text-slate-500 font-bold shadow-2xl">
             NO HAY UNIDADES EN MANTENIMIENTO ACTUALMENTE 
           </div>
         ) : (

@@ -50,9 +50,9 @@ export default function SystemModal({
       defaultConfirm: "Entendido"
     },
     confirm: {
-      icon: <HelpCircle className="text-indigo-500 w-8 h-8" />,
-      container: "bg-indigo-500/10 border-indigo-500/20 shadow-[0_0_15px_rgba(99,102,241,0.2)]",
-      btn: "bg-indigo-600 hover:bg-indigo-700 shadow-indigo-600/20",
+      icon: <HelpCircle className="text-[#01c38e] w-8 h-8" />,
+      container: "bg-[#01c38e]/10 border-[#01c38e]/20 shadow-[0_0_15px_rgba(99,102,241,0.2)]",
+      btn: "bg-[#01ac7c] hover:bg-indigo-700 shadow-[#01ac7c]/20",
       defaultConfirm: "Sí, continuar"
     },
     info: {
@@ -68,7 +68,7 @@ export default function SystemModal({
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[200] flex items-center justify-center p-4 animate-in fade-in duration-200">
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 max-w-sm w-full shadow-2xl text-center transform transition-all animate-in zoom-in-95">
+      <div className="bg-[#132d46] border border-[#132d46] rounded-2xl p-6 sm:p-8 max-w-sm w-full shadow-2xl text-center transform transition-all animate-in zoom-in-95">
         
         <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-5 border ${currentTheme.container}`}>
           {currentTheme.icon}
@@ -85,7 +85,7 @@ export default function SystemModal({
             <button 
               onClick={onCancel} 
               disabled={isProcessing} 
-              className="flex-1 bg-slate-950 border border-slate-700 hover:bg-slate-800 text-slate-300 font-bold py-3 px-4 rounded-xl transition-colors"
+              className="flex-1 bg-[#1a1e29] border border-slate-700 hover:bg-[#132d46] text-slate-300 font-bold py-3 px-4 rounded-xl transition-colors"
             >
               {cancelText}
             </button>

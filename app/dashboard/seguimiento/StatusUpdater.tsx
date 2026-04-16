@@ -71,7 +71,7 @@ export default function StatusUpdater({ folio, estadoActual, lugarActual, fechaA
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center gap-3">
-        <label className="text-[10px] font-black text-[#6366F1] uppercase tracking-widest">Estatus:</label>
+        <label className="text-[10px] font-black text-[#01c38e] uppercase tracking-widest">Estatus:</label>
         <PremiumSelect
           compact
           accent="indigo"
@@ -99,22 +99,22 @@ export default function StatusUpdater({ folio, estadoActual, lugarActual, fechaA
       </div>
 
       {estado === 'CITA' && (
-        <div className="grid grid-cols-1 gap-2 p-3 bg-slate-900 rounded-lg border border-slate-800">
+        <div className="grid grid-cols-1 gap-2 p-3 bg-[#132d46] rounded-lg border border-[#132d46]">
           <input 
-            className="bg-slate-950 border border-slate-800 text-[10px] text-white p-1.5 rounded outline-none focus:border-cyan-500"
+            className="bg-[#1a1e29] border border-[#132d46] text-[10px] text-white p-1.5 rounded outline-none focus:border-cyan-500"
             placeholder="¿Dónde será la cita?"
             value={lugar}
             onChange={(e) => { setLugar(e.target.value); onUpdateTemporal?.({ estado: 'CITA', lugar: e.target.value, fecha, hora, asesor, numeroAsesor, linkTaller }); }}
           />
           <div className="flex gap-2">
             <input 
-              className="w-1/2 bg-slate-950 border border-slate-800 text-[10px] text-white p-1.5 rounded outline-none focus:border-cyan-500"
+              className="w-1/2 bg-[#1a1e29] border border-[#132d46] text-[10px] text-white p-1.5 rounded outline-none focus:border-cyan-500"
               placeholder="Fecha"
               value={fecha}
               onChange={(e) => { setFecha(e.target.value); onUpdateTemporal?.({ estado: 'CITA', lugar, fecha: e.target.value, hora, asesor, numeroAsesor, linkTaller }); }}
             />
             <input 
-              className="w-1/2 bg-slate-950 border border-slate-800 text-[10px] text-white p-1.5 rounded outline-none focus:border-cyan-500"
+              className="w-1/2 bg-[#1a1e29] border border-[#132d46] text-[10px] text-white p-1.5 rounded outline-none focus:border-cyan-500"
               placeholder="Hora"
               value={hora}
               onChange={(e) => { setHora(e.target.value); onUpdateTemporal?.({ estado: 'CITA', lugar, fecha, hora: e.target.value, asesor, numeroAsesor, linkTaller }); }}
@@ -122,14 +122,14 @@ export default function StatusUpdater({ folio, estadoActual, lugarActual, fechaA
           </div>
           <div className="flex gap-2">
             <input 
-              className="w-1/2 bg-slate-950 border border-slate-800 text-[10px] text-white p-1.5 rounded outline-none focus:border-cyan-500"
+              className="w-1/2 bg-[#1a1e29] border border-[#132d46] text-[10px] text-white p-1.5 rounded outline-none focus:border-cyan-500"
               placeholder="Nombre del Asesor"
               value={asesor}
               onChange={(e) => { setAsesor(e.target.value); onUpdateTemporal?.({ estado: 'CITA', lugar, fecha, hora, asesor: e.target.value, numeroAsesor, linkTaller }); }}
             />
             {/*INPUT PARA EL NÚMERO DEL ASESOR */}
             <input 
-              className="w-1/2 bg-slate-950 border border-slate-800 text-[10px] text-white p-1.5 rounded outline-none focus:border-cyan-500"
+              className="w-1/2 bg-[#1a1e29] border border-[#132d46] text-[10px] text-white p-1.5 rounded outline-none focus:border-cyan-500"
               placeholder="Teléfono (Ej. 55 1234 5678)"
               value={numeroAsesor}
               onChange={(e) => { setNumeroAsesor(e.target.value); onUpdateTemporal?.({ estado: 'CITA', lugar, fecha, hora, asesor, numeroAsesor: e.target.value, linkTaller }); }}
@@ -138,7 +138,7 @@ export default function StatusUpdater({ folio, estadoActual, lugarActual, fechaA
           <div className="flex items-center gap-2">
             <ExternalLink size={12} className="text-cyan-500 shrink-0" />
             <input 
-              className="flex-1 bg-slate-950 border border-slate-800 text-[10px] text-white p-1.5 rounded outline-none focus:border-cyan-500 placeholder:text-slate-600"
+              className="flex-1 bg-[#1a1e29] border border-[#132d46] text-[10px] text-white p-1.5 rounded outline-none focus:border-cyan-500 placeholder:text-slate-600"
               placeholder="Link de ubicación (Google Maps)"
               value={linkTaller}
               onChange={(e) => { setLinkTaller(e.target.value); onUpdateTemporal?.({ estado: 'CITA', lugar, fecha, hora, asesor, numeroAsesor, linkTaller: e.target.value }); }}

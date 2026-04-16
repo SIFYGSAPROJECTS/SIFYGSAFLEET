@@ -17,7 +17,7 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-[#0B101E]">
+    <div className="min-h-screen bg-gradient-to-b from-[#1a1e29] via-[#132d46] to-[#01c38e] bg-fixed">
       {/* 1. Cronómetro de inactividad (15 min sin actividad = logout) */}
       <IdleTimer />
 

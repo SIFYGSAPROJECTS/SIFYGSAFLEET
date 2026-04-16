@@ -173,7 +173,7 @@ export default function RoleGuard() {
 
       {/* Tarjeta central */}
       <div className={`
-        relative max-w-md w-[90%] bg-slate-900 border border-slate-700/50 
+        relative max-w-md w-[90%] bg-[#132d46] border border-slate-700/50 
         rounded-2xl overflow-hidden ${reasonConfig.bgGlow}
         animate-in slide-in-from-bottom-4 zoom-in-95 duration-500
       `}>
@@ -181,7 +181,7 @@ export default function RoleGuard() {
         {/* Barra superior de acento */}
         <div className={`h-1 w-full ${kickInfo.reason === 'role_changed' ? 'bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-500' :
           kickInfo.reason === 'account_disabled' || kickInfo.reason === 'user_deleted' ? 'bg-gradient-to-r from-red-500 via-red-400 to-rose-500' :
-            'bg-gradient-to-r from-blue-500 via-blue-400 to-indigo-500'
+            'bg-gradient-to-r from-blue-500 via-blue-400 to-[#01c38e]'
           }`} />
 
         {/* Contenido */}
@@ -190,7 +190,7 @@ export default function RoleGuard() {
           {/* Icono con animación de pulso */}
           <div className={`
             ${reasonConfig.accentColor} mb-5 p-4 rounded-full 
-            bg-slate-950 border border-slate-800
+            bg-[#1a1e29] border border-[#132d46]
             animate-pulse
           `}>
             {reasonConfig.icon}
@@ -203,7 +203,7 @@ export default function RoleGuard() {
 
           {/* Detalle del cambio (ej. ADMIN → USER) */}
           {kickInfo.detail && (
-            <div className="mb-4 bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 inline-flex items-center gap-3">
+            <div className="mb-4 bg-[#1a1e29] border border-[#132d46] rounded-xl px-4 py-2.5 inline-flex items-center gap-3">
               <span className="text-xs font-mono font-bold text-red-400 line-through">{kickInfo.detail.split(' → ')[0]}</span>
               <span className="text-slate-600">→</span>
               <span className="text-xs font-mono font-bold text-emerald-400">{kickInfo.detail.split(' → ')[1]}</span>
@@ -217,7 +217,7 @@ export default function RoleGuard() {
 
           {/* Barra de progreso + Countdown */}
           <div className="w-full space-y-3">
-            <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+            <div className="w-full bg-[#132d46] rounded-full h-1.5 overflow-hidden">
               <div
                 className={`h-full rounded-full transition-all duration-1000 ease-linear ${kickInfo.reason === 'role_changed' ? 'bg-amber-500' :
                   kickInfo.reason === 'account_disabled' || kickInfo.reason === 'user_deleted' ? 'bg-red-500' :
@@ -237,7 +237,7 @@ export default function RoleGuard() {
         </div>
 
         {/* Branding sutil en el footer */}
-        <div className="bg-slate-950/50 border-t border-slate-800 px-6 py-3 text-center">
+        <div className="bg-[#1a1e29]/50 border-t border-[#132d46] px-6 py-3 text-center">
           <span className="text-[10px] font-bold text-slate-600 uppercase tracking-[0.2em]">
             SIFYGSA Fleet • Módulo de Seguridad
           </span>

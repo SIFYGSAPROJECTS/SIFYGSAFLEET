@@ -166,29 +166,29 @@ export default function PersonalPage() {
   return (
     <div className="w-full">
       {/* BARRA DE BOTONES SUPERIOR */}
-      <div className="flex flex-col sm:flex-row justify-between gap-4 mb-6 border-b border-slate-800 pb-4">
+      <div className="flex flex-col sm:flex-row justify-between gap-4 mb-6 border-b border-[#132d46] pb-4">
         <div className="flex gap-3 overflow-x-auto scrollbar-hide">
-          <button onClick={() => setFiltroTab('Activo')} className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm sm:text-base whitespace-nowrap transition-all ${filtroTab === 'Activo' ? 'bg-[#6366F1]/10 text-[#6366F1] border border-[#6366F1]/50 shadow-[0_0_15px_rgba(99,102,241,0.15)]' : 'text-slate-500 hover:text-slate-300 hover:bg-slate-900'}`}>
+          <button onClick={() => setFiltroTab('Activo')} className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm sm:text-base whitespace-nowrap transition-all ${filtroTab === 'Activo' ? 'bg-[#01c38e]/10 text-[#01c38e] border border-[#01c38e]/50 shadow-[0_0_15px_rgba(99,102,241,0.15)]' : 'text-slate-500 hover:text-slate-300 hover:bg-[#132d46]'}`}>
             <ShieldCheck size={18} /> Personal Activo
-            <span className={`ml-1 px-2 py-0.5 rounded-full text-[10px] ${filtroTab === 'Activo' ? 'bg-[#6366F1] text-white' : 'bg-slate-800 text-slate-400'}`}>{totalActivos}</span>
+            <span className={`ml-1 px-2 py-0.5 rounded-full text-[10px] ${filtroTab === 'Activo' ? 'bg-[#01c38e] text-white' : 'bg-[#132d46] text-slate-400'}`}>{totalActivos}</span>
           </button>
-          <button onClick={() => setFiltroTab('Inactivo')} className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm sm:text-base whitespace-nowrap transition-all ${filtroTab === 'Inactivo' ? 'bg-red-500/10 text-red-500 border border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.15)]' : 'text-slate-500 hover:text-slate-300 hover:bg-slate-900'}`}>
+          <button onClick={() => setFiltroTab('Inactivo')} className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm sm:text-base whitespace-nowrap transition-all ${filtroTab === 'Inactivo' ? 'bg-red-500/10 text-red-500 border border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.15)]' : 'text-slate-500 hover:text-slate-300 hover:bg-[#132d46]'}`}>
             <ShieldAlert size={18} /> Personal Inactivo
-            <span className={`ml-1 px-2 py-0.5 rounded-full text-[10px] ${filtroTab === 'Inactivo' ? 'bg-red-500 text-white' : 'bg-slate-800 text-slate-400'}`}>{totalInactivos}</span>
+            <span className={`ml-1 px-2 py-0.5 rounded-full text-[10px] ${filtroTab === 'Inactivo' ? 'bg-red-500 text-white' : 'bg-[#132d46] text-slate-400'}`}>{totalInactivos}</span>
           </button>
         </div>
-        <button onClick={abrirModalNuevo} className="w-full sm:w-auto bg-[#6366F1] hover:bg-[#4F46E5] text-white px-5 py-2.5 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg active:scale-95">
+        <button onClick={abrirModalNuevo} className="w-full sm:w-auto bg-[#01c38e] hover:bg-[#01ac7c] text-white px-5 py-2.5 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg active:scale-95">
           <UserPlus className="w-5 h-5" /> Nuevo Empleado
         </button>
       </div>
 
-      <div className={`bg-slate-900 rounded-xl shadow-xl border-x border-b border-t-4 overflow-hidden transition-all duration-500 ${filtroTab === 'Inactivo' ? 'border-t-red-500 border-slate-800' : 'border-t-purple-500 border-slate-800'}`}>
+      <div className={`bg-[#132d46] rounded-xl shadow-xl border-x border-b border-t-4 overflow-hidden transition-all duration-500 ${filtroTab === 'Inactivo' ? 'border-t-red-500 border-[#132d46]' : 'border-t-purple-500 border-[#132d46]'}`}>
         
         {/* TABLA ESCRITORIO */}
         <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-slate-950 border-b border-slate-800 text-slate-300 text-sm uppercase tracking-wider">
+              <tr className="bg-[#1a1e29] border-b border-[#132d46] text-slate-300 text-sm uppercase tracking-wider">
                 <th className="p-4 font-semibold">Empleado</th>
                 <th className="p-4 font-semibold">Contacto</th>
                 <th className="p-4 font-semibold">Puesto</th>
@@ -196,17 +196,17 @@ export default function PersonalPage() {
                 <th className="p-4 font-semibold text-center">Acciones</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800">
+            <tbody className="divide-y divide-[#132d46]">
               {cargando ? (
                 <tr><td colSpan={5} className="text-center p-8 text-slate-500">Cargando personal... 👥</td></tr>
               ) : empleadosFiltrados.length === 0 ? (
                 <tr><td colSpan={5} className="text-center p-8 text-slate-500 uppercase font-bold tracking-widest">No hay usuarios en esta lista</td></tr>
               ) : (
                 empleadosFiltrados.map((emp) => (
-                  <tr key={emp.Email} className="hover:bg-slate-800/50 transition-colors">
+                  <tr key={emp.Email} className="hover:bg-[#132d46]/50 transition-colors">
                     <td className="p-4">
                       <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm text-white border ${emp.Rol === 'ADMIN' ? 'bg-[#6366F1]/20 border-[#6366F1] text-[#6366F1]' : 'bg-slate-800 border-slate-600 text-slate-300'}`}>
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm text-white border ${emp.Rol === 'ADMIN' ? 'bg-[#01c38e]/20 border-[#01c38e] text-[#01c38e]' : 'bg-[#132d46] border-slate-600 text-slate-300'}`}>
                           {emp.Nombre_Empleado.charAt(0)}{emp.A_Paterno.charAt(0)}
                         </div>
                         <div>
@@ -221,7 +221,7 @@ export default function PersonalPage() {
                       <div className="text-xs text-slate-500">{emp.Departamento || 'General'}</div>
                     </td>
                     <td className="p-4 text-center">
-                      <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-black tracking-widest border ${emp.Rol === 'ADMIN' ? 'bg-blue-900/30 text-blue-400 border-blue-800' : 'bg-slate-800 text-slate-400 border-slate-700'}`}>
+                      <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-black tracking-widest border ${emp.Rol === 'ADMIN' ? 'bg-blue-900/30 text-blue-400 border-blue-800' : 'bg-[#132d46] text-slate-400 border-slate-700'}`}>
                         {emp.Rol}
                       </span>
                     </td>
@@ -241,17 +241,17 @@ export default function PersonalPage() {
         </div>
 
         {/* VISTA MÓVIL */}
-        <div className="md:hidden divide-y divide-slate-800">
+        <div className="md:hidden divide-y divide-[#132d46]">
           {cargando ? (
              <div className="p-10 text-center text-slate-500 font-bold">Cargando personal... 👥</div>
           ) : empleadosFiltrados.length === 0 ? (
              <div className="p-10 text-center text-slate-500 text-xs uppercase font-bold tracking-widest">No hay usuarios aquí</div>
           ) : (
              empleadosFiltrados.map((emp) => (
-               <div key={emp.Email} className="p-5 flex flex-col gap-4 active:bg-slate-800/50 transition-colors">
+               <div key={emp.Email} className="p-5 flex flex-col gap-4 active:bg-[#132d46]/50 transition-colors">
                  <div className="flex justify-between items-start">
                    <div className="flex items-center gap-3">
-                      <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg text-white border shrink-0 ${emp.Rol === 'ADMIN' ? 'bg-[#6366F1]/20 border-[#6366F1] text-[#6366F1]' : 'bg-slate-800 border-slate-600 text-slate-300'}`}>
+                      <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg text-white border shrink-0 ${emp.Rol === 'ADMIN' ? 'bg-[#01c38e]/20 border-[#01c38e] text-[#01c38e]' : 'bg-[#132d46] border-slate-600 text-slate-300'}`}>
                         {emp.Nombre_Empleado.charAt(0)}{emp.A_Paterno.charAt(0)}
                       </div>
                       <div className="overflow-hidden">
@@ -261,19 +261,19 @@ export default function PersonalPage() {
                    </div>
                  </div>
 
-                 <div className="grid grid-cols-2 gap-3 bg-slate-950/50 p-3 rounded-xl border border-slate-800/50">
+                 <div className="grid grid-cols-2 gap-3 bg-[#1a1e29]/50 p-3 rounded-xl border border-[#132d46]/50">
                     <div className="flex flex-col gap-1">
                       <span className="text-[9px] text-slate-500 font-black uppercase tracking-widest">Cargo</span>
                       <span className="text-xs text-slate-300 font-medium truncate">{emp.Cargo || 'S/N'}</span>
                     </div>
-                    <div className="flex flex-col gap-1 border-l border-slate-800 pl-3">
+                    <div className="flex flex-col gap-1 border-l border-[#132d46] pl-3">
                       <span className="text-[9px] text-slate-500 font-black uppercase tracking-widest">Rol</span>
                       <span className={`text-[10px] font-black tracking-widest uppercase ${emp.Rol === 'ADMIN' ? 'text-blue-400' : 'text-slate-400'}`}>{emp.Rol}</span>
                     </div>
                  </div>
 
                  <div className="flex gap-2 mt-2">
-                   <button onClick={() => abrirModalEditar(emp)} className="flex-1 flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 text-white p-3 rounded-xl transition-colors text-sm font-bold">
+                   <button onClick={() => abrirModalEditar(emp)} className="flex-1 flex items-center justify-center gap-2 bg-[#132d46] hover:bg-slate-700 text-white p-3 rounded-xl transition-colors text-sm font-bold">
                      <Pencil size={16} /> Editar
                    </button>
                    <button onClick={() => solicitarCambioAcceso(emp)} className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-xl text-white font-bold transition-colors text-sm ${filtroTab === 'Activo' ? 'bg-red-500/10 text-red-500 hover:bg-red-500/20' : 'bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20'}`}>
@@ -289,18 +289,18 @@ export default function PersonalPage() {
       {/* MODAL DE EDICIÓN CON EL BUSCADOR INTELIGENTE */}
       {modalAbierto && (
         <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-0 sm:p-4 animate-in fade-in duration-200">
-          <div className="bg-slate-900 w-full max-w-2xl rounded-t-3xl sm:rounded-xl shadow-2xl border-t sm:border border-slate-800 overflow-hidden flex flex-col max-h-[95vh]">
-            <div className="bg-slate-950 border-b border-[#6366F1]/50 p-5 sm:p-4 flex justify-between items-center text-white">
-              <h2 className="text-base sm:text-lg font-bold flex items-center gap-2 text-[#6366F1]">
+          <div className="bg-[#132d46] w-full max-w-2xl rounded-t-3xl sm:rounded-xl shadow-2xl border-t sm:border border-[#132d46] overflow-hidden flex flex-col max-h-[95vh]">
+            <div className="bg-[#1a1e29] border-b border-[#01c38e]/50 p-5 sm:p-4 flex justify-between items-center text-white">
+              <h2 className="text-base sm:text-lg font-bold flex items-center gap-2 text-[#01c38e]">
                 {modoEdicion ? <Pencil className="w-5 h-5" /> : <UserPlus className="w-5 h-5" />} 
                 {modoEdicion ? 'Editar Registro' : 'Nuevo Colaborador'}
               </h2>
-              <button type="button" onClick={() => setModalAbierto(false)} disabled={guardando} className="bg-slate-800 p-2 rounded-full text-slate-400 hover:text-red-500"><X size={18} /></button>
+              <button type="button" onClick={() => setModalAbierto(false)} disabled={guardando} className="bg-[#132d46] p-2 rounded-full text-slate-400 hover:text-red-500"><X size={18} /></button>
             </div>
             
             <form onSubmit={guardarEmpleado} className="p-6 overflow-y-auto pb-10 sm:pb-6 space-y-6">
               {!modoEdicion && (
-                <div className="bg-[#6366F1]/10 text-[#6366F1] p-4 rounded-xl text-sm border border-[#6366F1]/20 flex items-start sm:items-center gap-3">
+                <div className="bg-[#01c38e]/10 text-[#01c38e] p-4 rounded-xl text-sm border border-[#01c38e]/20 flex items-start sm:items-center gap-3">
                   <ShieldAlert size={20} className="shrink-0 mt-0.5 sm:mt-0" /> 
                   <span className="leading-snug">El sistema generará una <b className="text-white">contraseña segura</b> y la enviará al correo del colaborador.</span>
                 </div>
@@ -308,19 +308,19 @@ export default function PersonalPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
                 <div className="sm:col-span-2">
                   <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Email Corporativo *</label>
-                  <input required type="email" value={formData.Email} disabled={modoEdicion} onChange={e => setFormData({...formData, Email: e.target.value})} className={`w-full border border-slate-700 rounded-xl p-3.5 outline-none text-white text-sm ${modoEdicion ? 'bg-slate-800/50 text-slate-500 cursor-not-allowed' : 'bg-slate-950 focus:ring-2 focus:ring-[#6366F1]'}`} placeholder="correo@sifygsa.com" />
+                  <input required type="email" value={formData.Email} disabled={modoEdicion} onChange={e => setFormData({...formData, Email: e.target.value})} className={`w-full border border-slate-700 rounded-xl p-3.5 outline-none text-white text-sm ${modoEdicion ? 'bg-[#132d46]/50 text-slate-500 cursor-not-allowed' : 'bg-[#1a1e29] focus:ring-2 focus:ring-[#01c38e]'}`} placeholder="correo@sifygsa.com" />
                 </div>
                 <div>
                   <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Nombre(s) *</label>
-                  <input required type="text" value={formData.Nombre_Empleado} onChange={e => setFormData({...formData, Nombre_Empleado: e.target.value})} className="w-full bg-slate-950 border border-slate-700 text-white rounded-xl p-3.5 focus:ring-2 focus:ring-[#6366F1] outline-none text-sm" />
+                  <input required type="text" value={formData.Nombre_Empleado} onChange={e => setFormData({...formData, Nombre_Empleado: e.target.value})} className="w-full bg-[#1a1e29] border border-slate-700 text-white rounded-xl p-3.5 focus:ring-2 focus:ring-[#01c38e] outline-none text-sm" />
                 </div>
                 <div>
                   <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Apellido Paterno *</label>
-                  <input required type="text" value={formData.A_Paterno} onChange={e => setFormData({...formData, A_Paterno: e.target.value})} className="w-full bg-slate-950 border border-slate-700 text-white rounded-xl p-3.5 focus:ring-2 focus:ring-[#6366F1] outline-none text-sm" />
+                  <input required type="text" value={formData.A_Paterno} onChange={e => setFormData({...formData, A_Paterno: e.target.value})} className="w-full bg-[#1a1e29] border border-slate-700 text-white rounded-xl p-3.5 focus:ring-2 focus:ring-[#01c38e] outline-none text-sm" />
                 </div>
                 <div>
                   <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Apellido Materno</label>
-                  <input type="text" value={formData.A_Materno} onChange={e => setFormData({...formData, A_Materno: e.target.value})} className="w-full bg-slate-950 border border-slate-700 text-white rounded-xl p-3.5 focus:ring-2 focus:ring-[#6366F1] outline-none text-sm" />
+                  <input type="text" value={formData.A_Materno} onChange={e => setFormData({...formData, A_Materno: e.target.value})} className="w-full bg-[#1a1e29] border border-slate-700 text-white rounded-xl p-3.5 focus:ring-2 focus:ring-[#01c38e] outline-none text-sm" />
                 </div>
                 <div>
                   <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Rol de Sistema *</label>
@@ -337,11 +337,11 @@ export default function PersonalPage() {
                 </div>
                 <div>
                   <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Cargo</label>
-                  <input type="text" value={formData.Cargo} onChange={e => setFormData({...formData, Cargo: e.target.value})} className="w-full bg-slate-950 border border-slate-700 text-white rounded-xl p-3.5 focus:ring-2 focus:ring-[#6366F1] outline-none text-sm" placeholder="Ej. Chofer" />
+                  <input type="text" value={formData.Cargo} onChange={e => setFormData({...formData, Cargo: e.target.value})} className="w-full bg-[#1a1e29] border border-slate-700 text-white rounded-xl p-3.5 focus:ring-2 focus:ring-[#01c38e] outline-none text-sm" placeholder="Ej. Chofer" />
                 </div>
                 <div>
                   <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Departamento</label>
-                  <input type="text" value={formData.Departamento} onChange={e => setFormData({...formData, Departamento: e.target.value})} className="w-full bg-slate-950 border border-slate-700 text-white rounded-xl p-3.5 focus:ring-2 focus:ring-[#6366F1] outline-none text-sm" placeholder="Ej. Operaciones" />
+                  <input type="text" value={formData.Departamento} onChange={e => setFormData({...formData, Departamento: e.target.value})} className="w-full bg-[#1a1e29] border border-slate-700 text-white rounded-xl p-3.5 focus:ring-2 focus:ring-[#01c38e] outline-none text-sm" placeholder="Ej. Operaciones" />
                 </div>
 
                 {/*  BUSCADOR INTELIGENTE  */}
@@ -349,7 +349,7 @@ export default function PersonalPage() {
                   <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest">Asignación de Unidad (Folio / Consecutivo)</label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Car size={16} className={busquedaVehiculo ? "text-[#6366F1]" : "text-slate-500"} />
+                      <Car size={16} className={busquedaVehiculo ? "text-[#01c38e]" : "text-slate-500"} />
                     </div>
                     <input 
                       type="text"
@@ -363,12 +363,12 @@ export default function PersonalPage() {
                         }
                       }}
                       onFocus={() => setMostrarSugerencias(true)}
-                      className="w-full pl-10 pr-4 py-3 bg-slate-950 border border-slate-700 rounded-xl text-white focus:ring-2 focus:ring-[#6366F1] outline-none transition-all placeholder:text-slate-700 text-sm"
+                      className="w-full pl-10 pr-4 py-3 bg-[#1a1e29] border border-slate-700 rounded-xl text-white focus:ring-2 focus:ring-[#01c38e] outline-none transition-all placeholder:text-slate-700 text-sm"
                     />
 
                     {/* MENÚ DE SUGERENCIAS */}
                     {mostrarSugerencias && busquedaVehiculo.length > 0 && (
-                      <div className="absolute z-[60] w-full mt-1 bg-slate-900 border border-slate-800 rounded-xl shadow-2xl max-h-52 overflow-y-auto scrollbar-hide">
+                      <div className="absolute z-[60] w-full mt-1 bg-[#132d46] border border-[#132d46] rounded-xl shadow-2xl max-h-52 overflow-y-auto scrollbar-hide">
                         {sugerenciasVehiculos.length > 0 ? (
                           sugerenciasVehiculos.map((unidad) => {
                             const ocupadoPorOtro = unidad.Email_encargado && unidad.Email_encargado !== formData.Email;
@@ -382,17 +382,17 @@ export default function PersonalPage() {
                                   setBusquedaVehiculo(unidad.Consecutivo);
                                   setMostrarSugerencias(false);
                                 }}
-                                className={`w-full px-4 py-3 text-left border-b border-slate-800/50 last:border-none flex justify-between items-center group transition-colors ${ocupadoPorOtro ? 'hover:bg-red-900/20' : 'hover:bg-slate-800'}`}
+                                className={`w-full px-4 py-3 text-left border-b border-[#132d46]/50 last:border-none flex justify-between items-center group transition-colors ${ocupadoPorOtro ? 'hover:bg-red-900/20' : 'hover:bg-[#132d46]'}`}
                               >
                                 <div>
-                                  <p className={`text-sm font-bold transition-colors ${ocupadoPorOtro ? 'text-slate-400 group-hover:text-red-400' : 'text-white group-hover:text-[#6366F1]'}`}>
+                                  <p className={`text-sm font-bold transition-colors ${ocupadoPorOtro ? 'text-slate-400 group-hover:text-red-400' : 'text-white group-hover:text-[#01c38e]'}`}>
                                     {unidad.Consecutivo} {ocupadoPorOtro && '(Asignado)'}
                                   </p>
                                   <p className="text-[10px] text-slate-500 uppercase">
                                     {unidad.Marca} {unidad.Modelo} • {unidad.Placa}
                                   </p>
                                 </div>
-                                <PlusCircle size={16} className={`transition-colors ${ocupadoPorOtro ? 'text-slate-600 group-hover:text-red-400' : 'text-slate-600 group-hover:text-[#6366F1]'}`} />
+                                <PlusCircle size={16} className={`transition-colors ${ocupadoPorOtro ? 'text-slate-600 group-hover:text-red-400' : 'text-slate-600 group-hover:text-[#01c38e]'}`} />
                               </button>
                             );
                           })
@@ -420,9 +420,9 @@ export default function PersonalPage() {
                   </div>
                 )}
               </div>
-              <div className="pt-6 border-t border-slate-800 flex flex-col-reverse sm:flex-row justify-end gap-3 mt-4">
-                <button type="button" onClick={() => setModalAbierto(false)} disabled={guardando} className="w-full sm:w-auto px-6 py-3.5 sm:py-2.5 text-slate-300 font-bold hover:bg-slate-800 rounded-xl transition-colors">Cancelar</button>
-                <button type="submit" disabled={guardando} className="w-full sm:w-auto flex justify-center items-center gap-2 px-8 py-3.5 sm:py-2.5 text-white font-black rounded-xl bg-[#6366F1] hover:bg-[#4F46E5] shadow-lg disabled:opacity-50 transition-all uppercase tracking-wider text-xs sm:text-sm">
+              <div className="pt-6 border-t border-[#132d46] flex flex-col-reverse sm:flex-row justify-end gap-3 mt-4">
+                <button type="button" onClick={() => setModalAbierto(false)} disabled={guardando} className="w-full sm:w-auto px-6 py-3.5 sm:py-2.5 text-slate-300 font-bold hover:bg-[#132d46] rounded-xl transition-colors">Cancelar</button>
+                <button type="submit" disabled={guardando} className="w-full sm:w-auto flex justify-center items-center gap-2 px-8 py-3.5 sm:py-2.5 text-white font-black rounded-xl bg-[#01c38e] hover:bg-[#01ac7c] shadow-lg disabled:opacity-50 transition-all uppercase tracking-wider text-xs sm:text-sm">
                   {guardando && <Loader2 className="w-4 h-4 animate-spin" />}
                   {modoEdicion ? 'Actualizar' : (guardando ? 'Creando...' : 'Registrar')}
                 </button>

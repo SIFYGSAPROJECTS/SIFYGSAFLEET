@@ -21,7 +21,7 @@ export default async function VehiculosPage() {
             <Link href="/dashboard" className="text-slate-400 hover:text-blue-600 flex items-center gap-1 text-sm mb-2 transition-colors">
               <ArrowLeft size={16} /> Volver al Panel
             </Link>
-            <h1 className="text-3xl font-bold text-slate-800 flex items-center gap-3">
+            <h1 className="text-3xl font-bold text-[#132d46] flex items-center gap-3">
               <Car className="text-blue-600" />
               Inventario de Flota
             </h1>
@@ -51,7 +51,7 @@ export default async function VehiculosPage() {
                   <td className="p-4 font-mono text-slate-500 text-sm">{auto.Consecutivo}</td>
                   
                   <td className="p-4">
-                    <div className="font-medium text-slate-900">{auto.Marca} {auto.Modelo}</div>
+                    <div className="font-medium text-[#132d46]">{auto.Marca} {auto.Modelo}</div>
                     <div className="text-xs text-slate-400">{auto.Linea} - {auto.Color}</div>
                   </td>
                   

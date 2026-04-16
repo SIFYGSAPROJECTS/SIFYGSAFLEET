@@ -146,7 +146,7 @@ export default function TicketForm({ vehiculos }: Props) {
   );
 
   return (
-    <form onSubmit={handleSubmit} className="bg-slate-900 p-8 rounded-xl shadow-[0_0_20px_rgba(99,102,241,0.1)] border border-slate-800 border-t-4 border-t-[#6366F1]">
+    <form onSubmit={handleSubmit} className="bg-[#132d46] p-8 rounded-xl shadow-[0_0_20px_rgba(99,102,241,0.1)] border border-[#132d46] border-t-4 border-t-[#01c38e]">
       
       {/* 1. BUSCADOR INTELIGENTE DE VEHÍCULOS */}
       <div className="mb-6 relative" ref={dropdownRef}>
@@ -157,7 +157,7 @@ export default function TicketForm({ vehiculos }: Props) {
             type="text"
             required={!formData.consecutivo}
             placeholder="Buscar Automovil por consecutivo"
-            className="w-full p-3 pl-10 pr-10 bg-slate-950 border border-slate-700 text-white rounded-lg focus:ring-2 focus:ring-[#6366F1] outline-none transition-all"
+            className="w-full p-3 pl-10 pr-10 bg-[#1a1e29] border border-slate-700 text-white rounded-lg focus:ring-2 focus:ring-[#01c38e] outline-none transition-all"
             value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value);
@@ -172,19 +172,19 @@ export default function TicketForm({ vehiculos }: Props) {
 
         {/* Caja de sugerencias */}
         {isDropdownOpen && (
-          <div className="absolute z-10 w-full mt-1 bg-slate-950 border border-slate-700 rounded-lg shadow-xl max-h-60 overflow-y-auto">
+          <div className="absolute z-10 w-full mt-1 bg-[#1a1e29] border border-slate-700 rounded-lg shadow-xl max-h-60 overflow-y-auto">
             {vehiculosFiltrados.length > 0 ? (
               vehiculosFiltrados.map((auto) => (
                 <div 
                   key={auto.Consecutivo}
-                  className="p-3 hover:bg-slate-800 cursor-pointer text-white text-sm border-b border-slate-800 last:border-0 transition-colors"
+                  className="p-3 hover:bg-[#132d46] cursor-pointer text-white text-sm border-b border-[#132d46] last:border-0 transition-colors"
                   onClick={() => {
                     setFormData({...formData, consecutivo: auto.Consecutivo});
                     setSearchTerm(`(${auto.Consecutivo}) - ${auto.Marca} ${auto.Modelo}`);
                     setIsDropdownOpen(false);
                   }}
                 >
-                  <span className="font-bold text-[#6366F1]">({auto.Consecutivo})</span> - {auto.Marca} {auto.Modelo}
+                  <span className="font-bold text-[#01c38e]">({auto.Consecutivo})</span> - {auto.Marca} {auto.Modelo}
                 </div>
               ))
             ) : (
@@ -212,7 +212,7 @@ export default function TicketForm({ vehiculos }: Props) {
       </div>
 
       {/* 3. KILOMETRAJE ACTUAL Y TIER */}
-      <div className="mb-6 animate-in fade-in slide-in-from-top-4 duration-300 bg-slate-900/50 p-4 rounded-xl border border-slate-800/80">
+      <div className="mb-6 animate-in fade-in slide-in-from-top-4 duration-300 bg-[#132d46]/50 p-4 rounded-xl border border-[#132d46]/80">
         <div className="flex justify-between items-center mb-3">
           <label className="block text-sm font-medium text-slate-300">Registro de Kilometraje</label>
           <div className="flex items-center gap-2">
@@ -221,7 +221,7 @@ export default function TicketForm({ vehiculos }: Props) {
                 Último: {minKm.toLocaleString()} km
               </span>
             ) : formData.consecutivo ? (
-              <span className="px-2.5 py-1 bg-[#6366F1]/10 border border-[#6366F1]/30 rounded-md text-[10px] font-bold text-[#6366F1] uppercase tracking-widest shadow-sm transition-all">
+              <span className="px-2.5 py-1 bg-[#01c38e]/10 border border-[#01c38e]/30 rounded-md text-[10px] font-bold text-[#01c38e] uppercase tracking-widest shadow-sm transition-all">
                 Sin registro (Ingreso Inicial)
               </span>
             ) : null}
@@ -236,10 +236,10 @@ export default function TicketForm({ vehiculos }: Props) {
               type="number" 
               required
               min={minKm}
-              className={`w-full p-3 pl-16 bg-slate-950 border rounded-lg outline-none transition-all focus:shadow-[0_0_10px_rgba(99,102,241,0.2)] ${
+              className={`w-full p-3 pl-16 bg-[#1a1e29] border rounded-lg outline-none transition-all focus:shadow-[0_0_10px_rgba(99,102,241,0.2)] ${
                 formData.kilometraje && Number(formData.kilometraje) < minKm 
                   ? 'border-red-500 focus:ring-red-500 text-red-500' 
-                  : 'border-slate-700/80 focus:ring-[#6366F1] text-white'
+                  : 'border-slate-700/80 focus:ring-[#01c38e] text-white'
               }`}
               placeholder={minKm > 0 ? `+${minKm}` : "Ej: 15300"}
               value={formData.kilometraje}
@@ -271,7 +271,7 @@ export default function TicketForm({ vehiculos }: Props) {
                   type="text" 
                   autoFocus
                   placeholder="Ej: Servicio de 210,000km"
-                  className="w-full p-3 pl-4 bg-indigo-950/40 border border-[#6366F1]/50 text-white rounded-lg focus:ring-2 focus:ring-[#6366F1] outline-none transition-all text-xs font-medium placeholder-indigo-300/30"
+                  className="w-full p-3 pl-4 bg-[#132d46]/40 border border-[#01c38e]/50 text-white rounded-lg focus:ring-2 focus:ring-[#01c38e] outline-none transition-all text-xs font-medium placeholder-indigo-300/30"
                   value={customTierText}
                   onChange={(e) => setCustomTierText(e.target.value)}
                   required
@@ -282,7 +282,7 @@ export default function TicketForm({ vehiculos }: Props) {
                     setSelectedTier('');
                     setCustomTierText('');
                   }}
-                  className="absolute right-2 top-2 text-[#6366F1]/60 hover:text-red-400 p-1"
+                  className="absolute right-2 top-2 text-[#01c38e]/60 hover:text-red-400 p-1"
                   title="Cancelar Ingreso Manual"
                 >
                   ✖
@@ -290,7 +290,7 @@ export default function TicketForm({ vehiculos }: Props) {
               </div>
             ) : (
               <div 
-                className="w-full p-3 bg-gradient-to-r from-indigo-950/40 to-slate-900 border border-[#6366F1]/30 hover:border-[#6366F1]/60 text-indigo-300 font-bold rounded-lg cursor-pointer transition-all text-xs flex justify-between items-center group shadow-inner"
+                className="w-full p-3 bg-gradient-to-r from-[#132d46]/40 to-[#132d46] border border-[#01c38e]/30 hover:border-[#01c38e]/60 text-indigo-300 font-bold rounded-lg cursor-pointer transition-all text-xs flex justify-between items-center group shadow-inner"
                 onClick={() => setIsTierDropdownOpen(!isTierDropdownOpen)}
               >
                 <span>
@@ -298,20 +298,20 @@ export default function TicketForm({ vehiculos }: Props) {
                     ? `Servicio: ${Number(selectedTier)/1000}K` 
                     : "Aplica para..."}
                 </span>
-                <ChevronDown className={`text-[#6366F1] transition-transform duration-300 ${isTierDropdownOpen ? 'rotate-180' : ''}`} size={16} />
+                <ChevronDown className={`text-[#01c38e] transition-transform duration-300 ${isTierDropdownOpen ? 'rotate-180' : ''}`} size={16} />
               </div>
             )}
 
             {/* Menú Desplegable Personalizado */}
             {isTierDropdownOpen && selectedTier !== 'MANUAL' && (
-              <div className="absolute z-20 w-full mt-2 bg-slate-900 border border-slate-700/80 rounded-xl shadow-[0_10px_40px_-10px_rgba(99,102,241,0.5)] max-h-56 overflow-y-auto scrollbar-thin scrollbar-thumb-[#6366F1]/50 scrollbar-track-slate-900 animate-in fade-in slide-in-from-top-2">
-                <div className="p-2 border-b border-slate-800 bg-slate-950/50 sticky top-0 z-10">
+              <div className="absolute z-20 w-full mt-2 bg-[#132d46] border border-slate-700/80 rounded-xl shadow-[0_10px_40px_-10px_rgba(99,102,241,0.5)] max-h-56 overflow-y-auto scrollbar-thin scrollbar-thumb-[#01c38e]/50 scrollbar-track-[#132d46] animate-in fade-in slide-in-from-top-2">
+                <div className="p-2 border-b border-[#132d46] bg-[#1a1e29]/50 sticky top-0 z-10">
                   <span className="text-[10px] uppercase font-black text-slate-500 tracking-wider">Selecciona Servicio</span>
                 </div>
                 {Array.from({ length: 40 }, (_, i) => (i + 1) * 5000).map(tier => (
                   <div 
                     key={tier} 
-                    className={`px-4 py-2.5 text-xs font-semibold cursor-pointer transition-all border-b border-slate-800/50 hover:bg-[#6366F1]/20 hover:text-white ${selectedTier === tier.toString() ? 'bg-[#6366F1]/20 text-[#6366F1]' : 'text-slate-300'}`}
+                    className={`px-4 py-2.5 text-xs font-semibold cursor-pointer transition-all border-b border-[#132d46]/50 hover:bg-[#01c38e]/20 hover:text-white ${selectedTier === tier.toString() ? 'bg-[#01c38e]/20 text-[#01c38e]' : 'text-slate-300'}`}
                     onClick={() => {
                       setSelectedTier(tier.toString());
                       setIsTierDropdownOpen(false);
@@ -321,7 +321,7 @@ export default function TicketForm({ vehiculos }: Props) {
                   </div>
                 ))}
                 <div 
-                  className="px-4 py-3 text-xs font-bold cursor-pointer text-amber-500 hover:bg-amber-500/10 transition-all sticky bottom-0 bg-slate-900 border-t border-slate-800/80"
+                  className="px-4 py-3 text-xs font-bold cursor-pointer text-amber-500 hover:bg-amber-500/10 transition-all sticky bottom-0 bg-[#132d46] border-t border-[#132d46]/80"
                   onClick={() => {
                     setSelectedTier('MANUAL');
                     setIsTierDropdownOpen(false);
@@ -345,7 +345,7 @@ export default function TicketForm({ vehiculos }: Props) {
       <div className="mb-8">
         <div className="flex justify-between items-center mb-2">
           <label className="block text-sm font-medium text-slate-400">Detalles del Mantenimiento</label>
-          <span className={`text-[10px] font-black uppercase tracking-widest ${formData.descripcion.length >= 240 ? 'text-[#6366F1]' : 'text-slate-600'}`}>
+          <span className={`text-[10px] font-black uppercase tracking-widest ${formData.descripcion.length >= 240 ? 'text-[#01c38e]' : 'text-slate-600'}`}>
             {formData.descripcion.length} / 255
           </span>
         </div>
@@ -353,7 +353,7 @@ export default function TicketForm({ vehiculos }: Props) {
           required
           maxLength={255}
           rows={4}
-          className="w-full p-3 bg-slate-950 border border-slate-700 text-white rounded-lg focus:ring-2 focus:ring-[#6366F1] outline-none placeholder-slate-600 transition-all resize-none"
+          className="w-full p-3 bg-[#1a1e29] border border-slate-700 text-white rounded-lg focus:ring-2 focus:ring-[#01c38e] outline-none placeholder-slate-600 transition-all resize-none"
           placeholder="Describa los trabajos o fallas reportadas..."
           value={formData.descripcion}
           onChange={(e) => setFormData({...formData, descripcion: e.target.value})}
@@ -363,7 +363,7 @@ export default function TicketForm({ vehiculos }: Props) {
       <button 
         type="submit" 
         disabled={loading || (!!formData.kilometraje && Number(formData.kilometraje) < minKm)}
-        className="w-full bg-[#6366F1] hover:bg-[#4F46E5] text-white font-bold py-3.5 rounded-lg flex items-center justify-center gap-2 transition-all shadow-lg shadow-[#6366F1]/20 disabled:opacity-50 disabled:cursor-not-allowed uppercase text-sm tracking-wider"
+        className="w-full bg-[#01c38e] hover:bg-[#01ac7c] text-white font-bold py-3.5 rounded-lg flex items-center justify-center gap-2 transition-all shadow-lg shadow-[#01c38e]/20 disabled:opacity-50 disabled:cursor-not-allowed uppercase text-sm tracking-wider"
       >
         {loading ? <Loader2 className="animate-spin" /> : <Wrench size={20} />}
         Agendar Mantenimiento

@@ -18,21 +18,21 @@ export default async function Dashboard() {
   }) : 0;
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-transparent">
       
       {/* NAVBAR */}
-      <nav className="bg-slate-950 text-white p-4 shadow-lg sticky top-0 z-10 border-b border-slate-800">
+      <nav className="bg-transparent text-white p-4 sticky top-0 z-10 pt-6">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex items-center space-x-2">
-            <div className="bg-[#6366F1] p-1.5 rounded-lg shadow-lg shadow-[#6366F1]/20">
+            <div className="bg-[#01c38e] p-1.5 rounded-lg shadow-lg shadow-[#01c38e]/20">
               <Car className="text-white h-5 w-5" />
             </div>
-            <span className="font-bold text-xl tracking-wide">SIFYGSA <span className="text-[#6366F1]">Fleet</span></span>
+            <span className="font-bold text-xl tracking-wide">SIFYGSA <span className="text-[#01c38e]">Fleet</span></span>
           </div>
           <div className="flex items-center space-x-4">
             <div className="text-right">
               <p className="text-sm font-medium">{userName}</p>
-              <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold ${userRole === 'ADMIN' ? 'bg-[#6366F1]' : 'bg-slate-700 text-slate-300'}`}>
+              <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold ${userRole === 'ADMIN' ? 'bg-[#01c38e]' : 'bg-slate-700 text-slate-300'}`}>
                 {userRole === 'ADMIN' ? 'ADMINISTRADOR' : 'EMPLEADO'}
               </span>
             </div>
@@ -56,7 +56,7 @@ export default async function Dashboard() {
           {userRole !== 'ADMIN' && (
             <Link 
               href="/dashboard/servicios" 
-              className="bg-[#6366F1] hover:bg-[#4F46E5] text-white px-5 py-2.5 rounded-lg font-bold flex items-center gap-2 transition-all shadow-lg active:scale-95"
+              className="bg-[#01c38e] hover:bg-[#01ac7c] text-white px-5 py-2.5 rounded-lg font-bold flex items-center gap-2 transition-all shadow-lg active:scale-95"
             >
               <PlusCircle size={20} />
               Nuevo Mantenimiento

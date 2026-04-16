@@ -14,13 +14,13 @@ const generarPlantillaCorreo = (nombreUsuario: string, nuevaPassword: string) =>
       <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0f172a; color: #f8fafc; margin: 0; padding: 0; }
         .container { max-width: 600px; margin: 40px auto; background-color: #1e293b; border-radius: 16px; overflow: hidden; border: 1px solid #334155; }
-        .header { background-color: #0f172a; padding: 30px; text-align: center; border-bottom: 3px solid #6366F1; }
+        .header { background-color: #0f172a; padding: 30px; text-align: center; border-bottom: 3px solid #01c38e; }
         .header h1 { color: #f8fafc; margin: 0; font-size: 24px; letter-spacing: 1px; }
-        .header span { color: #6366F1; }
+        .header span { color: #01c38e; }
         .content { padding: 40px 30px; }
         .greeting { font-size: 20px; font-weight: bold; margin-bottom: 20px; color: #f8fafc; }
         .message { font-size: 16px; line-height: 1.6; color: #cbd5e1; margin-bottom: 30px; }
-        .password-box { background-color: #0f172a; border: 1px solid #6366F1; border-radius: 8px; padding: 20px; text-align: center; margin-bottom: 30px; }
+        .password-box { background-color: #0f172a; border: 1px solid #01c38e; border-radius: 8px; padding: 20px; text-align: center; margin-bottom: 30px; }
         .password-label { font-size: 12px; text-transform: uppercase; color: #94a3b8; letter-spacing: 1px; margin-bottom: 10px; display: block; }
         .password-value { font-size: 24px; font-weight: bold; color: #10b981; font-family: monospace; letter-spacing: 2px; }
         .footer { background-color: #0f172a; padding: 20px; text-align: center; font-size: 12px; color: #64748b; border-top: 1px solid #334155; }
@@ -142,7 +142,7 @@ export async function POST(request: Request) {
     // Encriptamos
     const hashedPassword = await bcrypt.hash(nuevaPassword, 12);
 
-    //  Actualizamos BD y GUARDAMOS LA FECHA ACTUAL ⏱
+    //  Actualizamos BD y GUARDAMOS LA FECHA ACTUAL 
     await prisma.empleados.update({
       where: { Email: email }, 
       data: { 

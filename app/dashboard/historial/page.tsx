@@ -8,7 +8,7 @@ export default async function HistorialPage() {
 
   if (!userEmail) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center p-8">
+      <div className="min-h-screen bg-transparent flex items-center justify-center p-8">
         <div className="bg-red-900/20 border border-red-900 text-red-500 p-6 rounded-xl shadow-lg font-bold">
           Error: No has iniciado sesión
         </div>
@@ -40,7 +40,7 @@ export default async function HistorialPage() {
 
   //  Ahora solo mandamos llamar al cliente dentro del fondo negro
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-transparent">
       <div className="p-8 max-w-7xl mx-auto">
         <HistorialClient historial={historial} rol={usuario?.Rol} />
       </div>

@@ -70,11 +70,11 @@ export async function POST(request: Request) {
       subject: '🔐 Bienvenido a SIFYGSA Fleet - Tus Credenciales de Acceso',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #333; border: 1px solid #e2e8f0; border-radius: 10px;">
-          <h2 style="color: #6366F1; text-align: center;">¡Bienvenido al Equipo! 🚛</h2>
+          <h2 style="color: #01c38e; text-align: center;">¡Bienvenido al Equipo! 🚛</h2>
           <p>Hola <strong>${Nombre_Empleado} ${A_Paterno}</strong>,</p>
           <p>Se ha creado tu cuenta corporativa en el <b>Sistema de Gestión de Flota SIFYGSA</b>. A continuación, te proporcionamos tus credenciales de acceso:</p>
           
-          <div style="background-color: #f8fafc; padding: 15px; border-left: 4px solid #6366F1; border-radius: 4px; margin: 20px 0;">
+          <div style="background-color: #f8fafc; padding: 15px; border-left: 4px solid #01c38e; border-radius: 4px; margin: 20px 0;">
             <p style="margin: 5px 0;"><strong>Usuario (Correo):</strong> ${Email.toLowerCase()}</p>
             <p style="margin: 5px 0;"><strong>Contraseña Temporal:</strong> <span style="font-family: monospace; font-size: 16px; background: #e2e8f0; padding: 2px 8px; border-radius: 4px; font-weight: bold; letter-spacing: 1px;">${passwordTemporal}</span></p>
             <p style="margin: 5px 0;"><strong>Nivel de Acceso:</strong> ${Rol || 'USER'}</p>
