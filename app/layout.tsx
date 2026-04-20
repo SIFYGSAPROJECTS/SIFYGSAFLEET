@@ -1,24 +1,23 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Lexend } from "next/font/google";
+import { Geist_Mono, Inter, Newsreader } from "next/font/google";
 import "./globals.css";
 // 1. IMPORTAMOS LOS HEADERS
 import { headers } from 'next/headers';
-
-// Configuración de fuentes de compatibilidad (Geist)
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
 
-// Configuración de fuentes y tipografía
-// Se implementa Lexend como fuente principal según los requerimientos de diseño de alta ingeniería.
-const lexend = Lexend({
-  variable: "--font-lexend",
+// Configuración de fuentes y tipografía inspirada en Claude
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin"],
+  display: 'swap',
+});
+
+const newsreader = Newsreader({
+  variable: "--font-newsreader",
   subsets: ["latin"],
   display: 'swap',
 });
@@ -42,7 +41,7 @@ export default async function RootLayout({
         <meta property="csp-nonce" content={nonce} />
       </head>
       <body
-        className={`${lexend.variable} ${geistMono.variable} font-sans antialiased`}
+        className={`${inter.variable} ${newsreader.variable} ${geistMono.variable} font-sans antialiased bg-[#21201d] text-[#EAE6E0] min-h-screen bg-fixed`}
       >
         {children}
       </body>

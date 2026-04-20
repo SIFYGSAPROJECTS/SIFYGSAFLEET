@@ -51,19 +51,19 @@ export default async function VerTicketPage({ params }: { params: Promise<{ foli
       <div className="w-full max-w-2xl bg-white shadow-xl rounded-lg border-t-8 border-blue-600 overflow-hidden print:shadow-none print:border-t-0">
         <div className="p-8 border-b border-slate-100 flex justify-between items-start">
           <div>
-            <h1 className="text-3xl font-black text-[#132d46] tracking-tighter">SIFYGSA</h1>
+            <h1 className="text-3xl font-black text-[#2D2D2D] tracking-tighter font-serif">SIFYGSA</h1>
             <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Control de Flota</p>
           </div>
           <div className="text-right">
             <span className="bg-blue-50 text-blue-700 px-2 py-1 rounded text-[10px] font-bold print:border print:border-blue-700">ORDEN DE SERVICIO</span>
-            <p className="text-xl font-mono font-bold text-[#132d46] mt-1">{ticket.Pk_folio_ticket}</p>
+            <p className="text-xl font-mono font-bold text-[#2D2D2D] mt-1 font-serif">{ticket.Pk_folio_ticket}</p>
           </div>
         </div>
 
         <div className="p-8 space-y-6">
-          <div className="flex items-center gap-3 bg-green-50 p-4 rounded-xl border border-green-100 print:border-gray-300 print:bg-white">
-            <CheckCircle2 className="text-green-600 print:text-black" size={24} />
-            <p className="text-green-800 font-bold text-sm print:text-black">Solicitud Registrada Exitosamente</p>
+          <div className="flex items-center gap-3 bg-zinc-50 p-4 rounded-xl border border-zinc-100 print:border-gray-300 print:bg-white">
+            <CheckCircle2 className="text-zinc-600 print:text-black" size={24} />
+            <p className="text-zinc-800 font-bold text-sm print:text-black">Solicitud Registrada Exitosamente</p>
           </div>
 
           <div className="grid grid-cols-3 gap-6">
@@ -77,7 +77,7 @@ export default async function VerTicketPage({ params }: { params: Promise<{ foli
             {/* 2. ETIQUETA DEL TIPO DE SERVICIO */}
             <div>
               <p className="text-[10px] font-bold text-slate-400 uppercase">Tipo</p>
-              <div className={`mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-bold border print:border-slate-400 print:text-[#132d46] ${tipoServicioColor}`}>
+              <div className={`mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-bold border print:border-slate-400 print:text-[#2D2D2D] ${tipoServicioColor}`}>
                 <IconoServicio size={12} />
                 {tipoServicioTexto}
               </div>
@@ -97,7 +97,7 @@ export default async function VerTicketPage({ params }: { params: Promise<{ foli
             <p className="text-[10px] font-bold text-slate-400 uppercase mb-2">Unidad</p>
             <div className="flex items-center gap-3">
               <Car className="text-blue-600 print:text-black" size={20} />
-              <p className="font-bold text-[#132d46]">
+              <p className="font-bold text-[#2D2D2D]">
                 {ticket.auto?.Marca} {ticket.auto?.Modelo} ({ticket.auto?.Placa})
               </p>
             </div>
@@ -106,7 +106,7 @@ export default async function VerTicketPage({ params }: { params: Promise<{ foli
           <div>
             <p className="text-[10px] font-bold text-slate-400 uppercase mb-2">Descripción del Servicio</p>
             <div className="p-4 bg-blue-50/50 rounded-lg border-l-4 border-blue-500 text-sm text-slate-700 italic print:bg-white print:border-gray-300">
-              "{ticket.Descripcion}"
+              &ldquo;{ticket.Descripcion}&rdquo;
             </div>
           </div>
         </div>

@@ -57,21 +57,21 @@ export default async function NuevoTicketPage() {
       <div className="max-w-3xl mx-auto p-6">
         <div className="mb-8">
           
-          <Link href="/dashboard" className="text-slate-400 hover:text-[#01c38e] flex items-center gap-2 text-sm mb-6 w-fit transition-colors">
+          <Link href="/dashboard" className="text-slate-400 hover:text-[#71717a] flex items-center gap-2 text-sm mb-6 w-fit transition-colors">
             <ArrowLeft size={16} /> Volver al Panel de Inicio
           </Link>
 
-          <h1 className="text-3xl font-black text-white tracking-tight">Programar Mantenimiento</h1>
+          <h1 className="text-3xl font-black text-white tracking-tight font-serif">Programar Mantenimiento</h1>
           <p className="text-sm text-slate-400 mt-2">
             {usuario?.Rol === 'ADMIN' 
-              ? <><span className="text-[#01c38e] font-bold"> Administrador:</span> Puedes agendar servicio para cualquier unidad de la flota.</> 
-              : <><span className="text-[#01c38e] font-bold"> Usuario:</span> Solo puedes solicitar servicio para las unidades que tienes asignadas.</>}
+              ? <><span className="text-[#71717a] font-bold"> Administrador:</span> Puedes agendar servicio para cualquier unidad de la flota.</> 
+              : <><span className="text-[#71717a] font-bold"> Usuario:</span> Solo puedes solicitar servicio para las unidades que tienes asignadas.</>}
           </p>
         </div>
 
         {misVehiculos.length === 0 ? (
-          <div className="bg-[#01c38e]/10 border border-[#01c38e]/30 text-[#01c38e] p-6 rounded-xl text-center shadow-lg">
-            <p className="font-bold text-lg mb-2">No tienes vehículos asignados</p>
+          <div className="bg-[#71717a]/10 border border-[#71717a]/30 text-[#71717a] p-6 rounded-xl text-center shadow-lg">
+            <p className="font-bold text-lg mb-2 font-serif">No tienes vehículos asignados</p>
             <p className="text-sm text-slate-300">Contacta a tu administrador para que te asigne una unidad antes de solicitar mantenimiento.</p>
           </div>
         ) : (

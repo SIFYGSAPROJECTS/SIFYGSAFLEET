@@ -151,16 +151,16 @@ export default function LoginPage() {
         className={`fixed inset-0 bg-black z-[999] transition-opacity duration-1000 ease-in-out ${isFadingOut ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
       />
 
-      <div className="flex min-h-screen bg-[#0F1318] text-slate-300 font-sans">
+      <div className="flex min-h-screen bg-transparent text-[#EAE6E0] font-sans">
         {/* PANEL IZQUIERDO: Branding & Animación (Oculto en móvil) */}
-        <div className="hidden lg:flex w-[55%] relative flex-col justify-center items-center overflow-hidden bg-gradient-to-br from-[#0A0D12] to-[#121820] border-r border-[#1D2430]">
+        <div className="hidden lg:flex w-[55%] relative flex-col justify-center items-center overflow-hidden bg-transparent border-r border-[#1D2430]/30">
 
           <style>{`
             .scan-line {
               width: 100%;
               height: 2px;
-              background: #FF7420;
-              box-shadow: 0 0 15px #FF7420, 0 0 30px #FF7420;
+              background: #D97757;
+              box-shadow: 0 0 15px #D97757, 0 0 30px #D97757;
               position: absolute;
               top: 0;
               left: 0;
@@ -170,7 +170,7 @@ export default function LoginPage() {
             .scan-glow {
               width: 100%;
               height: 150px;
-              background: linear-gradient(to bottom, rgba(255,116,32,0) 0%, rgba(255,116,32,0.15) 100%);
+              background: linear-gradient(to bottom, rgba(217,119,87,0) 0%, rgba(217,119,87,0.15) 100%);
               position: absolute;
               top: -150px;
               left: 0;
@@ -188,27 +188,27 @@ export default function LoginPage() {
           `}</style>
 
           {/* BACKGROUND GRID */}
-          <div className="absolute inset-0 z-0 opacity-[0.03]" style={{ backgroundImage: 'linear-gradient(#FF7420 1px, transparent 1px), linear-gradient(90deg, #FF7420 1px, transparent 1px)', backgroundSize: '40px 40px', backgroundPosition: 'center center' }}></div>
+          <div className="absolute inset-0 z-0 opacity-[0.03]" style={{ backgroundImage: 'linear-gradient(#D97757 1px, transparent 1px), linear-gradient(90deg, #D97757 1px, transparent 1px)', backgroundSize: '40px 40px', backgroundPosition: 'center center' }}></div>
 
           <div className="z-10 text-center max-w-2xl px-12 mt-[-10vh] lg:ml-16">
-            <h1 className="text-4xl lg:text-5xl font-bold text-white mb-4 tracking-tight">
-              Control <span className="text-[#FF7420] font-light">Vehicular</span>
+            <h1 className="text-4xl lg:text-5xl font-serif font-medium text-[#EAE6E0] mb-4 tracking-tight">
+              Control <span className="text-[#D97757] font-serif tracking-normal">Vehicular</span>
             </h1>
-            <p className="text-sm text-slate-400 font-light mb-12 max-w-md mx-auto leading-relaxed">
+            <p className="text-sm text-[#9E9B95] font-light mb-12 max-w-md mx-auto leading-relaxed">
               Plataforma integral para el diagnóstico predictivo y gestión operativa de unidades corporativas.
             </p>
 
             {/* ANIMACIÓN DEL VEHÍCULO DINÁMICO */}
-            <div className="relative w-full max-w-md mx-auto aspect-[16/9] border border-slate-700/50 rounded-lg bg-[#0F1318]/80 backdrop-blur-sm overflow-hidden flex items-center justify-center shadow-[0_0_50px_rgba(0,0,0,0.5)]">
+            <div className="relative w-full max-w-md mx-auto aspect-[16/9] border border-[#3B3A38]/50 rounded-lg bg-[#0F1318]/80 backdrop-blur-sm overflow-hidden flex items-center justify-center shadow-[0_0_50px_rgba(0,0,0,0.5)]">
               <div className="scan-line" />
               <div className="scan-glow" />
 
-              <div className="absolute top-3 right-3 bg-[#161A21]/90 border border-slate-800 backdrop-blur-sm text-[#FF7420] text-[10px] uppercase font-mono px-2 py-1 rounded-full shadow-inner z-20 flex items-center gap-1.5 transition-all duration-500">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#FF7420] animate-pulse"></span>
+              <div className="absolute top-3 right-3 bg-[#2D2D2D]/90 border border-[#3B3A38] backdrop-blur-sm text-[#D97757] text-[10px] uppercase font-mono px-2 py-1 rounded-full shadow-inner z-20 flex items-center gap-1.5 transition-all duration-500">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#D97757] animate-pulse"></span>
                 <span>{VEHICLES[vehicleIdx].name}</span>
               </div>
 
-              <svg width="70%" viewBox="0 0 200 80" fill="none" stroke="#FF7420" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="drop-shadow-[0_0_5px_rgba(255,116,32,0.5)] z-10 transition-all duration-1000 ease-in-out">
+              <svg width="70%" viewBox="0 0 200 80" fill="none" stroke="#D97757" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="drop-shadow-[0_0_5px_rgba(217,119,87,0.5)] z-10 transition-all duration-1000 ease-in-out">
                 {/* Silhouette Wireframe Dinámico */}
                 <path d={VEHICLES[vehicleIdx].body} className="transition-all duration-1000 ease-in-out" />
                 <circle cx="65" cy="65" r="10" />
@@ -220,17 +220,17 @@ export default function LoginPage() {
               </svg>
             </div>
 
-            <div className="mt-8 flex flex-wrap justify-center gap-x-6 gap-y-3 text-[11px] font-mono text-slate-500 max-w-lg mx-auto">
-              <span className="flex items-center gap-1.5 hover:text-slate-300 transition-colors">
-                <span className="w-1.5 h-1.5 bg-[#FF7420] rounded-full animate-pulse"></span> Mantenimiento Predictivo
+            <div className="mt-8 flex flex-wrap justify-center gap-x-6 gap-y-3 text-[11px] font-mono text-[#7C7A77] max-w-lg mx-auto">
+              <span className="flex items-center gap-1.5 hover:text-[#EAE6E0] transition-colors">
+                <span className="w-1.5 h-1.5 bg-[#D97757] rounded-full animate-pulse"></span> Mantenimiento Predictivo
               </span>
-              <span className="flex items-center gap-1.5 hover:text-slate-300 transition-colors">
+              <span className="flex items-center gap-1.5 hover:text-[#EAE6E0] transition-colors">
                 <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span> Control de Inventario
               </span>
-              <span className="flex items-center gap-1.5 hover:text-slate-300 transition-colors">
+              <span className="flex items-center gap-1.5 hover:text-[#EAE6E0] transition-colors">
                 <span className="w-1.5 h-1.5 bg-blue-500 rounded-full"></span> Inspecciones (Checklists)
               </span>
-              <span className="flex items-center gap-1.5 hover:text-slate-300 transition-colors">
+              <span className="flex items-center gap-1.5 hover:text-[#EAE6E0] transition-colors">
                 <span className="w-1.5 h-1.5 bg-purple-500 rounded-full"></span> Gestión de Tickets
               </span>
             </div>
@@ -238,31 +238,31 @@ export default function LoginPage() {
         </div>
 
         {/* PANEL DERECHO: Formulario de Login */}
-        <div className="w-full lg:w-[45%] bg-black flex flex-col justify-center px-4 sm:px-8 lg:px-8 xl:px-12 relative overflow-hidden text-slate-300 py-12 lg:py-0">
-          
+        <div className="w-full lg:w-[45%] bg-transparent flex flex-col justify-center px-4 sm:px-8 lg:px-8 xl:px-12 relative overflow-hidden text-[#EAE6E0] py-12 lg:py-0">
+
           {/* EL FRAME/CARTULARIO SOBRE EL NEGRO */}
-          <div className="w-full max-w-[420px] mx-auto lg:mr-auto lg:ml-8 xl:ml-16 relative z-10 rounded-[14px] overflow-hidden border border-slate-800 shadow-[0_0_40px_rgba(0,0,0,0.8)]">
-            
+          <div className="w-full max-w-[420px] mx-auto lg:mr-auto lg:ml-8 xl:ml-16 relative z-10 rounded-[14px] overflow-hidden border border-[#3B3A38] shadow-[0_0_40px_rgba(0,0,0,0.8)]">
+
             {/* Mitad Superior: Branding */}
-            <div className="bg-[#080B12] px-8 pt-10 pb-8 text-center flex flex-col items-center border-b border-slate-800/80">
+            <div className="bg-[#2D2D2D] px-8 pt-10 pb-8 text-center flex flex-col items-center border-b border-[#3B3A38]/80">
               <Image
                 src="/logo.png"
                 alt="Logo SIFYGSA"
-                width={160}
+                width={180}
                 height={160}
                 className="object-contain mb-3"
                 priority
               />
-              <p className="text-slate-400 text-[13px] leading-relaxed">
+              <p className="text-[#9E9B95] text-[13px] leading-relaxed">
                 Sistema para mantenimiento de flota y gestión vehicular
               </p>
             </div>
 
             {/* Mitad Inferior: Controles */}
-            <div className="bg-[#111826] px-8 py-8 pb-10">
+            <div className="bg-[#2D2D2D] px-8 py-8 pb-10">
               {isForgotPassword ? (
                 <form onSubmit={handlePasswordReset} className="space-y-5 animate-in fade-in zoom-in-95 duration-300">
-                  <p className="text-slate-400 text-sm mb-6 border-b border-slate-700 pb-4">
+                  <p className="text-[#9E9B95] text-sm mb-6 border-b border-[#3B3A38] pb-4">
                     Ingresa tu correo corporativo para recibir una clave temporal.
                   </p>
 
@@ -274,17 +274,17 @@ export default function LoginPage() {
                   )}
 
                   <div className="space-y-1.5">
-                    <label className="block text-xs font-bold text-slate-300 ml-1">Correo Corporativo</label>
+                    <label className="block text-xs font-bold text-[#EAE6E0] ml-1">Correo Corporativo</label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <Mail className="h-4 w-4 text-slate-400" />
+                        <Mail className="h-4 w-4 text-[#9E9B95]" />
                       </div>
                       <input
                         type="email"
                         required
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="block w-full pl-10 pr-3 py-3 bg-[#F1F5F9] border-transparent rounded-lg text-sm text-slate-900 focus:border-[#FF7420] focus:ring-2 focus:ring-[#FF7420] transition-colors outline-none placeholder-slate-500"
+                        className="block w-full pl-10 pr-3 py-3 bg-[#21201d] border border-[#4A4948] rounded-lg text-sm text-[#EAE6E0] focus:border-[#D97757] focus:ring-2 focus:ring-[#D97757] transition-colors outline-none placeholder-slate-500"
                         placeholder="ejemplo@sifygsa.com"
                       />
                     </div>
@@ -294,7 +294,7 @@ export default function LoginPage() {
                     <button
                       type="submit"
                       disabled={loading}
-                      className="w-full flex justify-center py-3.5 px-4 rounded-lg text-sm font-bold text-white bg-[#FF7420] hover:bg-[#E6681C] transition-colors disabled:opacity-50"
+                      className="w-full flex justify-center py-3.5 px-4 rounded-lg text-sm font-bold text-[#EAE6E0] bg-[#D97757] hover:bg-[#C56548] transition-colors disabled:opacity-50"
                     >
                       {loading ? <Loader2 className="animate-spin h-5 w-5" /> : 'Recuperar Clave'}
                     </button>
@@ -303,7 +303,7 @@ export default function LoginPage() {
                   <button
                     type="button"
                     onClick={() => { setIsForgotPassword(false); setResetMessage({ text: '', type: '' }); setError(''); }}
-                    className="w-full flex items-center justify-center gap-2 text-xs font-bold text-slate-400 border border-slate-700 bg-transparent hover:bg-slate-800 py-3 rounded-lg hover:text-white transition-colors mt-2"
+                    className="w-full flex items-center justify-center gap-2 text-xs font-bold text-[#9E9B95] border border-[#3B3A38] bg-transparent hover:bg-slate-800 py-3 rounded-lg hover:text-[#EAE6E0] transition-colors mt-2"
                   >
                     <ArrowLeft className="w-4 h-4" /> Cancelar
                   </button>
@@ -317,10 +317,10 @@ export default function LoginPage() {
                   )}
 
                   <div className="space-y-1.5">
-                    <label className="block text-xs font-bold text-slate-300 ml-1">Correo Corporativo</label>
+                    <label className="block text-xs font-bold text-[#EAE6E0] ml-1">Correo Corporativo</label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <User className="h-4 w-4 text-slate-400" />
+                        <User className="h-4 w-4 text-[#9E9B95]" />
                       </div>
                       <input
                         type="email"
@@ -328,7 +328,7 @@ export default function LoginPage() {
                         disabled={loading || loginSuccess}
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="block w-full pl-10 pr-3 py-3.5 bg-[#F1F5F9] border-transparent rounded-lg text-sm text-slate-900 focus:border-[#FF7420] focus:ring-2 focus:ring-[#FF7420] transition-colors outline-none placeholder-slate-500"
+                        className="block w-full pl-10 pr-3 py-3.5 bg-[#21201d] border border-[#4A4948] rounded-lg text-sm text-[#EAE6E0] focus:border-[#D97757] focus:ring-2 focus:ring-[#D97757] transition-colors outline-none placeholder-slate-500"
                         placeholder="tu.correo@sifygsa.com"
                       />
                     </div>
@@ -336,18 +336,18 @@ export default function LoginPage() {
 
                   <div className="space-y-1.5">
                     <div className="flex justify-between items-end ml-1 mr-1">
-                      <label className="block text-xs font-bold text-slate-300">Contraseña</label>
+                      <label className="block text-xs font-bold text-[#EAE6E0]">Contraseña</label>
                       <button
                         type="button"
                         onClick={() => setIsForgotPassword(true)}
-                        className="text-[11px] font-bold text-[#FF7420] hover:text-[#E6681C] transition-colors"
+                        className="text-[11px] font-bold text-[#D97757] hover:text-[#C56548] transition-colors"
                       >
                         ¿Olvidaste tu contraseña?
                       </button>
                     </div>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <Lock className="h-4 w-4 text-slate-400" />
+                        <Lock className="h-4 w-4 text-[#9E9B95]" />
                       </div>
                       <input
                         type={showPassword ? "text" : "password"}
@@ -355,13 +355,13 @@ export default function LoginPage() {
                         disabled={loading || loginSuccess}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="block w-full pl-10 pr-12 py-3.5 bg-[#F1F5F9] border-transparent rounded-lg text-sm text-slate-900 focus:border-[#FF7420] focus:ring-2 focus:ring-[#FF7420] transition-colors outline-none placeholder-slate-500"
+                        className="block w-full pl-10 pr-12 py-3.5 bg-[#21201d] border border-[#4A4948] rounded-lg text-sm text-[#EAE6E0] focus:border-[#D97757] focus:ring-2 focus:ring-[#D97757] transition-colors outline-none placeholder-slate-500"
                         placeholder="••••••••"
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-500 hover:text-slate-800 transition-colors focus:outline-none"
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-[#7C7A77] hover:text-slate-800 transition-colors focus:outline-none"
                         tabIndex={-1}
                       >
                         {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -373,9 +373,9 @@ export default function LoginPage() {
                     <button
                       type="submit"
                       disabled={loading || loginSuccess}
-                      className={`w-full flex justify-center items-center gap-2 py-3.5 px-4 rounded-lg text-sm font-bold text-white transition-colors focus:outline-none disabled:cursor-not-allowed ${loginSuccess
-                          ? 'bg-emerald-600 hover:bg-emerald-700'
-                          : 'bg-[#FF7420] hover:bg-[#E6681C]'
+                      className={`w-full flex justify-center items-center gap-2 py-3.5 px-4 rounded-lg text-sm font-bold text-[#EAE6E0] transition-colors focus:outline-none disabled:cursor-not-allowed ${loginSuccess
+                        ? 'bg-emerald-600 hover:bg-emerald-700'
+                        : 'bg-[#D97757] hover:bg-[#C56548]'
                         }`}
                     >
                       {loginSuccess ? (
@@ -383,7 +383,7 @@ export default function LoginPage() {
                           <CheckCircle2 className="h-4 w-4" /> Autenticado
                         </>
                       ) : loading ? (
-                        <Loader2 className="animate-spin h-4 w-4 text-white" />
+                        <Loader2 className="animate-spin h-4 w-4 text-[#EAE6E0]" />
                       ) : (
                         'Iniciar Sesión'
                       )}
@@ -392,8 +392,8 @@ export default function LoginPage() {
                 </form>
               )}
 
-              <div className="mt-8 pt-6 border-t border-slate-800/80 text-center">
-                <span className="text-[11px] font-medium text-slate-500">
+              <div className="mt-8 pt-6 border-t border-[#3B3A38]/80 text-center">
+                <span className="text-[11px] font-medium text-[#7C7A77]">
                   &copy; {new Date().getFullYear()} SIFYGSA Control de Flotas v2.0
                 </span>
               </div>

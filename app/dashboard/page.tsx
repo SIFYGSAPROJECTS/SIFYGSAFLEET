@@ -24,15 +24,15 @@ export default async function Dashboard() {
       <nav className="bg-transparent text-white p-4 sticky top-0 z-10 pt-6">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex items-center space-x-2">
-            <div className="bg-[#01c38e] p-1.5 rounded-lg shadow-lg shadow-[#01c38e]/20">
+            <div className="bg-[#71717a] p-1.5 rounded-lg shadow-lg shadow-[#71717a]/20">
               <Car className="text-white h-5 w-5" />
             </div>
-            <span className="font-bold text-xl tracking-wide">SIFYGSA <span className="text-[#01c38e]">Fleet</span></span>
+            <span className="font-serif font-medium text-xl tracking-wide">SIFYGSA <span className="text-[#71717a] font-serif">Fleet</span></span>
           </div>
           <div className="flex items-center space-x-4">
             <div className="text-right">
               <p className="text-sm font-medium">{userName}</p>
-              <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold ${userRole === 'ADMIN' ? 'bg-[#01c38e]' : 'bg-slate-700 text-slate-300'}`}>
+              <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold ${userRole === 'ADMIN' ? 'bg-[#71717a]' : 'bg-slate-700 text-slate-300'}`}>
                 {userRole === 'ADMIN' ? 'ADMINISTRADOR' : 'EMPLEADO'}
               </span>
             </div>
@@ -46,7 +46,7 @@ export default async function Dashboard() {
         {/* ENCABEZADO CON BOTÓN DE ACCIÓN RÁPIDA */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div className="text-left">
-            <h1 className="text-3xl font-bold text-white">
+            <h1 className="text-3xl font-serif font-medium text-white tracking-tight">
               {userRole === 'ADMIN' ? 'Panel de Control' : 'Centro de Servicios'}
             </h1>
             <p className="text-slate-400">Gestión de flota SIFYGSA</p>
@@ -56,7 +56,7 @@ export default async function Dashboard() {
           {userRole !== 'ADMIN' && (
             <Link 
               href="/dashboard/servicios" 
-              className="bg-[#01c38e] hover:bg-[#01ac7c] text-white px-5 py-2.5 rounded-lg font-bold flex items-center gap-2 transition-all shadow-lg active:scale-95"
+              className="bg-[#71717a] hover:bg-[#52525b] text-white px-5 py-2.5 rounded-lg font-bold flex items-center gap-2 transition-all shadow-lg active:scale-95"
             >
               <PlusCircle size={20} />
               Nuevo Mantenimiento

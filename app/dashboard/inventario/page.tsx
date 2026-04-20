@@ -191,8 +191,8 @@ export default function InventarioMaestroPage() {
   const colorBordeTabla = 
     filtroActivo === 'Siniestrado' ? 'border-t-red-500' : 
     filtroActivo === 'En Reparación' ? 'border-t-yellow-500' :
-    filtroActivo === 'Disponibles' ? 'border-t-emerald-500' :
-    'border-t-[#01c38e]';
+    filtroActivo === 'Disponibles' ? 'border-t-zinc-500' :
+    'border-t-[#71717a]';
 
   return (
     <div className="min-h-screen bg-transparent relative">
@@ -201,11 +201,11 @@ export default function InventarioMaestroPage() {
         <div className="flex flex-col lg:flex-row justify-between lg:items-center gap-5 mb-8">
           
           <div className="flex-1 flex flex-col items-start w-full text-left">
-            <Link href="/dashboard" className="inline-flex items-center gap-2 text-slate-400 hover:text-[#01c38e] transition-colors mb-3 font-medium text-sm">
+            <Link href="/dashboard" className="inline-flex items-center gap-2 text-slate-400 hover:text-[#71717a] transition-colors mb-3 font-medium text-sm">
               <ArrowLeft className="w-4 h-4" /> Volver al Panel Maestro
             </Link>
-            <h1 className="text-2xl sm:text-3xl font-black text-white flex items-center gap-3">
-              <Car className="text-[#01c38e] shrink-0" size={32} /> Gestión de Flota
+            <h1 className="text-2xl sm:text-3xl font-black text-white flex items-center gap-3 font-serif">
+              <Car className="text-[#71717a] shrink-0" size={32} /> Gestión de Flota
             </h1>
             <p className="text-slate-400 mt-2 font-medium text-sm sm:text-base">Centro de control unificado de unidades SIFYGSA</p>
           </div>
@@ -213,17 +213,17 @@ export default function InventarioMaestroPage() {
           <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-end gap-4 w-full lg:w-auto">
             <div className="w-full sm:w-auto overflow-x-auto scrollbar-hide pb-3">
               <div className="flex w-full justify-start sm:justify-center lg:justify-end min-w-max px-1">
-                <div className="inline-flex items-center bg-[#132d46] border border-[#132d46] rounded-full p-1.5 shadow-lg shrink-0 gap-1">
-                  <Link href="/dashboard/usuarios" className="px-4 py-1.5 text-xs font-bold rounded-full text-slate-500 hover:text-slate-300 hover:bg-[#132d46] transition-colors flex items-center gap-2 whitespace-nowrap">
+                <div className="inline-flex items-center bg-[#2D2D2D] border border-[#3B3A38] rounded-full p-1.5 shadow-lg shrink-0 gap-1">
+                  <Link href="/dashboard/usuarios" className="px-4 py-1.5 text-xs font-bold rounded-full text-slate-500 hover:text-slate-300 hover:bg-[#2D2D2D] transition-colors flex items-center gap-2 whitespace-nowrap">
                     <User size={14} /> Usuarios
                   </Link>
-                  <div className="px-4 py-1.5 text-xs font-bold rounded-full bg-[#132d46] text-white cursor-default flex items-center gap-2 shadow-inner whitespace-nowrap">
-                    <Car size={14} className="text-[#01c38e]" /> Flota
+                  <div className="px-4 py-1.5 text-xs font-bold rounded-full bg-[#2D2D2D] text-white cursor-default flex items-center gap-2 shadow-inner whitespace-nowrap">
+                    <Car size={14} className="text-[#71717a]" /> Flota
                   </div>
-                  <Link href="/dashboard/servicios" className="px-4 py-1.5 text-xs font-bold rounded-full text-slate-500 hover:text-slate-300 hover:bg-[#132d46] transition-colors flex items-center gap-2 whitespace-nowrap">
+                  <Link href="/dashboard/servicios" className="px-4 py-1.5 text-xs font-bold rounded-full text-slate-500 hover:text-slate-300 hover:bg-[#2D2D2D] transition-colors flex items-center gap-2 whitespace-nowrap">
                     <Wrench size={14} /> Servicios
                   </Link>
-                  <Link href="/dashboard/checklists" className="px-4 py-1.5 text-xs font-bold rounded-full text-slate-500 hover:text-cyan-400 hover:bg-[#132d46] transition-colors flex items-center gap-2 whitespace-nowrap">
+                  <Link href="/dashboard/checklists" className="px-4 py-1.5 text-xs font-bold rounded-full text-slate-500 hover:text-cyan-400 hover:bg-[#2D2D2D] transition-colors flex items-center gap-2 whitespace-nowrap">
                     <FileText size={14} /> Checklists
                   </Link>
                 </div>
@@ -231,7 +231,7 @@ export default function InventarioMaestroPage() {
             </div>
 
             {tabPrincipal === 'activos' && (
-              <button onClick={abrirModalNuevo} className="w-full sm:w-auto bg-[#01c38e] hover:bg-[#01ac7c] text-white px-5 py-2.5 rounded-lg font-bold flex items-center justify-center gap-2 transition-colors shadow-lg active:scale-95 shrink-0">
+              <button onClick={abrirModalNuevo} className="w-full sm:w-auto bg-[#71717a] hover:bg-[#52525b] text-white px-5 py-2.5 rounded-lg font-bold flex items-center justify-center gap-2 transition-colors shadow-lg active:scale-95 shrink-0">
                 <Plus className="w-5 h-5" /> Nuevo Vehículo
               </button>
             )}
@@ -239,21 +239,21 @@ export default function InventarioMaestroPage() {
         </div>
 
         {/* FILTRO DE EMPRESAS */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end border-b border-[#132d46] mb-8 w-full gap-4 sm:gap-0">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end border-b border-[#3B3A38] mb-8 w-full gap-4 sm:gap-0">
           <div className="flex space-x-1 sm:space-x-4 overflow-x-auto scrollbar-hide w-full sm:w-auto">
             <button 
               onClick={() => setTabPrincipal('activos')}
-              className={`px-4 sm:px-6 py-3.5 font-bold text-sm sm:text-base flex items-center gap-2 border-b-2 transition-all whitespace-nowrap shrink-0 ${tabPrincipal === 'activos' ? 'border-[#01c38e] text-[#01c38e]' : 'border-transparent text-slate-500 hover:text-slate-300'}`}
+              className={`px-4 sm:px-6 py-3.5 font-bold text-sm sm:text-base flex items-center gap-2 border-b-2 transition-all whitespace-nowrap shrink-0 ${tabPrincipal === 'activos' ? 'border-[#71717a] text-[#71717a]' : 'border-transparent text-slate-500 hover:text-slate-300'}`}
             >
               <ShieldCheck size={20} /> Flota Activa 
-              <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${tabPrincipal === 'activos' ? 'bg-[#01c38e] text-white' : 'bg-[#132d46] text-slate-400'}`}>{vehiculosActivosFlota.length}</span>
+              <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${tabPrincipal === 'activos' ? 'bg-[#71717a] text-white' : 'bg-[#2D2D2D] text-slate-400'}`}>{vehiculosActivosFlota.length}</span>
             </button>
             <button 
               onClick={() => setTabPrincipal('bajas')}
               className={`px-4 sm:px-6 py-3.5 font-bold text-sm sm:text-base flex items-center gap-2 border-b-2 transition-all whitespace-nowrap shrink-0 ${tabPrincipal === 'bajas' ? 'border-red-500 text-red-500' : 'border-transparent text-slate-500 hover:text-slate-300'}`}
             >
               <Archive size={20} /> Unidades (bajas)
-              <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${tabPrincipal === 'bajas' ? 'bg-red-500 text-white' : 'bg-[#132d46] text-slate-400'}`}>{vehiculosBaja.length}</span>
+              <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${tabPrincipal === 'bajas' ? 'bg-red-500 text-white' : 'bg-[#2D2D2D] text-slate-400'}`}>{vehiculosBaja.length}</span>
             </button>
           </div>
           
@@ -282,33 +282,33 @@ export default function InventarioMaestroPage() {
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 w-full">
             
             <div className="flex space-x-2 sm:space-x-4 mb-6 overflow-x-auto pb-2 scrollbar-hide w-full">
-              <button onClick={() => setFiltroActivo('Activo en flota')} className={`flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-lg font-bold transition-all text-sm sm:text-base whitespace-nowrap shrink-0 ${filtroActivo === 'Activo en flota' ? 'bg-[#01c38e]/10 text-[#01c38e] border border-[#01c38e]/50 shadow-[0_0_15px_rgba(99,102,241,0.15)]' : 'text-slate-500 hover:text-slate-300 hover:bg-[#132d46] border border-transparent'}`}>
+              <button onClick={() => setFiltroActivo('Activo en flota')} className={`flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-lg font-bold transition-all text-sm sm:text-base whitespace-nowrap shrink-0 ${filtroActivo === 'Activo en flota' ? 'bg-[#71717a]/10 text-[#71717a] border border-[#71717a]/50 shadow-[0_0_15px_rgba(99,102,241,0.15)]' : 'text-slate-500 hover:text-slate-300 hover:bg-[#2D2D2D] border border-transparent'}`}>
                 <ShieldCheck size={18} className="shrink-0" /> <span className="whitespace-nowrap">Operativos</span>
-                <span className={`ml-1 px-2 py-0.5 rounded-full text-[10px] ${filtroActivo === 'Activo en flota' ? 'bg-[#01c38e] text-white' : 'bg-[#132d46] text-slate-400'}`}>{totalActivos}</span>
+                <span className={`ml-1 px-2 py-0.5 rounded-full text-[10px] ${filtroActivo === 'Activo en flota' ? 'bg-[#71717a] text-white' : 'bg-[#2D2D2D] text-slate-400'}`}>{totalActivos}</span>
               </button>
               
-              <button onClick={() => setFiltroActivo('En Reparación')} className={`flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-lg font-bold transition-all text-sm sm:text-base whitespace-nowrap shrink-0 ${filtroActivo === 'En Reparación' ? 'bg-yellow-500/10 text-yellow-500 border border-yellow-500/50 shadow-[0_0_15px_rgba(234,179,8,0.15)]' : 'text-slate-500 hover:text-slate-300 hover:bg-[#132d46] border border-transparent'}`}>
+              <button onClick={() => setFiltroActivo('En Reparación')} className={`flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-lg font-bold transition-all text-sm sm:text-base whitespace-nowrap shrink-0 ${filtroActivo === 'En Reparación' ? 'bg-yellow-500/10 text-yellow-500 border border-yellow-500/50 shadow-[0_0_15px_rgba(234,179,8,0.15)]' : 'text-slate-500 hover:text-slate-300 hover:bg-[#2D2D2D] border border-transparent'}`}>
                 <Wrench size={18} className="shrink-0" /> <span className="whitespace-nowrap">Taller</span>
-                <span className={`ml-1 px-2 py-0.5 rounded-full text-[10px] ${filtroActivo === 'En Reparación' ? 'bg-yellow-500 text-black font-extrabold' : 'bg-[#132d46] text-slate-400'}`}>{totalReparacion}</span>
+                <span className={`ml-1 px-2 py-0.5 rounded-full text-[10px] ${filtroActivo === 'En Reparación' ? 'bg-yellow-500 text-black font-extrabold' : 'bg-[#2D2D2D] text-slate-400'}`}>{totalReparacion}</span>
               </button>
               
-              <button onClick={() => setFiltroActivo('Disponibles')} className={`flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-lg font-bold transition-all text-sm sm:text-base whitespace-nowrap shrink-0 ${filtroActivo === 'Disponibles' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/50 shadow-[0_0_15px_rgba(16,185,129,0.15)]' : 'text-slate-500 hover:text-slate-300 hover:bg-[#132d46] border border-transparent'}`}>
+              <button onClick={() => setFiltroActivo('Disponibles')} className={`flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-lg font-bold transition-all text-sm sm:text-base whitespace-nowrap shrink-0 ${filtroActivo === 'Disponibles' ? 'bg-zinc-500/10 text-zinc-500 border border-zinc-500/50 shadow-[0_0_15px_rgba(16,185,129,0.15)]' : 'text-slate-500 hover:text-slate-300 hover:bg-[#2D2D2D] border border-transparent'}`}>
                 <CheckCircle2 size={18} className="shrink-0" /> <span className="whitespace-nowrap">Sin Asignar</span>
-                <span className={`ml-1 px-2 py-0.5 rounded-full text-[10px] ${filtroActivo === 'Disponibles' ? 'bg-emerald-500 text-black font-extrabold' : 'bg-[#132d46] text-slate-400'}`}>{totalDisponibles}</span>
+                <span className={`ml-1 px-2 py-0.5 rounded-full text-[10px] ${filtroActivo === 'Disponibles' ? 'bg-zinc-500 text-black font-extrabold' : 'bg-[#2D2D2D] text-slate-400'}`}>{totalDisponibles}</span>
               </button>
               
-              <button onClick={() => setFiltroActivo('Siniestrado')} className={`flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-lg font-bold transition-all text-sm sm:text-base whitespace-nowrap shrink-0 ${filtroActivo === 'Siniestrado' ? 'bg-red-500/10 text-red-500 border border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.15)]' : 'text-slate-500 hover:text-slate-300 hover:bg-[#132d46] border border-transparent'}`}>
+              <button onClick={() => setFiltroActivo('Siniestrado')} className={`flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-lg font-bold transition-all text-sm sm:text-base whitespace-nowrap shrink-0 ${filtroActivo === 'Siniestrado' ? 'bg-red-500/10 text-red-500 border border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.15)]' : 'text-slate-500 hover:text-slate-300 hover:bg-[#2D2D2D] border border-transparent'}`}>
                 <AlertTriangle size={18} className="shrink-0" /> <span className="whitespace-nowrap">Siniestrados</span>
-                <span className={`ml-1 px-2 py-0.5 rounded-full text-[10px] ${filtroActivo === 'Siniestrado' ? 'bg-red-500 text-white' : 'bg-[#132d46] text-slate-400'}`}>{totalSiniestrados}</span>
+                <span className={`ml-1 px-2 py-0.5 rounded-full text-[10px] ${filtroActivo === 'Siniestrado' ? 'bg-red-500 text-white' : 'bg-[#2D2D2D] text-slate-400'}`}>{totalSiniestrados}</span>
               </button>
             </div>
 
             {/* TABLA DE ACTIVOS */}
-            <div className={`bg-[#132d46] rounded-xl shadow-2xl border-x border-b border-t-4 overflow-hidden transition-colors duration-500 ${colorBordeTabla}`}>
+            <div className={`bg-[#2D2D2D] rounded-xl shadow-2xl border-x border-b border-t-4 overflow-hidden transition-colors duration-500 ${colorBordeTabla}`}>
               <div className="overflow-x-auto">
                 <table className="min-w-[1000px] w-full text-left border-collapse">
                   <thead>
-                    <tr className="bg-[#1a1e29] border-b border-[#132d46] text-slate-300 text-sm uppercase tracking-wider">
+                    <tr className="bg-[#2D2D2D] border-b border-[#3B3A38] text-slate-300 text-sm uppercase tracking-wider">
                       <th className="p-4 font-semibold">Unidad</th>
                       <th className="p-4 font-semibold">Vehículo</th>
                       <th className="p-4 font-semibold">Detalles Operativos</th>
@@ -317,22 +317,22 @@ export default function InventarioMaestroPage() {
                       <th className="p-4 font-semibold text-center">Acciones</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#132d46]">
+                  <tbody className="divide-y divide-[#2D2D2D]">
                     {cargando ? (
                       <tr><td colSpan={6} className="text-center p-8 text-slate-500 font-bold">Cargando flota activa... </td></tr>
                     ) : vehiculosFiltrados.length === 0 ? (
                       <tr><td colSpan={6} className="text-center p-8 text-slate-500">No hay vehículos en esta categoría.</td></tr>
                     ) : (
                       vehiculosFiltrados.map((auto) => (
-                        <tr key={auto.Consecutivo} className="hover:bg-[#132d46]/50 transition-colors">
+                        <tr key={auto.Consecutivo} className="hover:bg-[#2D2D2D]/50 transition-colors">
                           <td className="p-4">
-                            <div className="font-bold text-white text-lg flex items-center gap-2">
+                            <div className="font-bold text-white text-lg flex items-center gap-2 font-serif">
                               {auto.Consecutivo}
                               {auto.Estatus_Operativo === 'Siniestrado' && <AlertTriangle size={16} className="text-red-500" />}
                               {auto.Estatus_Operativo === 'En Reparación' && <Wrench size={16} className="text-yellow-500" />}
                             </div>
                             <span className={`inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-bold border uppercase ${
-                              auto.Estatus_Operativo === 'Activo en flota' ? 'bg-[#01c38e]/10 text-[#01c38e] border-[#01c38e]/30' : 
+                              auto.Estatus_Operativo === 'Activo en flota' ? 'bg-[#71717a]/10 text-[#71717a] border-[#71717a]/30' : 
                               auto.Estatus_Operativo === 'En Reparación' ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/30' :
                               'bg-red-900/30 text-red-400 border-red-800'
                             }`}>{auto.Estatus_Operativo}</span>
@@ -348,20 +348,20 @@ export default function InventarioMaestroPage() {
                             <div className="text-sm text-slate-400"><span className="font-semibold text-slate-500">Póliza:</span> {auto.Poliza_Seguro || 'N/A'}</div>
                           </td>
                           <td className="p-4 text-center">
-                            <div className="font-mono font-bold text-white bg-[#1a1e29]/50 py-1 px-2 rounded-lg border border-[#132d46] inline-block">
+                            <div className="font-mono font-bold text-white bg-[#2D2D2D]/50 py-1 px-2 rounded-lg border border-[#3B3A38] inline-block">
                               {auto.Kilometraje_Actual ? `${Number(auto.Kilometraje_Actual).toLocaleString()} km` : <span className="text-slate-600 text-xs">Sin registro</span>}
                             </div>
                           </td>
                           <td className="p-4">
                             <div className="text-sm font-medium text-slate-300">
-                              {auto.encargado ? `${auto.encargado.Nombre_Empleado} ${auto.encargado.A_Paterno}` : <span className="text-emerald-500 font-bold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/30">Sin Asignar</span>}
+                              {auto.encargado ? `${auto.encargado.Nombre_Empleado} ${auto.encargado.A_Paterno}` : <span className="text-zinc-500 font-bold bg-zinc-500/10 px-2 py-0.5 rounded border border-zinc-500/30">Sin Asignar</span>}
                             </div>
                             <div className="text-xs text-slate-500 mt-0.5">
                               {auto.Departamento ? `Depto: ${auto.Departamento}` : ''} {auto.Ubicacion ? `| Ubic: ${auto.Ubicacion}` : ''}
                             </div>
                           </td>
                           <td className="p-4 text-center">
-                            <button onClick={() => abrirModalEditar(auto)} className="p-2 text-slate-500 hover:text-[#01c38e] hover:bg-[#01c38e]/10 rounded-lg transition-colors" title="Editar Unidad">
+                            <button onClick={() => abrirModalEditar(auto)} className="p-2 text-slate-500 hover:text-[#71717a] hover:bg-[#71717a]/10 rounded-lg transition-colors" title="Editar Unidad">
                               <Pencil className="w-5 h-5" />
                             </button>
                           </td>
@@ -380,13 +380,13 @@ export default function InventarioMaestroPage() {
             {cargando ? (
               <div className="text-center p-12 text-slate-500 font-bold">Cargando archivo histórico...</div>
             ) : vehiculosBaja.length === 0 ? (
-              <div className="bg-[#132d46] p-12 rounded-xl border border-dashed border-red-500/50 text-center text-slate-400 font-bold shadow-[0_0_20px_rgba(239,68,68,0.05)]">
+              <div className="bg-[#2D2D2D] p-12 rounded-xl border border-dashed border-red-500/50 text-center text-slate-400 font-bold shadow-[0_0_20px_rgba(239,68,68,0.05)]">
                 NO HAY VEHÍCULOS DADOS DE BAJA EN EL HISTORIAL
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {vehiculosBaja.map((vehiculo) => (
-                  <div key={vehiculo.Consecutivo} className="bg-[#132d46] rounded-xl p-6 border-x border-b border-[#132d46] border-t-4 border-t-red-500 relative overflow-hidden group hover:border-red-500 hover:shadow-[0_0_15px_rgba(239,68,68,0.15)] transition-all duration-300">
+                  <div key={vehiculo.Consecutivo} className="bg-[#2D2D2D] rounded-xl p-6 border-x border-b border-[#3B3A38] border-t-4 border-t-red-500 relative overflow-hidden group hover:border-red-500 hover:shadow-[0_0_15px_rgba(239,68,68,0.15)] transition-all duration-300">
                     <Archive className="absolute -right-8 -bottom-8 w-40 h-40 text-red-500/5 -rotate-12 group-hover:text-red-500/10 transition-colors" />
                     <div className="relative z-10">
                       <div className="flex justify-between items-start mb-4">
@@ -394,16 +394,16 @@ export default function InventarioMaestroPage() {
                           <span className="bg-red-500/10 text-red-500 px-3 py-1 rounded text-xs font-mono font-black tracking-widest border border-red-500/20">
                             {vehiculo.Consecutivo}
                           </span>
-                          <button onClick={() => abrirModalRestauracion(vehiculo)} title="Restaurar a Activo" className="text-slate-600 hover:text-emerald-400 hover:bg-emerald-400/10 p-1.5 rounded transition-all">
+                          <button onClick={() => abrirModalRestauracion(vehiculo)} title="Restaurar a Activo" className="text-slate-600 hover:text-zinc-400 hover:bg-zinc-400/10 p-1.5 rounded transition-all">
                             <RotateCcw size={16} />
                           </button>
                         </div>
                         <span className="flex items-center gap-1 text-[10px] font-bold bg-red-900/30 text-red-400 px-2 py-1 rounded border border-red-800/50 uppercase tracking-widest">INACTIVO</span>
                       </div>
-                      <h3 className="text-xl font-bold text-white mb-1">
+                      <h3 className="text-xl font-bold text-white mb-1 font-serif">
                         {vehiculo.Linea ? `(${vehiculo.Linea}) ` : ''}{vehiculo.Marca} {vehiculo.Modelo}
                       </h3>
-                      <div className="flex gap-4 text-slate-400 font-mono text-sm mb-6 border-b border-[#132d46] pb-4">
+                      <div className="flex gap-4 text-slate-400 font-mono text-sm mb-6 border-b border-[#3B3A38] pb-4">
                         <p>Placa: <span className="text-slate-300">{vehiculo.Placa}</span></p>
                           <p>Año/Obs: <span className="text-slate-300">Detalle Completo en Título</span></p>
                       </div>
@@ -424,69 +424,69 @@ export default function InventarioMaestroPage() {
       {/* MODALES COMPARTIDOS */}
       {modalAbierto && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
-          <div className="bg-[#132d46] rounded-xl shadow-2xl border border-[#132d46] w-full max-w-4xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-            <div className="bg-[#1a1e29] border-b border-[#01c38e]/50 p-4 flex justify-between items-center text-white transition-colors">
-              <h2 className="text-lg font-bold flex items-center gap-2">
-                {modoEdicion ? <Pencil className="w-5 h-5 text-[#01c38e]" /> : <Car className="w-5 h-5 text-[#01c38e]" />} 
-                <span className="text-[#01c38e]">{modoEdicion ? `Editar Unidad ${formData.Consecutivo}` : 'Registrar Nueva Unidad'}</span>
+          <div className="bg-[#2D2D2D] rounded-xl shadow-2xl border border-[#3B3A38] w-full max-w-4xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="bg-[#2D2D2D] border-b border-[#71717a]/50 p-4 flex justify-between items-center text-white transition-colors">
+              <h2 className="text-lg font-bold flex items-center gap-2 font-serif">
+                {modoEdicion ? <Pencil className="w-5 h-5 text-[#71717a]" /> : <Car className="w-5 h-5 text-[#71717a]" />} 
+                <span className="text-[#71717a]">{modoEdicion ? `Editar Unidad ${formData.Consecutivo}` : 'Registrar Nueva Unidad'}</span>
               </h2>
               <button onClick={() => setModalAbierto(false)} className="text-slate-400 hover:text-red-500 transition-colors"><X className="w-6 h-6" /></button>
             </div>
             
             <form onSubmit={guardarVehiculo} className="p-6 max-h-[80vh] overflow-y-auto">
-              <h3 className="text-xs font-bold text-[#01c38e] uppercase tracking-wider mb-3 border-b border-[#132d46] pb-2">Datos Principales</h3>
+              <h3 className="text-xs font-bold text-[#71717a] uppercase tracking-wider mb-3 border-b border-[#3B3A38] pb-2">Datos Principales</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-6">
                 <div>
                   <label className="block text-sm font-medium text-slate-400 mb-1">Consecutivo *</label>
-                  <input required type="text" value={formData.Consecutivo} disabled={modoEdicion} onChange={e => setFormData({...formData, Consecutivo: e.target.value})} className={`w-full border border-slate-700 rounded-lg p-2.5 outline-none uppercase text-white ${modoEdicion ? 'bg-[#132d46]/50 text-slate-500 cursor-not-allowed' : 'bg-[#1a1e29] focus:ring-2 focus:ring-[#01c38e] focus:border-[#01c38e]'}`} placeholder="V-XX" />
+                  <input required type="text" value={formData.Consecutivo} disabled={modoEdicion} onChange={e => setFormData({...formData, Consecutivo: e.target.value})} className={`w-full border border-slate-700 rounded-lg p-2.5 outline-none uppercase text-white ${modoEdicion ? 'bg-[#2D2D2D]/50 text-slate-500 cursor-not-allowed' : 'bg-[#2D2D2D] focus:ring-2 focus:ring-[#71717a] focus:border-[#71717a]'}`} placeholder="V-XX" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-400 mb-1">Placas *</label>
-                  <input required type="text" value={formData.Placa} onChange={e => setFormData({...formData, Placa: e.target.value})} className="w-full bg-[#1a1e29] border border-slate-700 text-white rounded-lg p-2.5 focus:ring-2 focus:ring-[#01c38e] outline-none uppercase placeholder-slate-600" placeholder="ABC-123" />
+                  <input required type="text" value={formData.Placa} onChange={e => setFormData({...formData, Placa: e.target.value})} className="w-full bg-[#2D2D2D] border border-slate-700 text-white rounded-lg p-2.5 focus:ring-2 focus:ring-[#71717a] outline-none uppercase placeholder-slate-600" placeholder="ABC-123" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-400 mb-1">Color</label>
-                  <input type="text" value={formData.Color} onChange={e => setFormData({...formData, Color: e.target.value})} className="w-full bg-[#1a1e29] border border-slate-700 text-white rounded-lg p-2.5 focus:ring-2 focus:ring-[#01c38e] outline-none placeholder-slate-600" placeholder="Ej. Blanco" />
+                  <input type="text" value={formData.Color} onChange={e => setFormData({...formData, Color: e.target.value})} className="w-full bg-[#2D2D2D] border border-slate-700 text-white rounded-lg p-2.5 focus:ring-2 focus:ring-[#71717a] outline-none placeholder-slate-600" placeholder="Ej. Blanco" />
                 </div>
               </div>
 
-              <h3 className="text-xs font-bold text-[#01c38e] uppercase tracking-wider mb-3 border-b border-[#132d46] pb-2">Especificaciones</h3>
+              <h3 className="text-xs font-bold text-[#71717a] uppercase tracking-wider mb-3 border-b border-[#3B3A38] pb-2">Especificaciones</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-6">
                 <div>
                   <label className="block text-sm font-medium text-slate-400 mb-1">Marca</label>
-                  <input type="text" value={formData.Marca} onChange={e => setFormData({...formData, Marca: e.target.value})} className="w-full bg-[#1a1e29] border border-slate-700 text-white rounded-lg p-2.5 focus:ring-2 focus:ring-[#01c38e] outline-none placeholder-slate-600" placeholder="Ej. Ford" />
+                  <input type="text" value={formData.Marca} onChange={e => setFormData({...formData, Marca: e.target.value})} className="w-full bg-[#2D2D2D] border border-slate-700 text-white rounded-lg p-2.5 focus:ring-2 focus:ring-[#71717a] outline-none placeholder-slate-600" placeholder="Ej. Ford" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-400 mb-1">Año</label>
-                  <input type="text" value={formData.Modelo} onChange={e => setFormData({...formData, Modelo: e.target.value})} className="w-full bg-[#1a1e29] border border-slate-700 text-white rounded-lg p-2.5 focus:ring-2 focus:ring-[#01c38e] outline-none placeholder-slate-600" placeholder="Ej. 2024" />
+                  <input type="text" value={formData.Modelo} onChange={e => setFormData({...formData, Modelo: e.target.value})} className="w-full bg-[#2D2D2D] border border-slate-700 text-white rounded-lg p-2.5 focus:ring-2 focus:ring-[#71717a] outline-none placeholder-slate-600" placeholder="Ej. 2024" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-400 mb-1">Línea / Modelo</label>
-                  <input type="text" value={formData.Linea} onChange={e => setFormData({...formData, Linea: e.target.value})} className="w-full bg-[#1a1e29] border border-slate-700 text-white rounded-lg p-2.5 focus:ring-2 focus:ring-[#01c38e] outline-none placeholder-slate-600" placeholder="Ej. Ranger" />
+                  <input type="text" value={formData.Linea} onChange={e => setFormData({...formData, Linea: e.target.value})} className="w-full bg-[#2D2D2D] border border-slate-700 text-white rounded-lg p-2.5 focus:ring-2 focus:ring-[#71717a] outline-none placeholder-slate-600" placeholder="Ej. Ranger" />
                 </div>
                 <div className="sm:col-span-2">
                   <label className="block text-sm font-medium text-slate-400 mb-1">Número de Serie (VIN)</label>
-                  <input type="text" value={formData.Numero_Serie} onChange={e => setFormData({...formData, Numero_Serie: e.target.value})} className="w-full bg-[#1a1e29] border border-slate-700 text-white rounded-lg p-2.5 focus:ring-2 focus:ring-[#01c38e] outline-none uppercase font-mono placeholder-slate-600" placeholder="1FD..." />
+                  <input type="text" value={formData.Numero_Serie} onChange={e => setFormData({...formData, Numero_Serie: e.target.value})} className="w-full bg-[#2D2D2D] border border-slate-700 text-white rounded-lg p-2.5 focus:ring-2 focus:ring-[#71717a] outline-none uppercase font-mono placeholder-slate-600" placeholder="1FD..." />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-400 mb-1">Póliza de Seguro</label>
-                  <input type="text" value={formData.Poliza_Seguro} onChange={e => setFormData({...formData, Poliza_Seguro: e.target.value})} className="w-full bg-[#1a1e29] border border-slate-700 text-white rounded-lg p-2.5 focus:ring-2 focus:ring-[#01c38e] outline-none uppercase placeholder-slate-600" />
+                  <input type="text" value={formData.Poliza_Seguro} onChange={e => setFormData({...formData, Poliza_Seguro: e.target.value})} className="w-full bg-[#2D2D2D] border border-slate-700 text-white rounded-lg p-2.5 focus:ring-2 focus:ring-[#71717a] outline-none uppercase placeholder-slate-600" />
                 </div>
               </div>
 
-              <h3 className="text-xs font-bold text-[#01c38e] uppercase tracking-wider mb-3 border-b border-[#132d46] pb-2">Asignación y Operación</h3>
+              <h3 className="text-xs font-bold text-[#71717a] uppercase tracking-wider mb-3 border-b border-[#3B3A38] pb-2">Asignación y Operación</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-4">
                 <div>
                   <label className="block text-sm font-medium text-slate-400 mb-1">Correo del Usuario</label>
-                  <input type="email" value={formData.Email_encargado} onChange={e => setFormData({...formData, Email_encargado: e.target.value})} className="w-full bg-[#1a1e29] border border-slate-700 text-white rounded-lg p-2.5 focus:ring-2 focus:ring-[#01c38e] outline-none placeholder-slate-600" placeholder="correo@sifygsa.com" />
+                  <input type="email" value={formData.Email_encargado} onChange={e => setFormData({...formData, Email_encargado: e.target.value})} className="w-full bg-[#2D2D2D] border border-slate-700 text-white rounded-lg p-2.5 focus:ring-2 focus:ring-[#71717a] outline-none placeholder-slate-600" placeholder="correo@sifygsa.com" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-400 mb-1">Departamento</label>
-                  <input type="text" value={formData.Departamento} onChange={e => setFormData({...formData, Departamento: e.target.value})} className="w-full bg-[#1a1e29] border border-[#132d46] text-white rounded-lg p-2.5 focus:ring-2 focus:ring-[#01c38e] outline-none placeholder-slate-600" placeholder="Ej. Ventas" />
+                  <input type="text" value={formData.Departamento} onChange={e => setFormData({...formData, Departamento: e.target.value})} className="w-full bg-[#2D2D2D] border border-[#3B3A38] text-white rounded-lg p-2.5 focus:ring-2 focus:ring-[#71717a] outline-none placeholder-slate-600" placeholder="Ej. Ventas" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-400 mb-1">Ubicación</label>
-                  <input type="text" value={formData.Ubicacion} onChange={e => setFormData({...formData, Ubicacion: e.target.value})} className="w-full bg-[#1a1e29] border border-slate-700 text-white rounded-lg p-2.5 focus:ring-2 focus:ring-[#01c38e] outline-none placeholder-slate-600" placeholder="Ej. Planta Sur" />
+                  <input type="text" value={formData.Ubicacion} onChange={e => setFormData({...formData, Ubicacion: e.target.value})} className="w-full bg-[#2D2D2D] border border-slate-700 text-white rounded-lg p-2.5 focus:ring-2 focus:ring-[#71717a] outline-none placeholder-slate-600" placeholder="Ej. Planta Sur" />
                 </div>
                 
                 <div className="sm:col-span-2 md:col-span-3">
@@ -508,13 +508,13 @@ export default function InventarioMaestroPage() {
 
                 <div className="sm:col-span-2 md:col-span-3 mt-2">
                   <label className="block text-sm font-medium text-slate-400 mb-1">Percances / Observaciones de Baja</label>
-                  <textarea value={formData.Percance} onChange={e => setFormData({...formData, Percance: e.target.value})} className="w-full bg-[#1a1e29] border border-slate-700 text-white rounded-lg p-2.5 focus:ring-2 focus:ring-[#01c38e] outline-none placeholder-slate-600" placeholder="Registrar cualquier golpe, accidente o motivo de baja..." rows={2} />
+                  <textarea value={formData.Percance} onChange={e => setFormData({...formData, Percance: e.target.value})} className="w-full bg-[#2D2D2D] border border-slate-700 text-white rounded-lg p-2.5 focus:ring-2 focus:ring-[#71717a] outline-none placeholder-slate-600" placeholder="Registrar cualquier golpe, accidente o motivo de baja..." rows={2} />
                 </div>
               </div>
 
-              <div className="mt-8 flex justify-end gap-3 pt-4 border-t border-[#132d46]">
-                <button type="button" onClick={() => setModalAbierto(false)} className="px-5 py-2.5 text-slate-300 font-medium hover:bg-[#132d46] rounded-lg transition-colors">Cancelar</button>
-                <button type="submit" className="px-5 py-2.5 text-white font-bold rounded-lg transition-colors shadow-lg bg-[#01c38e] hover:bg-[#01ac7c] shadow-[#01c38e]/20">
+              <div className="mt-8 flex justify-end gap-3 pt-4 border-t border-[#3B3A38]">
+                <button type="button" onClick={() => setModalAbierto(false)} className="px-5 py-2.5 text-slate-300 font-medium hover:bg-[#2D2D2D] rounded-lg transition-colors">Cancelar</button>
+                <button type="submit" className="px-5 py-2.5 text-white font-bold rounded-lg transition-colors shadow-lg bg-[#71717a] hover:bg-[#52525b] shadow-[#71717a]/20">
                   {modoEdicion ? 'Guardar Cambios' : 'Registrar Unidad'}
                 </button>
               </div>
@@ -528,7 +528,7 @@ export default function InventarioMaestroPage() {
           isOpen={modalRestaurar}
           type="confirm"
           title="¿Restaurar Unidad?"
-          message={<>Estás a punto de reactivar la unidad <strong className="text-[#01c38e] font-bold">{vehiculoARestaurar.Consecutivo}</strong>. Esta volverá a estar disponible en el Inventario Maestro como "Activa en flota".</>}
+          message={<>Estás a punto de reactivar la unidad <strong className="text-[#71717a] font-bold">{vehiculoARestaurar.Consecutivo}</strong>. Esta volverá a estar disponible en el Inventario Maestro como "Activa en flota".</>}
           onCancel={() => setModalRestaurar(false)}
           onConfirm={confirmarRestauracion}
           isProcessing={procesando}

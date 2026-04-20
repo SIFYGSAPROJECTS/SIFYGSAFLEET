@@ -47,11 +47,11 @@ export default async function SeguimientoPage() {
         
         {/* ENCABEZADO PREMIUM DARK */}
         <div className="mb-10">
-          <Link href="/dashboard" className="text-slate-400 hover:text-[#01c38e] flex items-center gap-2 text-sm mb-6 w-fit transition-colors font-medium">
+          <Link href="/dashboard" className="text-slate-400 hover:text-[#71717a] flex items-center gap-2 text-sm mb-6 w-fit transition-colors font-medium">
             <ArrowLeft size={16} /> Volver al Panel Maestro
           </Link>
-          <h1 className="text-3xl font-black text-white tracking-tight flex items-center gap-3">
-            <Activity className="text-[#01c38e]" size={32} /> Seguimiento de Unidades
+          <h1 className="text-3xl font-black text-white tracking-tight flex items-center gap-3 font-serif">
+            <Activity className="text-[#71717a]" size={32} /> Seguimiento de Unidades
           </h1>
           <p className="text-slate-400 mt-2 font-medium">
             {isAdmin 
@@ -62,7 +62,7 @@ export default async function SeguimientoPage() {
 
         {/* 3. Renderizado del Cliente */}
         {tickets.length === 0 ? (
-          <div className="bg-[#132d46] p-12 rounded-xl border border-[#132d46] text-center text-slate-500 font-bold shadow-2xl">
+          <div className="bg-[#2D2D2D] p-12 rounded-xl border border-[#3B3A38] text-center text-slate-500 font-bold shadow-2xl">
             NO HAY UNIDADES EN MANTENIMIENTO ACTUALMENTE 
           </div>
         ) : (

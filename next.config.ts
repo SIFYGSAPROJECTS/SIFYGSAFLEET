@@ -1,23 +1,5 @@
 import type { NextConfig } from "next";
 
-// 1. CSP Nivel "Fortaleza"
-// Quitamos 'data:' de script-src y nos aseguramos de que object-src sea 'none'
-const cspHeader = `
-    default-src 'self';
-    script-src 'self' 'unsafe-inline';
-    style-src 'self' 'unsafe-inline';
-    img-src 'self' blob: data: https://*.supabase.co https://*.easypanel.host;
-    font-src 'self' data:;
-    object-src 'self' https://*.easypanel.host;
-    base-uri 'self';
-    form-action 'self';
-    frame-ancestors 'none';
-    frame-src 'self' https://*.easypanel.host;
-    connect-src 'self' https://*.supabase.co https://*.easypanel.host;
-    block-all-mixed-content;
-    upgrade-insecure-requests;
-`.replace(/\s{2,}/g, ' ').trim();
-
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [

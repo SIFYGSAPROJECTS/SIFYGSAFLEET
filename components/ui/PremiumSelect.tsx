@@ -19,17 +19,17 @@ interface PremiumSelectProps {
   className?: string;
   /** Compact mode for inline/table usage */
   compact?: boolean;
-  /** Color accent: 'indigo' | 'purple' | 'cyan' | 'emerald' | 'red' | 'amber' */
-  accent?: 'indigo' | 'purple' | 'cyan' | 'emerald' | 'red' | 'amber';
+  /** Color accent: 'indigo' | 'purple' | 'cyan' | 'zinc' | 'red' | 'amber' */
+  accent?: 'indigo' | 'purple' | 'cyan' | 'zinc' | 'red' | 'amber';
   /** Open direction: 'down' (default) or 'up' */
   direction?: 'down' | 'up';
 }
 
 const accentMap = {
-  indigo:  { ring: 'border-[#01c38e]/50', bg: 'bg-[#01c38e]/15', text: 'text-[#01c38e]', hover: 'hover:bg-[#01c38e]/20', activeBg: 'bg-[#01c38e]/20', shadow: 'shadow-[0_10px_40px_-10px_rgba(99,102,241,0.4)]' },
+  indigo:  { ring: 'border-[#71717a]/50', bg: 'bg-[#71717a]/15', text: 'text-[#71717a]', hover: 'hover:bg-[#71717a]/20', activeBg: 'bg-[#71717a]/20', shadow: 'shadow-[0_10px_40px_-10px_rgba(99,102,241,0.4)]' },
   purple:  { ring: 'border-purple-500/50', bg: 'bg-purple-500/15', text: 'text-purple-400', hover: 'hover:bg-purple-500/20', activeBg: 'bg-purple-500/20', shadow: 'shadow-[0_10px_40px_-10px_rgba(168,85,247,0.4)]' },
   cyan:    { ring: 'border-cyan-500/50', bg: 'bg-cyan-500/15', text: 'text-cyan-400', hover: 'hover:bg-cyan-500/20', activeBg: 'bg-cyan-500/20', shadow: 'shadow-[0_10px_40px_-10px_rgba(6,182,212,0.4)]' },
-  emerald: { ring: 'border-emerald-500/50', bg: 'bg-emerald-500/15', text: 'text-emerald-400', hover: 'hover:bg-emerald-500/20', activeBg: 'bg-emerald-500/20', shadow: 'shadow-[0_10px_40px_-10px_rgba(16,185,129,0.4)]' },
+  zinc: { ring: 'border-zinc-500/50', bg: 'bg-zinc-500/15', text: 'text-zinc-400', hover: 'hover:bg-zinc-500/20', activeBg: 'bg-zinc-500/20', shadow: 'shadow-[0_10px_40px_-10px_rgba(16,185,129,0.4)]' },
   red:     { ring: 'border-red-500/50', bg: 'bg-red-500/15', text: 'text-red-400', hover: 'hover:bg-red-500/20', activeBg: 'bg-red-500/20', shadow: 'shadow-[0_10px_40px_-10px_rgba(239,68,68,0.4)]' },
   amber:   { ring: 'border-amber-500/50', bg: 'bg-amber-500/15', text: 'text-amber-400', hover: 'hover:bg-amber-500/20', activeBg: 'bg-amber-500/20', shadow: 'shadow-[0_10px_40px_-10px_rgba(245,158,11,0.4)]' },
 };
@@ -73,7 +73,7 @@ export default function PremiumSelect({ options, value, onChange, placeholder = 
       {/* Custom trigger */}
       <div
         onClick={() => { if (!disabled) setIsOpen(!isOpen); }}
-        className={`w-full ${compact ? 'px-2.5 py-1.5 text-xs' : 'p-3 text-sm'} bg-gradient-to-r from-[#1a1e29] to-[#132d46] border ${isOpen ? colors.ring : 'border-slate-700/80'} ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-slate-600'} rounded-lg font-bold flex justify-between items-center gap-2 transition-all duration-200 group`}
+        className={`w-full ${compact ? 'px-2.5 py-1.5 text-xs' : 'p-3 text-sm'} bg-[#21201d] border ${isOpen ? colors.ring : 'border-[#4A4948]'} ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-slate-600'} rounded-lg font-bold flex justify-between items-center gap-2 transition-all duration-200 group`}
       >
         <span className={selectedOption ? 'text-white' : 'text-slate-500'}>
           {selectedOption ? selectedOption.label : placeholder}
@@ -87,15 +87,15 @@ export default function PremiumSelect({ options, value, onChange, placeholder = 
       {/* Dropdown menu */}
       {isOpen && !disabled && (
         <div 
-          className={`absolute z-30 w-full ${direction === 'up' ? 'bottom-full mb-2' : 'mt-2'} bg-[#132d46] border border-slate-700/80 rounded-xl ${colors.shadow} max-h-56 overflow-y-auto scrollbar-thin animate-in fade-in ${direction === 'up' ? 'slide-in-from-bottom-2' : 'slide-in-from-top-2'} duration-200`}
+          className={`absolute z-30 w-full ${direction === 'up' ? 'bottom-full mb-2' : 'mt-2'} bg-[#2D2D2D] border border-[#4A4948] rounded-xl ${colors.shadow} max-h-56 overflow-y-auto scrollbar-thin animate-in fade-in ${direction === 'up' ? 'slide-in-from-bottom-2' : 'slide-in-from-top-2'} duration-200`}
         >
-          <div className="p-2 border-b border-[#132d46] bg-[#1a1e29]/50 sticky top-0 z-10">
+          <div className="p-2 border-b border-[#3B3A38] bg-[#2D2D2D]/50 sticky top-0 z-10">
             <span className="text-[10px] uppercase font-black text-slate-500 tracking-wider">{placeholder}</span>
           </div>
           {options.map(opt => (
             <div
               key={opt.value}
-              className={`px-4 ${compact ? 'py-2' : 'py-2.5'} text-xs font-semibold cursor-pointer transition-all border-b border-[#132d46]/50 last:border-none ${opt.disabled ? 'opacity-30 cursor-not-allowed' : `${colors.hover} hover:text-white`} ${value === opt.value ? `${colors.activeBg} ${colors.text}` : 'text-slate-300'}`}
+              className={`px-4 ${compact ? 'py-2' : 'py-2.5'} text-xs font-semibold cursor-pointer transition-all border-b border-[#3B3A38]/50 last:border-none ${opt.disabled ? 'opacity-30 cursor-not-allowed' : `${colors.hover} hover:text-white`} ${value === opt.value ? `${colors.activeBg} ${colors.text}` : 'text-slate-300'}`}
               onClick={() => {
                 if (!opt.disabled) {
                   onChange(opt.value);

@@ -19,7 +19,7 @@ export default function LogoutButton() {
   return (
     <button 
       onClick={handleLogout}
-      className="bg-[#132d46] hover:bg-red-600 border border-slate-700 hover:border-red-500 text-white px-3 py-1.5 rounded-lg text-xs flex items-center gap-2 transition-all"
+      className="bg-[#2D2D2D] hover:bg-red-600 border border-slate-700 hover:border-red-500 text-white px-3 py-1.5 rounded-lg text-xs flex items-center gap-2 transition-all"
     >
       <LogOut size={14} /> Salir
     </button>

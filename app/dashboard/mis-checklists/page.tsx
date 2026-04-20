@@ -46,7 +46,7 @@ export default function MisChecklistsPage() {
             {/* Enlace de regreso */}
             <Link 
               href="/dashboard" 
-              className="inline-flex items-center gap-2 text-slate-400 hover:text-[#01c38e] transition-colors font-medium text-sm mb-4"
+              className="inline-flex items-center gap-2 text-slate-400 hover:text-[#71717a] transition-colors font-medium text-sm mb-4"
             >
               <ArrowLeft className="w-4 h-4" /> 
               Volver al Panel Maestro
@@ -54,11 +54,11 @@ export default function MisChecklistsPage() {
 
             {/* Encabezado Principal integrado a la izquierda */}
             <div className="flex items-center gap-4">
-              <div className="bg-[#01c38e]/10 p-3 rounded-xl border border-[#01c38e]/20 shrink-0">
-                <FileText className="w-8 h-8 text-[#01c38e]" />
+              <div className="bg-[#71717a]/10 p-3 rounded-xl border border-[#71717a]/20 shrink-0">
+                <FileText className="w-8 h-8 text-[#71717a]" />
               </div>
               <div>
-                <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">Mis Checklists</h1>
+                <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight font-serif">Mis Checklists</h1>
                 <p className="text-slate-500 text-sm mt-1">Consulta el historial de revisiones de tu unidad a cargo.</p>
               </div>
             </div>
@@ -67,18 +67,18 @@ export default function MisChecklistsPage() {
           {/* BARRA DE ACCESOS DIRECTOS RESPONSIVA  */}
           <div className="w-full md:w-auto overflow-x-auto scrollbar-hide pb-3 pt-2 md:pt-0">
             <div className="flex w-full justify-start sm:justify-center md:justify-end min-w-max px-1">
-              <div className="inline-flex items-center bg-[#132d46] border border-[#132d46] rounded-full p-1.5 shadow-lg shrink-0 gap-1">
+              <div className="inline-flex items-center bg-[#2D2D2D] border border-[#3B3A38] rounded-full p-1.5 shadow-lg shrink-0 gap-1">
                 
-                <Link href="/dashboard/usuarios" className="px-4 py-1.5 text-xs font-bold rounded-full text-slate-500 hover:text-slate-300 hover:bg-[#132d46] transition-colors flex items-center gap-2 whitespace-nowrap">
+                <Link href="/dashboard/usuarios" className="px-4 py-1.5 text-xs font-bold rounded-full text-slate-500 hover:text-slate-300 hover:bg-[#2D2D2D] transition-colors flex items-center gap-2 whitespace-nowrap">
                   <User size={14} /> Usuarios
                 </Link>
 
-                <Link href="/dashboard/servicios" className="px-4 py-1.5 text-xs font-bold rounded-full text-slate-500 hover:text-slate-300 hover:bg-[#132d46] transition-colors flex items-center gap-2 whitespace-nowrap">
+                <Link href="/dashboard/servicios" className="px-4 py-1.5 text-xs font-bold rounded-full text-slate-500 hover:text-slate-300 hover:bg-[#2D2D2D] transition-colors flex items-center gap-2 whitespace-nowrap">
                   <Wrench size={14} /> Servicios
                 </Link>
 
                 {/* BOTÓN ACTIVO: CHECKLISTS */}
-                <div className="px-4 py-1.5 text-xs font-bold rounded-full bg-[#132d46] text-white cursor-default flex items-center gap-2 shadow-inner whitespace-nowrap">
+                <div className="px-4 py-1.5 text-xs font-bold rounded-full bg-[#2D2D2D] text-white cursor-default flex items-center gap-2 shadow-inner whitespace-nowrap">
                   <FileText size={14} className="text-cyan-500" /> Checklists
                 </div>
 
@@ -91,54 +91,54 @@ export default function MisChecklistsPage() {
         {/* ESTADO DE CARGA */}
         {cargando ? (
            <div className="flex flex-col items-center justify-center p-20 text-slate-500 gap-4">
-              <Loader2 className="w-8 h-8 animate-spin text-[#01c38e]" />
+              <Loader2 className="w-8 h-8 animate-spin text-[#71717a]" />
               <p className="font-bold tracking-widest uppercase text-xs">Buscando tu unidad asignada...</p>
            </div>
         ) : error ? (
            /* ESTADO DE ERROR */
            <div className="bg-red-500/10 border border-red-500/50 rounded-xl p-8 flex flex-col items-center text-center">
               <AlertCircle className="w-12 h-12 text-red-500 mb-4" />
-              <h2 className="text-white font-bold text-lg mb-2">Hubo un problema</h2>
+              <h2 className="text-white font-bold text-lg mb-2 font-serif">Hubo un problema</h2>
               <p className="text-red-400 text-sm">{error}</p>
            </div>
         ) : !unidadAsignada ? (
            /* ESTADO SIN UNIDAD */
-           <div className="bg-[#132d46] border-2 border-dashed border-[#132d46] rounded-3xl p-16 flex flex-col items-center text-center">
+           <div className="bg-[#2D2D2D] border-2 border-dashed border-[#3B3A38] rounded-3xl p-16 flex flex-col items-center text-center">
               <Car className="w-16 h-16 text-slate-700 mb-4 opacity-50" />
-              <h2 className="text-white font-bold text-xl mb-2">Sin unidad asignada</h2>
+              <h2 className="text-white font-bold text-xl mb-2 font-serif">Sin unidad asignada</h2>
               <p className="text-slate-500 text-sm max-w-md">
                 Actualmente no tienes ningún vehículo registrado a tu nombre en el sistema. Contacta al administrador si crees que es un error.
               </p>
            </div>
         ) : (
           /* ESTADO CON UNIDAD (Totalmente estático, sin animaciones de entrada) */
-          <div className="bg-[#132d46] border-x border-b border-[#132d46] rounded-xl shadow-2xl border-t-4 border-t-[#01c38e] overflow-hidden">
+          <div className="bg-[#2D2D2D] border-x border-b border-[#3B3A38] rounded-xl shadow-2xl border-t-4 border-t-[#71717a] overflow-hidden">
             <div className="p-8">
-              <h2 className="text-2xl font-bold text-white mb-8 flex items-center gap-3">
-                Unidad a tu cargo: <span className="text-[#01c38e]">{unidadAsignada.consecutivo}</span>
+              <h2 className="text-2xl font-bold text-white mb-8 flex items-center gap-3 font-serif">
+                Unidad a tu cargo: <span className="text-[#71717a]">{unidadAsignada.consecutivo}</span>
               </h2>
 
               {/* Grid de Información del Vehículo */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
-                <div className="bg-[#1a1e29] border border-[#132d46] p-5 rounded-xl group hover:border-[#01c38e]/30 transition-all">
-                  <span className="text-[10px] font-black text-[#01c38e] uppercase tracking-widest mb-2 flex items-center gap-2">
+                <div className="bg-[#2D2D2D] border border-[#3B3A38] p-5 rounded-xl group hover:border-[#71717a]/30 transition-all">
+                  <span className="text-[10px] font-black text-[#71717a] uppercase tracking-widest mb-2 flex items-center gap-2">
                     <Car size={12} /> Vehículo
                   </span>
-                  <p className="text-white font-bold text-lg truncate">{unidadAsignada.vehiculo}</p>
+                  <p className="text-white font-bold text-lg truncate font-serif">{unidadAsignada.vehiculo}</p>
                 </div>
 
-                <div className="bg-[#1a1e29] border border-[#132d46] p-5 rounded-xl group hover:border-[#01c38e]/30 transition-all">
-                  <span className="text-[10px] font-black text-[#01c38e] uppercase tracking-widest mb-2 flex items-center gap-2">
+                <div className="bg-[#2D2D2D] border border-[#3B3A38] p-5 rounded-xl group hover:border-[#71717a]/30 transition-all">
+                  <span className="text-[10px] font-black text-[#71717a] uppercase tracking-widest mb-2 flex items-center gap-2">
                     <Palette size={12} /> Color
                   </span>
-                  <p className="text-white font-bold text-lg truncate">{unidadAsignada.color || 'N/A'}</p>
+                  <p className="text-white font-bold text-lg truncate font-serif">{unidadAsignada.color || 'N/A'}</p>
                 </div>
 
-                <div className="bg-[#1a1e29] border border-[#132d46] p-5 rounded-xl group hover:border-[#01c38e]/30 transition-all">
-                  <span className="text-[10px] font-black text-[#01c38e] uppercase tracking-widest mb-2 flex items-center gap-2">
+                <div className="bg-[#2D2D2D] border border-[#3B3A38] p-5 rounded-xl group hover:border-[#71717a]/30 transition-all">
+                  <span className="text-[10px] font-black text-[#71717a] uppercase tracking-widest mb-2 flex items-center gap-2">
                     <CreditCard size={12} /> Placas
                   </span>
-                  <p className="text-white font-bold text-lg uppercase font-mono">{unidadAsignada.placas}</p>
+                  <p className="text-white font-bold text-lg uppercase font-mono font-serif">{unidadAsignada.placas}</p>
                 </div>
               </div>
 
@@ -146,16 +146,16 @@ export default function MisChecklistsPage() {
               {unidadAsignada.checklists && unidadAsignada.checklists.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {unidadAsignada.checklists.map((check: any) => (
-                    <div key={check.id} className="bg-[#1a1e29] border border-[#132d46] rounded-xl p-6 hover:border-[#01c38e]/50 transition-all group relative overflow-hidden flex flex-col justify-between h-full">
+                    <div key={check.id} className="bg-[#2D2D2D] border border-[#3B3A38] rounded-xl p-6 hover:border-[#71717a]/50 transition-all group relative overflow-hidden flex flex-col justify-between h-full">
                       {/* Efecto de luz hover (se mantiene porque da buena UX sin ser invasivo) */}
-                      <div className="absolute -right-4 -top-4 w-16 h-16 bg-[#01c38e]/5 rounded-full blur-2xl group-hover:bg-[#01c38e]/10 transition-all" />
+                      <div className="absolute -right-4 -top-4 w-16 h-16 bg-[#71717a]/5 rounded-full blur-2xl group-hover:bg-[#71717a]/10 transition-all" />
                       
                       <div className="flex items-start gap-4 mb-6">
                         <div className="bg-red-500/10 p-2.5 rounded-lg border border-red-500/20 shrink-0">
                           <FileText className="w-6 h-6 text-red-500" />
                         </div>
                         <div className="overflow-hidden">
-                          <h3 className="text-white font-bold text-sm leading-tight group-hover:text-[#01c38e] transition-colors truncate">
+                          <h3 className="text-white font-bold text-sm leading-tight group-hover:text-[#71717a] transition-colors truncate">
                             {check.titulo}
                           </h3>
                           <p className="text-[10px] text-slate-500 font-mono mt-1 uppercase">
@@ -170,7 +170,7 @@ export default function MisChecklistsPage() {
                         href={check.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="w-full bg-[#132d46] hover:bg-[#01c38e] text-slate-300 hover:text-white border border-[#132d46] hover:border-[#01c38e] py-2.5 rounded-lg text-xs font-black transition-all flex items-center justify-center gap-2 shadow-sm mt-auto"
+                        className="w-full bg-[#2D2D2D] hover:bg-[#71717a] text-slate-300 hover:text-white border border-[#3B3A38] hover:border-[#71717a] py-2.5 rounded-lg text-xs font-black transition-all flex items-center justify-center gap-2 shadow-sm mt-auto"
                       >
                         VER PDF <ExternalLink size={14} />
                       </a>
@@ -178,7 +178,7 @@ export default function MisChecklistsPage() {
                   ))}
                 </div>
               ) : (
-                <div className="text-center p-8 border border-dashed border-[#132d46] rounded-xl">
+                <div className="text-center p-8 border border-dashed border-[#3B3A38] rounded-xl">
                    <p className="text-slate-500 font-bold uppercase tracking-widest text-xs">Aún no hay checklists registrados para esta unidad</p>
                 </div>
               )}
