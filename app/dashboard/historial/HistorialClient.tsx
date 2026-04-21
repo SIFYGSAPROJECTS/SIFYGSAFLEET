@@ -119,10 +119,10 @@ export default function HistorialClient({ historial, rol }: Props) {
 
   const obtenerEstiloTipoServicio = (tipo: string | null) => {
     switch(tipo) {
-      case 'preventivo': return { bg: 'bg-blue-500/10', text: 'text-blue-400', border: 'border-blue-500/20', icon: <Calendar size={12} /> };
-      case 'correctivo': return { bg: 'bg-red-500/10', text: 'text-red-400', border: 'border-red-500/20', icon: <AlertTriangle size={12} /> };
-      case 'revision': return { bg: 'bg-amber-500/10', text: 'text-amber-400', border: 'border-amber-500/20', icon: <Search size={12} /> };
-      default: return { bg: 'bg-[#2D2D2D]', text: 'text-slate-400', border: 'border-slate-700', icon: <Wrench size={12} /> };
+      case 'preventivo': return { bg: 'bg-blue-50', text: 'text-blue-600', border: 'border-blue-200', icon: <Calendar size={12} /> };
+      case 'correctivo': return { bg: 'bg-red-50', text: 'text-red-600', border: 'border-red-200', icon: <AlertTriangle size={12} /> };
+      case 'revision': return { bg: 'bg-amber-50', text: 'text-amber-600', border: 'border-amber-200', icon: <Search size={12} /> };
+      default: return { bg: 'bg-stone-50', text: 'text-stone-500', border: 'border-stone-200', icon: <Wrench size={12} /> };
     }
   };
 
@@ -171,11 +171,11 @@ export default function HistorialClient({ historial, rol }: Props) {
       </div>
 
       {/* TABLA DE HISTORIAL */}
-      <div className="bg-[#2D2D2D] rounded-xl shadow-2xl border-x border-b border-[#3B3A38] border-t-4 border-t-[#71717a] overflow-hidden">
+      <div className="bg-[var(--bg-floating)] rounded-xl shadow-xl border border-[var(--border-cream)] border-t-4 border-t-[#71717a] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-[1000px] w-full text-left border-collapse">
             <thead>
-              <tr className="bg-[#2D2D2D] text-slate-300 text-xs uppercase tracking-wider border-b border-[#3B3A38]">
+              <tr className="bg-[var(--bg-screen)] text-[var(--text-muted)] text-xs uppercase tracking-wider border-b border-[var(--border-cream)]">
                 <th className="p-4 font-semibold">Folio</th>
                 <th className="p-4 font-semibold">Fecha</th>
                 <th className="p-4 font-semibold">Vehículo</th>
@@ -185,7 +185,7 @@ export default function HistorialClient({ historial, rol }: Props) {
                 <th className="p-4 font-semibold text-center">Acción</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#2D2D2D]">
+            <tbody className="">
               {historialFiltrado.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="p-12 text-center text-slate-500 italic">
@@ -200,20 +200,20 @@ export default function HistorialClient({ historial, rol }: Props) {
                     : 'S/N';
 
                   return (
-                  <tr key={ticket.Pk_folio_ticket} className="hover:bg-[#2D2D2D]/40 transition-colors group">
+                  <tr key={ticket.Pk_folio_ticket} className="hover:bg-[var(--bg-hover)] transition-colors group">
                     <td className="p-4 font-mono text-sm font-bold text-[#71717a]">#{ticket.Pk_folio_ticket}</td>
-                    <td className="p-4 text-sm text-slate-300 font-medium">
+                    <td className="p-4 text-sm text-[var(--text-muted)] font-medium">
                       {new Date(ticket.Fecha_Realizacion).toLocaleDateString('es-MX', { 
                         day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' 
                       })}
                     </td>
                     <td className="p-4 text-sm">
-                      <div className="text-white font-bold">{ticket.auto?.Marca} {ticket.auto?.Modelo}</div>
-                      <div className="text-xs text-slate-500 font-mono tracking-tighter uppercase">{ticket.auto?.Placa} | {ticket.auto?.Consecutivo}</div>
+                      <div className="text-[var(--text-main)] font-bold">{ticket.auto?.Marca} {ticket.auto?.Modelo}</div>
+                      <div className="text-xs text-[var(--text-muted)] font-mono tracking-tighter uppercase">{ticket.auto?.Placa} | {ticket.auto?.Consecutivo}</div>
                     </td>
                     <td className="p-4 text-sm">
-                      <div className="text-slate-200 font-medium">{ticket.empleado?.Nombre_Empleado} {ticket.empleado?.A_Paterno}</div>
-                      <div className="text-[10px] text-slate-500">{ticket.Email_Empleado}</div>
+                      <div className="text-[var(--text-main)] font-medium">{ticket.empleado?.Nombre_Empleado} {ticket.empleado?.A_Paterno}</div>
+                      <div className="text-[10px] text-[var(--text-muted)]">{ticket.Email_Empleado}</div>
                     </td>
                     <td className="p-4 text-center">
                       <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded border text-xs font-bold ${estiloServicio.bg} ${estiloServicio.text} ${estiloServicio.border}`}>
@@ -239,20 +239,20 @@ export default function HistorialClient({ historial, rol }: Props) {
                           </button>
                         </div>
                       ) : (
-                        <label className="cursor-pointer inline-flex items-center justify-center gap-1.5 text-slate-400 bg-[#2D2D2D] border border-slate-700 px-3 py-1.5 rounded-md text-xs font-bold hover:border-[#71717a] hover:text-[#71717a] transition-all shadow-sm">
+                        <label className="cursor-pointer inline-flex items-center justify-center gap-1.5 text-[var(--text-muted)] bg-white border border-[var(--border-cream)] px-3 py-1.5 rounded-md text-xs font-bold hover:border-[#71717a] hover:text-[#71717a] transition-all shadow-sm">
                           {subiendoFolio === ticket.Pk_folio_ticket ? <><Loader2 size={14} className="animate-spin" /> SUBIENDO</> : <><UploadCloud size={14} /> SUBIR</>}
                           <input type="file" accept=".pdf" className="hidden" onChange={(e) => handleSubirEvidencia(e, ticket.Pk_folio_ticket, ticket.auto?.Consecutivo || 'Unidad', false)} disabled={subiendoFolio === ticket.Pk_folio_ticket} />
                         </label>
                       )}
                     </td>
                     <td className="p-4 text-center">
-                      <Link href={`/dashboard/tickets/ver/${encodeURIComponent(ticket.Pk_folio_ticket)}`} className="inline-flex items-center justify-center gap-1.5 bg-[#2D2D2D] text-slate-300 border border-slate-700 px-3 py-1.5 rounded-md text-xs font-bold hover:bg-[#71717a] hover:text-white hover:border-[#71717a] transition-all shadow-sm">
+                      <Link href={`/dashboard/tickets/ver/${encodeURIComponent(ticket.Pk_folio_ticket)}`} className="inline-flex items-center justify-center gap-1.5 bg-white text-[var(--text-muted)] border border-[var(--border-cream)] px-3 py-1.5 rounded-md text-xs font-bold hover:bg-[#71717a] hover:text-white hover:border-[#71717a] transition-all shadow-sm">
                         <FileText size={14} /> TICKET
                       </Link>
                     </td>
                   </tr>
-                )}
-                )
+                  );
+                })
               )}
             </tbody>
           </table>

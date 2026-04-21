@@ -201,29 +201,29 @@ export default function InventarioMaestroPage() {
         <div className="flex flex-col lg:flex-row justify-between lg:items-center gap-5 mb-8">
           
           <div className="flex-1 flex flex-col items-start w-full text-left">
-            <Link href="/dashboard" className="inline-flex items-center gap-2 text-slate-400 hover:text-[#71717a] transition-colors mb-3 font-medium text-sm">
+            <Link href="/dashboard" className="inline-flex items-center gap-2 text-[var(--text-muted)] hover:text-[#71717a] transition-colors mb-3 font-medium text-sm">
               <ArrowLeft className="w-4 h-4" /> Volver al Panel Maestro
             </Link>
-            <h1 className="text-2xl sm:text-3xl font-black text-white flex items-center gap-3 font-serif">
+            <h1 className="text-2xl sm:text-3xl font-black text-[var(--text-main)] flex items-center gap-3 font-serif">
               <Car className="text-[#71717a] shrink-0" size={32} /> Gestión de Flota
             </h1>
-            <p className="text-slate-400 mt-2 font-medium text-sm sm:text-base">Centro de control unificado de unidades SIFYGSA</p>
+            <p className="text-[var(--text-muted)] mt-2 font-medium text-sm sm:text-base">Centro de control unificado de unidades SIFYGSA</p>
           </div>
 
           <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-end gap-4 w-full lg:w-auto">
             <div className="w-full sm:w-auto overflow-x-auto scrollbar-hide pb-3">
               <div className="flex w-full justify-start sm:justify-center lg:justify-end min-w-max px-1">
-                <div className="inline-flex items-center bg-[#2D2D2D] border border-[#3B3A38] rounded-full p-1.5 shadow-lg shrink-0 gap-1">
-                  <Link href="/dashboard/usuarios" className="px-4 py-1.5 text-xs font-bold rounded-full text-slate-500 hover:text-slate-300 hover:bg-[#2D2D2D] transition-colors flex items-center gap-2 whitespace-nowrap">
+                <div className="inline-flex items-center bg-[var(--bg-floating)] border border-[var(--border-cream)] rounded-full p-1.5 shadow-lg shrink-0 gap-1">
+                  <Link href="/dashboard/usuarios" className="px-4 py-1.5 text-xs font-bold rounded-full text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap">
                     <User size={14} /> Usuarios
                   </Link>
-                  <div className="px-4 py-1.5 text-xs font-bold rounded-full bg-[#2D2D2D] text-white cursor-default flex items-center gap-2 shadow-inner whitespace-nowrap">
+                  <div className="px-4 py-1.5 text-xs font-bold rounded-full bg-white text-[var(--text-main)] cursor-default flex items-center gap-2 shadow-sm border border-[var(--border-cream)] whitespace-nowrap">
                     <Car size={14} className="text-[#71717a]" /> Flota
                   </div>
-                  <Link href="/dashboard/servicios" className="px-4 py-1.5 text-xs font-bold rounded-full text-slate-500 hover:text-slate-300 hover:bg-[#2D2D2D] transition-colors flex items-center gap-2 whitespace-nowrap">
+                  <Link href="/dashboard/servicios" className="px-4 py-1.5 text-xs font-bold rounded-full text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap">
                     <Wrench size={14} /> Servicios
                   </Link>
-                  <Link href="/dashboard/checklists" className="px-4 py-1.5 text-xs font-bold rounded-full text-slate-500 hover:text-cyan-400 hover:bg-[#2D2D2D] transition-colors flex items-center gap-2 whitespace-nowrap">
+                  <Link href="/dashboard/checklists" className="px-4 py-1.5 text-xs font-bold rounded-full text-[var(--text-muted)] hover:text-cyan-600 hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap">
                     <FileText size={14} /> Checklists
                   </Link>
                 </div>
@@ -239,21 +239,21 @@ export default function InventarioMaestroPage() {
         </div>
 
         {/* FILTRO DE EMPRESAS */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end border-b border-[#3B3A38] mb-8 w-full gap-4 sm:gap-0">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end border-b border-[var(--border-cream)] mb-8 w-full gap-4 sm:gap-0">
           <div className="flex space-x-1 sm:space-x-4 overflow-x-auto scrollbar-hide w-full sm:w-auto">
             <button 
               onClick={() => setTabPrincipal('activos')}
-              className={`px-4 sm:px-6 py-3.5 font-bold text-sm sm:text-base flex items-center gap-2 border-b-2 transition-all whitespace-nowrap shrink-0 ${tabPrincipal === 'activos' ? 'border-[#71717a] text-[#71717a]' : 'border-transparent text-slate-500 hover:text-slate-300'}`}
+              className={`px-4 sm:px-6 py-3.5 font-bold text-sm sm:text-base flex items-center gap-2 border-b-2 transition-all whitespace-nowrap shrink-0 ${tabPrincipal === 'activos' ? 'border-[#71717a] text-[#71717a]' : 'border-transparent text-[var(--text-muted)] hover:text-[#71717a]'}`}
             >
               <ShieldCheck size={20} /> Flota Activa 
-              <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${tabPrincipal === 'activos' ? 'bg-[#71717a] text-white' : 'bg-[#2D2D2D] text-slate-400'}`}>{vehiculosActivosFlota.length}</span>
+              <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${tabPrincipal === 'activos' ? 'bg-[#71717a] text-white' : 'bg-stone-200 text-stone-600'}`}>{vehiculosActivosFlota.length}</span>
             </button>
             <button 
               onClick={() => setTabPrincipal('bajas')}
-              className={`px-4 sm:px-6 py-3.5 font-bold text-sm sm:text-base flex items-center gap-2 border-b-2 transition-all whitespace-nowrap shrink-0 ${tabPrincipal === 'bajas' ? 'border-red-500 text-red-500' : 'border-transparent text-slate-500 hover:text-slate-300'}`}
+              className={`px-4 sm:px-6 py-3.5 font-bold text-sm sm:text-base flex items-center gap-2 border-b-2 transition-all whitespace-nowrap shrink-0 ${tabPrincipal === 'bajas' ? 'border-red-500 text-red-500' : 'border-transparent text-[var(--text-muted)] hover:text-red-500'}`}
             >
               <Archive size={20} /> Unidades (bajas)
-              <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${tabPrincipal === 'bajas' ? 'bg-red-500 text-white' : 'bg-[#2D2D2D] text-slate-400'}`}>{vehiculosBaja.length}</span>
+              <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${tabPrincipal === 'bajas' ? 'bg-red-500 text-white' : 'bg-stone-200 text-stone-600'}`}>{vehiculosBaja.length}</span>
             </button>
           </div>
           
@@ -282,33 +282,33 @@ export default function InventarioMaestroPage() {
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 w-full">
             
             <div className="flex space-x-2 sm:space-x-4 mb-6 overflow-x-auto pb-2 scrollbar-hide w-full">
-              <button onClick={() => setFiltroActivo('Activo en flota')} className={`flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-lg font-bold transition-all text-sm sm:text-base whitespace-nowrap shrink-0 ${filtroActivo === 'Activo en flota' ? 'bg-[#71717a]/10 text-[#71717a] border border-[#71717a]/50 shadow-[0_0_15px_rgba(99,102,241,0.15)]' : 'text-slate-500 hover:text-slate-300 hover:bg-[#2D2D2D] border border-transparent'}`}>
+              <button onClick={() => setFiltroActivo('Activo en flota')} className={`flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-lg font-bold transition-all text-sm sm:text-base whitespace-nowrap shrink-0 ${filtroActivo === 'Activo en flota' ? 'bg-[#71717a]/10 text-[#71717a] border border-[#71717a]/50 shadow-md' : 'text-[var(--text-muted)] hover:text-[#71717a] hover:bg-[var(--bg-hover)] border border-transparent'}`}>
                 <ShieldCheck size={18} className="shrink-0" /> <span className="whitespace-nowrap">Operativos</span>
-                <span className={`ml-1 px-2 py-0.5 rounded-full text-[10px] ${filtroActivo === 'Activo en flota' ? 'bg-[#71717a] text-white' : 'bg-[#2D2D2D] text-slate-400'}`}>{totalActivos}</span>
+                <span className={`ml-1 px-2 py-0.5 rounded-full text-[10px] ${filtroActivo === 'Activo en flota' ? 'bg-[#71717a] text-white' : 'bg-stone-200 text-stone-600'}`}>{totalActivos}</span>
               </button>
               
-              <button onClick={() => setFiltroActivo('En Reparación')} className={`flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-lg font-bold transition-all text-sm sm:text-base whitespace-nowrap shrink-0 ${filtroActivo === 'En Reparación' ? 'bg-yellow-500/10 text-yellow-500 border border-yellow-500/50 shadow-[0_0_15px_rgba(234,179,8,0.15)]' : 'text-slate-500 hover:text-slate-300 hover:bg-[#2D2D2D] border border-transparent'}`}>
+              <button onClick={() => setFiltroActivo('En Reparación')} className={`flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-lg font-bold transition-all text-sm sm:text-base whitespace-nowrap shrink-0 ${filtroActivo === 'En Reparación' ? 'bg-yellow-500/10 text-yellow-600 border border-yellow-500/50 shadow-md' : 'text-[var(--text-muted)] hover:text-yellow-600 hover:bg-[var(--bg-hover)] border border-transparent'}`}>
                 <Wrench size={18} className="shrink-0" /> <span className="whitespace-nowrap">Taller</span>
-                <span className={`ml-1 px-2 py-0.5 rounded-full text-[10px] ${filtroActivo === 'En Reparación' ? 'bg-yellow-500 text-black font-extrabold' : 'bg-[#2D2D2D] text-slate-400'}`}>{totalReparacion}</span>
+                <span className={`ml-1 px-2 py-0.5 rounded-full text-[10px] ${filtroActivo === 'En Reparación' ? 'bg-yellow-500 text-white font-extrabold' : 'bg-stone-200 text-stone-600'}`}>{totalReparacion}</span>
               </button>
               
-              <button onClick={() => setFiltroActivo('Disponibles')} className={`flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-lg font-bold transition-all text-sm sm:text-base whitespace-nowrap shrink-0 ${filtroActivo === 'Disponibles' ? 'bg-zinc-500/10 text-zinc-500 border border-zinc-500/50 shadow-[0_0_15px_rgba(16,185,129,0.15)]' : 'text-slate-500 hover:text-slate-300 hover:bg-[#2D2D2D] border border-transparent'}`}>
+              <button onClick={() => setFiltroActivo('Disponibles')} className={`flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-lg font-bold transition-all text-sm sm:text-base whitespace-nowrap shrink-0 ${filtroActivo === 'Disponibles' ? 'bg-stone-500/10 text-stone-600 border border-stone-500/50 shadow-md' : 'text-[var(--text-muted)] hover:text-stone-600 hover:bg-[var(--bg-hover)] border border-transparent'}`}>
                 <CheckCircle2 size={18} className="shrink-0" /> <span className="whitespace-nowrap">Sin Asignar</span>
-                <span className={`ml-1 px-2 py-0.5 rounded-full text-[10px] ${filtroActivo === 'Disponibles' ? 'bg-zinc-500 text-black font-extrabold' : 'bg-[#2D2D2D] text-slate-400'}`}>{totalDisponibles}</span>
+                <span className={`ml-1 px-2 py-0.5 rounded-full text-[10px] ${filtroActivo === 'Disponibles' ? 'bg-stone-500 text-white font-extrabold' : 'bg-stone-200 text-stone-600'}`}>{totalDisponibles}</span>
               </button>
               
-              <button onClick={() => setFiltroActivo('Siniestrado')} className={`flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-lg font-bold transition-all text-sm sm:text-base whitespace-nowrap shrink-0 ${filtroActivo === 'Siniestrado' ? 'bg-red-500/10 text-red-500 border border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.15)]' : 'text-slate-500 hover:text-slate-300 hover:bg-[#2D2D2D] border border-transparent'}`}>
+              <button onClick={() => setFiltroActivo('Siniestrado')} className={`flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-lg font-bold transition-all text-sm sm:text-base whitespace-nowrap shrink-0 ${filtroActivo === 'Siniestrado' ? 'bg-red-500/10 text-red-600 border border-red-500/50 shadow-md' : 'text-[var(--text-muted)] hover:text-red-600 hover:bg-[var(--bg-hover)] border border-transparent'}`}>
                 <AlertTriangle size={18} className="shrink-0" /> <span className="whitespace-nowrap">Siniestrados</span>
-                <span className={`ml-1 px-2 py-0.5 rounded-full text-[10px] ${filtroActivo === 'Siniestrado' ? 'bg-red-500 text-white' : 'bg-[#2D2D2D] text-slate-400'}`}>{totalSiniestrados}</span>
+                <span className={`ml-1 px-2 py-0.5 rounded-full text-[10px] ${filtroActivo === 'Siniestrado' ? 'bg-red-500 text-white' : 'bg-stone-200 text-stone-600'}`}>{totalSiniestrados}</span>
               </button>
             </div>
 
             {/* TABLA DE ACTIVOS */}
-            <div className={`bg-[#2D2D2D] rounded-xl shadow-2xl border-x border-b border-t-4 overflow-hidden transition-colors duration-500 ${colorBordeTabla}`}>
+            <div className={`bg-[var(--bg-floating)] rounded-xl shadow-xl border border-[var(--border-cream)] border-t-4 overflow-hidden transition-colors duration-500 ${colorBordeTabla}`}>
               <div className="overflow-x-auto">
                 <table className="min-w-[1000px] w-full text-left border-collapse">
                   <thead>
-                    <tr className="bg-[#2D2D2D] border-b border-[#3B3A38] text-slate-300 text-sm uppercase tracking-wider">
+                    <tr className="bg-[var(--bg-screen)] border-b border-[var(--border-cream)] text-[var(--text-muted)] text-sm uppercase tracking-wider">
                       <th className="p-4 font-semibold">Unidad</th>
                       <th className="p-4 font-semibold">Vehículo</th>
                       <th className="p-4 font-semibold">Detalles Operativos</th>
@@ -317,46 +317,46 @@ export default function InventarioMaestroPage() {
                       <th className="p-4 font-semibold text-center">Acciones</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#2D2D2D]">
+                  <tbody className="">
                     {cargando ? (
-                      <tr><td colSpan={6} className="text-center p-8 text-slate-500 font-bold">Cargando flota activa... </td></tr>
+                      <tr><td colSpan={6} className="text-center p-8 text-[var(--text-muted)] font-bold">Cargando flota activa... </td></tr>
                     ) : vehiculosFiltrados.length === 0 ? (
-                      <tr><td colSpan={6} className="text-center p-8 text-slate-500">No hay vehículos en esta categoría.</td></tr>
+                      <tr><td colSpan={6} className="text-center p-8 text-[var(--text-muted)]">No hay vehículos en esta categoría.</td></tr>
                     ) : (
                       vehiculosFiltrados.map((auto) => (
-                        <tr key={auto.Consecutivo} className="hover:bg-[#2D2D2D]/50 transition-colors">
+                        <tr key={auto.Consecutivo} className="hover:bg-[var(--bg-hover)] transition-colors">
                           <td className="p-4">
-                            <div className="font-bold text-white text-lg flex items-center gap-2 font-serif">
+                            <div className="font-bold text-[var(--text-main)] text-lg flex items-center gap-2 font-serif">
                               {auto.Consecutivo}
                               {auto.Estatus_Operativo === 'Siniestrado' && <AlertTriangle size={16} className="text-red-500" />}
                               {auto.Estatus_Operativo === 'En Reparación' && <Wrench size={16} className="text-yellow-500" />}
                             </div>
                             <span className={`inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-bold border uppercase ${
                               auto.Estatus_Operativo === 'Activo en flota' ? 'bg-[#71717a]/10 text-[#71717a] border-[#71717a]/30' : 
-                              auto.Estatus_Operativo === 'En Reparación' ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/30' :
-                              'bg-red-900/30 text-red-400 border-red-800'
+                              auto.Estatus_Operativo === 'En Reparación' ? 'bg-yellow-500/10 text-yellow-600 border-yellow-500/30' :
+                              'bg-red-500/10 text-red-600 border-red-500/30'
                             }`}>{auto.Estatus_Operativo}</span>
                           </td>
                           <td className="p-4">
-                            <div className="font-medium text-white">
+                            <div className="font-medium text-[var(--text-main)]">
                               {auto.Linea ? `(${auto.Linea}) ` : ''}{auto.Marca} {auto.Modelo}
                             </div>
-                            <div className="text-sm text-slate-400">Placa: <span className="font-mono text-slate-300 font-bold">{auto.Placa}</span> • Color: {auto.Color}</div>
+                            <div className="text-sm text-[var(--text-muted)]">Placa: <span className="font-mono text-[var(--text-main)] font-bold">{auto.Placa}</span> • Color: {auto.Color}</div>
                           </td>
                           <td className="p-4">
-                            <div className="text-sm text-slate-400"><span className="font-semibold text-slate-500">VIN:</span> {auto.Numero_Serie || 'N/A'}</div>
-                            <div className="text-sm text-slate-400"><span className="font-semibold text-slate-500">Póliza:</span> {auto.Poliza_Seguro || 'N/A'}</div>
+                            <div className="text-sm text-[var(--text-muted)]"><span className="font-semibold text-stone-400">VIN:</span> {auto.Numero_Serie || 'N/A'}</div>
+                            <div className="text-sm text-[var(--text-muted)]"><span className="font-semibold text-stone-400">Póliza:</span> {auto.Poliza_Seguro || 'N/A'}</div>
                           </td>
                           <td className="p-4 text-center">
-                            <div className="font-mono font-bold text-white bg-[#2D2D2D]/50 py-1 px-2 rounded-lg border border-[#3B3A38] inline-block">
-                              {auto.Kilometraje_Actual ? `${Number(auto.Kilometraje_Actual).toLocaleString()} km` : <span className="text-slate-600 text-xs">Sin registro</span>}
+                            <div className="font-mono font-bold text-[var(--text-main)] bg-stone-100 py-1 px-2 rounded-lg border border-[var(--border-cream)] inline-block">
+                              {auto.Kilometraje_Actual ? `${Number(auto.Kilometraje_Actual).toLocaleString()} km` : <span className="text-stone-400 text-xs">Sin registro</span>}
                             </div>
                           </td>
                           <td className="p-4">
-                            <div className="text-sm font-medium text-slate-300">
-                              {auto.encargado ? `${auto.encargado.Nombre_Empleado} ${auto.encargado.A_Paterno}` : <span className="text-zinc-500 font-bold bg-zinc-500/10 px-2 py-0.5 rounded border border-zinc-500/30">Sin Asignar</span>}
+                            <div className="text-sm font-medium text-[var(--text-main)]">
+                              {auto.encargado ? `${auto.encargado.Nombre_Empleado} ${auto.encargado.A_Paterno}` : <span className="text-stone-400 font-bold bg-stone-100 px-2 py-0.5 rounded border border-[var(--border-cream)]">Sin Asignar</span>}
                             </div>
-                            <div className="text-xs text-slate-500 mt-0.5">
+                            <div className="text-xs text-[var(--text-muted)] mt-0.5">
                               {auto.Departamento ? `Depto: ${auto.Departamento}` : ''} {auto.Ubicacion ? `| Ubic: ${auto.Ubicacion}` : ''}
                             </div>
                           </td>
@@ -378,38 +378,38 @@ export default function InventarioMaestroPage() {
         {tabPrincipal === 'bajas' && (
           <div className="animate-in fade-in slide-in-from-right-8 duration-500">
             {cargando ? (
-              <div className="text-center p-12 text-slate-500 font-bold">Cargando archivo histórico...</div>
+              <div className="text-center p-12 text-[var(--text-muted)] font-bold">Cargando archivo histórico...</div>
             ) : vehiculosBaja.length === 0 ? (
-              <div className="bg-[#2D2D2D] p-12 rounded-xl border border-dashed border-red-500/50 text-center text-slate-400 font-bold shadow-[0_0_20px_rgba(239,68,68,0.05)]">
+              <div className="bg-[var(--bg-floating)] p-12 rounded-xl border border-dashed border-red-500/50 text-center text-[var(--text-muted)] font-bold shadow-md">
                 NO HAY VEHÍCULOS DADOS DE BAJA EN EL HISTORIAL
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {vehiculosBaja.map((vehiculo) => (
-                  <div key={vehiculo.Consecutivo} className="bg-[#2D2D2D] rounded-xl p-6 border-x border-b border-[#3B3A38] border-t-4 border-t-red-500 relative overflow-hidden group hover:border-red-500 hover:shadow-[0_0_15px_rgba(239,68,68,0.15)] transition-all duration-300">
+                  <div key={vehiculo.Consecutivo} className="bg-[var(--bg-floating)] rounded-xl p-6 border border-[var(--border-cream)] border-t-4 border-t-red-500 relative overflow-hidden group hover:shadow-xl transition-all duration-300">
                     <Archive className="absolute -right-8 -bottom-8 w-40 h-40 text-red-500/5 -rotate-12 group-hover:text-red-500/10 transition-colors" />
                     <div className="relative z-10">
                       <div className="flex justify-between items-start mb-4">
                         <div className="flex items-center gap-2">
-                          <span className="bg-red-500/10 text-red-500 px-3 py-1 rounded text-xs font-mono font-black tracking-widest border border-red-500/20">
+                          <span className="bg-red-500/10 text-red-600 px-3 py-1 rounded text-xs font-mono font-black tracking-widest border border-red-500/20">
                             {vehiculo.Consecutivo}
                           </span>
-                          <button onClick={() => abrirModalRestauracion(vehiculo)} title="Restaurar a Activo" className="text-slate-600 hover:text-zinc-400 hover:bg-zinc-400/10 p-1.5 rounded transition-all">
+                          <button onClick={() => abrirModalRestauracion(vehiculo)} title="Restaurar a Activo" className="text-stone-400 hover:text-stone-600 hover:bg-[var(--bg-hover)] p-1.5 rounded transition-all">
                             <RotateCcw size={16} />
                           </button>
                         </div>
-                        <span className="flex items-center gap-1 text-[10px] font-bold bg-red-900/30 text-red-400 px-2 py-1 rounded border border-red-800/50 uppercase tracking-widest">INACTIVO</span>
+                        <span className="flex items-center gap-1 text-[10px] font-bold bg-red-500/10 text-red-600 px-2 py-1 rounded border border-red-500/20 uppercase tracking-widest">INACTIVO</span>
                       </div>
-                      <h3 className="text-xl font-bold text-white mb-1 font-serif">
+                      <h3 className="text-xl font-bold text-[var(--text-main)] mb-1 font-serif">
                         {vehiculo.Linea ? `(${vehiculo.Linea}) ` : ''}{vehiculo.Marca} {vehiculo.Modelo}
                       </h3>
-                      <div className="flex gap-4 text-slate-400 font-mono text-sm mb-6 border-b border-[#3B3A38] pb-4">
-                        <p>Placa: <span className="text-slate-300">{vehiculo.Placa}</span></p>
-                          <p>Año/Obs: <span className="text-slate-300">Detalle Completo en Título</span></p>
+                      <div className="flex gap-4 text-[var(--text-muted)] font-mono text-sm mb-6 border-b border-[var(--border-cream)] pb-4">
+                        <p>Placa: <span className="text-[var(--text-main)]">{vehiculo.Placa}</span></p>
+                          <p>Año/Obs: <span className="text-[var(--text-main)]">Detalle Completo en Título</span></p>
                       </div>
-                      <div className="bg-red-950/30 border border-red-900/50 p-4 rounded-lg">
-                        <p className="text-[10px] font-bold text-red-400 flex items-center gap-2 uppercase tracking-wider mb-2"><AlertCircle size={14} /> Motivo de Baja</p>
-                        <p className="text-sm text-slate-300 italic">{vehiculo.Percance ? `"${vehiculo.Percance}"` : "Sin observaciones al momento de la baja."}</p>
+                      <div className="bg-red-50 p-4 rounded-lg border border-red-100">
+                        <p className="text-[10px] font-bold text-red-600 flex items-center gap-2 uppercase tracking-wider mb-2"><AlertCircle size={14} /> Motivo de Baja</p>
+                        <p className="text-sm text-red-800/70 italic">{vehiculo.Percance ? `"${vehiculo.Percance}"` : "Sin observaciones al momento de la baja."}</p>
                       </div>
                     </div>
                   </div>
@@ -424,73 +424,73 @@ export default function InventarioMaestroPage() {
       {/* MODALES COMPARTIDOS */}
       {modalAbierto && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
-          <div className="bg-[#2D2D2D] rounded-xl shadow-2xl border border-[#3B3A38] w-full max-w-4xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-            <div className="bg-[#2D2D2D] border-b border-[#71717a]/50 p-4 flex justify-between items-center text-white transition-colors">
+          <div className="bg-white rounded-xl shadow-2xl border border-[var(--border-cream)] w-full max-w-4xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="bg-stone-50 border-b border-[var(--border-cream)] p-4 flex justify-between items-center text-[var(--text-main)] transition-colors">
               <h2 className="text-lg font-bold flex items-center gap-2 font-serif">
                 {modoEdicion ? <Pencil className="w-5 h-5 text-[#71717a]" /> : <Car className="w-5 h-5 text-[#71717a]" />} 
-                <span className="text-[#71717a]">{modoEdicion ? `Editar Unidad ${formData.Consecutivo}` : 'Registrar Nueva Unidad'}</span>
+                <span className="text-[var(--text-main)]">{modoEdicion ? `Editar Unidad ${formData.Consecutivo}` : 'Registrar Nueva Unidad'}</span>
               </h2>
-              <button onClick={() => setModalAbierto(false)} className="text-slate-400 hover:text-red-500 transition-colors"><X className="w-6 h-6" /></button>
+              <button onClick={() => setModalAbierto(false)} className="text-stone-400 hover:text-red-500 transition-colors"><X className="w-6 h-6" /></button>
             </div>
             
-            <form onSubmit={guardarVehiculo} className="p-6 max-h-[80vh] overflow-y-auto">
-              <h3 className="text-xs font-bold text-[#71717a] uppercase tracking-wider mb-3 border-b border-[#3B3A38] pb-2">Datos Principales</h3>
+            <form onSubmit={guardarVehiculo} className="p-6 max-h-[80vh] overflow-y-auto bg-white">
+              <h3 className="text-xs font-black text-[#71717a] uppercase tracking-wider mb-3 border-b border-[var(--border-cream)] pb-2">Datos Principales</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-6">
                 <div>
-                  <label className="block text-sm font-medium text-slate-400 mb-1">Consecutivo *</label>
-                  <input required type="text" value={formData.Consecutivo} disabled={modoEdicion} onChange={e => setFormData({...formData, Consecutivo: e.target.value})} className={`w-full border border-slate-700 rounded-lg p-2.5 outline-none uppercase text-white ${modoEdicion ? 'bg-[#2D2D2D]/50 text-slate-500 cursor-not-allowed' : 'bg-[#2D2D2D] focus:ring-2 focus:ring-[#71717a] focus:border-[#71717a]'}`} placeholder="V-XX" />
+                  <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">Consecutivo *</label>
+                  <input required type="text" value={formData.Consecutivo} disabled={modoEdicion} onChange={e => setFormData({...formData, Consecutivo: e.target.value})} className={`w-full border border-[var(--border-cream)] rounded-lg p-2.5 outline-none uppercase text-[var(--text-main)] ${modoEdicion ? 'bg-stone-50 text-stone-400 cursor-not-allowed' : 'bg-white focus:ring-2 focus:ring-[#71717a] focus:border-[#71717a]'}`} placeholder="V-XX" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-400 mb-1">Placas *</label>
-                  <input required type="text" value={formData.Placa} onChange={e => setFormData({...formData, Placa: e.target.value})} className="w-full bg-[#2D2D2D] border border-slate-700 text-white rounded-lg p-2.5 focus:ring-2 focus:ring-[#71717a] outline-none uppercase placeholder-slate-600" placeholder="ABC-123" />
+                  <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">Placas *</label>
+                  <input required type="text" value={formData.Placa} onChange={e => setFormData({...formData, Placa: e.target.value})} className="w-full bg-white border border-[var(--border-cream)] text-[var(--text-main)] rounded-lg p-2.5 focus:ring-2 focus:ring-[#71717a] outline-none uppercase placeholder-stone-300" placeholder="ABC-123" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-400 mb-1">Color</label>
-                  <input type="text" value={formData.Color} onChange={e => setFormData({...formData, Color: e.target.value})} className="w-full bg-[#2D2D2D] border border-slate-700 text-white rounded-lg p-2.5 focus:ring-2 focus:ring-[#71717a] outline-none placeholder-slate-600" placeholder="Ej. Blanco" />
+                  <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">Color</label>
+                  <input type="text" value={formData.Color} onChange={e => setFormData({...formData, Color: e.target.value})} className="w-full bg-white border border-[var(--border-cream)] text-[var(--text-main)] rounded-lg p-2.5 focus:ring-2 focus:ring-[#71717a] outline-none placeholder-stone-300" placeholder="Ej. Blanco" />
                 </div>
               </div>
 
-              <h3 className="text-xs font-bold text-[#71717a] uppercase tracking-wider mb-3 border-b border-[#3B3A38] pb-2">Especificaciones</h3>
+              <h3 className="text-xs font-black text-[#71717a] uppercase tracking-wider mb-3 border-b border-[var(--border-cream)] pb-2">Especificaciones</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-6">
                 <div>
-                  <label className="block text-sm font-medium text-slate-400 mb-1">Marca</label>
-                  <input type="text" value={formData.Marca} onChange={e => setFormData({...formData, Marca: e.target.value})} className="w-full bg-[#2D2D2D] border border-slate-700 text-white rounded-lg p-2.5 focus:ring-2 focus:ring-[#71717a] outline-none placeholder-slate-600" placeholder="Ej. Ford" />
+                  <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">Marca</label>
+                  <input type="text" value={formData.Marca} onChange={e => setFormData({...formData, Marca: e.target.value})} className="w-full bg-white border border-[var(--border-cream)] text-[var(--text-main)] rounded-lg p-2.5 focus:ring-2 focus:ring-[#71717a] outline-none placeholder-stone-300" placeholder="Ej. Ford" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-400 mb-1">Año</label>
-                  <input type="text" value={formData.Modelo} onChange={e => setFormData({...formData, Modelo: e.target.value})} className="w-full bg-[#2D2D2D] border border-slate-700 text-white rounded-lg p-2.5 focus:ring-2 focus:ring-[#71717a] outline-none placeholder-slate-600" placeholder="Ej. 2024" />
+                  <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">Año</label>
+                  <input type="text" value={formData.Modelo} onChange={e => setFormData({...formData, Modelo: e.target.value})} className="w-full bg-white border border-[var(--border-cream)] text-[var(--text-main)] rounded-lg p-2.5 focus:ring-2 focus:ring-[#71717a] outline-none placeholder-stone-300" placeholder="Ej. 2024" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-400 mb-1">Línea / Modelo</label>
-                  <input type="text" value={formData.Linea} onChange={e => setFormData({...formData, Linea: e.target.value})} className="w-full bg-[#2D2D2D] border border-slate-700 text-white rounded-lg p-2.5 focus:ring-2 focus:ring-[#71717a] outline-none placeholder-slate-600" placeholder="Ej. Ranger" />
+                  <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">Línea / Modelo</label>
+                  <input type="text" value={formData.Linea} onChange={e => setFormData({...formData, Linea: e.target.value})} className="w-full bg-white border border-[var(--border-cream)] text-[var(--text-main)] rounded-lg p-2.5 focus:ring-2 focus:ring-[#71717a] outline-none placeholder-stone-300" placeholder="Ej. Ranger" />
                 </div>
                 <div className="sm:col-span-2">
-                  <label className="block text-sm font-medium text-slate-400 mb-1">Número de Serie (VIN)</label>
-                  <input type="text" value={formData.Numero_Serie} onChange={e => setFormData({...formData, Numero_Serie: e.target.value})} className="w-full bg-[#2D2D2D] border border-slate-700 text-white rounded-lg p-2.5 focus:ring-2 focus:ring-[#71717a] outline-none uppercase font-mono placeholder-slate-600" placeholder="1FD..." />
+                  <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">Número de Serie (VIN)</label>
+                  <input type="text" value={formData.Numero_Serie} onChange={e => setFormData({...formData, Numero_Serie: e.target.value})} className="w-full bg-white border border-[var(--border-cream)] text-[var(--text-main)] rounded-lg p-2.5 focus:ring-2 focus:ring-[#71717a] outline-none uppercase font-mono placeholder-stone-300" placeholder="1FD..." />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-400 mb-1">Póliza de Seguro</label>
-                  <input type="text" value={formData.Poliza_Seguro} onChange={e => setFormData({...formData, Poliza_Seguro: e.target.value})} className="w-full bg-[#2D2D2D] border border-slate-700 text-white rounded-lg p-2.5 focus:ring-2 focus:ring-[#71717a] outline-none uppercase placeholder-slate-600" />
+                  <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">Póliza de Seguro</label>
+                  <input type="text" value={formData.Poliza_Seguro} onChange={e => setFormData({...formData, Poliza_Seguro: e.target.value})} className="w-full bg-white border border-[var(--border-cream)] text-[var(--text-main)] rounded-lg p-2.5 focus:ring-2 focus:ring-[#71717a] outline-none uppercase placeholder-stone-300" />
                 </div>
               </div>
 
-              <h3 className="text-xs font-bold text-[#71717a] uppercase tracking-wider mb-3 border-b border-[#3B3A38] pb-2">Asignación y Operación</h3>
+              <h3 className="text-xs font-black text-[#71717a] uppercase tracking-wider mb-3 border-b border-[var(--border-cream)] pb-2">Asignación y Operación</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-400 mb-1">Correo del Usuario</label>
-                  <input type="email" value={formData.Email_encargado} onChange={e => setFormData({...formData, Email_encargado: e.target.value})} className="w-full bg-[#2D2D2D] border border-slate-700 text-white rounded-lg p-2.5 focus:ring-2 focus:ring-[#71717a] outline-none placeholder-slate-600" placeholder="correo@sifygsa.com" />
+                  <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">Correo del Usuario</label>
+                  <input type="email" value={formData.Email_encargado} onChange={e => setFormData({...formData, Email_encargado: e.target.value})} className="w-full bg-white border border-[var(--border-cream)] text-[var(--text-main)] rounded-lg p-2.5 focus:ring-2 focus:ring-[#71717a] outline-none placeholder-stone-300" placeholder="correo@sifygsa.com" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-400 mb-1">Departamento</label>
-                  <input type="text" value={formData.Departamento} onChange={e => setFormData({...formData, Departamento: e.target.value})} className="w-full bg-[#2D2D2D] border border-[#3B3A38] text-white rounded-lg p-2.5 focus:ring-2 focus:ring-[#71717a] outline-none placeholder-slate-600" placeholder="Ej. Ventas" />
+                  <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">Departamento</label>
+                  <input type="text" value={formData.Departamento} onChange={e => setFormData({...formData, Departamento: e.target.value})} className="w-full bg-white border border-[var(--border-cream)] text-[var(--text-main)] rounded-lg p-2.5 focus:ring-2 focus:ring-[#71717a] outline-none placeholder-stone-300" placeholder="Ej. Ventas" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-400 mb-1">Ubicación</label>
-                  <input type="text" value={formData.Ubicacion} onChange={e => setFormData({...formData, Ubicacion: e.target.value})} className="w-full bg-[#2D2D2D] border border-slate-700 text-white rounded-lg p-2.5 focus:ring-2 focus:ring-[#71717a] outline-none placeholder-slate-600" placeholder="Ej. Planta Sur" />
+                  <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">Ubicación</label>
+                  <input type="text" value={formData.Ubicacion} onChange={e => setFormData({...formData, Ubicacion: e.target.value})} className="w-full bg-white border border-[var(--border-cream)] text-[var(--text-main)] rounded-lg p-2.5 focus:ring-2 focus:ring-[#71717a] outline-none placeholder-stone-300" placeholder="Ej. Planta Sur" />
                 </div>
                 
                 <div className="sm:col-span-2 md:col-span-3">
-                  <label className="block text-sm font-medium text-slate-400 mb-1">Estatus Operativo de la Unidad</label>
+                  <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">Estatus Operativo de la Unidad</label>
                   <PremiumSelect
                     accent="indigo"
                     placeholder="Seleccionar estatus"
@@ -507,13 +507,13 @@ export default function InventarioMaestroPage() {
                 </div>
 
                 <div className="sm:col-span-2 md:col-span-3 mt-2">
-                  <label className="block text-sm font-medium text-slate-400 mb-1">Percances / Observaciones de Baja</label>
-                  <textarea value={formData.Percance} onChange={e => setFormData({...formData, Percance: e.target.value})} className="w-full bg-[#2D2D2D] border border-slate-700 text-white rounded-lg p-2.5 focus:ring-2 focus:ring-[#71717a] outline-none placeholder-slate-600" placeholder="Registrar cualquier golpe, accidente o motivo de baja..." rows={2} />
+                  <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">Percances / Observaciones de Baja</label>
+                  <textarea value={formData.Percance} onChange={e => setFormData({...formData, Percance: e.target.value})} className="w-full bg-white border border-[var(--border-cream)] text-[var(--text-main)] rounded-lg p-2.5 focus:ring-2 focus:ring-[#71717a] outline-none placeholder-stone-300" placeholder="Registrar cualquier golpe, accidente o motivo de baja..." rows={2} />
                 </div>
               </div>
 
-              <div className="mt-8 flex justify-end gap-3 pt-4 border-t border-[#3B3A38]">
-                <button type="button" onClick={() => setModalAbierto(false)} className="px-5 py-2.5 text-slate-300 font-medium hover:bg-[#2D2D2D] rounded-lg transition-colors">Cancelar</button>
+              <div className="mt-8 flex justify-end gap-3 pt-4 border-t border-[var(--border-cream)]">
+                <button type="button" onClick={() => setModalAbierto(false)} className="px-5 py-2.5 text-[var(--text-muted)] font-medium hover:bg-[var(--bg-hover)] rounded-lg transition-colors">Cancelar</button>
                 <button type="submit" className="px-5 py-2.5 text-white font-bold rounded-lg transition-colors shadow-lg bg-[#71717a] hover:bg-[#52525b] shadow-[#71717a]/20">
                   {modoEdicion ? 'Guardar Cambios' : 'Registrar Unidad'}
                 </button>

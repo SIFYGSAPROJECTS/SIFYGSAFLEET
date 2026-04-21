@@ -5,3 +5,17 @@
   --font-serif: var(--font-newsreader), "Newsreader", "Georgia", "Times New Roman", serif;
 }
 
+:root {
+  --bg-screen: #FDFBF7;
+  --bg-floating: #EAE4D9;
+  --text-main: #1D1C1A;
+  --text-muted: #57534E;
+  --bg-hover: #DCD3C1;
+  --border-cream: #E7E2DA;
+}
+
+body {
+  color: var(--text-main);
+  background-color: var(--bg-screen);
+}
+

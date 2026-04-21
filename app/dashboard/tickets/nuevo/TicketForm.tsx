@@ -146,18 +146,18 @@ export default function TicketForm({ vehiculos }: Props) {
   );
 
   return (
-    <form onSubmit={handleSubmit} className="bg-[#2D2D2D] p-8 rounded-xl shadow-[0_0_20px_rgba(99,102,241,0.1)] border border-[#3B3A38] border-t-4 border-t-[#71717a]">
+    <form onSubmit={handleSubmit} className="bg-[var(--bg-floating)] p-8 rounded-xl shadow-xl border border-[var(--border-cream)] border-t-4 border-t-[#71717a]">
       
       {/* 1. BUSCADOR INTELIGENTE DE VEHÍCULOS */}
       <div className="mb-6 relative" ref={dropdownRef}>
-        <label className="block text-sm font-medium text-slate-400 mb-2">Vehículo a intervenir</label>
+        <label className="block text-sm font-medium text-[var(--text-muted)] mb-2">Vehículo a intervenir</label>
         <div className="relative">
           <Search className="absolute left-3 top-3.5 text-slate-500" size={18} />
           <input 
             type="text"
             required={!formData.consecutivo}
             placeholder="Buscar Automóvil por consecutivo"
-            className="w-full p-3 pl-10 pr-10 bg-[#21201d] border border-[#4A4948] text-white rounded-lg focus:ring-2 focus:ring-[#71717a] outline-none transition-all"
+            className="w-full p-3 pl-10 pr-10 bg-white border border-[var(--border-cream)] text-[var(--text-main)] rounded-lg focus:ring-2 focus:ring-[#71717a] outline-none transition-all"
             value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value);
@@ -172,12 +172,12 @@ export default function TicketForm({ vehiculos }: Props) {
 
         {/* Caja de sugerencias */}
         {isDropdownOpen && (
-          <div className="absolute z-10 w-full mt-1 bg-[#2D2D2D] border border-slate-700 rounded-lg shadow-xl max-h-60 overflow-y-auto">
+          <div className="absolute z-10 w-full mt-1 bg-[var(--bg-floating)] border border-[var(--border-cream)] rounded-lg shadow-xl max-h-60 overflow-y-auto">
             {vehiculosFiltrados.length > 0 ? (
               vehiculosFiltrados.map((auto) => (
                 <div 
                   key={auto.Consecutivo}
-                  className="p-3 hover:bg-[#2D2D2D] cursor-pointer text-white text-sm border-b border-[#3B3A38] last:border-0 transition-colors"
+                  className="p-3 hover:bg-[var(--bg-screen)] cursor-pointer text-[var(--text-main)] text-sm border-b border-[var(--border-cream)] last:border-0 transition-colors"
                   onClick={() => {
                     setFormData({...formData, consecutivo: auto.Consecutivo});
                     setSearchTerm(`(${auto.Consecutivo}) - ${auto.Marca} ${auto.Modelo}`);
@@ -196,7 +196,7 @@ export default function TicketForm({ vehiculos }: Props) {
 
       {/* 2. TIPO DE SERVICIO (Nuevo) */}
       <div className="mb-6">
-        <label className="block text-sm font-medium text-slate-400 mb-2">Tipo de Servicio</label>
+        <label className="block text-sm font-medium text-[var(--text-muted)] mb-2">Tipo de Servicio</label>
         <PremiumSelect
           required
           placeholder="-- Selecciona el tipo de servicio --"
@@ -212,12 +212,12 @@ export default function TicketForm({ vehiculos }: Props) {
       </div>
 
       {/* 3. KILOMETRAJE ACTUAL Y TIER */}
-      <div className="mb-6 animate-in fade-in slide-in-from-top-4 duration-300 bg-[#2D2D2D]/50 p-4 rounded-xl border border-[#3B3A38]/80">
+      <div className="mb-6 animate-in fade-in slide-in-from-top-4 duration-300 bg-[var(--bg-screen)]/50 p-4 rounded-xl border border-[var(--border-cream)]">
         <div className="flex justify-between items-center mb-3">
-          <label className="block text-sm font-medium text-slate-300">Registro de Kilometraje</label>
+          <label className="block text-sm font-medium text-[var(--text-muted)]">Registro de Kilometraje</label>
           <div className="flex items-center gap-2">
             {minKm > 0 ? (
-              <span className="px-2.5 py-1 bg-zinc-500/10 border border-zinc-500/30 rounded-md text-[10px] font-bold text-zinc-400 uppercase tracking-widest shadow-sm">
+              <span className="px-2.5 py-1 bg-[var(--bg-hover)] border border-[var(--border-cream)] rounded-md text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest shadow-sm">
                 Último: {minKm.toLocaleString()} km
               </span>
             ) : formData.consecutivo ? (
@@ -236,10 +236,10 @@ export default function TicketForm({ vehiculos }: Props) {
               type="number" 
               required
               min={minKm}
-              className={`w-full p-3 pl-16 bg-[#2D2D2D] border rounded-lg outline-none transition-all focus:shadow-[0_0_10px_rgba(99,102,241,0.2)] ${
+              className={`w-full p-3 pl-16 bg-white border rounded-lg outline-none transition-all focus:shadow-md ${
                 formData.kilometraje && Number(formData.kilometraje) < minKm 
                   ? 'border-red-500 focus:ring-red-500 text-red-500' 
-                  : 'border-slate-700/80 focus:ring-[#71717a] text-white'
+                  : 'border-[var(--border-cream)] focus:ring-[#71717a] text-[var(--text-main)]'
               }`}
               placeholder={minKm > 0 ? `+${minKm}` : "Ej: 15300"}
               value={formData.kilometraje}
@@ -271,7 +271,7 @@ export default function TicketForm({ vehiculos }: Props) {
                   type="text" 
                   autoFocus
                   placeholder="Ej: Servicio de 210,000km"
-                  className="w-full p-3 pl-4 bg-[#21201d] border border-[#4A4948] text-[#EAE6E0] rounded-lg focus:ring-2 focus:ring-[#71717a] outline-none transition-all text-xs font-bold placeholder-slate-500"
+                  className="w-full p-3 pl-4 bg-white border border-[var(--border-cream)] text-[var(--text-main)] rounded-lg focus:ring-2 focus:ring-[#71717a] outline-none transition-all text-xs font-bold placeholder-stone-400"
                   value={customTierText}
                   onChange={(e) => setCustomTierText(e.target.value)}
                   required
@@ -290,7 +290,7 @@ export default function TicketForm({ vehiculos }: Props) {
               </div>
             ) : (
               <div 
-                className="w-full p-3 bg-[#21201d] border border-[#4A4948] hover:border-[#71717a] text-[#EAE6E0] font-bold rounded-lg cursor-pointer transition-all text-xs flex justify-between items-center group"
+                className="w-full p-3 bg-white border border-[var(--border-cream)] hover:border-[#71717a] text-[var(--text-main)] font-bold rounded-lg cursor-pointer transition-all text-xs flex justify-between items-center group"
                 onClick={() => setIsTierDropdownOpen(!isTierDropdownOpen)}
               >
                 <span>
@@ -304,14 +304,14 @@ export default function TicketForm({ vehiculos }: Props) {
 
             {/* Menú Desplegable Personalizado */}
             {isTierDropdownOpen && selectedTier !== 'MANUAL' && (
-              <div className="absolute z-20 w-full mt-2 bg-[#1A1918] border border-[#3B3A38] rounded-xl shadow-2xl max-h-56 overflow-y-auto scrollbar-thin scrollbar-thumb-[#71717a]/50 scrollbar-track-[#2D2D2D] animate-in fade-in slide-in-from-top-2">
-                <div className="p-2 border-b border-[#3B3A38] bg-[#1A1918] sticky top-0 z-10">
-                  <span className="text-[10px] uppercase font-black text-[#9E9B95] tracking-wider">Selecciona Servicio</span>
+              <div className="absolute z-20 w-full mt-2 bg-[var(--bg-floating)] border border-[var(--border-cream)] rounded-xl shadow-2xl max-h-56 overflow-y-auto scrollbar-thin scrollbar-thumb-stone-200 scrollbar-track-transparent animate-in fade-in slide-in-from-top-2">
+                <div className="p-2 border-b border-[var(--border-cream)] bg-[var(--bg-screen)] sticky top-0 z-10">
+                  <span className="text-[10px] uppercase font-black text-stone-400 tracking-wider">Selecciona Servicio</span>
                 </div>
                 {Array.from({ length: 40 }, (_, i) => (i + 1) * 5000).map(tier => (
                   <div 
                     key={tier} 
-                    className={`px-4 py-3 text-xs font-semibold cursor-pointer transition-all border-b border-[#3B3A38] hover:bg-[#3B3A38] hover:text-[#EAE6E0] ${selectedTier === tier.toString() ? 'bg-[#3B3A38] text-[#EAE6E0]' : 'text-slate-400'}`}
+                    className={`px-4 py-3 text-xs font-semibold cursor-pointer transition-all border-b border-[var(--border-cream)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-main)] ${selectedTier === tier.toString() ? 'bg-[var(--bg-hover)] text-[var(--text-main)]' : 'text-[var(--text-muted)]'}`}
                     onClick={() => {
                       setSelectedTier(tier.toString());
                       setIsTierDropdownOpen(false);
@@ -321,7 +321,7 @@ export default function TicketForm({ vehiculos }: Props) {
                   </div>
                 ))}
                 <div 
-                  className="px-4 py-3 text-xs font-bold cursor-pointer text-[#EAE6E0] hover:bg-[#3B3A38] transition-all sticky bottom-0 bg-[#2D2D2D] border-t border-[#3B3A38]"
+                  className="px-4 py-3 text-xs font-bold cursor-pointer text-[var(--text-main)] hover:bg-[var(--bg-hover)] transition-all sticky bottom-0 bg-[var(--bg-floating)] border-t border-[var(--border-cream)]"
                   onClick={() => {
                     setSelectedTier('MANUAL');
                     setIsTierDropdownOpen(false);
@@ -344,7 +344,7 @@ export default function TicketForm({ vehiculos }: Props) {
       {/* 4. DESCRIPCIÓN */}
       <div className="mb-8">
         <div className="flex justify-between items-center mb-2">
-          <label className="block text-sm font-medium text-slate-400">Detalles del Mantenimiento</label>
+          <label className="block text-sm font-medium text-[var(--text-muted)]">Detalles del Mantenimiento</label>
           <span className={`text-[10px] font-black uppercase tracking-widest ${formData.descripcion.length >= 240 ? 'text-[#71717a]' : 'text-slate-600'}`}>
             {formData.descripcion.length} / 255
           </span>
@@ -353,7 +353,7 @@ export default function TicketForm({ vehiculos }: Props) {
           required
           maxLength={255}
           rows={4}
-          className="w-full p-3 bg-[#21201d] border border-[#4A4948] text-white rounded-lg focus:ring-2 focus:ring-[#71717a] outline-none placeholder-slate-600 transition-all resize-none"
+          className="w-full p-3 bg-white border border-[var(--border-cream)] text-[var(--text-main)] rounded-lg focus:ring-2 focus:ring-[#71717a] outline-none placeholder-stone-400 transition-all resize-none"
           placeholder="Describa los trabajos o fallas reportadas..."
           value={formData.descripcion}
           onChange={(e) => setFormData({...formData, descripcion: e.target.value})}

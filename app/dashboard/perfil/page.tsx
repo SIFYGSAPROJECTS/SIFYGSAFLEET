@@ -70,13 +70,13 @@ export default function MiPerfilPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         
         {/* TARJETA DE INFORMACIÓN */}
-        <div className="md:col-span-1 bg-[#2D2D2D] border border-[#3B3A38] rounded-2xl p-6 shadow-xl h-fit">
+        <div className="md:col-span-1 bg-[var(--bg-floating)] border border-[var(--border-cream)] rounded-2xl p-6 shadow-xl h-fit">
           <div className="flex flex-col items-center text-center">
-            <div className="bg-[#2D2D2D] p-5 rounded-full border border-[#3B3A38] shadow-inner mb-4">
+            <div className="bg-[var(--bg-floating)] p-5 rounded-full border border-[var(--border-cream)] shadow-inner mb-4">
               <User className="w-12 h-12 text-[#71717a]" />
             </div>
-            <h2 className="text-xl font-black text-white mb-1 font-serif">{usuarioInfo.nombre || 'Cargando...'}</h2>
-            <p className="text-slate-400 text-sm font-mono break-all bg-[#2D2D2D] px-3 py-1 rounded-lg border border-[#3B3A38]">
+            <h2 className="text-xl font-black text-[var(--text-main)] mb-1 font-serif">{usuarioInfo.nombre || 'Cargando...'}</h2>
+            <p className="text-[var(--text-muted)] text-sm font-mono break-all bg-[var(--bg-floating)] px-3 py-1 rounded-lg border border-[var(--border-cream)]">
               {usuarioInfo.email || 'cargando@email.com'}
             </p>
             <span className="mt-6 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest border bg-[#71717a]/10 text-[#71717a] border-[#71717a]/30">
@@ -86,14 +86,14 @@ export default function MiPerfilPage() {
         </div>
 
         {/* FORMULARIO DE SEGURIDAD */}
-        <div className="md:col-span-2 bg-[#2D2D2D] border border-[#3B3A38] rounded-2xl p-8 shadow-xl border-t-4 border-t-[#71717a]">
-          <div className="flex items-center gap-3 mb-6 pb-4 border-b border-[#3B3A38]">
+        <div className="md:col-span-2 bg-[var(--bg-floating)] border border-[var(--border-cream)] rounded-2xl p-8 shadow-xl border-t-4 border-t-[#71717a]">
+          <div className="flex items-center gap-3 mb-6 pb-4 border-b border-[var(--border-cream)]">
             <div className="bg-[#71717a]/10 p-2 rounded-lg">
               <Lock className="text-[#71717a]" size={24} /> 
             </div>
             <div>
-              <h3 className="text-xl font-bold text-white font-serif">Actualizar Contraseña</h3>
-              <p className="text-sm text-slate-400">Por seguridad, usa una contraseña difícil de adivinar.</p>
+              <h3 className="text-xl font-bold text-[var(--text-main)] font-serif">Actualizar Contraseña</h3>
+              <p className="text-sm text-[var(--text-muted)]">Por seguridad, usa una contraseña difícil de adivinar.</p>
             </div>
           </div>
           
@@ -102,10 +102,10 @@ export default function MiPerfilPage() {
               
               {/* NUEVA CONTRASEÑA */}
               <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Nueva Contraseña</label>
+                <label className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest">Nueva Contraseña</label>
                 <div className="relative">
-                  <input type={mostrarNueva ? "text" : "password"} placeholder="Mínimo 6 caracteres" className="w-full bg-[#21201d] border border-[#4A4948] rounded-lg pl-4 pr-12 py-3 text-white focus:border-[#71717a] outline-none transition-all font-mono" value={nuevaPassword} onChange={(e) => setNuevaPassword(e.target.value)} />
-                  <button type="button" onClick={() => setMostrarNueva(!mostrarNueva)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-[#71717a] transition-colors">
+                  <input type={mostrarNueva ? "text" : "password"} placeholder="Mínimo 6 caracteres" className="w-full bg-white border border-[var(--border-cream)] rounded-lg pl-4 pr-12 py-3 text-[var(--text-main)] focus:border-[#71717a] outline-none transition-all font-mono" value={nuevaPassword} onChange={(e) => setNuevaPassword(e.target.value)} />
+                  <button type="button" onClick={() => setMostrarNueva(!mostrarNueva)} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[#71717a] transition-colors">
                     {mostrarNueva ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
@@ -113,10 +113,10 @@ export default function MiPerfilPage() {
 
               {/* CONFIRMAR CONTRASEÑA */}
               <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Confirmar Contraseña</label>
+                <label className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest">Confirmar Contraseña</label>
                 <div className="relative">
-                  <input type={mostrarConfirmar ? "text" : "password"} placeholder="Repite tu contraseña" className="w-full bg-[#21201d] border border-[#4A4948] rounded-lg pl-4 pr-12 py-3 text-white focus:border-[#71717a] outline-none transition-all font-mono" value={confirmarPassword} onChange={(e) => setConfirmarPassword(e.target.value)} />
-                  <button type="button" onClick={() => setMostrarConfirmar(!mostrarConfirmar)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-[#71717a] transition-colors">
+                  <input type={mostrarConfirmar ? "text" : "password"} placeholder="Repite tu contraseña" className="w-full bg-white border border-[var(--border-cream)] rounded-lg pl-4 pr-12 py-3 text-[var(--text-main)] focus:border-[#71717a] outline-none transition-all font-mono" value={confirmarPassword} onChange={(e) => setConfirmarPassword(e.target.value)} />
+                  <button type="button" onClick={() => setMostrarConfirmar(!mostrarConfirmar)} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[#71717a] transition-colors">
                     {mostrarConfirmar ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
@@ -131,7 +131,7 @@ export default function MiPerfilPage() {
               </div>
             )}
 
-            <button type="submit" disabled={guardando || !nuevaPassword || !confirmarPassword} className="bg-[#71717a] hover:bg-[#52525b] disabled:bg-[#2D2D2D] disabled:text-slate-500 text-white px-6 py-4 rounded-lg flex items-center justify-center gap-2 font-bold transition-all shadow-lg mt-2">
+            <button type="submit" disabled={guardando || !nuevaPassword || !confirmarPassword} className="bg-[#71717a] hover:bg-[#52525b] disabled:bg-[var(--bg-floating)] disabled:text-[var(--text-muted)] text-white px-6 py-4 rounded-lg flex items-center justify-center gap-2 font-bold transition-all shadow-lg mt-2">
               {guardando ? <RefreshCcw size={20} className="animate-spin" /> : <Save size={20} />}
               {guardando ? 'Procesando...' : 'Guardar Nueva Contraseña'}
             </button>

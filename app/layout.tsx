@@ -41,7 +41,7 @@ export default async function RootLayout({
         <meta property="csp-nonce" content={nonce} />
       </head>
       <body
-        className={`${inter.variable} ${newsreader.variable} ${geistMono.variable} font-sans antialiased bg-[#21201d] text-[#EAE6E0] min-h-screen bg-fixed`}
+        className={`${inter.variable} ${newsreader.variable} ${geistMono.variable} font-sans antialiased bg-[var(--bg-screen)] text-[var(--text-main)] min-h-screen bg-fixed`}
       >
         {children}
       </body>

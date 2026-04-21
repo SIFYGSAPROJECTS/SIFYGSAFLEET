@@ -21,18 +21,18 @@ export default async function Dashboard() {
     <div className="min-h-screen bg-transparent">
       
       {/* NAVBAR */}
-      <nav className="bg-transparent text-white p-4 sticky top-0 z-10 pt-6">
+      <nav className="bg-transparent text-[var(--text-main)] p-4 sticky top-0 z-10 pt-6">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex items-center space-x-2">
             <div className="bg-[#71717a] p-1.5 rounded-lg shadow-lg shadow-[#71717a]/20">
               <Car className="text-white h-5 w-5" />
             </div>
-            <span className="font-serif font-medium text-xl tracking-wide">SIFYGSA <span className="text-[#71717a] font-serif">Fleet</span></span>
+            <span className="font-serif font-medium text-xl tracking-wide text-[var(--text-main)]">SIFYGSA <span className="text-[#71717a] font-serif">Fleet</span></span>
           </div>
           <div className="flex items-center space-x-4">
             <div className="text-right">
-              <p className="text-sm font-medium">{userName}</p>
-              <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold ${userRole === 'ADMIN' ? 'bg-[#71717a]' : 'bg-slate-700 text-slate-300'}`}>
+              <p className="text-sm font-medium text-[var(--text-main)]">{userName}</p>
+              <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold ${userRole === 'ADMIN' ? 'bg-[#71717a] text-white' : 'bg-stone-200 text-stone-600'}`}>
                 {userRole === 'ADMIN' ? 'ADMINISTRADOR' : 'EMPLEADO'}
               </span>
             </div>
@@ -46,10 +46,10 @@ export default async function Dashboard() {
         {/* ENCABEZADO CON BOTÓN DE ACCIÓN RÁPIDA */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div className="text-left">
-            <h1 className="text-3xl font-serif font-medium text-white tracking-tight">
+            <h1 className="text-3xl font-serif font-medium text-[var(--text-main)] tracking-tight">
               {userRole === 'ADMIN' ? 'Panel de Control' : 'Centro de Servicios'}
             </h1>
-            <p className="text-slate-400">Gestión de flota SIFYGSA</p>
+            <p className="text-[var(--text-muted)]">Gestión de flota SIFYGSA</p>
           </div>
 
           {/* BOTÓN "NUEVO MANTENIMIENTO" (Solo para clientes/empleados) */}

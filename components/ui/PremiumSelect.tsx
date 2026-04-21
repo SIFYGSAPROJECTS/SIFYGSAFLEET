@@ -26,12 +26,12 @@ interface PremiumSelectProps {
 }
 
 const accentMap = {
-  indigo:  { ring: 'border-[#71717a]/50', bg: 'bg-[#71717a]/15', text: 'text-[#71717a]', hover: 'hover:bg-[#71717a]/20', activeBg: 'bg-[#71717a]/20', shadow: 'shadow-[0_10px_40px_-10px_rgba(99,102,241,0.4)]' },
-  purple:  { ring: 'border-purple-500/50', bg: 'bg-purple-500/15', text: 'text-purple-400', hover: 'hover:bg-purple-500/20', activeBg: 'bg-purple-500/20', shadow: 'shadow-[0_10px_40px_-10px_rgba(168,85,247,0.4)]' },
-  cyan:    { ring: 'border-cyan-500/50', bg: 'bg-cyan-500/15', text: 'text-cyan-400', hover: 'hover:bg-cyan-500/20', activeBg: 'bg-cyan-500/20', shadow: 'shadow-[0_10px_40px_-10px_rgba(6,182,212,0.4)]' },
-  zinc: { ring: 'border-zinc-500/50', bg: 'bg-zinc-500/15', text: 'text-zinc-400', hover: 'hover:bg-zinc-500/20', activeBg: 'bg-zinc-500/20', shadow: 'shadow-[0_10px_40px_-10px_rgba(16,185,129,0.4)]' },
-  red:     { ring: 'border-red-500/50', bg: 'bg-red-500/15', text: 'text-red-400', hover: 'hover:bg-red-500/20', activeBg: 'bg-red-500/20', shadow: 'shadow-[0_10px_40px_-10px_rgba(239,68,68,0.4)]' },
-  amber:   { ring: 'border-amber-500/50', bg: 'bg-amber-500/15', text: 'text-amber-400', hover: 'hover:bg-amber-500/20', activeBg: 'bg-amber-500/20', shadow: 'shadow-[0_10px_40px_-10px_rgba(245,158,11,0.4)]' },
+  indigo:  { ring: 'border-[#71717a]/50', bg: 'bg-[#71717a]/15', text: 'text-[#71717a]', hover: 'hover:bg-[var(--bg-hover)]', activeBg: 'bg-[var(--bg-hover)]', shadow: 'shadow-[0_10px_40px_-10px_rgba(113,113,122,0.2)]' },
+  purple:  { ring: 'border-purple-500/50', bg: 'bg-purple-500/10', text: 'text-purple-600', hover: 'hover:bg-purple-500/10', activeBg: 'bg-purple-500/15', shadow: 'shadow-[0_10px_40px_-10px_rgba(168,85,247,0.2)]' },
+  cyan:    { ring: 'border-cyan-500/50', bg: 'bg-cyan-500/10', text: 'text-cyan-600', hover: 'hover:bg-cyan-500/10', activeBg: 'bg-cyan-500/15', shadow: 'shadow-[0_10px_40px_-10px_rgba(6,182,212,0.2)]' },
+  zinc:    { ring: 'border-zinc-500/50', bg: 'bg-zinc-500/10', text: 'text-zinc-600', hover: 'hover:bg-zinc-500/10', activeBg: 'bg-zinc-500/15', shadow: 'shadow-[0_10px_40px_-10px_rgba(113,113,122,0.2)]' },
+  red:     { ring: 'border-red-500/50', bg: 'bg-red-500/10', text: 'text-red-600', hover: 'hover:bg-red-500/10', activeBg: 'bg-red-500/15', shadow: 'shadow-[0_10px_40px_-10px_rgba(239,68,68,0.2)]' },
+  amber:   { ring: 'border-amber-500/50', bg: 'bg-amber-500/10', text: 'text-amber-600', hover: 'hover:bg-amber-500/10', activeBg: 'bg-amber-500/15', shadow: 'shadow-[0_10px_40px_-10px_rgba(245,158,11,0.2)]' },
 };
 
 export default function PremiumSelect({ options, value, onChange, placeholder = 'Seleccionar...', required = false, disabled = false, className = '', compact = false, accent = 'indigo', direction = 'down' }: PremiumSelectProps) {
@@ -73,9 +73,9 @@ export default function PremiumSelect({ options, value, onChange, placeholder = 
       {/* Custom trigger */}
       <div
         onClick={() => { if (!disabled) setIsOpen(!isOpen); }}
-        className={`w-full ${compact ? 'px-2.5 py-1.5 text-xs' : 'p-3 text-sm'} bg-[#21201d] border ${isOpen ? colors.ring : 'border-[#4A4948]'} ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-slate-600'} rounded-lg font-bold flex justify-between items-center gap-2 transition-all duration-200 group`}
+        className={`w-full ${compact ? 'px-2.5 py-1.5 text-xs' : 'p-3 text-sm'} bg-[var(--bg-screen)] border ${isOpen ? colors.ring : 'border-[var(--border-cream)]'} ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-[#71717a]'} rounded-lg font-bold flex justify-between items-center gap-2 transition-all duration-200 group shadow-sm`}
       >
-        <span className={selectedOption ? 'text-white' : 'text-slate-500'}>
+        <span className={selectedOption ? 'text-[var(--text-main)]' : 'text-stone-400'}>
           {selectedOption ? selectedOption.label : placeholder}
         </span>
         <ChevronDown 
@@ -87,15 +87,23 @@ export default function PremiumSelect({ options, value, onChange, placeholder = 
       {/* Dropdown menu */}
       {isOpen && !disabled && (
         <div 
-          className={`absolute z-30 w-full ${direction === 'up' ? 'bottom-full mb-2' : 'mt-2'} bg-[#2D2D2D] border border-[#4A4948] rounded-xl ${colors.shadow} max-h-56 overflow-y-auto scrollbar-thin animate-in fade-in ${direction === 'up' ? 'slide-in-from-bottom-2' : 'slide-in-from-top-2'} duration-200`}
+          className={`absolute z-30 w-full ${direction === 'up' ? 'bottom-full mb-2' : 'mt-2'} bg-[var(--bg-floating)] border border-[var(--border-cream)] rounded-xl ${colors.shadow} max-h-56 overflow-y-auto scrollbar-thin animate-in fade-in ${direction === 'up' ? 'slide-in-from-bottom-2' : 'slide-in-from-top-2'} duration-200`}
         >
-          <div className="p-2 border-b border-[#3B3A38] bg-[#2D2D2D]/50 sticky top-0 z-10">
-            <span className="text-[10px] uppercase font-black text-slate-500 tracking-wider">{placeholder}</span>
+          <div className="p-2 border-b border-[var(--border-cream)] bg-[var(--bg-screen)] sticky top-0 z-10">
+            <span className="text-[10px] uppercase font-black text-stone-400 tracking-wider">{placeholder}</span>
           </div>
           {options.map(opt => (
             <div
               key={opt.value}
-              className={`px-4 ${compact ? 'py-2' : 'py-2.5'} text-xs font-semibold cursor-pointer transition-all border-b border-[#3B3A38]/50 last:border-none ${opt.disabled ? 'opacity-30 cursor-not-allowed' : `${colors.hover} hover:text-white`} ${value === opt.value ? `${colors.activeBg} ${colors.text}` : 'text-slate-300'}`}
+              className={`px-4 ${compact ? 'py-2' : 'py-2.5'} text-xs font-semibold cursor-pointer transition-all duration-300 border-b border-[var(--border-cream)]/30 last:border-none 
+                ${opt.disabled 
+                  ? 'opacity-30 cursor-not-allowed' 
+                  : `hover:bg-[var(--bg-hover)] hover:pl-6 hover:text-[var(--text-main)]`
+                } 
+                ${value === opt.value 
+                  ? `${colors.activeBg} ${colors.text} border-l-4 border-l-current pl-3` 
+                  : 'text-[var(--text-main)] pl-4'
+                }`}
               onClick={() => {
                 if (!opt.disabled) {
                   onChange(opt.value);

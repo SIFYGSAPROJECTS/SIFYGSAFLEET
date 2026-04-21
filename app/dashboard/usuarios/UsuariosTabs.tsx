@@ -32,10 +32,10 @@ export default function UsuariosTabs({ isAdmin, empleadosIniciales }: Props) {
           <Link href="/dashboard" className="inline-flex items-center gap-2 text-slate-400 hover:text-[#71717a] transition-colors mb-3 font-medium text-sm">
             <ArrowLeft className="w-4 h-4" /> Volver al Panel Maestro
           </Link>
-          <h1 className="text-2xl sm:text-3xl font-black text-white flex items-center gap-3 font-serif">
+          <h1 className="text-2xl sm:text-3xl font-black text-[var(--text-main)] flex items-center gap-3 font-serif">
             <User className="text-[#71717a] shrink-0" size={32} /> Configuración de Usuario
           </h1>
-          <p className="text-slate-400 mt-2 font-medium text-sm sm:text-base leading-relaxed">
+          <p className="text-[var(--text-muted)] mt-2 font-medium text-sm sm:text-base leading-relaxed">
             {isAdmin ? 'Gestión global de perfiles, permisos y seguridad de credenciales.' : 'Administra tus datos personales y contraseña.'}
           </p>
         </div>
@@ -44,25 +44,25 @@ export default function UsuariosTabs({ isAdmin, empleadosIniciales }: Props) {
         <div className="w-full md:w-auto overflow-x-auto scrollbar-hide pb-3">
           {/* Aquí está la magia: justify-start en móvil, y center/end en pantallas grandes */}
           <div className="flex w-full justify-start sm:justify-center md:justify-end min-w-max px-1">
-            <div className="inline-flex items-center bg-[#2D2D2D] border border-[#3B3A38] rounded-full p-1.5 shadow-lg shrink-0 gap-1">
+            <div className="inline-flex items-center bg-[var(--bg-floating)] border border-[var(--border-cream)] rounded-full p-1.5 shadow-lg shrink-0 gap-1">
               
-              <div className="px-4 py-1.5 text-xs font-bold rounded-full bg-[#2D2D2D] text-white cursor-default flex items-center gap-2 shadow-inner whitespace-nowrap">
+              <div className="px-4 py-1.5 text-xs font-bold rounded-full bg-[var(--bg-floating)] text-[var(--text-main)] cursor-default flex items-center gap-2 shadow-inner whitespace-nowrap">
                 <User size={14} className="text-[#71717a]" /> Usuarios
               </div>
               
               {isAdmin && (
-                <Link href="/dashboard/inventario" className="px-4 py-1.5 text-xs font-bold rounded-full text-slate-500 hover:text-slate-300 hover:bg-[#2D2D2D] transition-colors flex items-center gap-2 whitespace-nowrap">
+                <Link href="/dashboard/inventario" className="px-4 py-1.5 text-xs font-bold rounded-full text-[var(--text-muted)] hover:text-[#71717a] hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap">
                   <Car size={14} /> Flota
                 </Link>
               )}
               
-              <Link href="/dashboard/servicios" className="px-4 py-1.5 text-xs font-bold rounded-full text-slate-500 hover:text-slate-300 hover:bg-[#2D2D2D] transition-colors flex items-center gap-2 whitespace-nowrap">
+              <Link href="/dashboard/servicios" className="px-4 py-1.5 text-xs font-bold rounded-full text-[var(--text-muted)] hover:text-[#71717a] hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap">
                 <Wrench size={14} /> Servicios
               </Link>
 
               <Link 
                 href={isAdmin ? '/dashboard/checklists' : '/dashboard/mis-checklists'} 
-                className="px-4 py-1.5 text-xs font-bold rounded-full text-slate-500 hover:text-cyan-400 hover:bg-[#2D2D2D] transition-colors flex items-center gap-2 whitespace-nowrap"
+                className="px-4 py-1.5 text-xs font-bold rounded-full text-[var(--text-muted)] hover:text-cyan-600 hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap"
               >
                 <FileText size={14} /> Checklists
               </Link>
@@ -73,12 +73,12 @@ export default function UsuariosTabs({ isAdmin, empleadosIniciales }: Props) {
       </div>
 
       <div className="w-full overflow-x-auto pb-1 mb-6 scrollbar-hide">
-        <div className="flex space-x-2 border-b border-[#3B3A38] min-w-max pb-px">
+        <div className="flex space-x-2 border-b border-[var(--border-cream)] min-w-max pb-px">
           
           <button
             onClick={() => setActiveTab('perfil')}
             className={`px-4 sm:px-6 py-3.5 font-bold text-sm sm:text-base flex items-center gap-2 border-b-2 transition-all whitespace-nowrap ${
-              activeTab === 'perfil' ? 'border-[#71717a] text-[#71717a]' : 'border-transparent text-slate-500 hover:text-slate-300'
+              activeTab === 'perfil' ? 'border-[#71717a] text-[#71717a]' : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text-main)]'
             }`}
           >
             <User size={20} /> Mi Perfil
@@ -89,11 +89,11 @@ export default function UsuariosTabs({ isAdmin, empleadosIniciales }: Props) {
               <button
                 onClick={() => setActiveTab('personal')}
                 className={`px-4 sm:px-6 py-3.5 font-bold text-sm sm:text-base flex items-center gap-2 border-b-2 transition-all whitespace-nowrap ${
-                  activeTab === 'personal' ? 'border-purple-500 text-purple-500' : 'border-transparent text-slate-500 hover:text-slate-300'
+                  activeTab === 'personal' ? 'border-purple-600 text-purple-600' : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text-main)]'
                 }`}
               >
                 <Users size={20} /> Gestion de Personal
-                <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${activeTab === 'personal' ? 'bg-purple-500 text-white' : 'bg-[#2D2D2D] text-slate-400'}`}>
+                <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${activeTab === 'personal' ? 'bg-purple-600 text-white' : 'bg-[var(--bg-floating)] text-[var(--text-muted)]'}`}>
                   {empleadosIniciales.length}
                 </span>
               </button>
@@ -101,7 +101,7 @@ export default function UsuariosTabs({ isAdmin, empleadosIniciales }: Props) {
               <button
                 onClick={() => setActiveTab('seguridad')}
                 className={`px-4 sm:px-6 py-3.5 font-bold text-sm sm:text-base flex items-center gap-2 border-b-2 transition-all whitespace-nowrap ${
-                  activeTab === 'seguridad' ? 'border-yellow-500 text-yellow-500' : 'border-transparent text-slate-500 hover:text-slate-300'
+                  activeTab === 'seguridad' ? 'border-amber-600 text-amber-600' : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text-main)]'
                 }`}
               >
                 <Lock size={20} /> Seguridad y Accesos

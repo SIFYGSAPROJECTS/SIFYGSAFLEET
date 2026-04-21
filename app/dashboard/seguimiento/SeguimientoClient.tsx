@@ -9,7 +9,7 @@ export default function SeguimientoClient({ ticketsIniciales = [], isAdmin }: an
   const [vista, setVista] = useState<'proceso' | 'finalizadas'>('proceso');
 
   if (!ticketsIniciales || ticketsIniciales.length === 0) {
-    return <div className="bg-[#2D2D2D] p-12 rounded-xl text-center text-slate-500 font-bold border border-[#3B3A38]">No hay unidades en el sistema.</div>;
+    return <div className="bg-[var(--bg-floating)] p-12 rounded-xl text-center text-[var(--text-muted)] font-bold border border-[var(--border-cream)]">No hay unidades en el sistema.</div>;
   }
 
   //  LÓGICA DE FILTRADO EN TIEMPO REAL 
@@ -29,13 +29,13 @@ export default function SeguimientoClient({ ticketsIniciales = [], isAdmin }: an
     <div className="space-y-6">
       
       {/*  BOTONES SUB-FILTRO  */}
-      <div className="flex gap-3 mb-6 border-b border-[#3B3A38] pb-4">
+      <div className="flex gap-3 mb-6 border-b border-[var(--border-cream)] pb-4">
         <button 
           onClick={() => setVista('proceso')}
           className={`px-4 py-2 rounded-lg font-bold text-sm transition-all flex items-center gap-2 ${
             vista === 'proceso' 
-              ? 'bg-cyan-500/10 text-cyan-500 border border-cyan-500/30 shadow-[0_0_10px_rgba(6,182,212,0.15)]' 
-              : 'text-slate-500 hover:text-slate-300 hover:bg-[#2D2D2D] border border-transparent'
+              ? 'bg-cyan-600/10 text-cyan-600 border border-cyan-600/30' 
+              : 'text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-hover)] border border-transparent'
           }`}
         >
           <Activity size={16} /> En Proceso
@@ -44,8 +44,8 @@ export default function SeguimientoClient({ ticketsIniciales = [], isAdmin }: an
           onClick={() => setVista('finalizadas')}
           className={`px-4 py-2 rounded-lg font-bold text-sm transition-all flex items-center gap-2 ${
             vista === 'finalizadas' 
-              ? 'bg-zinc-500/10 text-zinc-500 border border-zinc-500/30 shadow-[0_0_10px_rgba(16,185,129,0.15)]' 
-              : 'text-slate-500 hover:text-slate-300 hover:bg-[#2D2D2D] border border-transparent'
+              ? 'bg-stone-600/10 text-stone-600 border border-stone-600/30' 
+              : 'text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-hover)] border border-transparent'
           }`}
         >
           <CheckCircle2 size={16} /> Finalizadas
@@ -54,8 +54,8 @@ export default function SeguimientoClient({ ticketsIniciales = [], isAdmin }: an
 
       {/* MENSAJE SI ESTÁ VACÍO */}
       {ticketsFiltrados.length === 0 && (
-        <div className="bg-[#2D2D2D]/50 p-12 rounded-xl text-center border border-[#3B3A38] border-dashed">
-          <p className="text-slate-500 font-bold">
+        <div className="bg-[var(--bg-floating)]/50 p-12 rounded-xl text-center border border-[var(--border-cream)] border-dashed">
+          <p className="text-[var(--text-muted)] font-bold">
             {vista === 'proceso' ? ' No hay unidades en mantenimiento actualmente.' : 'No hay mantenimientos finalizados recientemente.'}
           </p>
         </div>
@@ -80,27 +80,27 @@ export default function SeguimientoClient({ ticketsIniciales = [], isAdmin }: an
         const esFinalizado = estadoVisual === 'LISTO';
 
         return (
-          <div key={ticket.Pk_folio_ticket} className={`bg-[#2D2D2D] rounded-xl shadow-2xl border-x border-b border-[#3B3A38] border-t-4 p-5 sm:p-8 transition-colors ${esFinalizado ? 'border-t-zinc-500' : 'border-t-[#71717a]'}`}>
+          <div key={ticket.Pk_folio_ticket} className={`bg-[var(--bg-floating)] rounded-xl shadow-xl border-x border-b border-[var(--border-cream)] border-t-4 p-5 sm:p-8 transition-colors ${esFinalizado ? 'border-t-stone-400' : 'border-t-[#71717a]'}`}>
             <div className="flex flex-col md:flex-row justify-between items-start mb-10 gap-6">
               <div>
                 <span className={`px-2 py-1 rounded text-[10px] font-mono font-black mb-3 inline-block tracking-[0.2em] ${esFinalizado ? 'bg-zinc-500/10 text-zinc-500 border border-zinc-500/20' : 'bg-[#71717a]/10 text-[#71717a] border border-[#71717a]/20'}`}>
                   FOLIO: {ticket.Pk_folio_ticket}
                 </span>
-                <h3 className="text-xl sm:text-2xl font-bold text-white leading-tight font-serif">
+                <h3 className="text-xl sm:text-2xl font-bold text-[var(--text-main)] leading-tight font-serif">
                   {ticket.auto?.Linea ? `(${ticket.auto.Linea}) ` : ''}{ticket.auto?.Marca} {ticket.auto?.Modelo}
                 </h3>
                 <div className="flex gap-2 items-center mt-1.5">
-                  <p className="text-sm text-slate-400 font-medium">
-                    Placa: <span className="text-slate-200 font-bold font-mono">{ticket.auto?.Placa || 'S/P'}</span>
-                    <span className="mx-2 text-slate-600">•</span>
-                    Color: <span className="text-slate-200">{ticket.auto?.Color || 'Sin especificar'}</span>
+                  <p className="text-sm text-[var(--text-muted)] font-medium">
+                    Placa: <span className="text-[var(--text-main)] font-bold font-mono">{ticket.auto?.Placa || 'S/P'}</span>
+                    <span className="mx-2 text-[var(--border-cream)]">•</span>
+                    Color: <span className="text-[var(--text-main)]">{ticket.auto?.Color || 'Sin especificar'}</span>
                   </p>
                 </div>
-                <p className="text-sm text-slate-400 mt-2 italic">&ldquo;{ticket.Descripcion}&rdquo;</p>
+                <p className="text-sm text-[var(--text-muted)] mt-2 italic">&ldquo;{ticket.Descripcion}&rdquo;</p>
               </div>
 
               {isAdmin && !esFinalizado && (
-                <div className="bg-[#2D2D2D] p-4 rounded-xl border border-[#3B3A38] shadow-inner w-full md:w-auto animate-in fade-in">
+                <div className="bg-[var(--bg-floating)] p-4 rounded-xl border border-[var(--border-cream)] shadow-inner w-full md:w-auto animate-in fade-in">
                   <StatusUpdater 
                     folio={ticket.Pk_folio_ticket} 
                     estadoActual={ticket.Estado}
@@ -124,7 +124,7 @@ export default function SeguimientoClient({ ticketsIniciales = [], isAdmin }: an
             {/* LÍNEA DE TIEMPO RESPONSIVE */}
             <div className={`w-full overflow-x-auto pb-4 scrollbar-hide ${esFinalizado ? 'opacity-70' : ''}`}>
               <div className="relative py-4 px-2 sm:px-6 mb-4 min-w-[320px] sm:min-w-[400px]">
-                <div className="absolute top-10 left-0 w-full h-1.5 bg-[#2D2D2D] rounded-full"></div>
+                <div className="absolute top-10 left-0 w-full h-1.5 bg-[var(--bg-screen)] rounded-full"></div>
                 <div className="absolute top-10 left-0 h-1.5 rounded-full transition-all duration-1000 bg-gradient-to-r from-[#71717a] via-cyan-500 via-yellow-500 to-zinc-500"
                   style={{ width: `${(pasoActual / 3) * 100}%` }}></div>
                 <div className="relative flex justify-between">
@@ -135,10 +135,10 @@ export default function SeguimientoClient({ ticketsIniciales = [], isAdmin }: an
                     { l: 'Listo', i: CheckCircle2, c: 'text-zinc-400', b: 'bg-zinc-500' }
                   ].map((p, idx) => (
                     <div key={p.l} className="flex flex-col items-center">
-                      <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center border-2 z-10 transition-all duration-700 ${pasoActual >= idx ? `${p.b} border-transparent shadow-lg` : 'bg-[#2D2D2D] border-slate-700 text-slate-600'}`}>
+                      <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center border-2 z-10 transition-all duration-700 ${pasoActual >= idx ? `${p.b} border-transparent shadow-md` : 'bg-[var(--bg-screen)] border-[var(--border-cream)] text-stone-300'}`}>
                         <p.i size={18} className={`sm:w-5 sm:h-5 ${pasoActual >= idx ? 'text-white' : ''}`} />
                       </div>
-                      <p className={`text-[8px] sm:text-[10px] font-black mt-4 uppercase tracking-widest ${pasoActual >= idx ? p.c : 'text-slate-700'}`}>{p.l}</p>
+                      <p className={`text-[8px] sm:text-[10px] font-black mt-4 uppercase tracking-widest ${pasoActual >= idx ? p.c : 'text-stone-300'}`}>{p.l}</p>
                     </div>
                   ))}
                 </div>
@@ -147,13 +147,13 @@ export default function SeguimientoClient({ ticketsIniciales = [], isAdmin }: an
 
             {/* CUADRO DE CITA RESPONSIVE */}
             {estadoVisual === 'CITA' && (lugar || fecha || hora || asesor || numeroAsesor) && (
-              <div className="mt-6 sm:mt-8 bg-cyan-500/5 border border-cyan-500/20 rounded-xl p-4 sm:p-6 animate-in slide-in-from-top-4 duration-500">
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 lg:gap-3 xl:gap-6 text-white">
+              <div className="mt-6 sm:mt-8 bg-cyan-600/5 border border-cyan-600/10 rounded-xl p-4 sm:p-6 animate-in slide-in-from-top-4 duration-500">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 lg:gap-3 xl:gap-6 text-[var(--text-main)]">
                   
                   <div className="flex items-center gap-3">
                     <MapPin className="text-cyan-500 shrink-0" size={22}/> 
                     <div>
-                      <p className="text-[10px] text-slate-500 font-bold uppercase">Lugar</p>
+                      <p className="text-[10px] text-[var(--text-muted)] font-bold uppercase">Lugar</p>
                       <p className="font-bold text-sm xl:text-base leading-tight break-words">
                         {lugar || 'Por definir'}
                         {linkTaller && (
@@ -161,7 +161,7 @@ export default function SeguimientoClient({ ticketsIniciales = [], isAdmin }: an
                             href={linkTaller} 
                             target="_blank" 
                             rel="noopener noreferrer" 
-                            className="inline-flex items-center gap-1 ml-2 text-cyan-400 hover:text-cyan-300 transition-colors"
+                            className="inline-flex items-center gap-1 ml-2 text-cyan-700 hover:text-cyan-600 transition-colors"
                             title="Ver ubicación en el mapa"
                           >
                             <ExternalLink size={14} className="inline" />
@@ -171,34 +171,34 @@ export default function SeguimientoClient({ ticketsIniciales = [], isAdmin }: an
                     </div>
                   </div>
                   
-                  <div className="flex items-center gap-3 sm:border-l sm:border-[#3B3A38] sm:pl-4 xl:pl-6">
-                    <Calendar className="text-cyan-500 shrink-0" size={22}/> 
+                  <div className="flex items-center gap-3 sm:border-l sm:border-[var(--border-cream)] sm:pl-4 xl:pl-6">
+                    <Calendar className="text-cyan-600 shrink-0" size={22}/> 
                     <div>
-                      <p className="text-[10px] text-slate-500 font-bold uppercase">Fecha</p>
+                      <p className="text-[10px] text-[var(--text-muted)] font-bold uppercase">Fecha</p>
                       <p className="font-bold text-sm xl:text-base leading-tight">{fecha || 'Por definir'}</p>
                     </div>
                   </div>
                   
-                  <div className="flex items-center gap-3 md:border-l md:border-[#3B3A38] md:pl-4 xl:pl-6">
-                    <Clock className="text-cyan-500 shrink-0" size={22}/> 
+                  <div className="flex items-center gap-3 md:border-l md:border-[var(--border-cream)] md:pl-4 xl:pl-6">
+                    <Clock className="text-cyan-600 shrink-0" size={22}/> 
                     <div>
-                      <p className="text-[10px] text-slate-500 font-bold uppercase">Hora</p>
+                      <p className="text-[10px] text-[var(--text-muted)] font-bold uppercase">Hora</p>
                       <p className="font-bold text-sm xl:text-base leading-tight">{hora || 'Por definir'}</p>
                     </div>
                   </div>
                   
-                  <div className="flex items-center gap-3 sm:border-l sm:border-[#3B3A38] sm:pl-4 lg:border-l lg:border-[#3B3A38] lg:pl-4 xl:pl-6">
-                    <User className="text-cyan-500 shrink-0" size={22}/> 
+                  <div className="flex items-center gap-3 sm:border-l sm:border-[var(--border-cream)] sm:pl-4 lg:border-l lg:border-[var(--border-cream)] lg:pl-4 xl:pl-6">
+                    <User className="text-cyan-600 shrink-0" size={22}/> 
                     <div>
-                      <p className="text-[10px] text-slate-500 font-bold uppercase">Asesor</p>
+                      <p className="text-[10px] text-[var(--text-muted)] font-bold uppercase">Asesor</p>
                       <p className="font-bold text-sm xl:text-base leading-tight break-words">{asesor || 'Por definir'}</p>
                     </div>
                   </div>
                   
-                  <div className="flex items-center gap-3 md:border-l md:border-[#3B3A38] md:pl-4 lg:border-l lg:border-[#3B3A38] lg:pl-4 xl:pl-6">
-                    <Phone className="text-cyan-500 shrink-0" size={22}/> 
+                  <div className="flex items-center gap-3 md:border-l md:border-[var(--border-cream)] md:pl-4 lg:border-l lg:border-[var(--border-cream)] lg:pl-4 xl:pl-6">
+                    <Phone className="text-cyan-600 shrink-0" size={22}/> 
                     <div>
-                      <p className="text-[10px] text-slate-500 font-bold uppercase">Contacto</p>
+                      <p className="text-[10px] text-[var(--text-muted)] font-bold uppercase">Contacto</p>
                       <p className="font-bold font-mono text-sm xl:text-base leading-tight break-all">{numeroAsesor || 'S/N'}</p>
                     </div>
                   </div>

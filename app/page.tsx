@@ -151,7 +151,7 @@ export default function LoginPage() {
         className={`fixed inset-0 bg-black z-[999] transition-opacity duration-1000 ease-in-out ${isFadingOut ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
       />
 
-      <div className="flex min-h-screen bg-transparent text-[#EAE6E0] font-sans">
+      <div className="flex min-h-screen bg-[#141413] text-[#EAE6E0] font-sans">
         {/* PANEL IZQUIERDO: Branding & Animación (Oculto en móvil) */}
         <div className="hidden lg:flex w-[55%] relative flex-col justify-center items-center overflow-hidden bg-transparent border-r border-[#1D2430]/30">
 
