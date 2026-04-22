@@ -9,7 +9,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// Configuración de fuentes y tipografía inspirada en Claude
+// Configuración de fuentes
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
