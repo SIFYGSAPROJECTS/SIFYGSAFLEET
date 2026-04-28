@@ -30,7 +30,12 @@ export default async function CentralServiciosPage() {
 
   const tickets = await prisma.solicitud.findMany({
     where: condicionTickets,
-    include: { auto: true, empleado: true },
+    include: { 
+      auto: {
+        include: { encargado: true }
+      }, 
+      empleado: true 
+    },
     orderBy: { Fecha_Realizacion: 'desc' }
   });
 

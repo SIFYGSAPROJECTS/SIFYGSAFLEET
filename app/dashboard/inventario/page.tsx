@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { Car, Plus, X, Pencil, ArrowLeft, ShieldCheck, AlertTriangle, Wrench, CheckCircle2, Archive, RotateCcw, AlertCircle, User, FileText } from 'lucide-react';
+import { Car, Plus, X, Pencil, ArrowLeft, ShieldCheck, AlertTriangle, Wrench, CheckCircle2, Archive, RotateCcw, AlertCircle, User, FileText, Download } from 'lucide-react';
 import Link from 'next/link';
 import SystemModal, { ModalType } from '@/components/ui/SystemModal';
 import PremiumSelect from '@/components/ui/PremiumSelect';
@@ -194,6 +194,72 @@ export default function InventarioMaestroPage() {
     filtroActivo === 'Disponibles' ? 'border-t-zinc-500' :
     'border-t-[#71717a]';
 
+  const descargarCSV = async () => {
+    const dataToExport = tabPrincipal === 'activos' ? vehiculosFiltrados : vehiculosBaja;
+    
+    if (dataToExport.length === 0) {
+      setSysModal({ isOpen: true, type: 'info', title: 'Aviso', message: 'No hay datos para exportar con los filtros actuales.' });
+      return;
+    }
+
+    const ExcelJS = (await import('exceljs')).default || await import('exceljs');
+    const { saveAs } = await import('file-saver');
+
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet(`Inventario ${tabPrincipal === 'activos' ? 'Activo' : 'Bajas'}`);
+
+    worksheet.columns = [
+      { header: 'Unidad', key: 'unidad', width: 15 },
+      { header: 'Placa', key: 'placa', width: 15 },
+      { header: 'Marca', key: 'marca', width: 20 },
+      { header: 'Modelo', key: 'modelo', width: 15 },
+      { header: 'Color', key: 'color', width: 15 },
+      { header: 'Línea', key: 'linea', width: 15 },
+      { header: 'VIN', key: 'vin', width: 25 },
+      { header: 'Póliza', key: 'poliza', width: 20 },
+      { header: 'Departamento', key: 'departamento', width: 20 },
+      { header: 'Ubicación', key: 'ubicacion', width: 20 },
+      { header: 'Estatus', key: 'estatus', width: 20 },
+      { header: 'Kilometraje', key: 'kilometraje', width: 15 },
+      { header: 'Asignado A', key: 'asignado', width: 25 }
+    ];
+
+    worksheet.getRow(1).eachCell((cell) => {
+      cell.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FF71717A' }
+      };
+      cell.font = { color: { argb: 'FFFFFFFF' }, bold: true };
+      cell.alignment = { vertical: 'middle', horizontal: 'center' };
+    });
+
+    dataToExport.forEach(v => {
+      const row = worksheet.addRow({
+        unidad: v.Consecutivo || '',
+        placa: v.Placa || '',
+        marca: v.Marca || '',
+        modelo: v.Modelo || '',
+        color: v.Color || '',
+        linea: v.Linea || '',
+        vin: v.Numero_Serie || '',
+        poliza: v.Poliza_Seguro || '',
+        departamento: v.Departamento || '',
+        ubicacion: v.Ubicacion || '',
+        estatus: v.Estatus_Operativo || '',
+        kilometraje: v.Kilometraje_Actual || 0,
+        asignado: v.encargado ? `${v.encargado.Nombre_Empleado} ${v.encargado.A_Paterno}` : 'Sin Asignar'
+      });
+      row.eachCell({ includeEmpty: true }, (cell) => {
+        cell.alignment = { vertical: 'top', horizontal: 'center', wrapText: true };
+      });
+    });
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    saveAs(blob, `Inventario_${tabPrincipal}_${filtroEmpresa}_${new Date().toISOString().split('T')[0]}.xlsx`);
+  };
+
   return (
     <div className="min-h-screen bg-transparent relative">
       <div className="p-4 sm:p-8 max-w-7xl mx-auto">
@@ -229,12 +295,6 @@ export default function InventarioMaestroPage() {
                 </div>
               </div>
             </div>
-
-            {tabPrincipal === 'activos' && (
-              <button onClick={abrirModalNuevo} className="w-full sm:w-auto bg-[#71717a] hover:bg-[#52525b] text-white px-5 py-2.5 rounded-lg font-bold flex items-center justify-center gap-2 transition-colors shadow-lg active:scale-95 shrink-0">
-                <Plus className="w-5 h-5" /> Nuevo Vehículo
-              </button>
-            )}
           </div>
         </div>
 
@@ -257,8 +317,8 @@ export default function InventarioMaestroPage() {
             </button>
           </div>
           
-          {/* NUEVO COMPONENTE: SELECTOR DE EMPRESA */}
-          <div className="pb-3 w-full sm:w-auto shrink-0 flex items-center justify-end">
+          {/* NUEVO COMPONENTE: SELECTOR DE EMPRESA Y BOTONES */}
+          <div className="pb-3 w-full sm:w-auto shrink-0 flex flex-col sm:flex-row items-center justify-end gap-3">
             <PremiumSelect
               compact
               accent="indigo"
@@ -275,6 +335,21 @@ export default function InventarioMaestroPage() {
               className="w-52"
               direction="down"
             />
+            {tabPrincipal === 'activos' && (
+              <div className="flex gap-3 w-full sm:w-auto">
+                <button onClick={descargarCSV} className="w-full sm:w-auto bg-white hover:bg-[var(--bg-hover)] border border-[var(--border-cream)] text-[var(--text-main)] px-4 py-2.5 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors shadow-sm shrink-0">
+                  <Download className="w-4 h-4" /> Exportar Excel
+                </button>
+                <button onClick={abrirModalNuevo} className="w-full sm:w-auto bg-[#71717a] hover:bg-[#52525b] text-white px-5 py-2.5 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg active:scale-95 shrink-0">
+                  <Plus className="w-5 h-5" /> Nuevo Vehículo
+                </button>
+              </div>
+            )}
+            {tabPrincipal === 'bajas' && (
+              <button onClick={descargarCSV} className="w-full sm:w-auto bg-white hover:bg-[var(--bg-hover)] border border-[var(--border-cream)] text-[var(--text-main)] px-4 py-2.5 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors shadow-sm shrink-0">
+                <Download className="w-4 h-4" /> Exportar Excel
+              </button>
+            )}
           </div>
         </div>
 

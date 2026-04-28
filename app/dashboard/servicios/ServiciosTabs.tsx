@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Wrench, History, Activity, ArrowLeft, PlusCircle, User, Car, FileText } from 'lucide-react';
+import { Wrench, History, Activity, ArrowLeft, PlusCircle, User, Car, FileText, Download } from 'lucide-react';
 import Link from 'next/link';
 
 import TicketForm from '../tickets/nuevo/TicketForm';
@@ -23,6 +23,81 @@ export default function ServiciosTabs({ tickets, vehiculos, isAdmin, rol }: Prop
   // Guardamos hasta 30 tickets finalizados recientes para que la pestaña "Finalizadas" tenga contenido
   const finalizadosRecientes = tickets.filter(t => t.Estado === 'LISTO').slice(0, 30); 
   const ticketsSeguimiento = [...activos, ...finalizadosRecientes];
+
+  const descargarCSV = async () => {
+    let dataToExport: any[] = [];
+    if (activeTab === 'seguimiento') {
+      dataToExport = ticketsSeguimiento;
+    } else if (activeTab === 'historial') {
+      dataToExport = tickets;
+    }
+
+    if (dataToExport.length === 0) {
+      alert('No hay datos para exportar.');
+      return;
+    }
+
+    // Importamos las librerías de forma dinámica para no afectar la carga inicial de la página
+    const ExcelJS = (await import('exceljs')).default || await import('exceljs');
+    const { saveAs } = await import('file-saver');
+
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet(`Servicios ${activeTab === 'seguimiento' ? 'Proceso' : 'Historial'}`);
+
+    // Definir columnas y anchos para que se vea estético
+    worksheet.columns = [
+      { header: 'Folio', key: 'folio', width: 25 },
+      { header: 'Fecha', key: 'fecha', width: 12 },
+      { header: 'Unidad', key: 'unidad', width: 20 },
+      { header: 'Placas', key: 'placas', width: 12 },
+      { header: 'Conductor', key: 'conductor', width: 25 },
+      { header: 'Solicitante', key: 'solicitante', width: 25 },
+      { header: 'Kilometraje', key: 'kilometraje', width: 15 },
+      { header: 'Servicio (Descripción)', key: 'servicio', width: 60 },
+      { header: 'Tipo', key: 'tipo', width: 18 },
+      { header: 'Estado', key: 'estado', width: 15 }
+    ];
+
+    // Estilos del encabezado (Color #71717a y texto blanco)
+    worksheet.getRow(1).eachCell((cell) => {
+      cell.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FF71717A' } 
+      };
+      cell.font = {
+        color: { argb: 'FFFFFFFF' },
+        bold: true
+      };
+      cell.alignment = { vertical: 'middle', horizontal: 'center' };
+    });
+
+    // Agregar los datos
+    dataToExport.forEach((t: any) => {
+      const row = worksheet.addRow({
+        folio: t.Pk_folio_ticket || t.id || '',
+        fecha: t.Fecha_Realizacion ? new Date(t.Fecha_Realizacion).toLocaleDateString() : '',
+        unidad: t.auto ? `${t.auto.Marca || ''} ${t.auto.Modelo || ''}`.trim() : 'N/A',
+        placas: t.auto ? t.auto.Placa : 'N/A',
+        conductor: t.auto && t.auto.encargado ? `${t.auto.encargado.Nombre_Empleado || ''} ${t.auto.encargado.A_Paterno || ''}`.trim() : 'Sin Asignar',
+        solicitante: t.empleado ? `${t.empleado.Nombre_Empleado || ''} ${t.empleado.A_Paterno || ''}`.trim() : 'N/A',
+        kilometraje: t.Kilometraje || '0',
+        servicio: t.Descripcion || 'Sin descripción',
+        tipo: t.Tipo_Servicio ? t.Tipo_Servicio.toUpperCase() : 'NO ESPECIFICADO',
+        estado: t.Estado || ''
+      });
+
+      // AQUÍ ESTÁ LA MAGIA: Alinear texto a la parte superior, centrado y permitir ajuste de texto
+      row.eachCell({ includeEmpty: true }, (cell) => {
+        cell.alignment = { vertical: 'top', horizontal: 'center', wrapText: true };
+      });
+    });
+
+    // Generar archivo y descargar
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    saveAs(blob, `Servicios_${activeTab}_${new Date().toISOString().split('T')[0]}.xlsx`);
+  };
 
   return (
     <div className="space-y-6">
@@ -79,8 +154,8 @@ export default function ServiciosTabs({ tickets, vehiculos, isAdmin, rol }: Prop
       </div>
 
       {/* PESTAÑAS RESPONSIVAS (REORDENADAS) */}
-      <div className="w-full overflow-x-auto pb-1 mb-6 scrollbar-hide">
-        <div className="flex space-x-2 border-b border-[var(--border-cream)] min-w-max pb-px">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end border-b border-[var(--border-cream)] mb-6 w-full gap-4 sm:gap-0">
+        <div className="flex space-x-1 sm:space-x-4 overflow-x-auto scrollbar-hide w-full sm:w-auto">
           
           <button
             onClick={() => setActiveTab('nueva')}
@@ -112,6 +187,14 @@ export default function ServiciosTabs({ tickets, vehiculos, isAdmin, rol }: Prop
           >
             <History size={20} /> Historial Completo
           </button>
+        </div>
+
+        <div className="pb-3 w-full sm:w-auto shrink-0 flex items-center justify-end">
+          {(activeTab === 'seguimiento' || activeTab === 'historial') && (
+            <button onClick={descargarCSV} className="w-full sm:w-auto bg-white hover:bg-[var(--bg-hover)] border border-[var(--border-cream)] text-[var(--text-main)] px-4 py-2.5 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors shadow-sm shrink-0">
+              <Download className="w-4 h-4" /> Exportar Excel
+            </button>
+          )}
         </div>
       </div>
 

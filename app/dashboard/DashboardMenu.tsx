@@ -1,8 +1,38 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ShieldCheck, Users, FileText, Wrench, Activity, User, Car, MousePointerClick } from 'lucide-react';
+import { ShieldCheck, Users, FileText, Wrench, User, Car, MousePointerClick } from 'lucide-react';
+
+function AnimatedCounter({ value, duration = 1500 }: { value: number, duration?: number }) {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    let startTimestamp: number | null = null;
+    let animationFrameId: number;
+
+    const step = (timestamp: number) => {
+      if (!startTimestamp) startTimestamp = timestamp;
+      const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+      // easeOutQuart para una desaceleración suave
+      const easeProgress = 1 - Math.pow(1 - progress, 4);
+      setCount(Math.floor(easeProgress * value));
+
+      if (progress < 1) {
+        animationFrameId = window.requestAnimationFrame(step);
+      } else {
+        setCount(value);
+      }
+    };
+
+    animationFrameId = window.requestAnimationFrame(step);
+
+    return () => window.cancelAnimationFrame(animationFrameId);
+  }, [value, duration]);
+
+  return <>{count}</>;
+}
 
 interface Props {
   userRole: string;
@@ -140,7 +170,7 @@ export default function DashboardMenu({ userRole, totalAutos, totalEmpleados, ti
               <h2 className="text-xs font-bold text-[var(--text-muted)] group-hover:text-[#52525b] transition-colors uppercase tracking-widest">FLOTA TOTAL</h2>
               <Car className="text-[#71717a]" size={18} />
             </div>
-            <p className="text-3xl font-black text-[var(--text-main)] font-serif">{totalAutos}</p>
+            <p className="text-3xl font-black text-[var(--text-main)] font-serif"><AnimatedCounter value={totalAutos} /></p>
             <p className="text-[10px] text-[#71717a] mt-1 font-bold uppercase tracking-wider">Ir a unidades registradas &rarr;</p>
           </Link>
           
@@ -150,7 +180,7 @@ export default function DashboardMenu({ userRole, totalAutos, totalEmpleados, ti
               <h2 className="text-xs font-bold text-[var(--text-muted)] group-hover:text-[#52525b] transition-colors uppercase tracking-widest">PERSONAL ACTIVO</h2>
               <Users className="text-[#71717a]" size={18} />
             </div>
-            <p className="text-3xl font-black text-[var(--text-main)] font-serif">{totalEmpleados}</p>
+            <p className="text-3xl font-black text-[var(--text-main)] font-serif"><AnimatedCounter value={totalEmpleados} /></p>
             <p className="text-[10px] text-[var(--text-muted)] mt-1 font-bold uppercase tracking-wider">Ir a directorio de usuarios &rarr;</p>
           </Link>
 
@@ -160,7 +190,7 @@ export default function DashboardMenu({ userRole, totalAutos, totalEmpleados, ti
               <h2 className="text-xs font-bold text-[var(--text-muted)] group-hover:text-[#71717a] transition-colors uppercase tracking-widest">SERVICIOS PENDIENTES</h2>
               <Wrench className="text-[#71717a]" size={18} />
             </div>
-            <p className="text-3xl font-black text-[var(--text-main)] font-serif">{ticketsPendientes}</p>
+            <p className="text-3xl font-black text-[var(--text-main)] font-serif"><AnimatedCounter value={ticketsPendientes} /></p>
             <p className="text-[10px] text-[#71717a] mt-1 font-bold uppercase tracking-wider">Ir a órdenes en espera &rarr;</p>
           </Link>
         </div>

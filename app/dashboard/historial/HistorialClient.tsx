@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { 
-  FileText, Filter, UploadCloud, CheckCircle, 
+  FileText, Filter, UploadCloud, 
   Loader2, History, X, ExternalLink, 
   Trash2, PencilLine, AlertTriangle, Wrench, Search, Calendar
 } from 'lucide-react';
@@ -181,7 +181,7 @@ export default function HistorialClient({ historial, rol }: Props) {
                 <th className="p-4 font-semibold">Vehículo</th>
                 <th className="p-4 font-semibold">Solicitante</th>
                 <th className="p-4 font-semibold text-center">Tipo Servicio</th>
-                <th className="p-4 font-semibold text-center w-64">Evidencia</th>
+                <th className="p-4 font-semibold text-center w-64">Factura</th>
                 <th className="p-4 font-semibold text-center">Acción</th>
               </tr>
             </thead>
@@ -226,9 +226,9 @@ export default function HistorialClient({ historial, rol }: Props) {
                         <div className="flex items-center justify-center gap-2">
                           <button 
                             onClick={() => abrirPrevisualizacion(ticket.Evidencia)} 
-                            className="inline-flex items-center gap-1.5 text-zinc-400 bg-zinc-400/10 border border-zinc-400/20 px-3 py-1.5 rounded-md text-xs font-bold hover:bg-zinc-400/20 transition-all shadow-sm"
+                            className="inline-flex items-center gap-1.5 bg-[#71717a] hover:bg-[#52525b] text-white border border-transparent px-4 py-2 rounded-lg text-xs font-bold transition-all shadow-md active:scale-95"
                           >
-                            <CheckCircle size={14} /> VER PDF
+                            <FileText size={14} /> VER PDF
                           </button>
                           <label className="cursor-pointer p-1.5 text-slate-500 hover:text-yellow-400 transition-colors" title="Reemplazar">
                             {editandoFolio === ticket.Pk_folio_ticket ? <Loader2 size={16} className="animate-spin text-yellow-400" /> : <PencilLine size={16} />}
@@ -264,8 +264,8 @@ export default function HistorialClient({ historial, rol }: Props) {
         <SystemModal
           isOpen={modalEliminar}
           type="error"
-          title="¿Eliminar Evidencia?"
-          message={<>Borrarás el PDF del mantenimiento <strong className="text-white font-bold">#{evidenciaAEliminar.folio}</strong> permanentemente.</>}
+          title="¿Eliminar Factura?"
+          message={<>Borrarás el PDF de la factura del mantenimiento <strong className="text-white font-bold">#{evidenciaAEliminar.folio}</strong> permanentemente.</>}
           onCancel={() => setModalEliminar(false)}
           onConfirm={confirmarEliminacion}
           isProcessing={procesando}
@@ -287,7 +287,7 @@ export default function HistorialClient({ historial, rol }: Props) {
           <div className="max-w-6xl mx-auto w-full flex justify-between items-center mb-4">
             <div className="flex items-center gap-3">
               <div className="bg-[#71717a] p-2 rounded-lg shadow-lg shadow-[#71717a]/20"><History className="text-white" size={20} /></div>
-              <h3 className="font-bold text-lg text-white tracking-tight font-serif">Evidencia de Mantenimiento</h3>
+              <h3 className="font-bold text-lg text-white tracking-tight font-serif">Factura de Mantenimiento</h3>
             </div>
             <div className="flex gap-2">
               <button onClick={() => window.open(pdfUrl!, '_blank')} className="bg-[#2D2D2D] hover:bg-slate-700 p-2.5 rounded-lg transition-colors text-slate-300" title="Abrir fuera"><ExternalLink size={20} /></button>

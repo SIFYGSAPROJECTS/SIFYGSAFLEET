@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { UserPlus, X, Pencil, ShieldAlert, ShieldCheck, UserMinus, UserCheck, Loader2, AlertTriangle, Car, PlusCircle } from 'lucide-react';
+import { UserPlus, X, Pencil, ShieldAlert, ShieldCheck, UserMinus, UserCheck, Loader2, AlertTriangle, Car, PlusCircle, Download } from 'lucide-react';
 import SystemModal, { ModalType } from '@/components/ui/SystemModal';
 import PremiumSelect from '@/components/ui/PremiumSelect';
 
@@ -163,6 +163,61 @@ export default function PersonalPage() {
     } finally { setGuardando(false); }
   };
 
+  const descargarCSV = async () => {
+    if (empleadosFiltrados.length === 0) {
+      setSysModal({ isOpen: true, type: 'info', title: 'Aviso', message: 'No hay datos para exportar en esta vista.' });
+      return;
+    }
+
+    const ExcelJS = (await import('exceljs')).default || await import('exceljs');
+    const { saveAs } = await import('file-saver');
+
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet(`Personal ${filtroTab}`);
+
+    worksheet.columns = [
+      { header: 'Email', key: 'email', width: 30 },
+      { header: 'Nombre', key: 'nombre', width: 20 },
+      { header: 'Apellido Paterno', key: 'paterno', width: 20 },
+      { header: 'Apellido Materno', key: 'materno', width: 20 },
+      { header: 'Cargo', key: 'cargo', width: 25 },
+      { header: 'Departamento', key: 'departamento', width: 25 },
+      { header: 'Rol', key: 'rol', width: 15 },
+      { header: 'Estatus', key: 'estatus', width: 15 }
+    ];
+
+    worksheet.getRow(1).eachCell((cell) => {
+      cell.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FF71717A' }
+      };
+      cell.font = { color: { argb: 'FFFFFFFF' }, bold: true };
+      cell.alignment = { vertical: 'middle', horizontal: 'center' };
+    });
+
+    empleadosFiltrados.forEach(e => {
+      const row = worksheet.addRow({
+        email: e.Email || '',
+        nombre: e.Nombre_Empleado || '',
+        paterno: e.A_Paterno || '',
+        materno: e.A_Materno || '',
+        cargo: e.Cargo || '',
+        departamento: e.Departamento || '',
+        rol: e.Rol || '',
+        estatus: e.Estatus_Acceso || ''
+      });
+      
+      row.eachCell({ includeEmpty: true }, (cell) => {
+        cell.alignment = { vertical: 'top', horizontal: 'center', wrapText: true };
+      });
+    });
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    saveAs(blob, `Personal_${filtroTab}_${new Date().toISOString().split('T')[0]}.xlsx`);
+  };
+
   return (
     <div className="w-full">
       {/* BARRA DE BOTONES SUPERIOR */}
@@ -177,9 +232,14 @@ export default function PersonalPage() {
             <span className={`ml-1 px-2 py-0.5 rounded-full text-[10px] ${filtroTab === 'Inactivo' ? 'bg-red-500 text-white' : 'bg-stone-200 text-stone-600'}`}>{totalInactivos}</span>
           </button>
         </div>
-        <button onClick={abrirModalNuevo} className="w-full sm:w-auto bg-[#71717a] hover:bg-[#52525b] text-white px-5 py-2.5 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg active:scale-95">
-          <UserPlus className="w-5 h-5" /> Nuevo Empleado
-        </button>
+        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+          <button onClick={descargarCSV} className="w-full sm:w-auto bg-white hover:bg-[var(--bg-hover)] border border-[var(--border-cream)] text-[var(--text-main)] px-4 py-2.5 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors shadow-sm shrink-0">
+            <Download className="w-4 h-4" /> Exportar Excel
+          </button>
+          <button onClick={abrirModalNuevo} className="w-full sm:w-auto bg-[#71717a] hover:bg-[#52525b] text-white px-5 py-2.5 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg active:scale-95 shrink-0">
+            <UserPlus className="w-5 h-5" /> Nuevo Empleado
+          </button>
+        </div>
       </div>
 
       <div className={`bg-[var(--bg-floating)] rounded-xl shadow-xl border border-[var(--border-cream)] border-t-4 overflow-hidden transition-all duration-500 ${filtroTab === 'Inactivo' ? 'border-t-red-500' : 'border-t-purple-500'}`}>
