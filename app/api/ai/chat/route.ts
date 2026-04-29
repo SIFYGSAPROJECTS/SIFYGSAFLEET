@@ -103,7 +103,7 @@ export async function POST(req: Request) {
 
     if (!GROQ_API_KEY) return NextResponse.json({ text: "Error: API Key no configurada." }, { status: 200 });
 
-    let groqMessages = [{ role: "system", content: SYSTEM_PROMPT }];
+    let groqMessages: any[] = [{ role: "system", content: SYSTEM_PROMPT }];
     const recentMessages = messages.slice(-5);
     for (const msg of recentMessages) {
       groqMessages.push({ role: msg.role === "model" ? "assistant" : "user", content: msg.content || "" });
