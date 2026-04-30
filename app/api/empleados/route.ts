@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import bcrypt from 'bcryptjs';
-import nodemailer from 'nodemailer'; // IMPORTAMOS NODEMAILER
+import nodemailer from 'nodemailer';
 
-// 1. OBTENER TODO EL PERSONAL
+// Obtiene la lista completa de empleados ordenados alfabéticamente
 export async function GET() {
   try {
     const empleados = await prisma.empleados.findMany({
@@ -11,25 +11,22 @@ export async function GET() {
     });
     return NextResponse.json(empleados);
   } catch (error) {
-    console.error('❌ Error al cargar empleados:', error);
+    console.error('Error al cargar empleados:', error);
     return NextResponse.json({ error: 'Error al cargar el personal' }, { status: 500 });
   }
 }
 
-// 2. REGISTRAR UN NUEVO EMPLEADO + ASIGNAR VEHÍCULO
+// Crea un nuevo empleado, genera credenciales temporales y asigna vehículo si corresponde
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    //  AGREGAMOS Consecutivo_Vehiculo A LA EXTRACCIÓN DE DATOS
     const { Email, Nombre_Empleado, A_Paterno, A_Materno, Cargo, Departamento, Rol, Estatus_Acceso, Consecutivo_Vehiculo } = body;
 
-    // GENERAMOS UNA CONTRASEÑA TEMPORAL Y LA ENCRIPTAMOS
     const passwordTemporal = Math.random().toString(36).slice(-8) + "S!fy";
     const hashedPassword = await bcrypt.hash(passwordTemporal, 12);
 
-    //  USAMOS UNA TRANSACCIÓN PARA CREAR AL EMPLEADO Y ASIGNARLE EL CARRO DE FORMA SEGURA
+    // Transacción para garantizar atomicidad entre creación de empleado y asignación de vehículo
     const nuevoEmpleado = await prisma.$transaction(async (tx) => {
-      // Creamos el empleado
       const empleado = await tx.empleados.create({
         data: {
           Email: Email.toLowerCase(),
@@ -44,7 +41,6 @@ export async function POST(request: Request) {
         }
       });
 
-      // Si seleccionaron un vehículo, lo asignamos a este correo
       if (Consecutivo_Vehiculo) {
         await tx.inventario_Automoviles.update({
           where: { Consecutivo: Consecutivo_Vehiculo },
@@ -55,7 +51,7 @@ export async function POST(request: Request) {
       return empleado;
     });
 
-    //  ¡NUEVO: ENVÍO DE CORREO AL EMPLEADO! 
+    // Envío de credenciales de acceso por correo electrónico
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
@@ -90,36 +86,32 @@ export async function POST(request: Request) {
     };
 
     await transporter.sendMail(mailOptions);
-    console.log(`✉️ Correo de bienvenida enviado con éxito a: ${Email}`);
-    // FIN DEL ENVÍO DE CORREO 
 
     return NextResponse.json({ success: true, data: nuevoEmpleado });
   } catch (error: any) {
     if (error.code === 'P2002') {
       return NextResponse.json({ error: 'Este correo electrónico ya está registrado o el vehículo ya está asignado.' }, { status: 400 });
     }
-    console.error('❌ Error interno:', error);
+    console.error('Error interno:', error);
     return NextResponse.json({ error: 'Error interno en el servidor' }, { status: 500 });
   }
 }
 
-// 3. ACTUALIZAR UN EMPLEADO + CAMBIO INTELIGENTE DE VEHÍCULO
+// Actualiza los datos del empleado y gestiona la reasignación de vehículos
 export async function PUT(request: Request) {
   try {
     const body = await request.json();
-    //  AGREGAMOS Consecutivo_Vehiculo
     const { Email, Nombre_Empleado, A_Paterno, A_Materno, Cargo, Departamento, Rol, Estatus_Acceso, Consecutivo_Vehiculo } = body;
 
-    //  USAMOS TRANSACCIÓN PARA LIMPIAR Y ASIGNAR SIN ROMPER LA BD
     const empleadoActualizado = await prisma.$transaction(async (tx) => {
       
-      // 1. Limpiamos cualquier vehículo que tuviera asignado este empleado antes
+      // Libera cualquier vehículo previamente asignado al empleado
       await tx.inventario_Automoviles.updateMany({
         where: { Email_encargado: Email },
         data: { Email_encargado: null }
       });
 
-      // 2. Actualizamos la información del empleado
+      // Actualiza la información principal del empleado
       const emp = await tx.empleados.update({
         where: { Email },
         data: {
@@ -133,7 +125,7 @@ export async function PUT(request: Request) {
         }
       });
 
-      // 3. Si eligieron un vehículo nuevo en el buscador, se lo asignamos
+      // Asigna el nuevo vehículo si se proporcionó uno
       if (Consecutivo_Vehiculo) {
         await tx.inventario_Automoviles.update({
           where: { Consecutivo: Consecutivo_Vehiculo },
@@ -146,7 +138,7 @@ export async function PUT(request: Request) {
 
     return NextResponse.json({ success: true, data: empleadoActualizado });
   } catch (error) {
-    console.error('❌ Error al actualizar empleado:', error);
+    console.error('Error al actualizar empleado:', error);
     return NextResponse.json({ error: 'Error al actualizar los datos en la base de datos' }, { status: 500 });
   }
 }

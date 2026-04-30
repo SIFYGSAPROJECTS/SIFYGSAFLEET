@@ -21,13 +21,11 @@ export default async function DashboardLayout({
     <>
       <div className="fixed inset-0 pointer-events-none z-[9999] animate-entrance-overlay" />
       <div className="min-h-screen bg-transparent">
-        {/* 1. Cronómetro de inactividad (15 min sin actividad = logout) */}
         <IdleTimer />
 
-        {/* 2. (cada 5s verifica si el rol cambió) */}
         <RoleGuard />
 
-        {/* Todo lo que pongas aquí se verá en todas las páginas del dashboard */}
+        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50/50">
         {children}
       </div>
       <CopilotChat />

@@ -2,12 +2,12 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import nodemailer from 'nodemailer';
 
+// Actualiza el estado de un ticket y envía notificaciones automáticas por correo
 export async function PUT(request: Request) {
   try {
-
     const { folio, estado, lugar, fecha, hora, asesor, numeroAsesor, linkTaller } = await request.json();
 
-    // 1. Actualizamos el ticket incluyendo el número de asesor
+    // Actualiza los detalles de la cita y la información del asesor en la base de datos
     const ticketActualizado = await prisma.solicitud.update({
       where: { Pk_folio_ticket: folio },
       data: {
@@ -16,7 +16,7 @@ export async function PUT(request: Request) {
         Fecha_Cita: fecha || null,
         Hora_Cita: hora || null,
         Asesor: asesor || null,
-        Num_Asesor: numeroAsesor || null, //  GUARDAMOS EL TELÉFONO
+        Num_Asesor: numeroAsesor || null,
         Link_Taller: linkTaller || null
       },
       include: {
@@ -25,9 +25,8 @@ export async function PUT(request: Request) {
       }
     });
 
-    // 2. ¡NOTIFICACIONES POR CORREO!
+    // Envía notificaciones por correo electrónico al empleado según el nuevo estado
     if (ticketActualizado.empleado?.Email) {
-
       const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
@@ -38,7 +37,6 @@ export async function PUT(request: Request) {
 
       let mailOptions = null;
 
-      // --- CASO: CITA AGENDADA ---
       if (estado === 'CITA') {
         mailOptions = {
           from: process.env.EMAIL_USER,
@@ -76,10 +74,7 @@ export async function PUT(request: Request) {
             </div>
           `
         };
-      }
-
-      // --- CASO: EN TALLER ---
-      else if (estado === 'EN TALLER') {
+      } else if (estado === 'EN TALLER') {
         mailOptions = {
           from: process.env.EMAIL_USER,
           to: ticketActualizado.empleado.Email,
@@ -104,10 +99,7 @@ export async function PUT(request: Request) {
             </div>
           `
         };
-      }
-
-      // --- CASO: LISTO (RECOLECCIÓN) ---
-      else if (estado === 'LISTO') {
+      } else if (estado === 'LISTO') {
         mailOptions = {
           from: process.env.EMAIL_USER,
           to: ticketActualizado.empleado.Email,
@@ -135,17 +127,15 @@ export async function PUT(request: Request) {
         };
       }
 
-      // ENVIAR EL CORREO SI SE DEFINIÓ ALGUNA OPCIÓN
       if (mailOptions) {
         await transporter.sendMail(mailOptions);
-        console.log(`✉️ Correo de estado [${estado}] enviado con éxito a: ${ticketActualizado.empleado.Email}`);
       }
     }
 
     return NextResponse.json({ success: true, data: ticketActualizado });
 
   } catch (error) {
-    console.error('❌ Error al cambiar estado o enviar correo:', error);
+    console.error('Error al cambiar estado o enviar correo:', error);
     return NextResponse.json({ error: 'Error interno en el servidor' }, { status: 500 });
   }
 }

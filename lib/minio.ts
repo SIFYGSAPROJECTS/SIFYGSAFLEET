@@ -24,7 +24,7 @@ export const setupMinioBuckets = async () => {
       const exists = await minioClient.bucketExists(bucketName);
       if (!exists) {
         await minioClient.makeBucket(bucketName, 'us-east-1');
-        console.log(`✅ Bucket creado en MinIO: ${bucketName}`);
+        console.info(`Bucket created in MinIO: ${bucketName}`);
 
         // Crear política pública de lectura para poder ver los PDFs por URL
         const policy = {
@@ -39,7 +39,8 @@ export const setupMinioBuckets = async () => {
           ],
         };
         await minioClient.setBucketPolicy(bucketName, JSON.stringify(policy));
-        console.log(`✅ Política pública asignada a: ${bucketName}`);
+        // Bucket policy definition omitted for brevity or integrated
+        console.info(`Bucket policy applied for: ${bucketName}`);
       }
     } catch (err) {
       console.error(`Error configurando el bucket ${bucketName}:`, err);

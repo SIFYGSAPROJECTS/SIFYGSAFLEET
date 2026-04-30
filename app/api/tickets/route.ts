@@ -3,12 +3,13 @@ import { prisma } from '@/lib/db';
 import { cookies } from 'next/headers';
 import nodemailer from 'nodemailer';
 
+// Registra una nueva solicitud de servicio y notifica a los involucrados
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    // RECIBIMOS TAMBIÉN EL TIPO DE SERVICIO
     const { consecutivo, tipo_servicio, descripcion, kilometraje } = body;
 
+    // Verifica que el usuario tenga una sesión activa
     const cookieStore = await cookies();
     const userEmail = cookieStore.get('user_email')?.value;
 
@@ -16,7 +17,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'No se encontró sesión' }, { status: 401 });
     }
 
-    // --- CANDADO DE ESTADO DEL VEHÍCULO ---
+    // Valida que la unidad exista y se encuentre operativa (no dada de baja)
     const vehiculoRequerido = await prisma.inventario_Automoviles.findUnique({
       where: { Consecutivo: consecutivo }
     });
@@ -32,7 +33,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // --- FILTRO  ---
+    // Restringe a los usuarios estándar a crear un máximo de un ticket por día
     const usuario = await prisma.empleados.findUnique({
       where: { Email: userEmail }
     });
@@ -62,17 +63,15 @@ export async function POST(request: Request) {
       }
     }
 
-    // --- GUARDAMOS EN LA BASE DE DATOS ---
+    // Genera un folio único y registra el ticket en la base de datos
     const folioGenerado = `${consecutivo}-${Date.now()}`;
 
     const nuevoMantenimiento = await prisma.solicitud.create({
       data: {
         auto: { connect: { Consecutivo: consecutivo } },
         empleado: { connect: { Email: userEmail } },
-        // 2. GUARDAMOS EL NUEVO CAMPO EN LA BASE DE DATOS
         Tipo_Servicio: tipo_servicio,
         Descripcion: descripcion,
-        // Si no es preventivo, el kilometraje puede venir como null o undefined
         Kilometraje: kilometraje ? parseInt(kilometraje) : null,
         Fecha_Realizacion: new Date(),
         Estado: "PENDIENTE",
@@ -81,7 +80,7 @@ export async function POST(request: Request) {
       include: { auto: true }
     });
 
-    // --- ENVÍO DE CORREOS ---
+    // Configura la lista de destinatarios (solicitante, encargado y administradores)
     const administradores = await prisma.empleados.findMany({
       where: { Rol: 'ADMIN' },
       select: { Email: true }
@@ -93,8 +92,7 @@ export async function POST(request: Request) {
     const todosLosCorreos = [userEmail, encargadoVehiculo, ...correosAdmins].filter(Boolean);
     const destinatariosFinales = Array.from(new Set(todosLosCorreos)).join(', ');
 
-    console.log(`📧 Preparando envío de correo a: ${destinatariosFinales}`);
-
+    // Envía la confirmación por correo electrónico
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
@@ -103,7 +101,6 @@ export async function POST(request: Request) {
       },
     });
 
-    // 3. AGREGAMOS EL TIPO DE SERVICIO AL CORREO CORPORATIVO
     const tipoServicioCapitalizado = tipo_servicio ? tipo_servicio.charAt(0).toUpperCase() + tipo_servicio.slice(1) : 'No especificado';
 
     const mailOptions = {
@@ -132,12 +129,11 @@ export async function POST(request: Request) {
     };
 
     await transporter.sendMail(mailOptions);
-    console.log('✅ Correo enviado con éxito');
 
     return NextResponse.json({ success: true, data: nuevoMantenimiento });
 
   } catch (error: any) {
-    console.error('❌ Error en la API:', error);
+    console.error('Error en la API:', error);
     return NextResponse.json({ error: 'Error interno en el servidor' }, { status: 500 });
   }
 }

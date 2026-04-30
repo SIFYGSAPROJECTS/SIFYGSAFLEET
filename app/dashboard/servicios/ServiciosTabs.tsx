@@ -16,14 +16,15 @@ interface Props {
 }
 
 export default function ServiciosTabs({ tickets, vehiculos, isAdmin, rol }: Props) {
-  // Por defecto abrimos "Nueva Orden" (Mantenimiento)
+  // Inicializa la pestaña activa en 'Nueva Orden' por defecto
   const [activeTab, setActiveTab] = useState('nueva');
 
   const activos = tickets.filter(t => t.Estado !== 'LISTO');
-  // Guardamos hasta 30 tickets finalizados recientes para que la pestaña "Finalizadas" tenga contenido
+  // Conserva un límite de 30 tickets recientes para mantener el rendimiento de la vista
   const finalizadosRecientes = tickets.filter(t => t.Estado === 'LISTO').slice(0, 30); 
   const ticketsSeguimiento = [...activos, ...finalizadosRecientes];
 
+  // Genera y descarga un reporte en formato Excel (.xlsx) basado en la pestaña activa
   const descargarCSV = async () => {
     let dataToExport: any[] = [];
     if (activeTab === 'seguimiento') {
@@ -37,14 +38,14 @@ export default function ServiciosTabs({ tickets, vehiculos, isAdmin, rol }: Prop
       return;
     }
 
-    // Importamos las librerías de forma dinámica para no afectar la carga inicial de la página
+    // Importación dinámica de librerías para optimizar la carga del componente
     const ExcelJS = (await import('exceljs')).default || await import('exceljs');
     const { saveAs } = await import('file-saver');
 
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet(`Servicios ${activeTab === 'seguimiento' ? 'Proceso' : 'Historial'}`);
 
-    // Definir columnas y anchos para que se vea estético
+    // Configuración de la estructura de columnas del reporte
     worksheet.columns = [
       { header: 'Folio', key: 'folio', width: 25 },
       { header: 'Fecha', key: 'fecha', width: 12 },
@@ -58,7 +59,7 @@ export default function ServiciosTabs({ tickets, vehiculos, isAdmin, rol }: Prop
       { header: 'Estado', key: 'estado', width: 15 }
     ];
 
-    // Estilos del encabezado (Color #71717a y texto blanco)
+    // Aplicación de estilos corporativos al encabezado de la hoja
     worksheet.getRow(1).eachCell((cell) => {
       cell.fill = {
         type: 'pattern',
@@ -72,7 +73,7 @@ export default function ServiciosTabs({ tickets, vehiculos, isAdmin, rol }: Prop
       cell.alignment = { vertical: 'middle', horizontal: 'center' };
     });
 
-    // Agregar los datos
+    // Inserción y mapeo de datos en el documento
     dataToExport.forEach((t: any) => {
       const row = worksheet.addRow({
         folio: t.Pk_folio_ticket || t.id || '',
@@ -87,13 +88,13 @@ export default function ServiciosTabs({ tickets, vehiculos, isAdmin, rol }: Prop
         estado: t.Estado || ''
       });
 
-      // AQUÍ ESTÁ LA MAGIA: Alinear texto a la parte superior, centrado y permitir ajuste de texto
+      // Configuración de alineación de celdas para optimizar legibilidad
       row.eachCell({ includeEmpty: true }, (cell) => {
         cell.alignment = { vertical: 'top', horizontal: 'center', wrapText: true };
       });
     });
 
-    // Generar archivo y descargar
+    // Procesamiento y descarga del archivo final
     const buffer = await workbook.xlsx.writeBuffer();
     const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
     saveAs(blob, `Servicios_${activeTab}_${new Date().toISOString().split('T')[0]}.xlsx`);
@@ -104,7 +105,6 @@ export default function ServiciosTabs({ tickets, vehiculos, isAdmin, rol }: Prop
       
       <div className="flex flex-col md:flex-row justify-between md:items-center gap-5 mb-8">
         
-        {/* TEXTO ALINEADO A LA IZQUIERDA SIEMPRE */}
         <div className="flex-1 flex flex-col items-start w-full text-left">
           <Link href="/dashboard" className="inline-flex items-center gap-2 text-slate-400 hover:text-[#71717a] transition-colors mb-3 font-medium text-sm">
             <ArrowLeft className="w-4 h-4" /> Volver al Panel Maestro
@@ -117,30 +117,24 @@ export default function ServiciosTabs({ tickets, vehiculos, isAdmin, rol }: Prop
           </p>
         </div>
 
-        {/*  BARRA DE ACCESOS DIRECTOS RESPONSIVA  */}
         <div className="w-full md:w-auto overflow-x-auto scrollbar-hide pb-3">
-          {/* justify-start en móvil para permitir scroll, justify-end en desktop */}
           <div className="flex w-full justify-start sm:justify-center md:justify-end min-w-max px-1">
             <div className="inline-flex items-center bg-[var(--bg-floating)] border border-[var(--border-cream)] rounded-full p-1.5 shadow-lg shrink-0 gap-1">
               
-              {/*  BOTÓN DE USUARIOS SIEMPRE VISIBLE PARA TODOS  */}
               <Link href="/dashboard/usuarios" className="px-4 py-1.5 text-xs font-bold rounded-full text-slate-500 hover:text-slate-700 hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap">
                 <User size={14} /> Usuarios
               </Link>
 
-              {/*  FLOTA SOLO PARA ADMIN  */}
               {isAdmin && (
                 <Link href="/dashboard/inventario" className="px-4 py-1.5 text-xs font-bold rounded-full text-slate-500 hover:text-slate-700 hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap">
                   <Car size={14} /> Flota
                 </Link>
               )}
               
-              {/* BOTÓN ACTIVO: SERVICIOS */}
               <div className="px-4 py-1.5 text-xs font-bold rounded-full bg-[var(--bg-floating)] text-[var(--text-main)] cursor-default flex items-center gap-2 shadow-inner whitespace-nowrap">
                 <Wrench size={14} className="text-zinc-500" /> Servicios
               </div>
 
-              {/* BOTÓN DE CHECKLISTS */}
               <Link 
                 href={isAdmin ? '/dashboard/checklists' : '/dashboard/mis-checklists'} 
                 className="px-4 py-1.5 text-xs font-bold rounded-full text-slate-500 hover:text-cyan-600 hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap"
@@ -153,7 +147,6 @@ export default function ServiciosTabs({ tickets, vehiculos, isAdmin, rol }: Prop
         </div>
       </div>
 
-      {/* PESTAÑAS RESPONSIVAS (REORDENADAS) */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end border-b border-[var(--border-cream)] mb-6 w-full gap-4 sm:gap-0">
         <div className="flex space-x-1 sm:space-x-4 overflow-x-auto scrollbar-hide w-full sm:w-auto">
           
@@ -173,7 +166,6 @@ export default function ServiciosTabs({ tickets, vehiculos, isAdmin, rol }: Prop
             }`}
           >
             <Activity size={20} /> Seguimiento
-            {/* Solo contamos los activos en el globito de notificaciones */}
             <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${activeTab === 'seguimiento' ? 'bg-cyan-600 text-white' : 'bg-[var(--bg-floating)] text-slate-500'}`}>
               {activos.length}
             </span>
@@ -198,10 +190,7 @@ export default function ServiciosTabs({ tickets, vehiculos, isAdmin, rol }: Prop
         </div>
       </div>
 
-      {/* CONTENEDOR DE VISTAS */}
       <div className="">
-        
-        {/* VISTA 1: NUEVO TICKET */}
         {activeTab === 'nueva' && (
           <div className="max-w-3xl mx-auto">
              {vehiculos.length === 0 ? (
@@ -215,21 +204,17 @@ export default function ServiciosTabs({ tickets, vehiculos, isAdmin, rol }: Prop
           </div>
         )}
 
-        {/* VISTA 2: SEGUIMIENTO */}
         {activeTab === 'seguimiento' && (
           <div className="bg-[var(--bg-floating)]/50 p-1 rounded-xl">
-            {/* Le pasamos todos los tickets combinados (activos + recientes) */}
             <SeguimientoClient ticketsIniciales={ticketsSeguimiento} isAdmin={isAdmin} />
           </div>
         )}
 
-        {/* VISTA 3: HISTORIAL */}
         {activeTab === 'historial' && (
           <div>
             <HistorialClient historial={tickets} rol={rol} />
           </div>
         )}
-
       </div>
     </div>
   );

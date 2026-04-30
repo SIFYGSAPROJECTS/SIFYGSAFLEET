@@ -1,5 +1,6 @@
 import { prisma } from "../db";
 
+// Calcula el total de unidades en el inventario y segmenta por estatus (activos/inactivos)
 export async function get_inventory_summary(empresa_flota?: string) {
   const whereClause: any = {};
   if (empresa_flota && empresa_flota !== 'Todas') {
@@ -15,6 +16,7 @@ export async function get_inventory_summary(empresa_flota?: string) {
   return { total, activos, inactivos, empresa: empresa_flota || 'TODAS' };
 }
 
+// Agrupa las unidades por estado operativo y determina cuántas están disponibles sin asignación
 export async function get_fleet_status_summary(empresa_flota?: string) {
   const whereClause: any = {};
   if (empresa_flota && empresa_flota !== 'Todas') {
@@ -27,7 +29,6 @@ export async function get_fleet_status_summary(empresa_flota?: string) {
     _count: { Consecutivo: true }
   });
   
-  // Contar disponibles (Activo en flota y sin encargado)
   const disponibles = await prisma.inventario_Automoviles.count({
     where: {
       ...whereClause,
@@ -39,6 +40,7 @@ export async function get_fleet_status_summary(empresa_flota?: string) {
   return { stats, disponibles, empresa: empresa_flota || 'Todas' };
 }
 
+// Obtiene un reporte detallado del inventario de flota incluyendo datos del encargado
 export async function get_fleet_report(empresa_flota?: string) {
   const whereClause: any = {};
   if (empresa_flota && empresa_flota !== 'Todas') {
@@ -55,6 +57,7 @@ export async function get_fleet_report(empresa_flota?: string) {
   });
 }
 
+// Recupera información completa de una unidad específica, incluyendo su bitácora y último servicio
 export async function get_unit_details(identificador: string) {
   return await prisma.inventario_Automoviles.findFirst({
     where: {
@@ -81,6 +84,7 @@ export async function get_unit_details(identificador: string) {
   });
 }
 
+// Genera estadísticas de distribución de la flota por ubicación y departamento
 export async function get_fleet_stats() {
   const byUbicacion = await prisma.inventario_Automoviles.groupBy({
     by: ['Ubicacion'],
@@ -94,6 +98,7 @@ export async function get_fleet_stats() {
   return { byUbicacion, byDepartamento };
 }
 
+// Obtiene el listado de unidades operativas que no tienen un empleado asignado
 export async function get_unassigned_units() {
   return await prisma.inventario_Automoviles.findMany({
     where: { OR: [{ Email_encargado: null }, { Email_encargado: "" }] },
@@ -101,6 +106,7 @@ export async function get_unassigned_units() {
   });
 }
 
+// Búsqueda avanzada de unidades con filtros dinámicos (estatus, asignación, departamento)
 export async function get_dynamic_units(filtros: { empresa_flota?: string, departamento?: string, estatus?: string, ubicacion?: string, asignado?: boolean }) {
   const whereClause: any = {};
   
@@ -117,10 +123,8 @@ export async function get_dynamic_units(filtros: { empresa_flota?: string, depar
     whereClause.Ubicacion = { contains: filtros.ubicacion, mode: 'insensitive' };
   }
   if (filtros.asignado === true) {
-    // Solo trae autos cuyo encargado exista realmente en la tabla Empleados
     whereClause.encargado = { isNot: null };
   } else if (filtros.asignado === false) {
-    // Trae autos que no tienen a nadie en la tabla Empleados
     whereClause.encargado = { is: null };
   }
 
@@ -132,6 +136,7 @@ export async function get_dynamic_units(filtros: { empresa_flota?: string, depar
   });
 }
 
+// Consulta los tickets de servicio más recientes creados en el sistema
 export async function get_recent_tickets() {
   return await prisma.solicitud.findMany({
     orderBy: { Fecha_Realizacion: 'desc' },
@@ -140,23 +145,22 @@ export async function get_recent_tickets() {
   });
 }
 
-// === NUEVOS MÓDULOS DE EMPLEADOS ===
-
+// Obtiene el directorio corporativo de empleados aplicando filtros opcionales
 export async function get_employee_directory(filtros: { departamento?: string, cargo?: string, estatus?: string, nombre?: string }) {
-  const whereClause: any = {};
+  const Clause: any = {};
   
-  if (filtros.departamento) whereClause.Departamento = { contains: filtros.departamento, mode: 'insensitive' };
-  if (filtros.cargo) whereClause.Cargo = { contains: filtros.cargo, mode: 'insensitive' };
-  if (filtros.estatus) whereClause.Estatus_Acceso = { contains: filtros.estatus, mode: 'insensitive' };
+  if (filtros.departamento) Clause.Departamento = { contains: filtros.departamento, mode: 'insensitive' };
+  if (filtros.cargo) Clause.Cargo = { contains: filtros.cargo, mode: 'insensitive' };
+  if (filtros.estatus) Clause.Estatus_Acceso = { contains: filtros.estatus, mode: 'insensitive' };
   if (filtros.nombre) {
-    whereClause.OR = [
+    Clause.OR = [
       { Nombre_Empleado: { contains: filtros.nombre, mode: 'insensitive' } },
       { A_Paterno: { contains: filtros.nombre, mode: 'insensitive' } }
     ];
   }
 
   return await prisma.empleados.findMany({
-    where: whereClause,
+    where: Clause,
     select: {
       Email: true,
       Nombre_Empleado: true,
@@ -169,6 +173,7 @@ export async function get_employee_directory(filtros: { departamento?: string, c
   });
 }
 
+// Genera estadísticas operativas sobre los empleados registrados
 export async function get_employee_stats() {
   const byDepartamento = await prisma.empleados.groupBy({
     by: ['Departamento'],
@@ -181,9 +186,9 @@ export async function get_employee_stats() {
   return { total, totalActivos, byDepartamento };
 }
 
+// Recupera las revisiones (checklists) realizadas, filtrando opcionalmente por vehículo
 export async function get_checklists(consecutivo?: string) {
   if (!consecutivo) {
-    // Si no se pide una unidad específica, devolvemos una lista de unidades que TIENEN checklists
     const unitsWithChecklists = await prisma.checklist.findMany({
       select: { Consecutivo: true, Titulo: true, Fecha_Subida: true },
       distinct: ['Consecutivo'],
@@ -198,6 +203,7 @@ export async function get_checklists(consecutivo?: string) {
   });
 }
 
+// Obtiene el historial de mantenimientos para una unidad específica
 export async function get_unit_tickets(consecutivo: string) {
   return await prisma.solicitud.findMany({
     where: { Consecutivo: { contains: consecutivo, mode: 'insensitive' } },
@@ -207,6 +213,8 @@ export async function get_unit_tickets(consecutivo: string) {
     }
   });
 }
+
+// Consulta la bitácora histórica general de una unidad
 export async function get_unit_history(consecutivo: string) {
   return await prisma.historial_Auto.findMany({
     where: { Consecutivo: { contains: consecutivo, mode: 'insensitive' } },
@@ -214,8 +222,7 @@ export async function get_unit_history(consecutivo: string) {
   });
 }
 
-// === NUEVOS MÓDULOS PARA ADAPTABILIDAD 100% ===
-
+// Consulta el historial de reasignaciones (empleados) de un vehículo
 export async function get_unit_assignment_history(consecutivo: string) {
   return await prisma.historial_Registro_Automovil.findMany({
     where: { Consecutivo: { contains: consecutivo, mode: 'insensitive' } },
@@ -226,6 +233,7 @@ export async function get_unit_assignment_history(consecutivo: string) {
   });
 }
 
+// Recupera la información detallada de una solicitud de servicio por su folio
 export async function get_ticket_details(folio: string) {
   return await prisma.solicitud.findUnique({
     where: { Pk_folio_ticket: folio },
@@ -236,23 +244,20 @@ export async function get_ticket_details(folio: string) {
   });
 }
 
+// Busca solicitudes de servicio pendientes utilizando términos de coincidencia amplios o específicos
 export async function get_pending_services(query?: string) {
   const whereClause: any = {};
   const q = (query || "").toLowerCase().trim();
   
-  // Palabras que indican "dame todo lo activo"
   const broadKeywords = ["programado", "programados", "cita", "citas", "taller", 
     "pendiente", "pendientes", "servicio", "servicios", "seguimiento", "activo", 
     "activos", "proceso", "mantenimiento", "abril", "mayo", "mes", "todos", ""];
   
-  // Es búsqueda amplia si: no hay query, está vacía, o CONTIENE alguna palabra común
   const isBroadSearch = !q || q === "undefined" || broadKeywords.some(kw => q.includes(kw));
 
   if (isBroadSearch) {
-    // Traer todo lo que NO esté terminado (LISTO)
     whereClause.NOT = { Estado: 'LISTO' };
   } else {
-    // Búsqueda específica (ej. un folio concreto)
     whereClause.OR = [
       { Estado: { contains: query, mode: 'insensitive' } },
       { Tipo_Servicio: { contains: query, mode: 'insensitive' } },
@@ -271,6 +276,7 @@ export async function get_pending_services(query?: string) {
   });
 }
 
+// Cuenta la cantidad de tickets agrupados por su estado operativo actual
 export async function get_services_summary() {
   return await prisma.solicitud.groupBy({
     by: ['Estado'],
@@ -278,8 +284,8 @@ export async function get_services_summary() {
   });
 }
 
+// Identifica riesgos operativos en la flota (ausencia de seguros y alta demanda de servicios)
 export async function get_fleet_alerts() {
-  // Unidades con estatus no operativo o con muchos tickets
   const sinSeguro = await prisma.inventario_Automoviles.findMany({
     where: { Poliza_Seguro: null },
     select: { Consecutivo: true, Placa: true }
