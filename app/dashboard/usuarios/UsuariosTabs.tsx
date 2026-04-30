@@ -112,7 +112,7 @@ export default function UsuariosTabs({ isAdmin, empleadosIniciales }: Props) {
         </div>
       </div>
 
-      <div className="pt-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="pt-4">
 
         {/* VISTA 1: MI PERFIL */}
         {activeTab === 'perfil' && (

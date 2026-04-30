@@ -19,27 +19,25 @@ body {
   background-color: var(--bg-screen);
 }
 
-@keyframes entrance-fade {
+@keyframes entrance-overlay {
   0% {
-    opacity: 0;
-    filter: blur(12px) brightness(1.4) saturate(0.2);
-    transform: scale(1.02);
+    opacity: 1;
+    backdrop-filter: blur(12px) brightness(1.4) saturate(0.2);
     background-color: #000;
   }
   40% {
-    opacity: 0.6;
-    filter: blur(6px) brightness(1.2) saturate(0.5);
+    opacity: 1;
+    backdrop-filter: blur(6px) brightness(1.2) saturate(0.5);
     background-color: rgba(0,0,0,0.4);
   }
   100% {
-    opacity: 1;
-    filter: blur(0) brightness(1) saturate(1);
-    transform: scale(1);
+    opacity: 0;
+    backdrop-filter: blur(0px) brightness(1) saturate(1);
     background-color: transparent;
   }
 }
 
-.animate-entrance {
-  animation: entrance-fade 2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+.animate-entrance-overlay {
+  animation: entrance-overlay 2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 

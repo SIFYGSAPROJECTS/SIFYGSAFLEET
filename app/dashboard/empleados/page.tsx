@@ -348,9 +348,9 @@ export default function PersonalPage() {
 
       {/* MODAL DE EDICIÓN CON EL BUSCADOR INTELIGENTE */}
       {modalAbierto && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-0 sm:p-4 animate-in fade-in duration-200">
-          <div className="bg-white w-full max-w-2xl rounded-t-3xl sm:rounded-xl shadow-2xl border-t sm:border border-[var(--border-cream)] overflow-hidden flex flex-col max-h-[95vh]">
-            <div className="bg-[var(--bg-screen)] border-b border-[var(--border-cream)] p-5 sm:p-4 flex justify-between items-center text-[var(--text-main)]">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+          <div className="bg-white w-full max-w-2xl rounded-xl shadow-2xl border border-[var(--border-cream)] overflow-hidden flex flex-col max-h-[95vh]">
+            <div className="bg-[var(--bg-screen)] border-b border-[var(--border-cream)] p-4 flex justify-between items-center text-[var(--text-main)]">
               <h2 className="text-base sm:text-lg font-bold flex items-center gap-2 text-[#71717a] font-serif">
                 {modoEdicion ? <Pencil className="w-5 h-5" /> : <UserPlus className="w-5 h-5" />} 
                 {modoEdicion ? 'Editar Registro' : 'Nuevo Colaborador'}
@@ -481,8 +481,8 @@ export default function PersonalPage() {
                 )}
               </div>
               <div className="pt-6 border-t border-[var(--border-cream)] flex flex-col-reverse sm:flex-row justify-end gap-3 mt-4">
-                <button type="button" onClick={() => setModalAbierto(false)} disabled={guardando} className="w-full sm:w-auto px-6 py-3.5 sm:py-2.5 text-[var(--text-muted)] font-bold hover:bg-[var(--bg-hover)] rounded-xl transition-colors">Cancelar</button>
-                <button type="submit" disabled={guardando} className="w-full sm:w-auto flex justify-center items-center gap-2 px-8 py-3.5 sm:py-2.5 text-white font-black rounded-xl bg-[#71717a] hover:bg-[#52525b] shadow-lg disabled:opacity-50 transition-all uppercase tracking-wider text-xs sm:text-sm">
+                <button type="button" onClick={() => setModalAbierto(false)} disabled={guardando} className="w-full sm:w-auto px-6 py-2.5 text-[var(--text-muted)] font-bold hover:bg-[var(--bg-hover)] rounded-xl transition-colors">Cancelar</button>
+                <button type="submit" disabled={guardando} className="w-full sm:w-auto flex justify-center items-center gap-2 px-8 py-2.5 text-white font-black rounded-xl bg-[#71717a] hover:bg-[#52525b] shadow-lg disabled:opacity-50 transition-all uppercase tracking-wider text-xs sm:text-sm">
                   {guardando && <Loader2 className="w-4 h-4 animate-spin" />}
                   {modoEdicion ? 'Actualizar' : (guardando ? 'Creando...' : 'Registrar')}
                 </button>

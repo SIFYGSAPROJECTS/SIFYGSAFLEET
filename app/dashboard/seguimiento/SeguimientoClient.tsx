@@ -14,14 +14,14 @@ export default function SeguimientoClient({ ticketsIniciales = [], isAdmin }: an
 
   //  LÓGICA DE FILTRADO EN TIEMPO REAL 
   const ticketsFiltrados = ticketsIniciales.filter((ticket: any) => {
-    // Revisamos si acabamos de cambiar su estado ahorita mismo (datosTemporales) o si ya venía así
-    const infoMemoria = datosTemporales[ticket.Pk_folio_ticket] || {};
-    const estadoVisual = infoMemoria.estado || ticket.Estado || 'PENDIENTE';
+    // Usamos el estado real guardado en base de datos para no desaparecer la tarjeta
+    // antes de que el usuario confirme el cambio a "LISTO"
+    const estadoReal = ticket.Estado || 'PENDIENTE';
     
     if (vista === 'proceso') {
-      return estadoVisual !== 'LISTO';
+      return estadoReal !== 'LISTO';
     } else {
-      return estadoVisual === 'LISTO';
+      return estadoReal === 'LISTO';
     }
   });
 
@@ -77,13 +77,14 @@ export default function SeguimientoClient({ ticketsIniciales = [], isAdmin }: an
         const pasoActual = estados.indexOf(estadoVisual);
 
         // Estilo condicional si está finalizado
-        const esFinalizado = estadoVisual === 'LISTO';
+        const esFinalizadoVisual = estadoVisual === 'LISTO';
+        const esFinalizadoReal = ticket.Estado === 'LISTO';
 
         return (
-          <div key={ticket.Pk_folio_ticket} className={`bg-[var(--bg-floating)] rounded-xl shadow-xl border-x border-b border-[var(--border-cream)] border-t-4 p-5 sm:p-8 transition-colors ${esFinalizado ? 'border-t-stone-400' : 'border-t-[#71717a]'}`}>
+          <div key={ticket.Pk_folio_ticket} className={`bg-[var(--bg-floating)] rounded-xl shadow-xl border-x border-b border-[var(--border-cream)] border-t-4 p-5 sm:p-8 transition-colors ${esFinalizadoVisual ? 'border-t-emerald-500' : 'border-t-[#71717a]'}`}>
             <div className="flex flex-col md:flex-row justify-between items-start mb-10 gap-6">
               <div>
-                <span className={`px-2 py-1 rounded text-[10px] font-mono font-black mb-3 inline-block tracking-[0.2em] ${esFinalizado ? 'bg-zinc-500/10 text-zinc-500 border border-zinc-500/20' : 'bg-[#71717a]/10 text-[#71717a] border border-[#71717a]/20'}`}>
+                <span className={`px-2 py-1 rounded text-[10px] font-mono font-black mb-3 inline-block tracking-[0.2em] ${esFinalizadoVisual ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'bg-[#71717a]/10 text-[#71717a] border border-[#71717a]/20'}`}>
                   FOLIO: {ticket.Pk_folio_ticket}
                 </span>
                 <h3 className="text-xl sm:text-2xl font-bold text-[var(--text-main)] leading-tight font-serif">
@@ -99,7 +100,7 @@ export default function SeguimientoClient({ ticketsIniciales = [], isAdmin }: an
                 <p className="text-sm text-[var(--text-muted)] mt-2 italic">&ldquo;{ticket.Descripcion}&rdquo;</p>
               </div>
 
-              {isAdmin && !esFinalizado && (
+              {isAdmin && !esFinalizadoReal && (
                 <div className="bg-[var(--bg-floating)] p-4 rounded-xl border border-[var(--border-cream)] shadow-inner w-full md:w-auto animate-in fade-in">
                   <StatusUpdater 
                     folio={ticket.Pk_folio_ticket} 
@@ -114,25 +115,25 @@ export default function SeguimientoClient({ ticketsIniciales = [], isAdmin }: an
                   />
                 </div>
               )}
-              {isAdmin && esFinalizado && (
-                <div className="flex items-center gap-2 bg-zinc-500/10 text-zinc-500 px-4 py-2 rounded-lg border border-zinc-500/20 font-bold text-sm">
+              {isAdmin && esFinalizadoReal && (
+                <div className="flex items-center gap-2 bg-emerald-500/10 text-emerald-600 px-4 py-2 rounded-lg border border-emerald-500/20 font-bold text-sm">
                   <CheckCircle2 size={18} /> Mantenimiento Concluido
                 </div>
               )}
             </div>
 
             {/* LÍNEA DE TIEMPO RESPONSIVE */}
-            <div className={`w-full overflow-x-auto pb-4 scrollbar-hide ${esFinalizado ? 'opacity-70' : ''}`}>
+            <div className={`w-full overflow-x-auto pb-4 scrollbar-hide ${esFinalizadoVisual ? 'opacity-70' : ''}`}>
               <div className="relative py-4 px-2 sm:px-6 mb-4 min-w-[320px] sm:min-w-[400px]">
                 <div className="absolute top-10 left-0 w-full h-1.5 bg-[var(--bg-screen)] rounded-full"></div>
-                <div className="absolute top-10 left-0 h-1.5 rounded-full transition-all duration-1000 bg-gradient-to-r from-[#71717a] via-cyan-500 via-yellow-500 to-zinc-500"
+                <div className="absolute top-10 left-0 h-1.5 rounded-full transition-all duration-1000 bg-gradient-to-r from-[#71717a] via-cyan-500 via-yellow-500 to-emerald-500"
                   style={{ width: `${(pasoActual / 3) * 100}%` }}></div>
                 <div className="relative flex justify-between">
                   {[
                     { l: 'Pendiente', i: Timer, c: 'text-[#71717a]', b: 'bg-[#71717a]' },
                     { l: 'Cita', i: Calendar, c: 'text-cyan-400', b: 'bg-cyan-500' },
                     { l: 'En Taller', i: Wrench, c: 'text-yellow-400', b: 'bg-yellow-500' },
-                    { l: 'Listo', i: CheckCircle2, c: 'text-zinc-400', b: 'bg-zinc-500' }
+                    { l: 'Listo', i: CheckCircle2, c: 'text-emerald-500', b: 'bg-emerald-500' }
                   ].map((p, idx) => (
                     <div key={p.l} className="flex flex-col items-center">
                       <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center border-2 z-10 transition-all duration-700 ${pasoActual >= idx ? `${p.b} border-transparent shadow-md` : 'bg-[var(--bg-screen)] border-[var(--border-cream)] text-stone-300'}`}>

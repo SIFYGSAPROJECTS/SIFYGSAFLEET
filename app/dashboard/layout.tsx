@@ -19,7 +19,8 @@ export default async function DashboardLayout({
 
   return (
     <>
-      <div className="min-h-screen bg-transparent animate-entrance">
+      <div className="fixed inset-0 pointer-events-none z-[9999] animate-entrance-overlay" />
+      <div className="min-h-screen bg-transparent">
         {/* 1. Cronómetro de inactividad (15 min sin actividad = logout) */}
         <IdleTimer />
 

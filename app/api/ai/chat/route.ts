@@ -72,7 +72,7 @@ const TOOLS = [
 
 async function callGroq(messages: any[], tools?: any[], temp = 0) {
   const body: any = {
-    model: "llama-3.1-8b-instant", // A las 6PM cambiar a llama-3.3-70b-versatile
+    model: "llama-3.3-70b-versatile",
     messages,
     temperature: temp,
     max_tokens: 1024

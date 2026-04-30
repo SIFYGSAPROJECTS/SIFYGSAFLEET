@@ -199,7 +199,7 @@ export default function ServiciosTabs({ tickets, vehiculos, isAdmin, rol }: Prop
       </div>
 
       {/* CONTENEDOR DE VISTAS */}
-      <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="">
         
         {/* VISTA 1: NUEVO TICKET */}
         {activeTab === 'nueva' && (
