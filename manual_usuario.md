@@ -235,7 +235,7 @@ PENDIENTE → EN PROCESO → LISTO
 5. Envía la solicitud.
 
 > [!TIP]
-> El sistema puede enviar una notificación por correo con un archivo `.ics` para agregar la cita automáticamente al calendario (Outlook, Google Calendar).
+> Al crear un ticket, el sistema envía automáticamente un **correo de notificación** al solicitante, al encargado del vehículo y a todos los administradores. El correo incluye los detalles completos de la orden: unidad, placa, tipo de servicio y descripción del trabajo.
 
 ### 6.3 Ver y Gestionar Tickets (ADMIN)
 
