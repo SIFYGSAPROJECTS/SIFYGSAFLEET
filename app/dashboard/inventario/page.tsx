@@ -332,11 +332,11 @@ export default function InventarioMaestroPage() {
                   label: `Flota: ${emp}`
                 }))
               ]}
-              className="w-52"
+              className="w-full sm:w-52"
               direction="down"
             />
             {tabPrincipal === 'activos' && (
-              <div className="flex gap-3 w-full sm:w-auto">
+              <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
                 <button onClick={descargarCSV} className="w-full sm:w-auto bg-white hover:bg-[var(--bg-hover)] border border-[var(--border-cream)] text-[var(--text-main)] px-4 py-2.5 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors shadow-sm shrink-0">
                   <Download className="w-4 h-4" /> Exportar Excel
                 </button>

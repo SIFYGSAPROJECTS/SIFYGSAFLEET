@@ -41,7 +41,13 @@ const TOOLS = [
     function: {
       name: "get_fleet_report", 
       description: "Obtener LISTA DETALLADA para generar REPORTES EXCEL de unidades y conductores.",
-      parameters: { type: "object", properties: { empresa_flota: { type: "string" } } }
+      parameters: { 
+        type: "object", 
+        properties: { 
+          empresa_flota: { type: "string", description: "Opcional. Prefijo de empresa (Ej. AVH). Usa 'Todas' si piden flota total o no especifican." },
+          estatus: { type: "string", description: "Opcional. Filtro de estatus (Ej. 'Activo', 'Baja'). Usa 'Todos' por defecto." }
+        } 
+      }
     }
   },
   { 
@@ -57,7 +63,12 @@ const TOOLS = [
     function: {
       name: "get_fleet_status_summary", 
       description: "Ver conteos rápidos (Texto). NO sirve para Excel.",
-      parameters: { type: "object", properties: { empresa_flota: { type: "string" } } }
+      parameters: { 
+        type: "object", 
+        properties: { 
+          empresa_flota: { type: "string", description: "Opcional. Prefijo de empresa (Ej. AVH). Usa 'Todas' si piden flota total o no especifican." }
+        } 
+      }
     }
   },
   { 
@@ -141,7 +152,7 @@ export async function POST(req: Request) {
       
       try {
         switch (functionName) {
-          case "get_fleet_report": functionResult = await get_fleet_report(args.empresa_flota); break;
+          case "get_fleet_report": functionResult = await get_fleet_report(args.empresa_flota, args.estatus); break;
           case "get_pending_services": functionResult = await get_pending_services(args.query); break;
           case "get_fleet_status_summary": functionResult = await get_fleet_status_summary(args.empresa_flota); break;
           case "get_unit_details": functionResult = await get_unit_details(args.identificador || ""); break;

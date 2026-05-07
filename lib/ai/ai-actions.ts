@@ -19,7 +19,7 @@ export async function get_inventory_summary(empresa_flota?: string) {
 // Agrupa las unidades por estado operativo y determina cuántas están disponibles sin asignación
 export async function get_fleet_status_summary(empresa_flota?: string) {
   const whereClause: any = {};
-  if (empresa_flota && empresa_flota !== 'Todas') {
+  if (empresa_flota && !['todas', 'total', 'activa', 'activos', 'general', 'flota'].includes(empresa_flota.toLowerCase())) {
     whereClause.Consecutivo = { startsWith: empresa_flota + '-', mode: 'insensitive' };
   }
 
@@ -41,10 +41,22 @@ export async function get_fleet_status_summary(empresa_flota?: string) {
 }
 
 // Obtiene un reporte detallado del inventario de flota incluyendo datos del encargado
-export async function get_fleet_report(empresa_flota?: string) {
+export async function get_fleet_report(empresa_flota?: string, estatus?: string) {
   const whereClause: any = {};
-  if (empresa_flota && empresa_flota !== 'Todas') {
+  if (empresa_flota && !['todas', 'total', 'activa', 'activos', 'general', 'flota'].includes(empresa_flota.toLowerCase())) {
     whereClause.Consecutivo = { startsWith: empresa_flota + '-', mode: 'insensitive' };
+  }
+
+  if (estatus && estatus.toLowerCase() !== 'todos') {
+    if (estatus.toLowerCase().includes('activ')) {
+      whereClause.Estatus_Operativo = 'Activo en flota';
+    } else if (estatus.toLowerCase().includes('baja') || estatus.toLowerCase().includes('inactiv')) {
+      whereClause.Estatus_Operativo = 'Dado de baja';
+    } else if (estatus.toLowerCase().includes('repara') || estatus.toLowerCase().includes('taller')) {
+      whereClause.Estatus_Operativo = 'En Reparación';
+    } else if (estatus.toLowerCase().includes('siniestrad')) {
+      whereClause.Estatus_Operativo = 'Siniestrado';
+    }
   }
 
   return await prisma.inventario_Automoviles.findMany({

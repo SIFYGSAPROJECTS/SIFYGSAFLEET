@@ -26,7 +26,8 @@ export default async function DashboardLayout({
         <RoleGuard />
 
         <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50/50">
-        {children}
+          {children}
+        </main>
       </div>
       <CopilotChat />
     </>
