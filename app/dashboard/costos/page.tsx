@@ -91,7 +91,7 @@ export default function CostosPage() {
         body: formData,
       });
       const data = await res.json();
-      
+      //comentario
       if (res.ok) {
         alert(`¡Importación exitosa! Se procesaron ${data.procesados} registros. (${data.errores} errores)`);
         fetchCostos(); // Recargar datos
