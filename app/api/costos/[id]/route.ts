@@ -6,10 +6,11 @@ const prisma = new PrismaClient();
 // PUT: Actualizar un costo existente
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = parseInt(params.id);
+    const { id } = await params;
+    const numericId = parseInt(id);
     const body = await request.json();
     const {
       Fecha,
@@ -27,7 +28,7 @@ export async function PUT(
     const Total = Number(Costo_MO) + Number(Costo_Refacciones);
 
     const costoActualizado = await prisma.costos_Mantenimiento.update({
-      where: { Id_Costo: id },
+      where: { Id_Costo: numericId },
       data: {
         Fecha: Fecha ? new Date(Fecha) : undefined,
         Servicio,
@@ -52,12 +53,13 @@ export async function PUT(
 // DELETE: Eliminar un costo
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = parseInt(params.id);
+    const { id } = await params;
+    const numericId = parseInt(id);
     await prisma.costos_Mantenimiento.delete({
-      where: { Id_Costo: id }
+      where: { Id_Costo: numericId }
     });
 
     return NextResponse.json({ message: 'Costo eliminado correctamente' });
