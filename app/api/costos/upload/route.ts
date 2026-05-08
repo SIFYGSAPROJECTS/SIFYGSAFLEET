@@ -14,10 +14,9 @@ export async function POST(request: Request) {
     }
 
     const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
 
     const workbook = new ExcelJS.Workbook();
-    await workbook.xlsx.load(buffer);
+    await workbook.xlsx.load(arrayBuffer as unknown as Buffer);
 
     const worksheet = workbook.worksheets[0]; // Tomar la primera hoja
     if (!worksheet) {
