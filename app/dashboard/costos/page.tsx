@@ -314,9 +314,9 @@ export default function CostosPage() {
           <div className="absolute top-0 right-0 p-3 opacity-5 group-hover:opacity-10 transition-opacity">
             <Wrench size={50} />
           </div>
-          <p className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest mb-1">Servicios (Tickets)</p>
-          <h3 className="text-2xl font-black text-[var(--text-main)] font-serif mb-1">{totalTicketsServicio}</h3>
-          <p className="text-xs font-medium text-[var(--text-muted)]">Generados en plataforma</p>
+          <p className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest mb-1">Servicios</p>
+          <h3 className="text-2xl font-black text-[var(--text-main)] font-serif mb-1">{filteredCostos.length}</h3>
+          <p className="text-xs font-medium text-[var(--text-muted)]">Registros en tabla de costos</p>
         </div>
       </div>
 
