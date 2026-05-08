@@ -333,7 +333,7 @@ export default function CostosPage() {
                 <CartesianGrid strokeDasharray="3 3" horizontal={false} />
                 <XAxis type="number" tickFormatter={(value) => `$${value/1000}k`} fontSize={12} />
                 <YAxis dataKey="name" type="category" width={80} fontSize={12} fontWeight="bold" />
-                <Tooltip formatter={(value: number) => formatoMoneda(value)} cursor={{fill: 'transparent'}} />
+                <Tooltip formatter={(value: any) => formatoMoneda(Number(value))} cursor={{fill: 'transparent'}} />
                 <Bar dataKey="value" fill="#27272a" radius={[0, 4, 4, 0]} barSize={24} />
               </BarChart>
             </ResponsiveContainer>
@@ -351,7 +351,7 @@ export default function CostosPage() {
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
                 <XAxis dataKey="mes" fontSize={12} />
                 <YAxis tickFormatter={(value) => `$${value/1000}k`} fontSize={12} />
-                <Tooltip formatter={(value: number) => formatoMoneda(value)} />
+                <Tooltip formatter={(value: any) => formatoMoneda(Number(value))} />
                 <Line type="monotone" dataKey="Total" stroke="#71717a" strokeWidth={3} dot={{r: 4, fill: '#18181b'}} activeDot={{r: 6}} />
               </LineChart>
             </ResponsiveContainer>
