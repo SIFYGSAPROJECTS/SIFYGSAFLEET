@@ -1,7 +1,7 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link'; 
-import { Search, Upload, FileText, AlertCircle, CheckCircle2, Car, User, Palette, Gauge, ArrowLeft, X, Eye, Download, ChevronRight, Trash2, PencilLine, AlertTriangle, Wrench } from 'lucide-react'; 
+import { Search, Upload, FileText, AlertCircle, CheckCircle2, Car, User, Palette, Gauge, ArrowLeft, X, Eye, Download, ChevronRight, Trash2, PencilLine, AlertTriangle, Wrench, DollarSign } from 'lucide-react'; 
 import SystemModal, { ModalType } from '@/components/ui/SystemModal';
 
 interface Props {
@@ -234,6 +234,12 @@ export default function ChecklistsPage({ vehiculos = [], isAdmin = false }: Prop
                 <div className="px-4 py-1.5 text-xs font-bold rounded-full bg-white text-[var(--text-main)] cursor-default flex items-center gap-2 shadow-sm border border-[var(--border-cream)] whitespace-nowrap">
                   <FileText size={14} className="text-cyan-600" /> Checklists
                 </div>
+
+                {isAdmin && (
+                  <Link href="/dashboard/costos" className="px-4 py-1.5 text-xs font-bold rounded-full text-[var(--text-muted)] hover:text-[#71717a] hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap">
+                    <DollarSign size={14} /> Costos
+                  </Link>
+                )}
 
               </div>
             </div>

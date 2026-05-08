@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Wrench, History, Activity, ArrowLeft, PlusCircle, User, Car, FileText, Download } from 'lucide-react';
+import { Wrench, History, Activity, ArrowLeft, PlusCircle, User, Car, FileText, Download, DollarSign } from 'lucide-react';
 import Link from 'next/link';
 
 import TicketForm from '../tickets/nuevo/TicketForm';
@@ -141,6 +141,12 @@ export default function ServiciosTabs({ tickets, vehiculos, isAdmin, rol }: Prop
               >
                 <FileText size={14} /> Checklists
               </Link>
+
+              {isAdmin && (
+                <Link href="/dashboard/costos" className="px-4 py-1.5 text-xs font-bold rounded-full text-slate-500 hover:text-[#71717a] hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap">
+                  <DollarSign size={14} /> Costos
+                </Link>
+              )}
 
             </div>
           </div>

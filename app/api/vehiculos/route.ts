@@ -6,6 +6,9 @@ export async function GET() {
     const vehiculos = await prisma.inventario_Automoviles.findMany({
       include: { 
         encargado: true, 
+        _count: {
+          select: { solicitudes: true }
+        },
         solicitudes: { 
           orderBy: { Fecha_Realizacion: 'desc' },
           take: 1, 
@@ -18,9 +21,10 @@ export async function GET() {
     });
 
     const vehiculosConKilometraje = vehiculos.map((auto: any) => {
-      const { solicitudes, ...datosAuto } = auto; 
+      const { solicitudes, _count, ...datosAuto } = auto; 
       return {
         ...datosAuto,
+        Total_Servicios: _count?.solicitudes || 0,
         Kilometraje_Actual: solicitudes && solicitudes.length > 0 ? solicitudes[0].Kilometraje : null
       };
     });

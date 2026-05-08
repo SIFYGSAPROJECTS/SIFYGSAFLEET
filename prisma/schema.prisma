@@ -58,6 +58,7 @@ model Inventario_Automoviles {
   bitacora_autos  Historial_Auto[]
   solicitudes     Solicitud[]
   checklists      Checklist[]
+  costos          Costos_Mantenimiento[]
 }
 
 // 3. TELEFONOS DE EMPLEADOS [cite: 3]
@@ -161,4 +162,22 @@ model Procesos {
 
   ticket          Solicitud @relation(fields: [Pk_folio_ticket], references: [Pk_folio_ticket], onDelete: Cascade)
   empleado        Empleados @relation(fields: [Email_Empleado], references: [Email])
+}
+
+// 10. COSTOS DE MANTENIMIENTO [cite: 10]
+model Costos_Mantenimiento {
+  Id_Costo          Int      @id @default(autoincrement())
+  Fecha             DateTime
+  Servicio          String   @db.Text
+  Consecutivo       String   @db.VarChar(10)
+  Costo_MO          Float
+  Costo_Refacciones Float
+  Total             Float
+  Proveedor         String   @db.Text
+  Empresa           String   @db.Text
+  Tipo_Mtto         String   @db.Text
+  Factura_CDG       String?  @db.Text
+
+  // Relacion
+  auto              Inventario_Automoviles @relation(fields: [Consecutivo], references: [Consecutivo], onDelete: Cascade)
 }
