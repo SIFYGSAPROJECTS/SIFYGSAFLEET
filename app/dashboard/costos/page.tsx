@@ -2,7 +2,11 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import Link from 'next/link';
-import { DollarSign, Search, Filter, Plus, Calendar, Wrench, Building2, Car, TrendingUp, TrendingDown, Receipt, UploadCloud, ArrowLeft, User, FileText } from 'lucide-react';
+import { DollarSign, Search, Filter, Plus, Calendar, Wrench, Building2, Car, TrendingUp, TrendingDown, Receipt, UploadCloud, ArrowLeft, User, FileText, Download } from 'lucide-react';
+
+import * as ExcelJS from 'exceljs';
+import { saveAs } from 'file-saver';
+import html2canvas from 'html2canvas';
 
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, LineChart, Line } from 'recharts';
 import PremiumSelect from '@/components/ui/PremiumSelect';
@@ -32,6 +36,9 @@ export default function CostosPage() {
   const [loading, setLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const chartEmpresaRef = useRef<HTMLDivElement>(null);
+  const chartMensualRef = useRef<HTMLDivElement>(null);
+  const [isExporting, setIsExporting] = useState(false);
   
   // Filtros
   const [empresaFiltro, setEmpresaFiltro] = useState('');
@@ -142,6 +149,111 @@ export default function CostosPage() {
       }
     } catch (error) {
       console.error(error);
+    }
+  };
+
+  const handleExportExcel = async () => {
+    setIsExporting(true);
+    try {
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet('Reporte de Costos');
+
+      // Título y Filtros
+      worksheet.addRow(['Reporte de Control de Costos']);
+      worksheet.addRow([`Fecha de Generación:`, new Date().toLocaleDateString()]);
+      worksheet.addRow([`Filtro Empresa:`, empresaFiltro || 'Todas']);
+      worksheet.addRow([`Filtro Unidad:`, unidadFiltro || 'Todas']);
+      worksheet.addRow([]); // Espacio
+
+      // Estilos para encabezados
+      const headerRow = worksheet.addRow(['Fecha', 'Servicio', 'Unidad', 'Costo MO', 'Costo Ref.', 'Total', 'Empresa', 'Proveedor']);
+      headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+      headerRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF27272A' } };
+      
+      // Anchos de columna
+      worksheet.columns = [
+        { width: 12 }, { width: 35 }, { width: 15 }, { width: 15 }, 
+        { width: 15 }, { width: 15 }, { width: 15 }, { width: 25 }
+      ];
+
+      // Datos
+      filteredCostos.forEach(costo => {
+        worksheet.addRow([
+          new Date(costo.Fecha).toLocaleDateString(),
+          costo.Servicio,
+          costo.Consecutivo,
+          costo.Costo_MO,
+          costo.Costo_Refacciones,
+          costo.Total,
+          costo.Empresa,
+          costo.Proveedor
+        ]);
+      });
+
+      // Formato de moneda para columnas D, E y F
+      worksheet.getColumn(4).numFmt = '"$"#,##0.00';
+      worksheet.getColumn(5).numFmt = '"$"#,##0.00';
+      worksheet.getColumn(6).numFmt = '"$"#,##0.00';
+
+      worksheet.addRow([]); // Espacio
+
+      // Sumatorias (desglosadas hacia abajo)
+      const rowMO = worksheet.addRow(['', '', 'Total Mano de Obra:', totalMO]);
+      const rowRef = worksheet.addRow(['', '', 'Total Refacciones:', totalRefacciones]);
+      const rowTot = worksheet.addRow(['', '', 'GASTO TOTAL GENERAL:', totalGasto]);
+      
+      rowMO.getCell(3).font = { bold: true, color: { argb: 'FF71717A' } };
+      rowRef.getCell(3).font = { bold: true, color: { argb: 'FF71717A' } };
+      rowTot.getCell(3).font = { bold: true };
+      
+      rowMO.getCell(4).numFmt = '"$"#,##0.00';
+      rowRef.getCell(4).numFmt = '"$"#,##0.00';
+      rowTot.getCell(4).numFmt = '"$"#,##0.00';
+      rowTot.getCell(4).font = { bold: true };
+
+      // Capturar y agregar gráficas si existen (lado a lado)
+      let startRow = worksheet.rowCount + 3; // Dejar espacio antes de las gráficas
+      
+      worksheet.getCell(`A${startRow}`).value = 'Costos por Empresa';
+      worksheet.getCell(`A${startRow}`).font = { bold: true, size: 14 };
+      
+      worksheet.getCell(`F${startRow}`).value = 'Tendencia de Gastos (Mensual)';
+      worksheet.getCell(`F${startRow}`).font = { bold: true, size: 14 };
+
+      if (chartEmpresaRef.current) {
+        const canvasEmp = await html2canvas(chartEmpresaRef.current, { scale: 2, backgroundColor: '#ffffff' });
+        const imgEmp = workbook.addImage({
+          base64: canvasEmp.toDataURL('image/png'),
+          extension: 'png',
+        });
+        worksheet.addImage(imgEmp, {
+          tl: { col: 0, row: startRow }, // col 0 = A, debajo del título
+          ext: { width: canvasEmp.width / 2, height: canvasEmp.height / 2 }
+        });
+      }
+
+      if (chartMensualRef.current) {
+        const canvasMens = await html2canvas(chartMensualRef.current, { scale: 2, backgroundColor: '#ffffff' });
+        const imgMens = workbook.addImage({
+          base64: canvasMens.toDataURL('image/png'),
+          extension: 'png',
+        });
+        worksheet.addImage(imgMens, {
+          tl: { col: 5, row: startRow }, // col 5 = F, lado a lado
+          ext: { width: canvasMens.width / 2, height: canvasMens.height / 2 }
+        });
+      }
+
+      // Guardar archivo
+      const buffer = await workbook.xlsx.writeBuffer();
+      const fileName = `Reporte_Costos_${new Date().toISOString().split('T')[0]}.xlsx`;
+      saveAs(new Blob([buffer as BlobPart]), fileName);
+
+    } catch (error) {
+      console.error('Error al exportar a Excel', error);
+      alert('Hubo un error al generar el archivo Excel.');
+    } finally {
+      setIsExporting(false);
     }
   };
 
@@ -266,6 +378,14 @@ export default function CostosPage() {
             onChange={handleFileUpload}
           />
           <button 
+            onClick={handleExportExcel}
+            disabled={isExporting}
+            className="bg-white border border-[var(--border-cream)] hover:bg-[var(--bg-hover)] text-[var(--text-main)] px-5 py-2.5 rounded-full font-bold shadow-sm transition-all flex items-center gap-2 disabled:opacity-50 text-sm"
+          >
+            <Download size={16} className={isExporting ? "animate-pulse" : ""} />
+            {isExporting ? 'Generando...' : 'Exportar Excel'}
+          </button>
+          <button 
             onClick={() => fileInputRef.current?.click()}
             disabled={isUploading}
             className="bg-white border border-[var(--border-cream)] hover:bg-[var(--bg-hover)] text-[var(--text-main)] px-5 py-2.5 rounded-full font-bold shadow-sm transition-all flex items-center gap-2 disabled:opacity-50 text-sm"
@@ -322,7 +442,7 @@ export default function CostosPage() {
 
       {/* GRÁFICAS */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-[var(--bg-floating)] border border-[var(--border-cream)] p-5 rounded-xl shadow-sm">
+        <div className="bg-[var(--bg-floating)] border border-[var(--border-cream)] p-5 rounded-xl shadow-sm" ref={chartEmpresaRef}>
           <h3 className="font-bold font-serif text-[var(--text-main)] mb-4 flex items-center gap-2">
             <Building2 size={18} className="text-[var(--text-muted)]" />
             Costos por Empresa
@@ -340,7 +460,7 @@ export default function CostosPage() {
           </div>
         </div>
 
-        <div className="bg-[var(--bg-floating)] border border-[var(--border-cream)] p-5 rounded-xl shadow-sm">
+        <div className="bg-[var(--bg-floating)] border border-[var(--border-cream)] p-5 rounded-xl shadow-sm" ref={chartMensualRef}>
           <h3 className="font-bold font-serif text-[var(--text-main)] mb-4 flex items-center gap-2">
             <TrendingUp size={18} className="text-[var(--text-muted)]" />
             Tendencia de Gastos (Mensual)

@@ -17,6 +17,7 @@
     "bcryptjs": "^3.0.3",
     "exceljs": "^4.4.0",
     "file-saver": "^2.0.5",
+    "html2canvas": "^1.4.1",
     "lucide-react": "^0.574.0",
     "minio": "^8.0.7",
     "next": "16.1.6",
