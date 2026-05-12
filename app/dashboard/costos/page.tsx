@@ -39,6 +39,7 @@ export default function CostosPage() {
   const chartEmpresaRef = useRef<HTMLDivElement>(null);
   const chartMensualRef = useRef<HTMLDivElement>(null);
   const [isExporting, setIsExporting] = useState(false);
+  const [userRole, setUserRole] = useState<string>('USER');
   
   // Filtros
   const [empresaFiltro, setEmpresaFiltro] = useState('');
@@ -82,6 +83,12 @@ export default function CostosPage() {
         if (Array.isArray(data)) setVehiculos(data);
       })
       .catch(console.error);
+      
+    // Leer el rol del usuario desde la cookie
+    const match = document.cookie.match(new RegExp('(^| )user_role=([^;]+)'));
+    if (match) {
+      setUserRole(match[2]);
+    }
   }, []);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -377,22 +384,26 @@ export default function CostosPage() {
             ref={fileInputRef}
             onChange={handleFileUpload}
           />
-          <button 
-            onClick={handleExportExcel}
-            disabled={isExporting}
-            className="bg-white border border-[var(--border-cream)] hover:bg-[var(--bg-hover)] text-[var(--text-main)] px-4 sm:px-5 py-2.5 rounded-full font-bold shadow-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50 text-sm whitespace-nowrap"
-          >
-            <Download size={16} className={isExporting ? "animate-pulse" : ""} />
-            {isExporting ? 'Generando...' : 'Exportar Excel'}
-          </button>
-          <button 
-            onClick={() => fileInputRef.current?.click()}
-            disabled={isUploading}
-            className="bg-white border border-[var(--border-cream)] hover:bg-[var(--bg-hover)] text-[var(--text-main)] px-4 sm:px-5 py-2.5 rounded-full font-bold shadow-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50 text-sm whitespace-nowrap"
-          >
-            <UploadCloud size={16} className={isUploading ? "animate-bounce" : ""} />
-            {isUploading ? 'Importando...' : 'Importar Excel'}
-          </button>
+          {userRole === 'ADMIN' && (
+            <>
+              <button 
+                onClick={handleExportExcel}
+                disabled={isExporting}
+                className="bg-white border border-[var(--border-cream)] hover:bg-[var(--bg-hover)] text-[var(--text-main)] px-4 sm:px-5 py-2.5 rounded-full font-bold shadow-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50 text-sm whitespace-nowrap"
+              >
+                <Download size={16} className={isExporting ? "animate-pulse" : ""} />
+                {isExporting ? 'Generando...' : 'Exportar Excel'}
+              </button>
+              <button 
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isUploading}
+                className="bg-white border border-[var(--border-cream)] hover:bg-[var(--bg-hover)] text-[var(--text-main)] px-4 sm:px-5 py-2.5 rounded-full font-bold shadow-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50 text-sm whitespace-nowrap"
+              >
+                <UploadCloud size={16} className={isUploading ? "animate-bounce" : ""} />
+                {isUploading ? 'Importando...' : 'Importar Excel'}
+              </button>
+            </>
+          )}
           <button 
             onClick={() => setIsModalOpen(true)}
             className="bg-[#27272a] hover:bg-black text-white px-5 sm:px-6 py-2.5 rounded-full font-bold shadow-md hover:shadow-xl transition-all flex items-center justify-center gap-2 text-sm whitespace-nowrap"
