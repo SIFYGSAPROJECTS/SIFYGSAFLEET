@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 const allowedOrigins = [
-  'https://fleet.sifygsa.com',
+  'https://cloud.sifygsa.com',
   'http://localhost:3000'
 ];
 
