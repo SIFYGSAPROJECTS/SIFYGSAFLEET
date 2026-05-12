@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { Car, Plus, X, Pencil, ArrowLeft, ShieldCheck, AlertTriangle, Wrench, CheckCircle2, Archive, RotateCcw, AlertCircle, User, FileText, Download, DollarSign } from 'lucide-react';
+import { Car, Plus, X, Pencil, ArrowLeft, ShieldCheck, AlertTriangle, Wrench, CheckCircle2, Archive, RotateCcw, AlertCircle, User, FileText, Download, DollarSign, Filter } from 'lucide-react';
 import Link from 'next/link';
 import SystemModal, { ModalType } from '@/components/ui/SystemModal';
 import PremiumSelect from '@/components/ui/PremiumSelect';
@@ -320,24 +320,8 @@ export default function InventarioMaestroPage() {
             </button>
           </div>
           
-          {/* NUEVO COMPONENTE: SELECTOR DE EMPRESA Y BOTONES */}
+          {/* BOTONES DE ACCIÓN */}
           <div className="pb-3 w-full sm:w-auto shrink-0 flex flex-col sm:flex-row items-center justify-end gap-3">
-            <PremiumSelect
-              compact
-              accent="indigo"
-              placeholder="Todas las Empresas"
-              value={filtroEmpresa}
-              onChange={(val) => setFiltroEmpresa(val)}
-              options={[
-                { value: 'Todas', label: 'Todas las Empresas' },
-                ...empresasDisponibles.map((emp) => ({
-                  value: emp!,
-                  label: `Flota: ${emp}`
-                }))
-              ]}
-              className="w-full sm:w-52"
-              direction="down"
-            />
             {tabPrincipal === 'activos' && (
               <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
                 <button onClick={descargarCSV} className="w-full sm:w-auto bg-white hover:bg-[var(--bg-hover)] border border-[var(--border-cream)] text-[var(--text-main)] px-4 py-2.5 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors shadow-sm shrink-0">
@@ -381,6 +365,33 @@ export default function InventarioMaestroPage() {
               </button>
             </div>
 
+            {/* BARRA DE FILTROS REDISEÑADA (Sutil y minimalista) */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 px-1 gap-3 relative z-20">
+              <div className="flex items-center gap-2 text-slate-500">
+                <Filter size={14} className="text-[#71717a]" />
+                <span className="text-[10px] font-black uppercase tracking-[0.2em]">Filtros de Tabla</span>
+              </div>
+              
+              <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+                <PremiumSelect
+                  compact
+                  accent="indigo"
+                  placeholder="Todas las Empresas"
+                  value={filtroEmpresa}
+                  onChange={(val) => setFiltroEmpresa(val)}
+                  options={[
+                    { value: 'Todas', label: 'Todas las Empresas' },
+                    ...empresasDisponibles.map((emp) => ({
+                      value: emp!,
+                      label: `Flota: ${emp}`
+                    }))
+                  ]}
+                  className="w-full sm:w-56"
+                  direction="down"
+                />
+              </div>
+            </div>
+
             {/* TABLA DE ACTIVOS */}
             <div className={`bg-[var(--bg-floating)] rounded-xl shadow-xl border border-[var(--border-cream)] border-t-4 overflow-hidden transition-colors duration-500 ${colorBordeTabla}`}>
               <div className="overflow-x-auto">
@@ -402,7 +413,7 @@ export default function InventarioMaestroPage() {
                       <tr><td colSpan={6} className="text-center p-8 text-[var(--text-muted)]">No hay vehículos en esta categoría.</td></tr>
                     ) : (
                       vehiculosFiltrados.map((auto) => (
-                        <tr key={auto.Consecutivo} className="hover:bg-[var(--bg-hover)] transition-colors">
+                        <tr key={auto.Consecutivo} className="hover:bg-[var(--bg-hover)] even:bg-[var(--bg-screen)] transition-colors">
                           <td className="p-4">
                             <div className="font-bold text-[var(--text-main)] text-lg flex items-center gap-2 font-serif">
                               {auto.Consecutivo}
@@ -455,6 +466,33 @@ export default function InventarioMaestroPage() {
 
         {tabPrincipal === 'bajas' && (
           <div className="animate-in fade-in slide-in-from-right-8 duration-500">
+            {/* BARRA DE FILTROS REDISEÑADA (Sutil y minimalista) */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 px-1 gap-3 relative z-20">
+              <div className="flex items-center gap-2 text-slate-500">
+                <Filter size={14} className="text-[#71717a]" />
+                <span className="text-[10px] font-black uppercase tracking-[0.2em]">Filtros de Tabla</span>
+              </div>
+              
+              <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+                <PremiumSelect
+                  compact
+                  accent="indigo"
+                  placeholder="Todas las Empresas"
+                  value={filtroEmpresa}
+                  onChange={(val) => setFiltroEmpresa(val)}
+                  options={[
+                    { value: 'Todas', label: 'Todas las Empresas' },
+                    ...empresasDisponibles.map((emp) => ({
+                      value: emp!,
+                      label: `Flota: ${emp}`
+                    }))
+                  ]}
+                  className="w-full sm:w-56"
+                  direction="down"
+                />
+              </div>
+            </div>
+
             {cargando ? (
               <div className="text-center p-12 text-[var(--text-muted)] font-bold">Cargando archivo histórico...</div>
             ) : vehiculosBaja.length === 0 ? (

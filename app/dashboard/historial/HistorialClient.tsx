@@ -200,7 +200,7 @@ export default function HistorialClient({ historial, rol }: Props) {
                     : 'S/N';
 
                   return (
-                  <tr key={ticket.Pk_folio_ticket} className="hover:bg-[var(--bg-hover)] transition-colors group">
+                  <tr key={ticket.Pk_folio_ticket} className="hover:bg-[var(--bg-hover)] even:bg-[var(--bg-screen)] transition-colors group">
                     <td className="p-4 font-mono text-sm font-bold text-[#71717a]">#{ticket.Pk_folio_ticket}</td>
                     <td className="p-4 text-sm text-[var(--text-muted)] font-medium">
                       {new Date(ticket.Fecha_Realizacion).toLocaleDateString('es-MX', { 

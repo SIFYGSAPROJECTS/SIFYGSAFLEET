@@ -263,7 +263,7 @@ export default function PersonalPage() {
                 <tr><td colSpan={5} className="text-center p-8 text-[var(--text-muted)] uppercase font-bold tracking-widest">No hay usuarios en esta lista</td></tr>
               ) : (
                 empleadosFiltrados.map((emp) => (
-                  <tr key={emp.Email} className="hover:bg-[var(--bg-hover)] transition-colors">
+                  <tr key={emp.Email} className="hover:bg-[var(--bg-hover)] even:bg-[var(--bg-screen)] transition-colors">
                     <td className="p-4">
                       <div className="flex items-center gap-3">
                         <div className={`w-10 h-10 rounded-full flex items-center justify-center font-black text-xs border shadow-sm transition-transform group-hover:scale-110 ${emp.Rol === 'ADMIN' ? 'bg-[#71717a] border-[#52525b] text-white shadow-[#71717a]/20' : 'bg-white border-[var(--border-cream)] text-[#71717a] shadow-md shadow-stone-200/50'}`}>

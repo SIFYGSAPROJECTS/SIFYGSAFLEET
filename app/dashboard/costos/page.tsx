@@ -554,7 +554,7 @@ export default function CostosPage() {
                 </tr>
               ) : (
                 filteredCostos.map((costo) => (
-                  <tr key={costo.Id_Costo} className="border-b border-[var(--border-cream)] hover:bg-[var(--bg-hover)] transition-colors">
+                  <tr key={costo.Id_Costo} className="border-b border-[var(--border-cream)] hover:bg-[var(--bg-hover)] even:bg-[var(--bg-screen)] transition-colors">
                     <td className="p-4 text-sm">{new Date(costo.Fecha).toLocaleDateString()}</td>
                     <td className="p-4 text-sm font-medium max-w-xs truncate" title={costo.Servicio}>{costo.Servicio}</td>
                     <td className="p-4 text-sm whitespace-nowrap">
