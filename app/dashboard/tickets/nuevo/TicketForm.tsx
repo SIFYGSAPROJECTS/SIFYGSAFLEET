@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Loader2, Wrench, AlertCircle, Search, ChevronDown } from 'lucide-react';
+import { Loader2, Wrench, AlertCircle, Search, ChevronDown, MapPin } from 'lucide-react';
 import SystemModal, { ModalType } from '@/components/ui/SystemModal';
 import PremiumSelect from '@/components/ui/PremiumSelect';
 
@@ -26,13 +26,14 @@ export default function TicketForm({ vehiculos }: Props) {
   const [isTierDropdownOpen, setIsTierDropdownOpen] = useState(false);
   const tierDropdownRef = useRef<HTMLDivElement>(null);
   const [customTierText, setCustomTierText] = useState('');
-  
+
   // 2. Agregamos tipo_servicio al estado
   const [formData, setFormData] = useState({
     consecutivo: '',
     tipo_servicio: '', // preventivo, correctivo, revision
     kilometraje: '',
-    descripcion: ''
+    descripcion: '',
+    taller_sugerido: ''
   });
 
   // Cerrar el buscador si el usuario hace clic afuera
@@ -99,9 +100,14 @@ export default function TicketForm({ vehiculos }: Props) {
         tierFinal = `\n[Nota: Corresponde a Servicio de los ${Number(selectedTier).toLocaleString()} km]`;
       }
 
+      let tallerFinal = '';
+      if (formData.taller_sugerido && formData.taller_sugerido.trim() !== '') {
+        tallerFinal = `\n\n[Taller Sugerido: ${formData.taller_sugerido.trim()}]`;
+      }
+
       const payload = {
         ...formData,
-        descripcion: formData.descripcion + tierFinal,
+        descripcion: formData.descripcion + tierFinal + tallerFinal,
         kilometraje: Number(formData.kilometraje),
       };
 
@@ -339,6 +345,21 @@ export default function TicketForm({ vehiculos }: Props) {
             <AlertCircle size={14} /> El kilometraje no puede ser menor al último registro ({minKm.toLocaleString()}).
           </p>
         )}
+      </div>
+
+      {/* 3.5 TALLER SUGERIDO (Opcional) */}
+      <div className="mb-6 animate-in fade-in slide-in-from-top-4 duration-300 bg-[var(--bg-screen)]/30 p-4 rounded-xl border border-[var(--border-cream)]">
+        <label className="block text-sm font-medium text-[var(--text-muted)] mb-2">Taller sugerido? (opcional)</label>
+        <div className="relative">
+          <MapPin className="absolute left-3 top-3.5 text-slate-400" size={18} />
+          <input 
+            type="text" 
+            placeholder="Ej: Taller Automotriz Especializado (opcional)"
+            className="w-full p-3 pl-10 bg-white border border-[var(--border-cream)] text-[var(--text-main)] rounded-lg focus:ring-2 focus:ring-[#71717a] outline-none transition-all placeholder:text-slate-400"
+            value={formData.taller_sugerido}
+            onChange={(e) => setFormData({...formData, taller_sugerido: e.target.value})}
+          />
+        </div>
       </div>
 
       {/* 4. DESCRIPCIÓN */}

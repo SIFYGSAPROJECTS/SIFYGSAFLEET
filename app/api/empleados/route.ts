@@ -65,22 +65,31 @@ export async function POST(request: Request) {
       to: Email.toLowerCase(),
       subject: '🔐 Bienvenido a SIFYGSA Fleet - Tus Credenciales de Acceso',
       html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #333; border: 1px solid #e2e8f0; border-radius: 10px;">
-          <h2 style="color: #01c38e; text-align: center;">¡Bienvenido al Equipo! 🚛</h2>
-          <p>Hola <strong>${Nombre_Empleado} ${A_Paterno}</strong>,</p>
-          <p>Se ha creado tu cuenta corporativa en el <b>Sistema de Gestión de Flota SIFYGSA</b>. A continuación, te proporcionamos tus credenciales de acceso:</p>
-          
-          <div style="background-color: #f8fafc; padding: 15px; border-left: 4px solid #01c38e; border-radius: 4px; margin: 20px 0;">
-            <p style="margin: 5px 0;"><strong>Usuario (Correo):</strong> ${Email.toLowerCase()}</p>
-            <p style="margin: 5px 0;"><strong>Contraseña Temporal:</strong> <span style="font-family: monospace; font-size: 16px; background: #e2e8f0; padding: 2px 8px; border-radius: 4px; font-weight: bold; letter-spacing: 1px;">${passwordTemporal}</span></p>
-            <p style="margin: 5px 0;"><strong>Nivel de Acceso:</strong> ${Rol || 'USER'}</p>
+        <div style="background-color: #f8fafc; padding: 20px 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+          <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+            <div style="background-color: #1e293b; padding: 25px 20px; text-align: center;">
+              <h1 style="color: #ffffff; font-size: 24px; font-weight: 800; margin: 0; letter-spacing: 1px;">SIFYGSA FLEET</h1>
+            </div>
+            <div style="padding: 30px;">
+              <h2 style="color: #059669; margin-top: 0; font-size: 20px; text-align: center;">¡Bienvenido al Equipo! 🚛</h2>
+              <p style="color: #475569; font-size: 15px; line-height: 1.6;">Hola <strong>${Nombre_Empleado} ${A_Paterno}</strong>, se ha creado tu cuenta corporativa en el Sistema de Gestión de Flota SIFYGSA. A continuación, tus credenciales de acceso:</p>
+              
+              <div style="background-color: #f0fdf4; border-left: 4px solid #10b981; padding: 20px; border-radius: 6px; margin: 25px 0;">
+                <p style="margin: 8px 0; color: #064e3b;"><strong>✉️ Usuario:</strong> ${Email.toLowerCase()}</p>
+                <p style="margin: 8px 0; color: #064e3b;"><strong>🔑 Contraseña Temporal:</strong> <span style="font-family: monospace; font-size: 16px; background: #d1fae5; padding: 2px 8px; border-radius: 4px; font-weight: bold; letter-spacing: 1px;">${passwordTemporal}</span></p>
+                <p style="margin: 8px 0; color: #064e3b;"><strong>🛡️ Nivel de Acceso:</strong> ${Rol || 'USER'}</p>
+              </div>
+              
+              <div style="text-align: center; margin: 35px 0 15px 0;">
+                <a href="https://cloud.sifygsa.com" style="background-color: #0f172a; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block; font-size: 15px;">Iniciar Sesión Ahora</a>
+              </div>
+            </div>
+            
+            <div style="background-color: #f1f5f9; padding: 20px; text-align: center; font-size: 12px; color: #64748b; border-top: 1px solid #e2e8f0;">
+              <p style="margin: 0 0 5px 0; color: #dc2626; font-weight: bold;">⚠️ Por seguridad, cambia esta contraseña desde la sección "Mi Perfil" al entrar.</p>
+              <p style="margin: 0;">Plataforma Oficial: <strong>cloud.sifygsa.com</strong></p>
+            </div>
           </div>
-          
-          <p style="color: #64748b; font-size: 14px;">⚠️ Por tu seguridad, te recomendamos iniciar sesión y cambiar esta contraseña desde la sección "Mi Perfil" lo antes posible.</p>
-          
-          <p style="color: #94a3b8; font-size: 12px; text-align: center; margin-top: 40px; border-top: 1px solid #e2e8f0; padding-top: 15px;">
-            Este es un mensaje automático de SIFYGSA Fleet. Por favor, no respondas a este correo.
-          </p>
         </div>
       `,
     };
