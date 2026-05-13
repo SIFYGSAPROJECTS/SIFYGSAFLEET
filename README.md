@@ -6,7 +6,7 @@
 
 **SIFYGSA Fleet** es una solución empresarial de alto nivel diseñada para centralizar, optimizar y monitorear operativamente las unidades vehiculares de SIFYGSA S.A. de C.V. La plataforma proporciona una experiencia de *"Control Room"*, integrando reportes automáticos, un robusto motor de seguridad y un Asistente de IA (Copilot) que opera directamente sobre la base de datos de la empresa.
 
-> **Producción:** [fleet.sifygsa.com](https://fleet.sifygsa.com)
+> **Producción:** [fleet.sifygsa.com](https://cloud.sifygsa.com)
 
 ---
 
