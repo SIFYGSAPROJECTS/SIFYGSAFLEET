@@ -1,71 +1,9 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import bcrypt from 'bcryptjs';
-import nodemailer from 'nodemailer';
-import { cookies } from 'next/headers'; 
-
-// PLANTILLA DEL CORREO 
-const generarPlantillaCorreo = (nombreUsuario: string, nuevaPassword: string) => {
-  return `
-    <!DOCTYPE html>
-    <html lang="es">
-    <head>
-      <meta charset="UTF-8">
-      <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0f172a; color: #f8fafc; margin: 0; padding: 0; }
-        .container { max-width: 600px; margin: 40px auto; background-color: #1e293b; border-radius: 16px; overflow: hidden; border: 1px solid #334155; }
-        .header { background-color: #0f172a; padding: 30px; text-align: center; border-bottom: 3px solid #01c38e; }
-        .header h1 { color: #f8fafc; margin: 0; font-size: 24px; letter-spacing: 1px; }
-        .header span { color: #01c38e; }
-        .content { padding: 40px 30px; }
-        .greeting { font-size: 20px; font-weight: bold; margin-bottom: 20px; color: #f8fafc; }
-        .message { font-size: 16px; line-height: 1.6; color: #cbd5e1; margin-bottom: 30px; }
-        .password-box { background-color: #0f172a; border: 1px solid #01c38e; border-radius: 8px; padding: 20px; text-align: center; margin-bottom: 30px; }
-        .password-label { font-size: 12px; text-transform: uppercase; color: #94a3b8; letter-spacing: 1px; margin-bottom: 10px; display: block; }
-        .password-value { font-size: 24px; font-weight: bold; color: #10b981; font-family: monospace; letter-spacing: 2px; }
-        .footer { background-color: #0f172a; padding: 20px; text-align: center; font-size: 12px; color: #64748b; border-top: 1px solid #334155; }
-        .warning { color: #ef4444; font-size: 14px; margin-top: 20px; text-align: center; font-weight: bold; }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <div class="header">
-          <h1>SIFYGSA <span>Fleet</span></h1>
-        </div>
-        <div class="content">
-          <div class="greeting">Hola, ${nombreUsuario}</div>
-          <div class="message">
-            Tu contraseña de acceso al sistema SIFYGSA Fleet ha sido restablecida. A continuación, encontrarás tus nuevas credenciales.
-          </div>
-          <div class="password-box">
-            <span class="password-label">NUEVA CONTRASEÑA</span>
-            <div class="password-value">${nuevaPassword}</div>
-          </div>
-          <div class="message" style="font-size: 14px; text-align: center;">
-            Por favor, ingresa al sistema utilizando esta contraseña. Te recomendamos mantenerla en un lugar seguro.
-          </div>
-          <div class="warning">
-            ⚠️ Si no solicitaste este cambio, contacta a soporte inmediatamente.
-          </div>
-        </div>
-        <div class="footer">
-          © ${new Date().getFullYear()} SIFYGSA Fleet Management. Todos los derechos reservados.<br>
-          Este es un correo automático, por favor no respondas a esta dirección.
-        </div>
-      </div>
-    </body>
-    </html>
-  `;
-};
-
-// CONFIGURACIÓN DE GMAIL
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER, 
-    pass: process.env.EMAIL_PASSWORD, 
-  },
-});
+import { enviarCorreo } from '@/lib/email';
+import { SecurityAlertEmail } from '@/components/emails/SecurityAlertEmail';
+import { cookies } from 'next/headers';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -151,17 +89,17 @@ export async function POST(request: Request) {
       }
     });
 
-    // ENVIAMOS EL CORREO 
-    const htmlCorreo = generarPlantillaCorreo(empleado.Nombre_Empleado, nuevaPassword);
-    
-    await transporter.sendMail({
-      from: `"SIFYGSA Security" <${process.env.EMAIL_USER}>`, 
+    // ENVIAMOS EL CORREO POR RESEND
+    await enviarCorreo({
       to: email, 
       subject: '🔑 Tu contraseña ha sido restablecida - SIFYGSA Fleet',
-      html: htmlCorreo,
+      react: SecurityAlertEmail({
+        nombreUsuario: empleado.Nombre_Empleado,
+        nuevaPassword: nuevaPassword
+      })
     });
 
-    return NextResponse.json({ message: 'Contraseña y correo enviado exitosamente por Gmail.' });
+    return NextResponse.json({ message: 'Contraseña y correo enviado exitosamente.' });
   } catch (error) {
     console.error("Error al procesar la solicitud o enviar correo:", error);
     return NextResponse.json({ error: 'Contraseña actualizada, pero hubo un error al enviar el correo.' }, { status: 500 });
