@@ -81,6 +81,14 @@ export async function POST(request: Request) {
       include: { auto: true }
     });
 
+    // Actualiza el kilometraje en la tabla principal del vehículo para mantenerlos sincronizados
+    if (kilometraje) {
+      await prisma.inventario_Automoviles.update({
+        where: { Consecutivo: consecutivo },
+        data: { Kilometraje: parseInt(kilometraje) }
+      });
+    }
+
     // Configura la lista de destinatarios (solicitante, encargado y administradores)
     const administradores = await prisma.empleados.findMany({
       where: { Rol: 'ADMIN' },

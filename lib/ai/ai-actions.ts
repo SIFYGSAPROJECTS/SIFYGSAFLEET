@@ -307,3 +307,102 @@ export async function get_fleet_alerts() {
   
   return { sinSeguro, pendientesCount: pendientes };
 }
+
+// Cuenta los costos totales de mantenimiento, opcionalmente filtrados por empresa
+export async function get_fleet_costs(empresa?: string) {
+  const whereClause: any = {};
+  if (empresa && empresa.toLowerCase() !== 'todas') {
+    whereClause.Empresa = { contains: empresa, mode: 'insensitive' };
+  }
+
+  const costos = await prisma.costos_Mantenimiento.findMany({
+    where: whereClause,
+    orderBy: { Fecha: 'desc' },
+    include: {
+      auto: { select: { Placa: true, Marca: true, Modelo: true } }
+    }
+  });
+
+  const totalGasto = costos.reduce((acc, curr) => acc + curr.Total, 0);
+  const totalMO = costos.reduce((acc, curr) => acc + curr.Costo_MO, 0);
+  const totalRefacciones = costos.reduce((acc, curr) => acc + curr.Costo_Refacciones, 0);
+
+  const gastosPorAuto: Record<string, number> = {};
+  costos.forEach(c => {
+    gastosPorAuto[c.Consecutivo] = (gastosPorAuto[c.Consecutivo] || 0) + c.Total;
+  });
+
+  const topAutos = Object.entries(gastosPorAuto)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([consecutivo, total]) => ({ consecutivo, total }));
+
+  return { totalGasto, totalMO, totalRefacciones, topAutos, desglose: costos.slice(0, 50) };
+}
+
+// Analiza autos que estén cerca de múltiplos de 10k o con mucho tiempo sin servicio
+export async function predict_upcoming_services() {
+  const autos = await prisma.inventario_Automoviles.findMany({
+    where: { Estatus_Operativo: 'Activo en flota' },
+    include: {
+      solicitudes: { orderBy: { Fecha_Realizacion: 'desc' }, take: 1, select: { Kilometraje: true, Fecha_Realizacion: true } },
+      bitacora_autos: { orderBy: { Fecha_Registro: 'desc' }, take: 1, select: { Kilometraje: true, Fecha_Registro: true } },
+      encargado: { select: { Nombre_Empleado: true, A_Paterno: true } }
+    }
+  });
+
+  const serviciosRecomendados = [];
+
+  for (const auto of autos) {
+    let lastKm = auto.bitacora_autos[0]?.Kilometraje || auto.solicitudes[0]?.Kilometraje || 0;
+    if (lastKm === 0) continue;
+    
+    const proxServicio = Math.ceil(lastKm / 10000) * 10000;
+    const dif = proxServicio - lastKm;
+
+    if (dif > 0 && dif <= 1500) {
+      serviciosRecomendados.push({
+        Consecutivo: auto.Consecutivo,
+        Placa: auto.Placa,
+        Encargado: auto.encargado ? `${auto.encargado.Nombre_Empleado} ${auto.encargado.A_Paterno}` : 'Sin asignar',
+        KmActual: lastKm,
+        ProximoServicio: proxServicio,
+        Motivo: `Faltan ${dif} km para su servicio de ${proxServicio} km.`
+      });
+    }
+  }
+
+  return serviciosRecomendados.sort((a, b) => a.ProximoServicio - a.KmActual - (b.ProximoServicio - b.KmActual));
+}
+
+// Revisa que vehículos activos NO tengan checklist subido en el último mes
+export async function audit_checklist_compliance() {
+  const hace30Dias = new Date();
+  hace30Dias.setDate(hace30Dias.getDate() - 30);
+
+  const autosActivos = await prisma.inventario_Automoviles.findMany({
+    where: { Estatus_Operativo: 'Activo en flota' },
+    include: {
+      checklists: {
+        where: { Fecha_Subida: { gte: hace30Dias } },
+        take: 1
+      },
+      encargado: { select: { Nombre_Empleado: true, Email: true } }
+    }
+  });
+
+  const incumplidos = autosActivos
+    .filter(auto => auto.checklists.length === 0)
+    .map(auto => ({
+      Consecutivo: auto.Consecutivo,
+      Placa: auto.Placa,
+      Encargado: auto.encargado?.Nombre_Empleado || 'No asignado',
+      Email: auto.encargado?.Email || 'N/A'
+    }));
+
+  return { 
+    totalActivos: autosActivos.length, 
+    totalIncumplidos: incumplidos.length, 
+    vehiculosSinChecklist: incumplidos 
+  };
+}

@@ -51,7 +51,7 @@ export default async function CentralServiciosPage() {
 
   const misVehiculos = vehiculosRaw.map(auto => ({
     ...auto,
-    Kilometraje_Actual: auto.solicitudes && auto.solicitudes.length > 0 ? auto.solicitudes[0].Kilometraje : 0
+    Kilometraje_Actual: auto.Kilometraje || (auto.solicitudes && auto.solicitudes.length > 0 ? auto.solicitudes[0].Kilometraje : 0)
   }));
 
   return (

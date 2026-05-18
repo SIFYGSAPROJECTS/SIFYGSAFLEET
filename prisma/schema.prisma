@@ -51,6 +51,7 @@ model Inventario_Automoviles {
   Contrato         String?
   Ubicacion        String?
   Percance         String?
+  Kilometraje      Int?
 
   // Relaciones
   encargado       Empleados? @relation("EncargadoAuto", fields: [Email_encargado], references: [Email])

@@ -22,10 +22,15 @@ export async function GET() {
 
     const vehiculosConKilometraje = vehiculos.map((auto: any) => {
       const { solicitudes, _count, ...datosAuto } = auto; 
+      
+      // La prioridad es el kilometraje en Inventario_Automoviles, si no, buscar en la ultima solicitud
+      const kmGuardado = auto.Kilometraje;
+      const kmSolicitud = solicitudes && solicitudes.length > 0 ? solicitudes[0].Kilometraje : null;
+
       return {
         ...datosAuto,
         Total_Servicios: _count?.solicitudes || 0,
-        Kilometraje_Actual: solicitudes && solicitudes.length > 0 ? solicitudes[0].Kilometraje : null
+        Kilometraje_Actual: kmGuardado || kmSolicitud
       };
     });
 
@@ -56,6 +61,7 @@ export async function POST(request: Request) {
         Percance: body.Percance,
         Estatus_Operativo: body.Estatus_Operativo || 'Activo en flota',
         Estado_Unidad: body.Estado_Unidad, 
+        Kilometraje: body.Kilometraje_Actual ? parseInt(body.Kilometraje_Actual.toString()) : null,
       }
     });
     return NextResponse.json({ success: true, data: vehiculo });
@@ -84,6 +90,7 @@ export async function PUT(request: Request) {
         Ubicacion: body.Ubicacion,
         Percance: body.Percance, 
         Estatus_Operativo: body.Estatus_Operativo, 
+        Kilometraje: body.Kilometraje_Actual ? parseInt(body.Kilometraje_Actual.toString()) : null,
       }
     });
     return NextResponse.json({ success: true, data: vehiculo });

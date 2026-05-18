@@ -17,7 +17,10 @@ import {
   get_fleet_alerts,
   get_services_summary,
   get_fleet_status_summary,
-  get_fleet_report
+  get_fleet_report,
+  get_fleet_costs,
+  predict_upcoming_services,
+  audit_checklist_compliance
 } from "@/lib/ai/ai-actions";
 import { generateExcelBase64 } from "@/lib/ai/excel-generator";
 
@@ -30,6 +33,16 @@ REGLA CRÍTICA PARA EXCEL:
 1. Si el usuario pide un "reporte", "Excel" o "lista", DEBES usar herramientas que devuelvan listas de datos como 'get_fleet_report' o 'get_pending_services'.
 2. NO uses herramientas de resumen (como 'get_fleet_status_summary') si te piden un Excel, ya que los resúmenes no se pueden convertir en tabla detallada.
 3. El sistema generará el botón de descarga automáticamente si devuelves una lista de más de 1 elemento.
+
+RESPUESTA A PREGUNTAS GENERALES DE CAPACIDADES ("¿En qué ayudas?", "¿Qué puedes hacer?"):
+Si el usuario te pregunta en qué le puedes ayudar, qué puedes hacer o para qué sirves, responde de manera estructurada y amigable que puedes ayudar con:
+1. **Inventario y Estado de Flota**: Consultar autos activos, inactivos y asignaciones de empleados.
+2. **Rastreo de Tickets y Servicios**: Ver servicios pendientes, estado de tickets y mantenimientos recientes.
+3. **Análisis de Costos**: Obtener reportes de gastos de mantenimiento de la flota o por empresa.
+4. **Predicción de Servicios**: Analizar kilometraje para predecir qué vehículos necesitarán servicio pronto (ej. cercanos a 10k).
+5. **Auditoría de Checklists**: Revisar qué vehículos activos no han entregado su checklist en el último mes.
+
+IMPORTANTE: Recuerda recalcar que NO puedes alterar datos ni modificar tickets, solo eres una herramienta de consulta analítica y gerencial.
 
 PERSONALIDAD:
 - Breve, directo y profesional.
@@ -77,6 +90,30 @@ const TOOLS = [
       name: "get_unit_details", 
       description: "Ver datos de un auto específico.", 
       parameters: { type: "object", properties: { identificador: { type: "string" } }, required: ["identificador"] } 
+    }
+  },
+  { 
+    type: "function", 
+    function: {
+      name: "get_fleet_costs", 
+      description: "Obtener la suma total de costos de mantenimiento de la flota.",
+      parameters: { type: "object", properties: { empresa: { type: "string", description: "Opcional. Prefijo de empresa (Ej. AVH)." } } }
+    }
+  },
+  { 
+    type: "function", 
+    function: {
+      name: "predict_upcoming_services", 
+      description: "Predice qué vehículos necesitarán mantenimiento pronto analizando su kilometraje (cercanos a múltiplos de 10,000 km).",
+      parameters: { type: "object", properties: {} }
+    }
+  },
+  { 
+    type: "function", 
+    function: {
+      name: "audit_checklist_compliance", 
+      description: "Revisa qué vehículos activos no han subido su revisión de checklist en los últimos 30 días.",
+      parameters: { type: "object", properties: {} }
     }
   }
 ];
@@ -156,6 +193,9 @@ export async function POST(req: Request) {
           case "get_pending_services": functionResult = await get_pending_services(args.query); break;
           case "get_fleet_status_summary": functionResult = await get_fleet_status_summary(args.empresa_flota); break;
           case "get_unit_details": functionResult = await get_unit_details(args.identificador || ""); break;
+          case "get_fleet_costs": functionResult = await get_fleet_costs(args.empresa); break;
+          case "predict_upcoming_services": functionResult = await predict_upcoming_services(); break;
+          case "audit_checklist_compliance": functionResult = await audit_checklist_compliance(); break;
         }
       } catch (err) {
         console.error("Tool execution error:", err);

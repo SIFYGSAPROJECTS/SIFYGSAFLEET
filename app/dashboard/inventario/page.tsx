@@ -48,7 +48,7 @@ export default function InventarioMaestroPage() {
   const [formData, setFormData] = useState({
     Consecutivo: '', Placa: '', Marca: '', Modelo: '', Color: '', Linea: '', 
     Numero_Serie: '', Poliza_Seguro: '', Departamento: '', Contrato: '', Ubicacion: '', Percance: '',
-    Email_encargado: '', Estado_Unidad: true, Estatus_Operativo: 'Activo en flota'
+    Email_encargado: '', Estado_Unidad: true, Estatus_Operativo: 'Activo en flota', Kilometraje_Actual: ''
   });
 
   const [modalRestaurar, setModalRestaurar] = useState(false);
@@ -115,7 +115,7 @@ export default function InventarioMaestroPage() {
     setFormData({ 
       Consecutivo: '', Placa: '', Marca: '', Modelo: '', Color: '', Linea: '', 
       Numero_Serie: '', Poliza_Seguro: '', Departamento: '', Contrato: '', Ubicacion: '', Percance: '',
-      Email_encargado: '', Estado_Unidad: true, Estatus_Operativo: 'Activo en flota'
+      Email_encargado: '', Estado_Unidad: true, Estatus_Operativo: 'Activo en flota', Kilometraje_Actual: ''
     });
     setModalAbierto(true);
   };
@@ -137,7 +137,8 @@ export default function InventarioMaestroPage() {
       Percance: auto.Percance || '',
       Email_encargado: auto.Email_encargado || '',
       Estado_Unidad: auto.Estado_Unidad,
-      Estatus_Operativo: auto.Estatus_Operativo || 'Activo en flota'
+      Estatus_Operativo: auto.Estatus_Operativo || 'Activo en flota',
+      Kilometraje_Actual: auto.Kilometraje_Actual || ''
     });
     setModalAbierto(true);
   };
@@ -594,6 +595,10 @@ export default function InventarioMaestroPage() {
                 <div>
                   <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">Póliza de Seguro</label>
                   <input type="text" value={formData.Poliza_Seguro} onChange={e => setFormData({...formData, Poliza_Seguro: e.target.value})} className="w-full bg-white border border-[var(--border-cream)] text-[var(--text-main)] rounded-lg p-2.5 focus:ring-2 focus:ring-[#71717a] outline-none uppercase placeholder-stone-300" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">Kilometraje Actual</label>
+                  <input type="number" value={formData.Kilometraje_Actual} onChange={e => setFormData({...formData, Kilometraje_Actual: e.target.value})} className="w-full bg-white border border-[var(--border-cream)] text-[var(--text-main)] rounded-lg p-2.5 focus:ring-2 focus:ring-[#71717a] outline-none placeholder-stone-300" placeholder="Ej. 15000" />
                 </div>
               </div>
 

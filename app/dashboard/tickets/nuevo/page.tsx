@@ -47,9 +47,9 @@ export default async function NuevoTicketPage() {
 
   const misVehiculos = vehiculosRaw.map(auto => ({
     ...auto,
-    Kilometraje_Actual: auto.solicitudes && auto.solicitudes.length > 0 
+    Kilometraje_Actual: auto.Kilometraje || (auto.solicitudes && auto.solicitudes.length > 0 
       ? auto.solicitudes[0].Kilometraje 
-      : 0
+      : 0)
   }));
 
   return (
