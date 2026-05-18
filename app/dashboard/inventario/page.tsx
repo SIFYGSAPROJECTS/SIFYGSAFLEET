@@ -138,7 +138,7 @@ export default function InventarioMaestroPage() {
       Email_encargado: auto.Email_encargado || '',
       Estado_Unidad: auto.Estado_Unidad,
       Estatus_Operativo: auto.Estatus_Operativo || 'Activo en flota',
-      Kilometraje_Actual: auto.Kilometraje_Actual || ''
+      Kilometraje_Actual: auto.Kilometraje_Actual ? auto.Kilometraje_Actual.toString() : ''
     });
     setModalAbierto(true);
   };
