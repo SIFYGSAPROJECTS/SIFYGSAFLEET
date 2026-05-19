@@ -4,6 +4,7 @@ import {
   Head,
   Heading,
   Html,
+  Link,
   Preview,
   Section,
   Text,
@@ -47,6 +48,12 @@ export const SecurityAlertEmail = ({
             <Text style={messageCenter}>
               Por favor, ingresa al sistema utilizando esta contraseña. Te recomendamos mantenerla en un lugar seguro.
             </Text>
+            
+            <Section style={buttonContainer}>
+              <Link href="https://cloud.sifygsa.com" style={button}>
+                Iniciar Sesión
+              </Link>
+            </Section>
             
             <Text style={warning}>
               ⚠️ Si no solicitaste este cambio, contacta a soporte inmediatamente.
@@ -159,6 +166,22 @@ const warning = {
   marginTop: '20px',
   textAlign: 'center' as const,
   fontWeight: 'bold',
+};
+
+const buttonContainer = {
+  textAlign: 'center' as const,
+  margin: '30px 0 10px 0',
+};
+
+const button = {
+  backgroundColor: '#10b981',
+  color: '#ffffff',
+  padding: '14px 32px',
+  textDecoration: 'none',
+  borderRadius: '8px',
+  fontWeight: 'bold',
+  display: 'inline-block',
+  fontSize: '15px',
 };
 
 const footer = {
