@@ -59,6 +59,7 @@ model Inventario_Automoviles {
   bitacora_autos  Historial_Auto[]
   solicitudes     Solicitud[]
   checklists      Checklist[]
+  documentos      Documentos_Unidad[]
   costos          Costos_Mantenimiento[]
 }
 
@@ -112,6 +113,18 @@ model Checklist {
   Fecha_Subida  DateTime @default(now())
 
   // Relación: Este checklist pertenece a un auto específico
+  vehiculo      Inventario_Automoviles @relation(fields: [Consecutivo], references: [Consecutivo], onDelete: Cascade)
+}
+
+// 6.2. DOCUMENTOS DE UNIDAD
+model Documentos_Unidad {
+  id            Int      @id @default(autoincrement())
+  Consecutivo   String   @db.VarChar(10)
+  Titulo        String   @db.VarChar(100)
+  Ruta_PDF      String   @db.Text
+  Fecha_Subida  DateTime @default(now())
+
+  // Relación: Este documento pertenece a un auto específico
   vehiculo      Inventario_Automoviles @relation(fields: [Consecutivo], references: [Consecutivo], onDelete: Cascade)
 }
 

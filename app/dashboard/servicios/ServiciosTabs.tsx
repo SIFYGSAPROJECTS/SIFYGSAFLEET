@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Wrench, History, Activity, ArrowLeft, PlusCircle, User, Car, FileText, Download, DollarSign } from 'lucide-react';
+import { Wrench, History, Activity, ArrowLeft, PlusCircle, User, Car, FileText, Download, DollarSign, FolderOpen } from 'lucide-react';
 import Link from 'next/link';
 
 import TicketForm from '../tickets/nuevo/TicketForm';
@@ -131,8 +131,8 @@ export default function ServiciosTabs({ tickets, vehiculos, isAdmin, rol }: Prop
                 </Link>
               )}
               
-              <div className="px-4 py-1.5 text-xs font-bold rounded-full bg-[var(--bg-floating)] text-[var(--text-main)] cursor-default flex items-center gap-2 shadow-inner whitespace-nowrap">
-                <Wrench size={14} className="text-zinc-500" /> Servicios
+              <div className="px-4 py-1.5 text-xs font-bold rounded-full bg-white text-[var(--text-main)] cursor-default flex items-center gap-2 shadow-sm border border-[var(--border-cream)] whitespace-nowrap">
+                <Wrench size={14} className="text-red-500" /> Servicios
               </div>
 
               <Link 
@@ -140,6 +140,13 @@ export default function ServiciosTabs({ tickets, vehiculos, isAdmin, rol }: Prop
                 className="px-4 py-1.5 text-xs font-bold rounded-full text-slate-500 hover:text-cyan-600 hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap"
               >
                 <FileText size={14} /> Checklists
+              </Link>
+
+              <Link 
+                href={isAdmin ? '/dashboard/documentos' : '/dashboard/mis-documentos'} 
+                className="px-4 py-1.5 text-xs font-bold rounded-full text-slate-500 hover:text-orange-500 hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap"
+              >
+                <FolderOpen size={14} /> Documentos
               </Link>
 
               {isAdmin && (

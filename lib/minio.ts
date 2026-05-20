@@ -17,7 +17,7 @@ export const minioClient = new Minio.Client({
 
 // Función para inicializar los buckets principales en caso de que no existan
 export const setupMinioBuckets = async () => {
-  const buckets = ['evidencias', 'checklists'];
+  const buckets = ['evidencias', 'checklists', 'documentos'];
   
   for (const bucketName of buckets) {
     try {

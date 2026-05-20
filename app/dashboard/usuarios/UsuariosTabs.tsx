@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { User, Users, ArrowLeft, Lock, Car, Wrench, FileText, DollarSign } from 'lucide-react';
+import { User, Users, ArrowLeft, Lock, Car, Wrench, FileText, DollarSign, FolderOpen } from 'lucide-react';
 import Link from 'next/link';
 
 import MiPerfilPage from '../perfil/page';
@@ -46,8 +46,8 @@ export default function UsuariosTabs({ isAdmin, empleadosIniciales }: Props) {
           <div className="flex w-full justify-start sm:justify-center md:justify-end min-w-max px-1">
             <div className="inline-flex items-center bg-[var(--bg-floating)] border border-[var(--border-cream)] rounded-full p-1.5 shadow-lg shrink-0 gap-1">
               
-              <div className="px-4 py-1.5 text-xs font-bold rounded-full bg-[var(--bg-floating)] text-[var(--text-main)] cursor-default flex items-center gap-2 shadow-inner whitespace-nowrap">
-                <User size={14} className="text-[#71717a]" /> Usuarios
+              <div className="px-4 py-1.5 text-xs font-bold rounded-full bg-white text-[var(--text-main)] cursor-default flex items-center gap-2 shadow-sm border border-[var(--border-cream)] whitespace-nowrap">
+                <User size={14} className="text-purple-600" /> Usuarios
               </div>
               
               {isAdmin && (
@@ -65,6 +65,13 @@ export default function UsuariosTabs({ isAdmin, empleadosIniciales }: Props) {
                 className="px-4 py-1.5 text-xs font-bold rounded-full text-[var(--text-muted)] hover:text-cyan-600 hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap"
               >
                 <FileText size={14} /> Checklists
+              </Link>
+
+              <Link 
+                href={isAdmin ? '/dashboard/documentos' : '/dashboard/mis-documentos'} 
+                className="px-4 py-1.5 text-xs font-bold rounded-full text-[var(--text-muted)] hover:text-orange-500 hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap"
+              >
+                <FolderOpen size={14} /> Documentos
               </Link>
 
               {isAdmin && (

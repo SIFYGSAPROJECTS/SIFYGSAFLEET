@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import Link from 'next/link';
-import { DollarSign, Search, Filter, Plus, Calendar, Wrench, Building2, Car, TrendingUp, TrendingDown, Receipt, UploadCloud, ArrowLeft, User, FileText, Download } from 'lucide-react';
+import { DollarSign, Search, Filter, Plus, Calendar, Wrench, Building2, Car, TrendingUp, TrendingDown, Receipt, UploadCloud, ArrowLeft, User, FileText, Download, FolderOpen } from 'lucide-react';
 
 import * as ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
@@ -367,8 +367,11 @@ export default function CostosPage() {
                   <Link href="/dashboard/checklists" className="px-4 py-1.5 text-xs font-bold rounded-full text-[var(--text-muted)] hover:text-cyan-600 hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap">
                     <FileText size={14} /> Checklists
                   </Link>
+                  <Link href="/dashboard/documentos" className="px-4 py-1.5 text-xs font-bold rounded-full text-[var(--text-muted)] hover:text-orange-500 hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap">
+                    <FolderOpen size={14} /> Documentos
+                  </Link>
                   <div className="px-4 py-1.5 text-xs font-bold rounded-full bg-white text-[var(--text-main)] cursor-default flex items-center gap-2 shadow-sm border border-[var(--border-cream)] whitespace-nowrap">
-                    <DollarSign size={14} className="text-[#71717a]" /> Costos
+                    <DollarSign size={14} className="text-emerald-500" /> Costos
                   </div>
                 </div>
               </div>

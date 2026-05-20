@@ -3,7 +3,7 @@
 import { usePathname } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ShieldCheck, Users, FileText, Wrench, User, Car, MousePointerClick, DollarSign } from 'lucide-react';
+import { ShieldCheck, Users, FileText, Wrench, User, Car, MousePointerClick, DollarSign, FolderOpen } from 'lucide-react';
 
 function AnimatedCounter({ value, duration = 1500 }: { value: number, duration?: number }) {
   const [count, setCount] = useState(0);
@@ -51,6 +51,7 @@ export default function DashboardMenu({ userRole, totalAutos, totalEmpleados, ti
     if (pathname.includes('/costos')) return 'costos';
     if (pathname.includes('/usuarios') || pathname.includes('/perfil')) return 'usuario';
     if (pathname.includes('/checklists') || pathname.includes('/mis-checklists')) return 'checklists';
+    if (pathname.includes('/documentos') || pathname.includes('/mis-documentos')) return 'documentos';
     return '';
   };
 
@@ -108,6 +109,24 @@ export default function DashboardMenu({ userRole, totalAutos, totalEmpleados, ti
           <FileText className="w-8 h-8 text-[#71717a] mb-4" />
           <span className="block font-bold text-lg text-[var(--text-main)] font-serif">Mis Checklists</span>
           <span className="text-sm text-[var(--text-muted)]">Expediente digital de tu unidad asignada.</span>
+        </Link>
+      )}
+    </>
+  );
+
+  const tarjetasDocumentos = (
+    <>
+      {userRole === 'ADMIN' ? (
+        <Link href="/dashboard/documentos" className="p-6 bg-[var(--bg-floating)] border border-[var(--border-cream)] border-t-4 border-t-[#71717a] rounded-xl hover:bg-[var(--bg-hover)] hover:shadow-xl transition-all duration-300 group text-left block">
+          <FolderOpen className="w-8 h-8 text-[#71717a] mb-4" />
+          <span className="block font-bold text-lg text-[var(--text-main)] font-serif">Documentos de Unidad</span>
+          <span className="text-sm text-[var(--text-muted)]">Consulta y sube pólizas de seguro, tarjetas de circulación, etc.</span>
+        </Link>
+      ) : (
+        <Link href="/dashboard/mis-documentos" className="p-6 bg-[var(--bg-floating)] border border-[var(--border-cream)] border-t-4 border-t-[#71717a] rounded-xl hover:bg-[var(--bg-hover)] hover:shadow-xl transition-all duration-300 group text-left block">
+          <FolderOpen className="w-8 h-8 text-[#71717a] mb-4" />
+          <span className="block font-bold text-lg text-[var(--text-main)] font-serif">Mis Documentos</span>
+          <span className="text-sm text-[var(--text-muted)]">Expediente digital de documentos de tu unidad.</span>
         </Link>
       )}
     </>
@@ -179,6 +198,17 @@ export default function DashboardMenu({ userRole, totalAutos, totalEmpleados, ti
             <FileText size={18} /> <span className="hidden sm:inline">Checklists</span>
           </Link>
           
+          <Link
+            href={userRole === 'ADMIN' ? '/dashboard/documentos' : '/dashboard/mis-documentos'}
+            className={`flex-1 flex justify-center px-6 py-2.5 font-bold text-sm items-center gap-2 rounded-full transition-all whitespace-nowrap ${
+              activeTab === 'documentos' 
+                ? 'bg-white text-[var(--text-main)] shadow-md' 
+                : 'text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-screen)]/50'
+            }`}
+          >
+            <FolderOpen size={18} /> <span className="hidden sm:inline">Documentos</span>
+          </Link>
+          
         </div>
       </div>
 
@@ -231,6 +261,7 @@ export default function DashboardMenu({ userRole, totalAutos, totalEmpleados, ti
           {activeTab === 'transporte' && tarjetasTransporte}
           {activeTab === 'usuario' && tarjetasUsuario}
           {activeTab === 'checklists' && tarjetasChecklists}
+          {activeTab === 'documentos' && tarjetasDocumentos}
         </div>
       </div>
 
