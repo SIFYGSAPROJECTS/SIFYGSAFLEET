@@ -17,12 +17,12 @@ model Empleados {
   Pin_Temporal     String?
   Expiracion_Pin   DateTime?
   Ultimo_Cambio_Password   DateTime?
-  Nombre_Empleado  String  @db.VarChar(30)
-  A_Paterno        String  @db.VarChar(30)
+  Nombre_Empleado  String  @db.VarChar(60)
+  A_Paterno        String  @db.VarChar(60)
   Estatus_Acceso   String   @default("Activo")
-  A_Materno        String? @db.VarChar(30)
-  Cargo            String? @db.VarChar(30)
-  Departamento     String? @db.VarChar(40)
+  A_Materno        String? @db.VarChar(60)
+  Cargo            String? @db.VarChar(60)
+  Departamento     String? @db.VarChar(80)
   Rol              String  @default("USER")
 
   // Relaciones
@@ -132,11 +132,11 @@ model Documentos_Unidad {
 model Historial_Empleados {
   Id_Historial_Emp Int      @id @default(autoincrement())
   Email_Empleado   String   @db.VarChar(50)
-  Nombre           String?  @db.VarChar(30)
-  A_Paterno        String?  @db.VarChar(30)
-  A_Materno        String?  @db.VarChar(30)
-  Cargo            String?  @db.VarChar(30)
-  Departamento     String?  @db.VarChar(40)
+  Nombre           String?  @db.VarChar(60)
+  A_Paterno        String?  @db.VarChar(60)
+  A_Materno        String?  @db.VarChar(60)
+  Cargo            String?  @db.VarChar(60)
+  Departamento     String?  @db.VarChar(80)
   Fecha_Cambio     DateTime @default(now())
 
   empleado         Empleados @relation(fields: [Email_Empleado], references: [Email], onDelete: Cascade)

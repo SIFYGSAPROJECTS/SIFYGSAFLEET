@@ -112,7 +112,7 @@ export async function POST(request: Request) {
   }
 }
 
-// --- 3. ELIMINAR CHECKLIST (BD + SUPABASE) ---
+// --- 3. ELIMINAR CHECKLIST (BD + MINIO) ---
 export async function DELETE(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -143,7 +143,7 @@ export async function DELETE(request: Request) {
   }
 }
 
-// --- 4. ACTUALIZAR/REEMPLAZAR CHECKLIST (BD + SUPABASE) ---
+// --- 4. ACTUALIZAR/REEMPLAZAR CHECKLIST (BD + MINIO) ---
 export async function PUT(request: Request) {
   try {
     const formData = await request.formData();
