@@ -25,6 +25,10 @@ export default function CopilotChat() {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
+    // Emitir evento para que otros componentes sepan si el chat está abierto
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('copilot-toggle', { detail: isOpen }));
+    }
   }, [messages, isOpen]);
 
   const handleSend = async () => {

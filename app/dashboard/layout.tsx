@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import IdleTimer from '@/components/security/IdleTimer';
 import RoleGuard from '@/components/security/RoleGuard';
 import CopilotChat from '@/components/ai/CopilotChat';
-
+import ScrollToTop from '@/components/ui/ScrollToTop';
 export default async function DashboardLayout({
   children,
 }: {
@@ -30,6 +30,7 @@ export default async function DashboardLayout({
         </main>
       </div>
       <CopilotChat />
+      <ScrollToTop />
     </>
   );
 }
