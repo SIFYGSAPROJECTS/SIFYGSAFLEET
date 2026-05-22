@@ -10,24 +10,20 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@google/generative-ai": "^0.24.1",
     "@prisma/client": "^6.19.2",
-    "@react-pdf/renderer": "^4.3.2",
+    "@react-email/components": "^0.0.33",
     "bcryptjs": "^3.0.3",
     "exceljs": "^4.4.0",
     "file-saver": "^2.0.5",
     "html2canvas": "^1.4.1",
     "lucide-react": "^0.574.0",
-    "maplibre-gl": "^5.24.0",
     "minio": "^8.0.7",
     "next": "16.1.6",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-email": "^3.0.7",
-    "@react-email/components": "^0.0.33",
-    "resend": "^4.1.2",
-    "react-map-gl": "^8.1.1",
-    "recharts": "^3.8.1"
+    "recharts": "^3.8.1",
+    "resend": "^4.1.2"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -37,7 +33,6 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "docx": "^9.6.1",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
     "prisma": "^6.19.2",

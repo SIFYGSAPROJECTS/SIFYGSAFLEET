@@ -105,7 +105,7 @@ Si prefieres correr el proyecto fuera de Docker (para desarrollo):
 | `npm install` | Instala todas las dependencias. |
 | `npx prisma generate` | Genera los tipos de datos del ORM. |
 | `npx prisma db push` | Sincroniza el esquema de BD sin generar migraciones. |
-| `npx prisma db seed` | (Opcional) Puebla la base de datos inicial. |
+| `npx prisma db seed` | (Opcional) Prueba la base de datos inicial. |
 | `npm run dev` | Levanta el servidor de Next.js en modo desarrollo. |
 | `npm run build` | Construye el empaquetado para producción. |
 
@@ -115,3 +115,6 @@ Si prefieres correr el proyecto fuera de Docker (para desarrollo):
 
 © 2026 **SIFYGSA S.A. de C.V.** — Todos los derechos reservados.
 Desarrollo orientado a la gestión de flotas y mantenimiento preventivo corporativo.
+
+## Diseñando E implementado por:
+**Mike Mendez Carmona**
