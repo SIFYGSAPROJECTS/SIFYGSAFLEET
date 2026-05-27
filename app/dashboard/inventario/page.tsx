@@ -19,10 +19,10 @@ interface Vehiculo {
   Contrato: string | null;
   Ubicacion: string | null;
   Percance: string | null;
-  Estado_Unidad: boolean; 
-  Estatus_Operativo: string; 
+  Estado_Unidad: boolean;
+  Estatus_Operativo: string;
   Email_encargado: string | null;
-  Kilometraje_Actual?: string | number | null; 
+  Kilometraje_Actual?: string | number | null;
   encargado?: {
     Nombre_Empleado: string;
     A_Paterno: string;
@@ -35,18 +35,18 @@ type TabPrincipal = 'activos' | 'bajas';
 export default function InventarioMaestroPage() {
   const [vehiculos, setVehiculos] = useState<Vehiculo[]>([]);
   const [cargando, setCargando] = useState(true);
-  
+
   const [tabPrincipal, setTabPrincipal] = useState<TabPrincipal>('activos');
   const [filtroActivo, setFiltroActivo] = useState<TipoFiltroActivo>('Activo en flota');
-  
+
   //  ESTADO PARA EL FILTRO DE EMPRESA
   const [filtroEmpresa, setFiltroEmpresa] = useState<string>('Todas');
 
   const [modalAbierto, setModalAbierto] = useState(false);
-  const [modoEdicion, setModoEdicion] = useState(false); 
-  const [sysModal, setSysModal] = useState<{isOpen: boolean, type: ModalType, title: string, message: React.ReactNode}>({ isOpen: false, type: 'info', title: '', message: '' }); 
+  const [modoEdicion, setModoEdicion] = useState(false);
+  const [sysModal, setSysModal] = useState<{ isOpen: boolean, type: ModalType, title: string, message: React.ReactNode }>({ isOpen: false, type: 'info', title: '', message: '' });
   const [formData, setFormData] = useState({
-    Consecutivo: '', Placa: '', Marca: '', Modelo: '', Color: '', Linea: '', 
+    Consecutivo: '', Placa: '', Marca: '', Modelo: '', Color: '', Linea: '',
     Numero_Serie: '', Poliza_Seguro: '', Departamento: '', Contrato: '', Ubicacion: '', Percance: '',
     Email_encargado: '', Estado_Unidad: true, Estatus_Operativo: 'Activo en flota', Kilometraje_Actual: ''
   });
@@ -64,11 +64,11 @@ export default function InventarioMaestroPage() {
       if (Array.isArray(data)) {
         setVehiculos(data);
       } else {
-        setVehiculos([]); 
+        setVehiculos([]);
       }
     } catch (error) {
       console.error('Error de conexión:', error);
-      setVehiculos([]); 
+      setVehiculos([]);
     } finally {
       setCargando(false);
     }
@@ -76,7 +76,7 @@ export default function InventarioMaestroPage() {
 
   useEffect(() => {
     cargarVehiculos();
-    
+
     // Leer el rol del usuario desde la cookie
     const match = document.cookie.match(new RegExp('(^| )user_role=([^;]+)'));
     if (match) {
@@ -90,14 +90,14 @@ export default function InventarioMaestroPage() {
   ).filter(Boolean).sort();
 
   //  FILTRAMOS TODA LA DATA POR LA EMPRESA SELECCIONADA 
-  const vehiculosSegunEmpresa = vehiculos.filter(v => 
+  const vehiculosSegunEmpresa = vehiculos.filter(v =>
     filtroEmpresa === 'Todas' ? true : v.Consecutivo?.startsWith(filtroEmpresa + '-')
   );
 
   //  LAS PESTAÑAS Y LOS CONTADORES SE BASAN EN LA EMPRESA FILTRADA
   const vehiculosActivosFlota = vehiculosSegunEmpresa.filter(v => v.Estatus_Operativo !== 'Dado de baja');
   const vehiculosBaja = vehiculosSegunEmpresa.filter(v => v.Estatus_Operativo === 'Dado de baja');
-  
+
   const totalActivos = vehiculosActivosFlota.filter(v => v.Estatus_Operativo === 'Activo en flota').length;
   const totalSiniestrados = vehiculosActivosFlota.filter(v => v.Estatus_Operativo === 'Siniestrado').length;
   const totalReparacion = vehiculosActivosFlota.filter(v => v.Estatus_Operativo === 'En Reparación').length;
@@ -112,8 +112,8 @@ export default function InventarioMaestroPage() {
 
   const abrirModalNuevo = () => {
     setModoEdicion(false);
-    setFormData({ 
-      Consecutivo: '', Placa: '', Marca: '', Modelo: '', Color: '', Linea: '', 
+    setFormData({
+      Consecutivo: '', Placa: '', Marca: '', Modelo: '', Color: '', Linea: '',
       Numero_Serie: '', Poliza_Seguro: '', Departamento: '', Contrato: '', Ubicacion: '', Percance: '',
       Email_encargado: '', Estado_Unidad: true, Estatus_Operativo: 'Activo en flota', Kilometraje_Actual: ''
     });
@@ -156,8 +156,8 @@ export default function InventarioMaestroPage() {
       });
 
       if (res.ok) {
-        setModalAbierto(false); 
-        cargarVehiculos(); 
+        setModalAbierto(false);
+        cargarVehiculos();
         if (formData.Estatus_Operativo === 'Dado de baja') setTabPrincipal('bajas');
       } else {
         const errorData = await res.json();
@@ -186,7 +186,7 @@ export default function InventarioMaestroPage() {
         setModalRestaurar(false);
         setVehiculoARestaurar(null);
         cargarVehiculos();
-        setTabPrincipal('activos'); 
+        setTabPrincipal('activos');
       } else {
         setSysModal({ isOpen: true, type: 'error', title: 'Error', message: 'No se pudo restaurar la unidad.' });
       }
@@ -196,15 +196,15 @@ export default function InventarioMaestroPage() {
     setProcesando(false);
   };
 
-  const colorBordeTabla = 
-    filtroActivo === 'Siniestrado' ? 'border-t-red-500' : 
-    filtroActivo === 'En Reparación' ? 'border-t-yellow-500' :
-    filtroActivo === 'Disponibles' ? 'border-t-zinc-500' :
-    'border-t-[#71717a]';
+  const colorBordeTabla =
+    filtroActivo === 'Siniestrado' ? 'border-t-red-500' :
+      filtroActivo === 'En Reparación' ? 'border-t-yellow-500' :
+        filtroActivo === 'Disponibles' ? 'border-t-zinc-500' :
+          'border-t-[#71717a]';
 
   const descargarCSV = async () => {
     const dataToExport = tabPrincipal === 'activos' ? vehiculosFiltrados : vehiculosBaja;
-    
+
     if (dataToExport.length === 0) {
       setSysModal({ isOpen: true, type: 'info', title: 'Aviso', message: 'No hay datos para exportar con los filtros actuales.' });
       return;
@@ -271,9 +271,9 @@ export default function InventarioMaestroPage() {
   return (
     <div className="min-h-screen bg-transparent relative">
       <div className="p-4 sm:p-8 max-w-7xl mx-auto">
-        
+
         <div className="flex flex-col lg:flex-row justify-between lg:items-center gap-5 mb-8">
-          
+
           <div className="flex-1 flex flex-col items-start w-full text-left">
             <Link href="/dashboard" className="inline-flex items-center gap-2 text-[var(--text-muted)] hover:text-[#71717a] transition-colors mb-3 font-medium text-sm">
               <ArrowLeft className="w-4 h-4" /> Volver al Panel Maestro
@@ -315,14 +315,14 @@ export default function InventarioMaestroPage() {
         {/* FILTRO DE EMPRESAS */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end border-b border-[var(--border-cream)] mb-8 w-full gap-4 sm:gap-0">
           <div className="flex space-x-1 sm:space-x-4 overflow-x-auto scrollbar-hide w-full sm:w-auto">
-            <button 
+            <button
               onClick={() => setTabPrincipal('activos')}
               className={`px-4 sm:px-6 py-3.5 font-bold text-sm sm:text-base flex items-center gap-2 border-b-2 transition-all whitespace-nowrap shrink-0 ${tabPrincipal === 'activos' ? 'border-[#71717a] text-[#71717a]' : 'border-transparent text-[var(--text-muted)] hover:text-[#71717a]'}`}
             >
-              <ShieldCheck size={20} /> Flota Activa 
+              <ShieldCheck size={20} /> Flota Activa
               <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${tabPrincipal === 'activos' ? 'bg-[#71717a] text-white' : 'bg-stone-200 text-stone-600'}`}>{vehiculosActivosFlota.length}</span>
             </button>
-            <button 
+            <button
               onClick={() => setTabPrincipal('bajas')}
               className={`px-4 sm:px-6 py-3.5 font-bold text-sm sm:text-base flex items-center gap-2 border-b-2 transition-all whitespace-nowrap shrink-0 ${tabPrincipal === 'bajas' ? 'border-red-500 text-red-500' : 'border-transparent text-[var(--text-muted)] hover:text-red-500'}`}
             >
@@ -330,7 +330,7 @@ export default function InventarioMaestroPage() {
               <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${tabPrincipal === 'bajas' ? 'bg-red-500 text-white' : 'bg-stone-200 text-stone-600'}`}>{vehiculosBaja.length}</span>
             </button>
           </div>
-          
+
           {/* BOTONES DE ACCIÓN */}
           <div className="pb-3 w-full sm:w-auto shrink-0 flex flex-col sm:flex-row items-center justify-end gap-3">
             {tabPrincipal === 'activos' && userRole === 'ADMIN' && (
@@ -353,23 +353,23 @@ export default function InventarioMaestroPage() {
 
         {tabPrincipal === 'activos' && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 w-full">
-            
+
             <div className="flex space-x-2 sm:space-x-4 mb-6 overflow-x-auto pb-2 scrollbar-hide w-full">
               <button onClick={() => setFiltroActivo('Activo en flota')} className={`flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-lg font-bold transition-all text-sm sm:text-base whitespace-nowrap shrink-0 ${filtroActivo === 'Activo en flota' ? 'bg-[#71717a]/10 text-[#71717a] border border-[#71717a]/50 shadow-md' : 'text-[var(--text-muted)] hover:text-[#71717a] hover:bg-[var(--bg-hover)] border border-transparent'}`}>
                 <ShieldCheck size={18} className="shrink-0" /> <span className="whitespace-nowrap">Operativos</span>
                 <span className={`ml-1 px-2 py-0.5 rounded-full text-[10px] ${filtroActivo === 'Activo en flota' ? 'bg-[#71717a] text-white' : 'bg-stone-200 text-stone-600'}`}>{totalActivos}</span>
               </button>
-              
+
               <button onClick={() => setFiltroActivo('En Reparación')} className={`flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-lg font-bold transition-all text-sm sm:text-base whitespace-nowrap shrink-0 ${filtroActivo === 'En Reparación' ? 'bg-yellow-500/10 text-yellow-600 border border-yellow-500/50 shadow-md' : 'text-[var(--text-muted)] hover:text-yellow-600 hover:bg-[var(--bg-hover)] border border-transparent'}`}>
                 <Wrench size={18} className="shrink-0" /> <span className="whitespace-nowrap">Taller</span>
                 <span className={`ml-1 px-2 py-0.5 rounded-full text-[10px] ${filtroActivo === 'En Reparación' ? 'bg-yellow-500 text-white font-extrabold' : 'bg-stone-200 text-stone-600'}`}>{totalReparacion}</span>
               </button>
-              
+
               <button onClick={() => setFiltroActivo('Disponibles')} className={`flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-lg font-bold transition-all text-sm sm:text-base whitespace-nowrap shrink-0 ${filtroActivo === 'Disponibles' ? 'bg-stone-500/10 text-stone-600 border border-stone-500/50 shadow-md' : 'text-[var(--text-muted)] hover:text-stone-600 hover:bg-[var(--bg-hover)] border border-transparent'}`}>
                 <CheckCircle2 size={18} className="shrink-0" /> <span className="whitespace-nowrap">Sin Asignar</span>
                 <span className={`ml-1 px-2 py-0.5 rounded-full text-[10px] ${filtroActivo === 'Disponibles' ? 'bg-stone-500 text-white font-extrabold' : 'bg-stone-200 text-stone-600'}`}>{totalDisponibles}</span>
               </button>
-              
+
               <button onClick={() => setFiltroActivo('Siniestrado')} className={`flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-lg font-bold transition-all text-sm sm:text-base whitespace-nowrap shrink-0 ${filtroActivo === 'Siniestrado' ? 'bg-red-500/10 text-red-600 border border-red-500/50 shadow-md' : 'text-[var(--text-muted)] hover:text-red-600 hover:bg-[var(--bg-hover)] border border-transparent'}`}>
                 <AlertTriangle size={18} className="shrink-0" /> <span className="whitespace-nowrap">Siniestrados</span>
                 <span className={`ml-1 px-2 py-0.5 rounded-full text-[10px] ${filtroActivo === 'Siniestrado' ? 'bg-red-500 text-white' : 'bg-stone-200 text-stone-600'}`}>{totalSiniestrados}</span>
@@ -382,7 +382,7 @@ export default function InventarioMaestroPage() {
                 <Filter size={14} className="text-[#71717a]" />
                 <span className="text-[10px] font-black uppercase tracking-[0.2em]">Filtros de Tabla</span>
               </div>
-              
+
               <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                 <PremiumSelect
                   compact
@@ -414,7 +414,7 @@ export default function InventarioMaestroPage() {
                       <th className="p-4 font-semibold">Detalles Operativos</th>
                       <th className="p-4 font-semibold text-center">Kilometraje</th>
                       <th className="p-4 font-semibold">Asignación</th>
-                      <th className="p-4 font-semibold text-center">Acciones</th>
+                      <th className="p-4 font-semibold text-center">Editar</th>
                     </tr>
                   </thead>
                   <tbody className="">
@@ -431,11 +431,10 @@ export default function InventarioMaestroPage() {
                               {auto.Estatus_Operativo === 'Siniestrado' && <AlertTriangle size={16} className="text-red-500" />}
                               {auto.Estatus_Operativo === 'En Reparación' && <Wrench size={16} className="text-yellow-500" />}
                             </div>
-                            <span className={`inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-bold border uppercase ${
-                              auto.Estatus_Operativo === 'Activo en flota' ? 'bg-[#71717a]/10 text-[#71717a] border-[#71717a]/30' : 
-                              auto.Estatus_Operativo === 'En Reparación' ? 'bg-yellow-500/10 text-yellow-600 border-yellow-500/30' :
-                              'bg-red-500/10 text-red-600 border-red-500/30'
-                            }`}>{auto.Estatus_Operativo}</span>
+                            <span className={`inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-bold border uppercase ${auto.Estatus_Operativo === 'Activo en flota' ? 'bg-[#71717a]/10 text-[#71717a] border-[#71717a]/30' :
+                                auto.Estatus_Operativo === 'En Reparación' ? 'bg-yellow-500/10 text-yellow-600 border-yellow-500/30' :
+                                  'bg-red-500/10 text-red-600 border-red-500/30'
+                              }`}>{auto.Estatus_Operativo}</span>
                           </td>
                           <td className="p-4">
                             <div className="font-medium text-[var(--text-main)]">
@@ -483,7 +482,7 @@ export default function InventarioMaestroPage() {
                 <Filter size={14} className="text-[#71717a]" />
                 <span className="text-[10px] font-black uppercase tracking-[0.2em]">Filtros de Tabla</span>
               </div>
-              
+
               <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                 <PremiumSelect
                   compact
@@ -532,7 +531,7 @@ export default function InventarioMaestroPage() {
                       </h3>
                       <div className="flex gap-4 text-[var(--text-muted)] font-mono text-sm mb-6 border-b border-[var(--border-cream)] pb-4">
                         <p>Placa: <span className="text-[var(--text-main)]">{vehiculo.Placa}</span></p>
-                          <p>Año/Obs: <span className="text-[var(--text-main)]">Detalle Completo en Título</span></p>
+                        <p>Año/Obs: <span className="text-[var(--text-main)]">Detalle Completo en Título</span></p>
                       </div>
                       <div className="bg-red-50 p-4 rounded-lg border border-red-100">
                         <p className="text-[10px] font-bold text-red-600 flex items-center gap-2 uppercase tracking-wider mb-2"><AlertCircle size={14} /> Motivo de Baja</p>
@@ -554,26 +553,26 @@ export default function InventarioMaestroPage() {
           <div className="bg-white rounded-xl shadow-2xl border border-[var(--border-cream)] w-full max-w-4xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             <div className="bg-stone-50 border-b border-[var(--border-cream)] p-4 flex justify-between items-center text-[var(--text-main)] transition-colors">
               <h2 className="text-lg font-bold flex items-center gap-2 font-serif">
-                {modoEdicion ? <Pencil className="w-5 h-5 text-[#71717a]" /> : <Car className="w-5 h-5 text-[#71717a]" />} 
+                {modoEdicion ? <Pencil className="w-5 h-5 text-[#71717a]" /> : <Car className="w-5 h-5 text-[#71717a]" />}
                 <span className="text-[var(--text-main)]">{modoEdicion ? `Editar Unidad ${formData.Consecutivo}` : 'Registrar Nueva Unidad'}</span>
               </h2>
               <button onClick={() => setModalAbierto(false)} className="text-stone-400 hover:text-red-500 transition-colors"><X className="w-6 h-6" /></button>
             </div>
-            
+
             <form onSubmit={guardarVehiculo} className="p-6 max-h-[80vh] overflow-y-auto bg-white">
               <h3 className="text-xs font-black text-[#71717a] uppercase tracking-wider mb-3 border-b border-[var(--border-cream)] pb-2">Datos Principales</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-6">
                 <div>
                   <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">Consecutivo *</label>
-                  <input required type="text" value={formData.Consecutivo} disabled={modoEdicion} onChange={e => setFormData({...formData, Consecutivo: e.target.value})} className={`w-full border border-[var(--border-cream)] rounded-lg p-2.5 outline-none uppercase text-[var(--text-main)] ${modoEdicion ? 'bg-stone-50 text-stone-400 cursor-not-allowed' : 'bg-white focus:ring-2 focus:ring-[#71717a] focus:border-[#71717a]'}`} placeholder="V-XX" />
+                  <input required type="text" value={formData.Consecutivo} disabled={modoEdicion} onChange={e => setFormData({ ...formData, Consecutivo: e.target.value })} className={`w-full border border-[var(--border-cream)] rounded-lg p-2.5 outline-none uppercase text-[var(--text-main)] ${modoEdicion ? 'bg-stone-50 text-stone-400 cursor-not-allowed' : 'bg-white focus:ring-2 focus:ring-[#71717a] focus:border-[#71717a]'}`} placeholder="V-XX" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">Placas *</label>
-                  <input required type="text" value={formData.Placa} onChange={e => setFormData({...formData, Placa: e.target.value})} className="w-full bg-white border border-[var(--border-cream)] text-[var(--text-main)] rounded-lg p-2.5 focus:ring-2 focus:ring-[#71717a] outline-none uppercase placeholder-stone-300" placeholder="ABC-123" />
+                  <input required type="text" value={formData.Placa} onChange={e => setFormData({ ...formData, Placa: e.target.value })} className="w-full bg-white border border-[var(--border-cream)] text-[var(--text-main)] rounded-lg p-2.5 focus:ring-2 focus:ring-[#71717a] outline-none uppercase placeholder-stone-300" placeholder="ABC-123" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">Color</label>
-                  <input type="text" value={formData.Color} onChange={e => setFormData({...formData, Color: e.target.value})} className="w-full bg-white border border-[var(--border-cream)] text-[var(--text-main)] rounded-lg p-2.5 focus:ring-2 focus:ring-[#71717a] outline-none placeholder-stone-300" placeholder="Ej. Blanco" />
+                  <input type="text" value={formData.Color} onChange={e => setFormData({ ...formData, Color: e.target.value })} className="w-full bg-white border border-[var(--border-cream)] text-[var(--text-main)] rounded-lg p-2.5 focus:ring-2 focus:ring-[#71717a] outline-none placeholder-stone-300" placeholder="Ej. Blanco" />
                 </div>
               </div>
 
@@ -581,27 +580,27 @@ export default function InventarioMaestroPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-6">
                 <div>
                   <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">Marca</label>
-                  <input type="text" value={formData.Marca} onChange={e => setFormData({...formData, Marca: e.target.value})} className="w-full bg-white border border-[var(--border-cream)] text-[var(--text-main)] rounded-lg p-2.5 focus:ring-2 focus:ring-[#71717a] outline-none placeholder-stone-300" placeholder="Ej. Ford" />
+                  <input type="text" value={formData.Marca} onChange={e => setFormData({ ...formData, Marca: e.target.value })} className="w-full bg-white border border-[var(--border-cream)] text-[var(--text-main)] rounded-lg p-2.5 focus:ring-2 focus:ring-[#71717a] outline-none placeholder-stone-300" placeholder="Ej. Ford" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">Año</label>
-                  <input type="text" value={formData.Modelo} onChange={e => setFormData({...formData, Modelo: e.target.value})} className="w-full bg-white border border-[var(--border-cream)] text-[var(--text-main)] rounded-lg p-2.5 focus:ring-2 focus:ring-[#71717a] outline-none placeholder-stone-300" placeholder="Ej. 2024" />
+                  <input type="text" value={formData.Modelo} onChange={e => setFormData({ ...formData, Modelo: e.target.value })} className="w-full bg-white border border-[var(--border-cream)] text-[var(--text-main)] rounded-lg p-2.5 focus:ring-2 focus:ring-[#71717a] outline-none placeholder-stone-300" placeholder="Ej. 2024" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">Línea / Modelo</label>
-                  <input type="text" value={formData.Linea} onChange={e => setFormData({...formData, Linea: e.target.value})} className="w-full bg-white border border-[var(--border-cream)] text-[var(--text-main)] rounded-lg p-2.5 focus:ring-2 focus:ring-[#71717a] outline-none placeholder-stone-300" placeholder="Ej. Ranger" />
+                  <input type="text" value={formData.Linea} onChange={e => setFormData({ ...formData, Linea: e.target.value })} className="w-full bg-white border border-[var(--border-cream)] text-[var(--text-main)] rounded-lg p-2.5 focus:ring-2 focus:ring-[#71717a] outline-none placeholder-stone-300" placeholder="Ej. Ranger" />
                 </div>
                 <div className="sm:col-span-2">
                   <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">Número de Serie (VIN)</label>
-                  <input type="text" value={formData.Numero_Serie} onChange={e => setFormData({...formData, Numero_Serie: e.target.value})} className="w-full bg-white border border-[var(--border-cream)] text-[var(--text-main)] rounded-lg p-2.5 focus:ring-2 focus:ring-[#71717a] outline-none uppercase font-mono placeholder-stone-300" placeholder="1FD..." />
+                  <input type="text" value={formData.Numero_Serie} onChange={e => setFormData({ ...formData, Numero_Serie: e.target.value })} className="w-full bg-white border border-[var(--border-cream)] text-[var(--text-main)] rounded-lg p-2.5 focus:ring-2 focus:ring-[#71717a] outline-none uppercase font-mono placeholder-stone-300" placeholder="1FD..." />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">Póliza de Seguro</label>
-                  <input type="text" value={formData.Poliza_Seguro} onChange={e => setFormData({...formData, Poliza_Seguro: e.target.value})} className="w-full bg-white border border-[var(--border-cream)] text-[var(--text-main)] rounded-lg p-2.5 focus:ring-2 focus:ring-[#71717a] outline-none uppercase placeholder-stone-300" />
+                  <input type="text" value={formData.Poliza_Seguro} onChange={e => setFormData({ ...formData, Poliza_Seguro: e.target.value })} className="w-full bg-white border border-[var(--border-cream)] text-[var(--text-main)] rounded-lg p-2.5 focus:ring-2 focus:ring-[#71717a] outline-none uppercase placeholder-stone-300" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">Kilometraje Actual</label>
-                  <input type="number" value={formData.Kilometraje_Actual} onChange={e => setFormData({...formData, Kilometraje_Actual: e.target.value})} className="w-full bg-white border border-[var(--border-cream)] text-[var(--text-main)] rounded-lg p-2.5 focus:ring-2 focus:ring-[#71717a] outline-none placeholder-stone-300" placeholder="Ej. 15000" />
+                  <input type="number" value={formData.Kilometraje_Actual} onChange={e => setFormData({ ...formData, Kilometraje_Actual: e.target.value })} className="w-full bg-white border border-[var(--border-cream)] text-[var(--text-main)] rounded-lg p-2.5 focus:ring-2 focus:ring-[#71717a] outline-none placeholder-stone-300" placeholder="Ej. 15000" />
                 </div>
               </div>
 
@@ -609,24 +608,24 @@ export default function InventarioMaestroPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-4">
                 <div>
                   <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">Correo del Usuario</label>
-                  <input type="email" value={formData.Email_encargado} onChange={e => setFormData({...formData, Email_encargado: e.target.value})} className="w-full bg-white border border-[var(--border-cream)] text-[var(--text-main)] rounded-lg p-2.5 focus:ring-2 focus:ring-[#71717a] outline-none placeholder-stone-300" placeholder="correo@sifygsa.com" />
+                  <input type="email" value={formData.Email_encargado} onChange={e => setFormData({ ...formData, Email_encargado: e.target.value })} className="w-full bg-white border border-[var(--border-cream)] text-[var(--text-main)] rounded-lg p-2.5 focus:ring-2 focus:ring-[#71717a] outline-none placeholder-stone-300" placeholder="correo@sifygsa.com" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">Departamento</label>
-                  <input type="text" value={formData.Departamento} onChange={e => setFormData({...formData, Departamento: e.target.value})} className="w-full bg-white border border-[var(--border-cream)] text-[var(--text-main)] rounded-lg p-2.5 focus:ring-2 focus:ring-[#71717a] outline-none placeholder-stone-300" placeholder="Ej. Ventas" />
+                  <input type="text" value={formData.Departamento} onChange={e => setFormData({ ...formData, Departamento: e.target.value })} className="w-full bg-white border border-[var(--border-cream)] text-[var(--text-main)] rounded-lg p-2.5 focus:ring-2 focus:ring-[#71717a] outline-none placeholder-stone-300" placeholder="Ej. Ventas" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">Ubicación</label>
-                  <input type="text" value={formData.Ubicacion} onChange={e => setFormData({...formData, Ubicacion: e.target.value})} className="w-full bg-white border border-[var(--border-cream)] text-[var(--text-main)] rounded-lg p-2.5 focus:ring-2 focus:ring-[#71717a] outline-none placeholder-stone-300" placeholder="Ej. Planta Sur" />
+                  <input type="text" value={formData.Ubicacion} onChange={e => setFormData({ ...formData, Ubicacion: e.target.value })} className="w-full bg-white border border-[var(--border-cream)] text-[var(--text-main)] rounded-lg p-2.5 focus:ring-2 focus:ring-[#71717a] outline-none placeholder-stone-300" placeholder="Ej. Planta Sur" />
                 </div>
-                
+
                 <div className="sm:col-span-2 md:col-span-3">
                   <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">Estatus Operativo de la Unidad</label>
                   <PremiumSelect
                     accent="indigo"
                     placeholder="Seleccionar estatus"
                     value={formData.Estatus_Operativo}
-                    onChange={(val) => setFormData({...formData, Estatus_Operativo: val})}
+                    onChange={(val) => setFormData({ ...formData, Estatus_Operativo: val })}
                     options={[
                       { value: 'Activo en flota', label: 'Activo en Flota' },
                       { value: 'En Reparación', label: 'En Reparación' },
@@ -639,7 +638,7 @@ export default function InventarioMaestroPage() {
 
                 <div className="sm:col-span-2 md:col-span-3 mt-2">
                   <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">Percances / Observaciones de Baja</label>
-                  <textarea value={formData.Percance} onChange={e => setFormData({...formData, Percance: e.target.value})} className="w-full bg-white border border-[var(--border-cream)] text-[var(--text-main)] rounded-lg p-2.5 focus:ring-2 focus:ring-[#71717a] outline-none placeholder-stone-300" placeholder="Registrar cualquier golpe, accidente o motivo de baja..." rows={2} />
+                  <textarea value={formData.Percance} onChange={e => setFormData({ ...formData, Percance: e.target.value })} className="w-full bg-white border border-[var(--border-cream)] text-[var(--text-main)] rounded-lg p-2.5 focus:ring-2 focus:ring-[#71717a] outline-none placeholder-stone-300" placeholder="Registrar cualquier golpe, accidente o motivo de baja..." rows={2} />
                 </div>
               </div>
 

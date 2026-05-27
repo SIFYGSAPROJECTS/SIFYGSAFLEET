@@ -12,22 +12,22 @@ datasource db {
 
 // 1. CATALOGO DE EMPLEADOS [cite: 1]
 model Empleados {
-  Email            String  @id @db.VarChar(50)
-  Password         String  
-  Pin_Temporal     String?
-  Expiracion_Pin   DateTime?
-  Ultimo_Cambio_Password   DateTime?
-  Nombre_Empleado  String  @db.VarChar(60)
-  A_Paterno        String  @db.VarChar(60)
-  Estatus_Acceso   String   @default("Activo")
-  A_Materno        String? @db.VarChar(60)
-  Cargo            String? @db.VarChar(60)
-  Departamento     String? @db.VarChar(80)
-  Rol              String  @default("USER")
+  Email                  String    @id @db.VarChar(50)
+  Password               String
+  Pin_Temporal           String?
+  Expiracion_Pin         DateTime?
+  Ultimo_Cambio_Password DateTime?
+  Nombre_Empleado        String    @db.VarChar(60)
+  A_Paterno              String    @db.VarChar(60)
+  Estatus_Acceso         String    @default("Activo")
+  A_Materno              String?   @db.VarChar(60)
+  Cargo                  String?   @db.VarChar(60)
+  Departamento           String?   @db.VarChar(80)
+  Rol                    String    @default("USER")
 
   // Relaciones
   telefonos         Telefono[]
-  autos_encargados  Inventario_Automoviles[]     @relation("EncargadoAuto")
+  autos_encargados  Inventario_Automoviles[]       @relation("EncargadoAuto")
   historial_autos   Historial_Registro_Automovil[]
   historial_propios Historial_Empleados[]
   solicitudes       Solicitud[]
@@ -36,31 +36,31 @@ model Empleados {
 
 // 2. INVENTARIO DE UNIDADES [cite: 2]
 model Inventario_Automoviles {
-  Consecutivo      String   @id @db.VarChar(10)
-  Placa            String   @unique @db.VarChar(20) 
-  Marca            String?  @db.VarChar(50)         
-  Modelo           String?  @db.VarChar(50)        
-  Color            String?  @db.VarChar(40)         
-  Linea            String?  @db.VarChar(20)         
-  Estado_Unidad    Boolean  @default(true)
-  Estatus_Operativo String   @default("Activo en flota") @db.VarChar(30)
-  Email_encargado  String?  @db.VarChar(100)        
-  Numero_Serie     String?
-  Poliza_Seguro    String?
-  Departamento     String?
-  Contrato         String?
-  Ubicacion        String?
-  Percance         String?
-  Kilometraje      Int?
+  Consecutivo       String  @id @db.VarChar(10)
+  Placa             String  @unique @db.VarChar(20)
+  Marca             String? @db.VarChar(50)
+  Modelo            String? @db.VarChar(50)
+  Color             String? @db.VarChar(40)
+  Linea             String? @db.VarChar(20)
+  Estado_Unidad     Boolean @default(true)
+  Estatus_Operativo String  @default("Activo en flota") @db.VarChar(30)
+  Email_encargado   String? @db.VarChar(100)
+  Numero_Serie      String?
+  Poliza_Seguro     String?
+  Departamento      String?
+  Contrato          String?
+  Ubicacion         String?
+  Percance          String?
+  Kilometraje       Int?
 
   // Relaciones
-  encargado       Empleados? @relation("EncargadoAuto", fields: [Email_encargado], references: [Email])
-  historial_reg   Historial_Registro_Automovil[]
-  bitacora_autos  Historial_Auto[]
-  solicitudes     Solicitud[]
-  checklists      Checklist[]
-  documentos      Documentos_Unidad[]
-  costos          Costos_Mantenimiento[]
+  encargado      Empleados?                     @relation("EncargadoAuto", fields: [Email_encargado], references: [Email])
+  historial_reg  Historial_Registro_Automovil[]
+  bitacora_autos Historial_Auto[]
+  solicitudes    Solicitud[]
+  checklists     Checklist[]
+  documentos     Documentos_Unidad[]
+  costos         Costos_Mantenimiento[]
 }
 
 // 3. TELEFONOS DE EMPLEADOS [cite: 3]
@@ -68,7 +68,7 @@ model Telefono {
   Email_Empleado String @db.VarChar(50)
   No_Telefonico  String @db.VarChar(15)
 
-  empleado       Empleados @relation(fields: [Email_Empleado], references: [Email], onDelete: Cascade)
+  empleado Empleados @relation(fields: [Email_Empleado], references: [Email], onDelete: Cascade)
 
   @@id([Email_Empleado, No_Telefonico]) // Llave primaria compuesta
 }
@@ -86,46 +86,45 @@ model Historial_Registro_Automovil {
   Fecha_Cambio     DateTime @default(now())
 
   // Relaciones
-  auto             Inventario_Automoviles @relation(fields: [Consecutivo], references: [Consecutivo], onDelete: Cascade)
-  empleado         Empleados?             @relation(fields: [Email_Personal], references: [Email])
+  auto     Inventario_Automoviles @relation(fields: [Consecutivo], references: [Consecutivo], onDelete: Cascade)
+  empleado Empleados?             @relation(fields: [Email_Personal], references: [Email])
 }
-
 
 // 5. BITACORA DE SERVICIOS [cite: 6]
 model Historial_Auto {
-  Id_Historial     Int      @id @default(autoincrement())
-  Consecutivo      String   @db.VarChar(10)
-  Placa_Actual     String?  @db.VarChar(10)
-  Kilometraje      Int?
-  Estado_Actual    Boolean  @default(true)
-  Descripcion      String?  @db.Text
-  Fecha_Registro   DateTime @default(now())
+  Id_Historial   Int      @id @default(autoincrement())
+  Consecutivo    String   @db.VarChar(10)
+  Placa_Actual   String?  @db.VarChar(10)
+  Kilometraje    Int?
+  Estado_Actual  Boolean  @default(true)
+  Descripcion    String?  @db.Text
+  Fecha_Registro DateTime @default(now())
 
-  auto             Inventario_Automoviles @relation(fields: [Consecutivo], references: [Consecutivo], onDelete: Cascade)
+  auto Inventario_Automoviles @relation(fields: [Consecutivo], references: [Consecutivo], onDelete: Cascade)
 }
 
 // 6. CHECKLISTS EN PDF
 model Checklist {
-  id            Int      @id @default(autoincrement())
-  Consecutivo   String   
-  Titulo        String
-  Ruta_PDF      String   // Aquí guardaremos el nombre del archivo (ej. /uploads/VSI-011-check.pdf)
-  Fecha_Subida  DateTime @default(now())
+  id           Int      @id @default(autoincrement())
+  Consecutivo  String
+  Titulo       String
+  Ruta_PDF     String // Aquí guardaremos el nombre del archivo (ej. /uploads/VSI-011-check.pdf)
+  Fecha_Subida DateTime @default(now())
 
   // Relación: Este checklist pertenece a un auto específico
-  vehiculo      Inventario_Automoviles @relation(fields: [Consecutivo], references: [Consecutivo], onDelete: Cascade)
+  vehiculo Inventario_Automoviles @relation(fields: [Consecutivo], references: [Consecutivo], onDelete: Cascade)
 }
 
 // 6.2. DOCUMENTOS DE UNIDAD
 model Documentos_Unidad {
-  id            Int      @id @default(autoincrement())
-  Consecutivo   String   @db.VarChar(10)
-  Titulo        String   @db.VarChar(100)
-  Ruta_PDF      String   @db.Text
-  Fecha_Subida  DateTime @default(now())
+  id           Int      @id @default(autoincrement())
+  Consecutivo  String   @db.VarChar(10)
+  Titulo       String   @db.VarChar(100)
+  Ruta_PDF     String   @db.Text
+  Fecha_Subida DateTime @default(now())
 
   // Relación: Este documento pertenece a un auto específico
-  vehiculo      Inventario_Automoviles @relation(fields: [Consecutivo], references: [Consecutivo], onDelete: Cascade)
+  vehiculo Inventario_Automoviles @relation(fields: [Consecutivo], references: [Consecutivo], onDelete: Cascade)
 }
 
 // 7. HISTORIAL DE TRAYECTORIA DE EMPLEADOS [cite: 7]
@@ -139,7 +138,7 @@ model Historial_Empleados {
   Departamento     String?  @db.VarChar(80)
   Fecha_Cambio     DateTime @default(now())
 
-  empleado         Empleados @relation(fields: [Email_Empleado], references: [Email], onDelete: Cascade)
+  empleado Empleados @relation(fields: [Email_Empleado], references: [Email], onDelete: Cascade)
 }
 
 // 8. SOLICITUD (Tickets) [cite: 8]
@@ -158,12 +157,11 @@ model Solicitud {
   Evidencia         String?
   Descripcion       String?  @db.Text
   Fecha_Realizacion DateTime @default(now()) @db.Date
-  Estado            String  @default("PENDIENTE")
+  Estado            String   @default("PENDIENTE")
 
-  auto              Inventario_Automoviles @relation(fields: [Consecutivo], references: [Consecutivo])
-  empleado          Empleados              @relation(fields: [Email_Empleado], references: [Email])
-  procesos          Procesos[]
-
+  auto     Inventario_Automoviles @relation(fields: [Consecutivo], references: [Consecutivo])
+  empleado Empleados              @relation(fields: [Email_Empleado], references: [Email])
+  procesos Procesos[]
 }
 
 // 9. PROCESOS (Seguimiento) [cite: 9]
@@ -174,8 +172,8 @@ model Procesos {
   Detalle_Proceso String?  @db.Text
   Fecha_Hora      DateTime @default(now())
 
-  ticket          Solicitud @relation(fields: [Pk_folio_ticket], references: [Pk_folio_ticket], onDelete: Cascade)
-  empleado        Empleados @relation(fields: [Email_Empleado], references: [Email])
+  ticket   Solicitud @relation(fields: [Pk_folio_ticket], references: [Pk_folio_ticket], onDelete: Cascade)
+  empleado Empleados @relation(fields: [Email_Empleado], references: [Email])
 }
 
 // 10. COSTOS DE MANTENIMIENTO [cite: 10]
@@ -193,5 +191,5 @@ model Costos_Mantenimiento {
   Factura_CDG       String?  @db.Text
 
   // Relacion
-  auto              Inventario_Automoviles @relation(fields: [Consecutivo], references: [Consecutivo], onDelete: Cascade)
+  auto Inventario_Automoviles @relation(fields: [Consecutivo], references: [Consecutivo], onDelete: Cascade)
 }

@@ -12,14 +12,40 @@ interface Message {
   fileName?: string | null;
 }
 
+function getCookie(name: string): string {
+  if (typeof document === 'undefined') return '';
+  const match = document.cookie
+    .split(';')
+    .map(c => c.trim())
+    .find(c => c.startsWith(`${name}=`));
+  return match ? decodeURIComponent(match.split('=').slice(1).join('=')) : '';
+}
+
 export default function CopilotChat() {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([
-    { role: 'model', content: 'Hola, soy SIFY Copilot. ¿En qué te puedo ayudar con la flota hoy?' }
-  ]);
+
+  // Construir saludo personalizado según el rol de sesión
+  const buildWelcomeMessage = (): string => {
+    const role = getCookie('user_role');
+    const name = getCookie('user_name');
+    const firstName = name ? name.split(' ')[0] : '';
+    if (role.toLowerCase() === 'admin') {
+      return `Hola${firstName ? ` ${firstName}` : ''}, soy SIFY Copilot. ¿En qué te puedo ayudar con la flota hoy?`;
+    }
+    return `Hola${firstName ? ` ${firstName}` : ' conductor'}, soy SIFY Copilot. Puedo ayudarte con información sobre tu unidad asignada: kilometraje, servicios y checklists. ¿En qué te ayudo?`;
+  };
+
+
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Inicializar el mensaje de bienvenida al montar el componente (leyendo las cookies del browser)
+  useEffect(() => {
+    setMessages([{ role: 'model', content: buildWelcomeMessage() }]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (messagesEndRef.current) {

@@ -375,6 +375,53 @@ export async function predict_upcoming_services() {
   return serviciosRecomendados.sort((a, b) => a.ProximoServicio - a.KmActual - (b.ProximoServicio - b.KmActual));
 }
 
+// Obtiene la unidad asignada al empleado logueado y su historial reciente (uso exclusivo de usuarios normales)
+export async function get_my_unit(email: string) {
+  if (!email) return { mensaje: "No se pudo identificar tu cuenta. Por favor, recarga la página." };
+
+  const auto = await prisma.inventario_Automoviles.findFirst({
+    where: { Email_encargado: email },
+    include: {
+      bitacora_autos: {
+        orderBy: { Fecha_Registro: 'desc' },
+        take: 5,
+        select: { Kilometraje: true, Fecha_Registro: true, Descripcion: true }
+      },
+      solicitudes: {
+        orderBy: { Fecha_Realizacion: 'desc' },
+        take: 5,
+        select: { Pk_folio_ticket: true, Tipo_Servicio: true, Estado: true, Fecha_Realizacion: true, Kilometraje: true, Descripcion: true }
+      },
+      checklists: {
+        orderBy: { Fecha_Subida: 'desc' },
+        take: 3,
+        select: { Titulo: true, Fecha_Subida: true }
+      }
+    }
+  });
+
+  if (!auto) {
+    return { mensaje: "No tienes ninguna unidad asignada actualmente. Contacta a tu administrador si crees que esto es un error." };
+  }
+
+  return {
+    Consecutivo: auto.Consecutivo,
+    Placa: auto.Placa,
+    Marca: auto.Marca,
+    Modelo: auto.Modelo,
+    Anio: auto.Anio,
+    Color: auto.Color,
+    Estatus: auto.Estatus_Operativo,
+    Ubicacion: auto.Ubicacion,
+    Departamento: auto.Departamento,
+    Kilometraje_Actual: auto.bitacora_autos[0]?.Kilometraje ?? null,
+    Ultimo_Servicio: auto.solicitudes[0] ?? null,
+    Historial_Servicios: auto.solicitudes,
+    Bitacora_Reciente: auto.bitacora_autos,
+    Checklists_Recientes: auto.checklists
+  };
+}
+
 // Revisa que vehículos activos NO tengan checklist subido en el último mes
 export async function audit_checklist_compliance() {
   const hace30Dias = new Date();
