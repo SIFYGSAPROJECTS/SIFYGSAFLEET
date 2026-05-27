@@ -1,13 +1,14 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Check, X, ExternalLink } from 'lucide-react'; 
 import PremiumSelect from '@/components/ui/PremiumSelect';
 
 export default function StatusUpdater({ folio, estadoActual, lugarActual, fechaActual, horaActual, asesorActual, numeroAsesorActual, linkTallerActual, onUpdateTemporal }: any) {
   const router = useRouter();
   const [cargando, setCargando] = useState(false);
+  const isSubmitting = useRef(false);
   
   const [estado, setEstado] = useState(estadoActual);
   const [lugar, setLugar] = useState(lugarActual || '');
@@ -34,6 +35,8 @@ export default function StatusUpdater({ folio, estadoActual, lugarActual, fechaA
   }, [estadoActual, lugarActual, fechaActual, horaActual, asesorActual, numeroAsesorActual, linkTallerActual]);
 
   const guardarCambios = async () => {
+    if (isSubmitting.current) return;
+    isSubmitting.current = true;
     setCargando(true);
     try {
       const res = await fetch('/api/tickets/estado', {
@@ -53,6 +56,7 @@ export default function StatusUpdater({ folio, estadoActual, lugarActual, fechaA
       console.error("Error al actualizar", error);
       alert("Error de conexión al servidor.");
     } finally {
+      isSubmitting.current = false;
       setCargando(false);
     }
   };
