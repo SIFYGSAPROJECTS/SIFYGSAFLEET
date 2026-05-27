@@ -85,7 +85,7 @@ export default function ServiciosTabs({ tickets, vehiculos, isAdmin, rol }: Prop
         kilometraje: t.Kilometraje || '0',
         servicio: t.Descripcion || 'Sin descripción',
         tipo: t.Tipo_Servicio ? t.Tipo_Servicio.toUpperCase() : 'NO ESPECIFICADO',
-        estado: t.Estado || ''
+        estado: t.Estado || 'PENDIENTE'
       });
 
       // Configuración de alineación de celdas para optimizar legibilidad
