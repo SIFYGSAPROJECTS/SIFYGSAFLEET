@@ -409,7 +409,7 @@ export async function get_my_unit(email: string) {
     Placa: auto.Placa,
     Marca: auto.Marca,
     Modelo: auto.Modelo,
-    Anio: auto.Anio,
+    Linea: auto.Linea,
     Color: auto.Color,
     Estatus: auto.Estatus_Operativo,
     Ubicacion: auto.Ubicacion,
