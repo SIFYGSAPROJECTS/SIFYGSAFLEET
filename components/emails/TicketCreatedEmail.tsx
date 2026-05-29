@@ -21,6 +21,7 @@ interface TicketCreatedEmailProps {
   nota?: string | null;
   taller?: string | null;
   descripcionFormatted: string;
+  tieneEvidencia?: boolean;
 }
 
 export const TicketCreatedEmail = ({
@@ -33,6 +34,7 @@ export const TicketCreatedEmail = ({
   nota,
   taller,
   descripcionFormatted = 'Descripción del trabajo',
+  tieneEvidencia = false,
 }: TicketCreatedEmailProps) => {
   return (
     <Html>
@@ -62,6 +64,9 @@ export const TicketCreatedEmail = ({
               )}
               {taller && (
                 <Text style={infoText}><strong>📍 Taller Sugerido:</strong> {taller}</Text>
+              )}
+              {tieneEvidencia && (
+                <Text style={infoText}><strong>📸 Evidencia:</strong> El usuario adjuntó una fotografía a esta solicitud.</Text>
               )}
             </Section>
 

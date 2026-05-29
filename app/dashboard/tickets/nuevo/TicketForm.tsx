@@ -113,6 +113,7 @@ export default function TicketForm({ vehiculos }: Props) {
         ...formData,
         descripcion: formData.descripcion + tierFinal + tallerFinal,
         kilometraje: Number(formData.kilometraje),
+        tieneEvidencia: formData.tipo_servicio === 'preventivo' && !!imageFile,
       };
 
       const res = await fetch('/api/tickets', {

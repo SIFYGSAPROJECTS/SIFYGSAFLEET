@@ -8,7 +8,7 @@ import { TicketCreatedEmail } from '@/components/emails/TicketCreatedEmail';
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { consecutivo, tipo_servicio, descripcion, kilometraje } = body;
+    const { consecutivo, tipo_servicio, descripcion, kilometraje, tieneEvidencia } = body;
 
     // Verifica que el usuario tenga una sesión activa
     const cookieStore = await cookies();
@@ -129,7 +129,8 @@ export async function POST(request: Request) {
         kilometraje: nuevoMantenimiento.Kilometraje,
         nota: notaStr,
         taller: tallerStr,
-        descripcionFormatted: descriptionFormatted
+        descripcionFormatted: descriptionFormatted,
+        tieneEvidencia: tieneEvidencia
       })
     });
 
