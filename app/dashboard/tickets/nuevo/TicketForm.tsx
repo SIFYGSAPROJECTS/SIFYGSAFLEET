@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Loader2, Wrench, AlertCircle, Search, ChevronDown, MapPin } from 'lucide-react';
+import { Loader2, Wrench, AlertCircle, Search, ChevronDown, MapPin, Upload, X } from 'lucide-react';
 import SystemModal, { ModalType } from '@/components/ui/SystemModal';
 import PremiumSelect from '@/components/ui/PremiumSelect';
 
@@ -35,6 +35,10 @@ export default function TicketForm({ vehiculos }: Props) {
     descripcion: '',
     taller_sugerido: ''
   });
+
+  // 2.5 Estado para la imagen opcional
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   // Cerrar el buscador si el usuario hace clic afuera
   useEffect(() => {
@@ -124,6 +128,24 @@ export default function TicketForm({ vehiculos }: Props) {
 
       const resultado = await res.json(); 
       const folioGenerado = resultado.data.Pk_folio_ticket;
+
+      // Subir imagen de evidencia si es preventivo y existe archivo
+      if (formData.tipo_servicio === 'preventivo' && imageFile) {
+        const formDataUpload = new FormData();
+        formDataUpload.append('file', imageFile);
+        formDataUpload.append('folio', folioGenerado);
+        formDataUpload.append('consecutivo', formData.consecutivo);
+        formDataUpload.append('campo', 'Foto_Evidencia');
+
+        try {
+          await fetch('/api/evidencia', {
+            method: 'POST',
+            body: formDataUpload,
+          });
+        } catch (uploadError) {
+          console.error("Error subiendo evidencia:", uploadError);
+        }
+      }
 
       setSysModal({
         isOpen: true,
@@ -216,6 +238,7 @@ export default function TicketForm({ vehiculos }: Props) {
           ]}
         />
       </div>
+
 
       {/* 3. KILOMETRAJE ACTUAL Y TIER */}
       <div className="mb-6 animate-in fade-in slide-in-from-top-4 duration-300 bg-[var(--bg-screen)]/50 p-4 rounded-xl border border-[var(--border-cream)]">
@@ -380,6 +403,58 @@ export default function TicketForm({ vehiculos }: Props) {
           onChange={(e) => setFormData({...formData, descripcion: e.target.value})}
         />
       </div>
+
+      {/* 4.5 IMAGEN OPCIONAL (SOLO PREVENTIVO) */}
+      {formData.tipo_servicio === 'preventivo' && (
+        <div className="mb-8 animate-in fade-in slide-in-from-top-4 duration-300 bg-[var(--bg-screen)]/30 p-4 rounded-xl border border-dashed border-[#71717a]/50">
+          <label className="block text-sm font-medium text-[var(--text-muted)] mb-2 flex items-center justify-between">
+            <span>Evidencia Fotográfica <span className="text-xs font-normal text-slate-500">(opcional)</span></span>
+          </label>
+          
+          {!imagePreview ? (
+            <div className="flex items-center justify-center w-full">
+              <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-[var(--border-cream)] border-dashed rounded-lg cursor-pointer bg-white hover:bg-[var(--bg-hover)] transition-all">
+                <div className="flex flex-col items-center justify-center pt-5 pb-6 text-slate-500">
+                  <Upload className="w-8 h-8 mb-3 text-slate-400" />
+                  <p className="mb-2 text-sm text-slate-500"><span className="font-semibold text-[#71717a]">Haz clic para subir</span> o arrastra y suelta</p>
+                  <p className="text-xs text-slate-400">PNG, JPG o JPEG (MAX. 5MB)</p>
+                </div>
+                <input 
+                  type="file" 
+                  className="hidden" 
+                  accept="image/png, image/jpeg, image/jpg"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      if (file.size > 5 * 1024 * 1024) {
+                        setSysModal({ isOpen: true, type: 'error', title: 'Archivo muy grande', message: 'La imagen no debe superar los 5MB.', onConfirm: () => setSysModal(prev => ({...prev, isOpen: false})) });
+                        return;
+                      }
+                      setImageFile(file);
+                      setImagePreview(URL.createObjectURL(file));
+                    }
+                  }}
+                />
+              </label>
+            </div>
+          ) : (
+            <div className="relative w-full rounded-lg overflow-hidden border border-[var(--border-cream)]">
+              <img src={imagePreview} alt="Preview" className="w-full h-48 object-cover" />
+              <button
+                type="button"
+                onClick={() => {
+                  setImageFile(null);
+                  setImagePreview(null);
+                }}
+                className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white p-1.5 rounded-full shadow-lg transition-colors"
+                title="Quitar imagen"
+              >
+                <X size={16} />
+              </button>
+            </div>
+          )}
+        </div>
+      )}
 
       <button 
         type="submit" 

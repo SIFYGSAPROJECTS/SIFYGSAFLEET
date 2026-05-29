@@ -9,6 +9,7 @@ export async function POST(request: Request) {
     const file = formData.get('file') as File;
     const folio = formData.get('folio') as string;
     const consecutivo = formData.get('consecutivo') as string;
+    const campo = formData.get('campo') as string || 'Evidencia'; // Puede ser 'Evidencia' o 'Foto_Evidencia'
 
     if (!file || !folio || !consecutivo) {
       return NextResponse.json({ error: 'Faltan datos' }, { status: 400 });
@@ -17,8 +18,9 @@ export async function POST(request: Request) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Nombre: unidad + fecha + timestamp para evitar duplicados exactos
-    const nombreArchivo = `${consecutivo.toLowerCase()}-${folio}-${new Date().getTime()}.pdf`;
+    // Nombre: unidad + fecha + timestamp + extensión para evitar duplicados exactos
+    const extension = file.name.split('.').pop() || 'pdf';
+    const nombreArchivo = `${consecutivo.toLowerCase()}-${folio}-${new Date().getTime()}.${extension}`;
 
     // Subir a Minio
     await minioClient.putObject('evidencias', nombreArchivo, buffer, file.size, { 'Content-Type': file.type });
@@ -29,9 +31,17 @@ export async function POST(request: Request) {
     const minioPort = process.env.MINIO_PORT === '80' || process.env.MINIO_PORT === '443' ? '' : `:${process.env.MINIO_PORT}`;
     const publicUrl = `${protocol}://${minioHost}${minioPort}/evidencias/${nombreArchivo}`;
 
+    // Guardar en la columna correspondiente
+    const dataUpdate: any = {};
+    if (campo === 'Foto_Evidencia') {
+      dataUpdate.Foto_Evidencia = publicUrl;
+    } else {
+      dataUpdate.Evidencia = publicUrl;
+    }
+
     await prisma.solicitud.update({
       where: { Pk_folio_ticket: folio },
-      data: { Evidencia: publicUrl }
+      data: dataUpdate
     });
 
     return NextResponse.json({ url: publicUrl, mensaje: 'Evidencia guardada exitosamente en MinIO' });
@@ -72,7 +82,8 @@ export async function PUT(request: Request) {
     // 3. Subimos el NUEVO archivo
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    const nombreNuevo = `${solicitud.auto?.Consecutivo.toLowerCase() || 'unidad'}-${folio}-${new Date().getTime()}.pdf`;
+    const extension = file.name.split('.').pop() || 'pdf';
+    const nombreNuevo = `${solicitud.auto?.Consecutivo.toLowerCase() || 'unidad'}-${folio}-${new Date().getTime()}.${extension}`;
 
     await minioClient.putObject('evidencias', nombreNuevo, buffer, file.size, { 'Content-Type': file.type });
 

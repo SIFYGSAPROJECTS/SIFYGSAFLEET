@@ -109,6 +109,20 @@ export default async function VerTicketPage({ params }: { params: Promise<{ foli
               &ldquo;{ticket.Descripcion}&rdquo;
             </div>
           </div>
+
+          {/* 4. SECCIÓN DE EVIDENCIA FOTOGRÁFICA */}
+          {(ticket.Foto_Evidencia || (ticket.Evidencia && !ticket.Evidencia.toLowerCase().endsWith('.pdf'))) && (
+            <div className="print:hidden mt-6 flex flex-col gap-4">
+              <div>
+                <p className="text-[10px] font-bold text-slate-400 uppercase mb-2 flex items-center gap-1.5"><CheckCircle2 size={12} className="text-emerald-500"/> Respaldo Fotográfico</p>
+                <div className="rounded-lg overflow-hidden border border-slate-200 bg-slate-50 flex items-center justify-center p-2">
+                  <a href={ticket.Foto_Evidencia || ticket.Evidencia!} target="_blank" rel="noopener noreferrer" title="Click para ampliar" className="block cursor-zoom-in">
+                    <img src={ticket.Foto_Evidencia || ticket.Evidencia!} alt="Evidencia del Servicio" className="max-h-64 w-auto object-contain rounded shadow-sm hover:scale-[1.02] transition-transform" />
+                  </a>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="p-6 bg-slate-50 border-t border-slate-100 text-center text-[10px] text-slate-400 print:bg-white print:mt-10">

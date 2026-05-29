@@ -24,8 +24,8 @@ export default function HistorialClient({ historial, rol }: Props) {
   
   const [sysModal, setSysModal] = useState<{isOpen: boolean, type: ModalType, title: string, message: React.ReactNode}>({ isOpen: false, type: 'info', title: '', message: '' });
 
-  /* ESTADOS PARA EL VISOR PDF */
-  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  /* ESTADOS PARA EL VISOR DE ARCHIVOS */
+  const [evidenciaUrl, setEvidenciaUrl] = useState<string | null>(null);
   const [mostrarVisor, setMostrarVisor] = useState(false);
 
   /* ESTADOS PARA EDICIÓN Y ELIMINACIÓN */
@@ -52,7 +52,7 @@ export default function HistorialClient({ historial, rol }: Props) {
   });
 
   const abrirPrevisualizacion = (url: string) => {
-    setPdfUrl(url);
+    setEvidenciaUrl(url);
     setMostrarVisor(true);
   };
 
@@ -228,21 +228,29 @@ export default function HistorialClient({ historial, rol }: Props) {
                             onClick={() => abrirPrevisualizacion(ticket.Evidencia)} 
                             className="inline-flex items-center gap-1.5 bg-[#71717a] hover:bg-[#52525b] text-white border border-transparent px-4 py-2 rounded-lg text-xs font-bold transition-all shadow-md active:scale-95"
                           >
-                            <FileText size={14} /> VER PDF
+                            <FileText size={14} /> VER FACTURA
                           </button>
-                          <label className="cursor-pointer p-1.5 text-slate-500 hover:text-yellow-400 transition-colors" title="Reemplazar">
-                            {editandoFolio === ticket.Pk_folio_ticket ? <Loader2 size={16} className="animate-spin text-yellow-400" /> : <PencilLine size={16} />}
-                            <input type="file" accept=".pdf" className="hidden" onChange={(e) => handleSubirEvidencia(e, ticket.Pk_folio_ticket, ticket.auto?.Consecutivo || 'Unidad', true)} disabled={editandoFolio === ticket.Pk_folio_ticket} />
-                          </label>
-                          <button onClick={() => abrirModalEliminar(ticket.Pk_folio_ticket, ticket.Evidencia)} className="p-1.5 text-slate-500 hover:text-red-500 transition-colors" title="Eliminar">
-                            <Trash2 size={16} />
-                          </button>
+                          {rol === 'ADMIN' && (
+                            <>
+                              <label className="cursor-pointer p-1.5 text-slate-500 hover:text-yellow-400 transition-colors" title="Reemplazar">
+                                {editandoFolio === ticket.Pk_folio_ticket ? <Loader2 size={16} className="animate-spin text-yellow-400" /> : <PencilLine size={16} />}
+                                <input type="file" accept=".pdf" className="hidden" onChange={(e) => handleSubirEvidencia(e, ticket.Pk_folio_ticket, ticket.auto?.Consecutivo || 'Unidad', true)} disabled={editandoFolio === ticket.Pk_folio_ticket} />
+                              </label>
+                              <button onClick={() => abrirModalEliminar(ticket.Pk_folio_ticket, ticket.Evidencia)} className="p-1.5 text-slate-500 hover:text-red-500 transition-colors" title="Eliminar">
+                                <Trash2 size={16} />
+                              </button>
+                            </>
+                          )}
                         </div>
                       ) : (
-                        <label className="cursor-pointer inline-flex items-center justify-center gap-1.5 text-[var(--text-muted)] bg-white border border-[var(--border-cream)] px-3 py-1.5 rounded-md text-xs font-bold hover:border-[#71717a] hover:text-[#71717a] transition-all shadow-sm">
-                          {subiendoFolio === ticket.Pk_folio_ticket ? <><Loader2 size={14} className="animate-spin" /> SUBIENDO</> : <><UploadCloud size={14} /> SUBIR</>}
-                          <input type="file" accept=".pdf" className="hidden" onChange={(e) => handleSubirEvidencia(e, ticket.Pk_folio_ticket, ticket.auto?.Consecutivo || 'Unidad', false)} disabled={subiendoFolio === ticket.Pk_folio_ticket} />
-                        </label>
+                        rol === 'ADMIN' ? (
+                          <label className="cursor-pointer inline-flex items-center justify-center gap-1.5 text-[var(--text-muted)] bg-white border border-[var(--border-cream)] px-3 py-1.5 rounded-md text-xs font-bold hover:border-[#71717a] hover:text-[#71717a] transition-all shadow-sm">
+                            {subiendoFolio === ticket.Pk_folio_ticket ? <><Loader2 size={14} className="animate-spin" /> SUBIENDO</> : <><UploadCloud size={14} /> SUBIR</>}
+                            <input type="file" accept=".pdf" className="hidden" onChange={(e) => handleSubirEvidencia(e, ticket.Pk_folio_ticket, ticket.auto?.Consecutivo || 'Unidad', false)} disabled={subiendoFolio === ticket.Pk_folio_ticket} />
+                          </label>
+                        ) : (
+                          <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Pendiente</span>
+                        )
                       )}
                     </td>
                     <td className="p-4 text-center">
@@ -281,7 +289,7 @@ export default function HistorialClient({ historial, rol }: Props) {
         onConfirm={() => setSysModal({ ...sysModal, isOpen: false })}
       />
 
-      {/* MODAL DE PREVISUALIZACION PDF */}
+      {/* MODAL DE PREVISUALIZACION */}
       {mostrarVisor && (
         <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-[100] flex flex-col p-4 md:p-8 animate-in fade-in zoom-in-95 duration-200">
           <div className="max-w-6xl mx-auto w-full flex justify-between items-center mb-4">
@@ -290,12 +298,18 @@ export default function HistorialClient({ historial, rol }: Props) {
               <h3 className="font-bold text-lg text-white tracking-tight font-serif">Factura de Mantenimiento</h3>
             </div>
             <div className="flex gap-2">
-              <button onClick={() => window.open(pdfUrl!, '_blank')} className="bg-[#2D2D2D] hover:bg-slate-700 p-2.5 rounded-lg transition-colors text-slate-300" title="Abrir fuera"><ExternalLink size={20} /></button>
+              <button onClick={() => window.open(evidenciaUrl!, '_blank')} className="bg-[#2D2D2D] hover:bg-slate-700 p-2.5 rounded-lg transition-colors text-slate-300" title="Abrir fuera"><ExternalLink size={20} /></button>
               <button onClick={() => setMostrarVisor(false)} className="bg-red-600 hover:bg-red-700 text-white p-2.5 rounded-lg transition-colors shadow-lg"><X size={20} /></button>
             </div>
           </div>
-          <div className="max-w-6xl mx-auto w-full flex-1 bg-white rounded-xl overflow-hidden shadow-2xl border border-[#3B3A38]">
-            <iframe src={`${pdfUrl}#toolbar=0`} className="w-full h-full border-none" />
+          <div className="max-w-6xl mx-auto w-full flex-1 bg-white rounded-xl overflow-hidden shadow-2xl border border-[#3B3A38] flex items-center justify-center relative">
+            {evidenciaUrl && (
+              evidenciaUrl.toLowerCase().endsWith('.pdf') ? (
+                <iframe src={`${evidenciaUrl}#toolbar=0`} className="w-full h-full border-none" />
+              ) : (
+                <img src={evidenciaUrl} alt="Factura de Servicio" className="max-w-full max-h-full object-contain rounded-lg p-2" />
+              )
+            )}
           </div>
         </div>
       )}

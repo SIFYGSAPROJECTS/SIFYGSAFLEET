@@ -122,6 +122,10 @@ model Documentos_Unidad {
   Titulo       String   @db.VarChar(100)
   Ruta_PDF     String   @db.Text
   Fecha_Subida DateTime @default(now())
+  
+  Fecha_Expiracion DateTime? @db.Date
+  Aviso_Dias       Int?
+  Notificado       Boolean   @default(false)
 
   // Relación: Este documento pertenece a un auto específico
   vehiculo Inventario_Automoviles @relation(fields: [Consecutivo], references: [Consecutivo], onDelete: Cascade)
@@ -154,7 +158,8 @@ model Solicitud {
   Link_Taller       String?  @db.Text
   Kilometraje       Int?
   Tipo_Servicio     String?  @db.VarChar(30)
-  Evidencia         String?
+  Evidencia         String?  // Usado históricamente para Facturas
+  Foto_Evidencia    String?  // Nuevo campo para la fotografía del ticket
   Descripcion       String?  @db.Text
   Fecha_Realizacion DateTime @default(now()) @db.Date
   Estado            String   @default("PENDIENTE")

@@ -62,6 +62,12 @@ La plataforma adapta su interfaz en base al nivel de autorización (`ADMIN` / `U
 
 ---
 
+## 🆕 Actualizaciones Recientes (v2.0)
+
+*   **Seguridad de Concurrencia en Correos:** Se implementó un guardia de concurrencia (\`useRef\`) en la Central de Servicios para bloquear peticiones múltiples ocasionadas por "doble clic" accidental. Esto previene eficazmente el envío de correos electrónicos duplicados al actualizar el estado de las unidades.
+
+---
+
 ## 🚀 Despliegue e Instalación (Docker)
 
 El proyecto está dockerizado para asegurar su correcta ejecución en cualquier entorno de producción.

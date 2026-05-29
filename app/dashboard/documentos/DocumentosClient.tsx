@@ -5,7 +5,7 @@ import {
   Search, Upload, FileText, AlertCircle, Car, User, Palette, Gauge,
   ArrowLeft, X, Eye, Download, Trash2, PencilLine, Wrench, DollarSign,
   FolderOpen, ShieldCheck, CreditCard, Info, ChevronDown, FilePlus2,
-  CheckCircle2
+  CheckCircle2, Calendar, Bell
 } from 'lucide-react';
 import SystemModal, { ModalType } from '@/components/ui/SystemModal';
 
@@ -24,6 +24,13 @@ export default function DocumentosPage({ vehiculos = [], isAdmin = false }: Prop
   const [tituloDocumento, setTituloDocumento] = useState('');
   const [cargando, setCargando] = useState(false);
   const [mensaje, setMensaje] = useState('');
+  const [fechaExpiracion, setFechaExpiracion] = useState('');
+  const [avisoDias, setAvisoDias] = useState('');
+
+  const [modalEditarFecha, setModalEditarFecha] = useState(false);
+  const [docAEditarFecha, setDocAEditarFecha] = useState<any>(null);
+  const [editFechaExp, setEditFechaExp] = useState('');
+  const [editAvisoDias, setEditAvisoDias] = useState('');
 
   const [errorBusqueda, setErrorBusqueda] = useState(false);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
@@ -156,11 +163,15 @@ export default function DocumentosPage({ vehiculos = [], isAdmin = false }: Prop
     formData.append('file', archivo);
     formData.append('consecutivo', vehiculoActivo);
     formData.append('titulo', tituloDocumento.trim());
+    if (fechaExpiracion) formData.append('fecha_expiracion', fechaExpiracion);
+    if (avisoDias) formData.append('aviso_dias', avisoDias);
     try {
       const res = await fetch('/api/documentos', { method: 'POST', body: formData });
       if (res.ok) {
         setArchivo(null);
         setTituloDocumento('');
+        setFechaExpiracion('');
+        setAvisoDias('');
         buscarVehiculo();
         setSysModal({ isOpen: true, type: 'success', title: 'Documento Guardado', message: 'El documento ha sido cargado exitosamente.' });
       } else {
@@ -216,6 +227,41 @@ export default function DocumentosPage({ vehiculos = [], isAdmin = false }: Prop
       }
     } catch {
       setSysModal({ isOpen: true, type: 'error', title: 'Error de Conexión', message: 'No se pudo conectar para actualizar el archivo.' });
+    }
+    setCargando(false);
+  };
+
+  const abrirModalEditarFecha = (doc: any) => {
+    setDocAEditarFecha(doc);
+    setEditFechaExp(doc.Fecha_Expiracion ? new Date(doc.Fecha_Expiracion).toISOString().split('T')[0] : '');
+    setEditAvisoDias(doc.Aviso_Dias ? doc.Aviso_Dias.toString() : '');
+    setModalEditarFecha(true);
+  };
+
+  const guardarEdicionFecha = async () => {
+    if (!docAEditarFecha) return;
+    setCargando(true);
+    try {
+      const res = await fetch('/api/documentos', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: docAEditarFecha.id,
+          fecha_expiracion: editFechaExp || null,
+          aviso_dias: editAvisoDias || null
+        })
+      });
+      if (res.ok) {
+        setModalEditarFecha(false);
+        setDocAEditarFecha(null);
+        buscarVehiculo();
+        setSysModal({ isOpen: true, type: 'success', title: 'Fechas Actualizadas', message: 'Se ha modificado la vigencia del documento.' });
+      } else {
+        const errorData = await res.json();
+        setSysModal({ isOpen: true, type: 'error', title: 'Error al Actualizar', message: errorData.error });
+      }
+    } catch {
+      setSysModal({ isOpen: true, type: 'error', title: 'Error de Conexión', message: 'No se pudo conectar con el servidor.' });
     }
     setCargando(false);
   };
@@ -499,52 +545,86 @@ export default function DocumentosPage({ vehiculos = [], isAdmin = false }: Prop
                   </div>
 
                   <div className="p-5">
-                    <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
-                      {/* Título */}
-                      <div className="sm:col-span-5 flex flex-col gap-1.5">
-                        <label className="text-[10px] font-black text-[#71717a] uppercase tracking-widest flex items-center gap-1">
-                          <Info size={11} /> Título Descriptivo
-                        </label>
-                        <input
-                          type="text"
-                          placeholder="Ej. Seguro Vehicular 2025"
-                          className="w-full bg-white border border-[var(--border-cream)] rounded-xl px-4 py-2.5 outline-none text-sm font-medium text-[var(--text-main)] transition-all focus:border-[#71717a] focus:ring-2 focus:ring-[#71717a]/10 placeholder:text-stone-300"
-                          value={tituloDocumento}
-                          onChange={(e) => setTituloDocumento(e.target.value)}
-                        />
+                    <div className="flex flex-col gap-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
+                        {/* Título */}
+                        <div className="sm:col-span-6 flex flex-col gap-1.5">
+                          <label className="text-[10px] font-black text-[#71717a] uppercase tracking-widest flex items-center gap-1">
+                            <Info size={11} /> Título Descriptivo
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="Ej. Seguro Vehicular 2025"
+                            className="w-full bg-white border border-[var(--border-cream)] rounded-xl px-4 py-2.5 outline-none text-sm font-medium text-[var(--text-main)] transition-all focus:border-[#71717a] focus:ring-2 focus:ring-[#71717a]/10 placeholder:text-stone-300"
+                            value={tituloDocumento}
+                            onChange={(e) => setTituloDocumento(e.target.value)}
+                          />
+                        </div>
+
+                        {/* Archivo */}
+                        <div className="sm:col-span-6 flex flex-col gap-1.5">
+                          <label className="text-[10px] font-black text-[#71717a] uppercase tracking-widest flex items-center gap-1">
+                            <FileText size={11} /> Seleccionar PDF
+                          </label>
+                          <input
+                            type="file"
+                            id="doc-file-upload"
+                            accept=".pdf"
+                            className="hidden"
+                            onChange={(e) => setArchivo(e.target.files?.[0] || null)}
+                          />
+                          <label
+                            htmlFor="doc-file-upload"
+                            className={`flex items-center justify-between px-4 py-2.5 rounded-xl cursor-pointer transition-all text-xs font-bold border ${archivo ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-white border-[var(--border-cream)] text-[var(--text-muted)] hover:border-[#71717a] hover:text-[var(--text-main)] hover:bg-[var(--bg-hover)]'}`}
+                          >
+                            <span className="truncate max-w-[150px]">{archivo ? archivo.name : 'Elegir archivo...'}</span>
+                            {archivo ? <CheckCircle2 size={14} className="shrink-0 ml-2 text-emerald-600" /> : <Upload size={14} className="shrink-0 ml-2" />}
+                          </label>
+                        </div>
                       </div>
 
-                      {/* Archivo */}
-                      <div className="sm:col-span-4 flex flex-col gap-1.5">
-                        <label className="text-[10px] font-black text-[#71717a] uppercase tracking-widest flex items-center gap-1">
-                          <FileText size={11} /> Seleccionar PDF
-                        </label>
-                        <input
-                          type="file"
-                          id="doc-file-upload"
-                          accept=".pdf"
-                          className="hidden"
-                          onChange={(e) => setArchivo(e.target.files?.[0] || null)}
-                        />
-                        <label
-                          htmlFor="doc-file-upload"
-                          className={`flex items-center justify-between px-4 py-2.5 rounded-xl cursor-pointer transition-all text-xs font-bold border ${archivo ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-white border-[var(--border-cream)] text-[var(--text-muted)] hover:border-[#71717a] hover:text-[var(--text-main)] hover:bg-[var(--bg-hover)]'}`}
-                        >
-                          <span className="truncate max-w-[150px]">{archivo ? archivo.name : 'Elegir archivo...'}</span>
-                          {archivo ? <CheckCircle2 size={14} className="shrink-0 ml-2 text-emerald-600" /> : <Upload size={14} className="shrink-0 ml-2" />}
-                        </label>
-                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
+                        {/* Fecha Expiración */}
+                        <div className="sm:col-span-5 flex flex-col gap-1.5">
+                          <label className="text-[10px] font-black text-[#71717a] uppercase tracking-widest flex items-center gap-1">
+                            <Calendar size={11} /> Expiración (Opcional)
+                          </label>
+                          <input
+                            type="date"
+                            className="w-full bg-white border border-[var(--border-cream)] rounded-xl px-4 py-2.5 outline-none text-sm font-medium text-[var(--text-main)] transition-all focus:border-[#71717a] focus:ring-2 focus:ring-[#71717a]/10"
+                            value={fechaExpiracion}
+                            onChange={(e) => setFechaExpiracion(e.target.value)}
+                          />
+                        </div>
 
-                      {/* Botón */}
-                      <div className="sm:col-span-3">
-                        <button
-                          onClick={subirDocumento}
-                          disabled={cargando || !archivo || !tituloDocumento.trim()}
-                          className="w-full bg-amber-500 hover:bg-amber-600 disabled:bg-stone-100 disabled:text-stone-400 text-white py-2.5 rounded-xl flex items-center justify-center gap-2 font-bold transition-all shadow-lg text-xs uppercase active:scale-[0.98]"
-                        >
-                          <Upload size={14} />
-                          {cargando ? 'Subiendo...' : 'Subir'}
-                        </button>
+                        {/* Aviso Días */}
+                        <div className="sm:col-span-4 flex flex-col gap-1.5">
+                          <label className="text-[10px] font-black text-[#71717a] uppercase tracking-widest flex items-center gap-1">
+                            <Bell size={11} /> Alerta Previa
+                          </label>
+                          <select
+                            className="w-full bg-white border border-[var(--border-cream)] rounded-xl px-4 py-2.5 outline-none text-sm font-medium text-[var(--text-main)] transition-all focus:border-[#71717a] focus:ring-2 focus:ring-[#71717a]/10"
+                            value={avisoDias}
+                            onChange={(e) => setAvisoDias(e.target.value)}
+                            disabled={!fechaExpiracion}
+                          >
+                            <option value="">Sin alerta</option>
+                            <option value="15">15 días antes</option>
+                            <option value="30">30 días antes</option>
+                          </select>
+                        </div>
+
+                        {/* Botón */}
+                        <div className="sm:col-span-3">
+                          <button
+                            onClick={subirDocumento}
+                            disabled={cargando || !archivo || !tituloDocumento.trim()}
+                            className="w-full bg-amber-500 hover:bg-amber-600 disabled:bg-stone-100 disabled:text-stone-400 text-white py-2.5 rounded-xl flex items-center justify-center gap-2 font-bold transition-all shadow-lg text-xs uppercase active:scale-[0.98]"
+                          >
+                            <Upload size={14} />
+                            {cargando ? 'Subiendo...' : 'Subir'}
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -588,6 +668,13 @@ export default function DocumentosPage({ vehiculos = [], isAdmin = false }: Prop
                             {/* Acciones hover */}
                             <div className="absolute top-3.5 right-3.5 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                               <button
+                                onClick={() => abrirModalEditarFecha(doc)}
+                                className="text-stone-400 hover:text-blue-600 p-1.5 bg-white rounded-lg border border-[var(--border-cream)] hover:border-blue-300 transition-colors shadow-sm"
+                                title="Editar Vencimiento"
+                              >
+                                <Calendar size={13} />
+                              </button>
+                              <button
                                 onClick={() => setEditandoDocumentoId(editandoDocumentoId === doc.id ? null : doc.id)}
                                 className="text-stone-400 hover:text-yellow-600 p-1.5 bg-white rounded-lg border border-[var(--border-cream)] hover:border-yellow-300 transition-colors shadow-sm"
                                 title="Reemplazar PDF"
@@ -613,11 +700,21 @@ export default function DocumentosPage({ vehiculos = [], isAdmin = false }: Prop
                                   {doc.Titulo}
                                 </h3>
                                 {doc.Fecha_Subida && (
-                                  <span className="text-[10px] text-stone-400 mt-1 block font-mono">
-                                    {new Date(doc.Fecha_Subida).toLocaleDateString('es-MX', {
-                                      day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC'
-                                    })}
-                                  </span>
+                                  <>
+                                    <span className="text-[10px] text-stone-400 mt-1 block font-mono">
+                                      Subido: {new Date(doc.Fecha_Subida).toLocaleDateString('es-MX', {
+                                        day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC'
+                                      })}
+                                    </span>
+                                    {doc.Fecha_Expiracion && (
+                                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full mt-1.5 inline-block ${
+                                        new Date(doc.Fecha_Expiracion) < new Date() ? 'bg-red-100 text-red-700 border border-red-200' : 
+                                        new Date(doc.Fecha_Expiracion).getTime() - new Date().getTime() <= (doc.Aviso_Dias || 15) * 24 * 60 * 60 * 1000 ? 'bg-yellow-100 text-yellow-700 border border-yellow-200' : 'bg-emerald-100 text-emerald-700 border border-emerald-200'
+                                      }`}>
+                                        Vence: {new Date(doc.Fecha_Expiracion).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' })}
+                                      </span>
+                                    )}
+                                  </>
                                 )}
                               </div>
                             </div>
@@ -728,6 +825,39 @@ export default function DocumentosPage({ vehiculos = [], isAdmin = false }: Prop
           message={sysModal.message}
           onConfirm={() => setSysModal({ ...sysModal, isOpen: false })}
         />
+
+        {/* Modal Editar Fechas */}
+        {modalEditarFecha && docAEditarFecha && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-in fade-in duration-200">
+            <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
+              <div className="bg-[#0f172a] p-4 flex items-center justify-between">
+                <h3 className="font-bold text-white flex items-center gap-2"><Calendar size={18} className="text-amber-400" /> Editar Vigencia</h3>
+                <button onClick={() => setModalEditarFecha(false)} className="text-slate-400 hover:text-white transition-colors"><X size={18} /></button>
+              </div>
+              <div className="p-6 flex flex-col gap-5">
+                <p className="text-sm text-[var(--text-main)] font-medium">Actualizando expiración para: <strong className="text-amber-600 block mt-1">{docAEditarFecha.Titulo}</strong></p>
+                
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[10px] font-black text-[#71717a] uppercase tracking-widest flex items-center gap-1"><Calendar size={11} /> Nueva Expiración (Opcional)</label>
+                  <input type="date" className="w-full bg-white border border-[var(--border-cream)] rounded-xl px-4 py-2.5 outline-none text-sm font-medium transition-all focus:border-[#71717a] focus:ring-2 focus:ring-[#71717a]/10" value={editFechaExp} onChange={(e) => setEditFechaExp(e.target.value)} />
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[10px] font-black text-[#71717a] uppercase tracking-widest flex items-center gap-1"><Bell size={11} /> Alerta Previa</label>
+                  <select className="w-full bg-white border border-[var(--border-cream)] rounded-xl px-4 py-2.5 outline-none text-sm font-medium transition-all focus:border-[#71717a] focus:ring-2 focus:ring-[#71717a]/10" value={editAvisoDias} onChange={(e) => setEditAvisoDias(e.target.value)} disabled={!editFechaExp}>
+                    <option value="">Sin alerta</option>
+                    <option value="15">15 días antes</option>
+                    <option value="30">30 días antes</option>
+                  </select>
+                </div>
+
+                <button onClick={guardarEdicionFecha} disabled={cargando} className="w-full bg-amber-500 hover:bg-amber-600 disabled:bg-stone-200 disabled:text-stone-400 text-white py-3 rounded-xl flex items-center justify-center gap-2 font-bold transition-all shadow-lg active:scale-95 text-sm mt-2">
+                  <CheckCircle2 size={16} /> {cargando ? 'Guardando...' : 'Guardar Cambios'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

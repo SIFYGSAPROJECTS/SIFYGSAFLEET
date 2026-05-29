@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { minioClient } from '@/lib/minio';
 import { prisma } from '@/lib/db';
+import { enviarCorreo } from '@/lib/email';
+import { DocumentoExpiradoEmail } from '@/components/emails/DocumentoExpiradoEmail';
 
 // --- HELPER PARA ASEGURAR LA EXISTENCIA DEL BUCKET ---
 async function ensureBucketExists(bucketName: string) {
@@ -99,6 +101,8 @@ export async function POST(request: Request) {
     const file = formData.get('file') as File;
     const consecutivo = formData.get('consecutivo') as string;
     const titulo = formData.get('titulo') as string;
+    const fechaExpiracion = formData.get('fecha_expiracion') as string | null;
+    const avisoDias = formData.get('aviso_dias') as string | null;
 
     if (!file || !consecutivo || !titulo) {
       return NextResponse.json({ error: 'Datos incompletos' }, { status: 400 });
@@ -120,11 +124,48 @@ export async function POST(request: Request) {
     const minioPort = process.env.MINIO_PORT === '80' || process.env.MINIO_PORT === '443' ? '' : `:${process.env.MINIO_PORT}`;
     const publicUrl = `${protocol}://${minioHost}${minioPort}/documentos/${nombreArch}`;
 
+    const fechaExpObj = fechaExpiracion ? new Date(fechaExpiracion) : null;
+    const avisoDiasNum = avisoDias ? parseInt(avisoDias) : null;
+    let notificado = false;
+
+    // Validación inmediata al subir
+    if (fechaExpObj && avisoDiasNum !== null) {
+      const hoy = new Date();
+      const diffTime = fechaExpObj.getTime() - hoy.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+      // Si se sube y ya está en zona de riesgo, enviamos correo al instante
+      if (diffDays <= avisoDiasNum) {
+        const administradores = await prisma.empleados.findMany({
+          where: { Rol: 'ADMIN' },
+          select: { Email: true }
+        });
+        const correosAdmins = administradores.map(admin => admin.Email);
+
+        if (correosAdmins.length > 0) {
+          await enviarCorreo({
+            to: correosAdmins,
+            subject: `⚠️ Aviso Urgente: ${consecutivo} - ${titulo}`,
+            react: DocumentoExpiradoEmail({
+              consecutivo: consecutivo,
+              tituloDocumento: titulo,
+              fechaExpiracion: fechaExpObj.toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' }),
+              diasRestantes: diffDays
+            })
+          });
+          notificado = true; // Marcamos para que el cron diario ya no lo vuelva a avisar
+        }
+      }
+    }
+
     const nuevoDoc = await prisma.documentos_Unidad.create({
       data: {
         Consecutivo: consecutivo,
         Titulo: titulo,
-        Ruta_PDF: publicUrl
+        Ruta_PDF: publicUrl,
+        Fecha_Expiracion: fechaExpObj,
+        Aviso_Dias: avisoDiasNum,
+        Notificado: notificado
       }
     });
 
@@ -212,5 +253,67 @@ export async function PUT(request: Request) {
   } catch (error) {
     console.error("Error PUT documentos:", error);
     return NextResponse.json({ error: 'Error interno al actualizar' }, { status: 500 });
+  }
+}
+
+// --- 5. ACTUALIZAR FECHA DE EXPIRACIÓN Y AVISO ---
+export async function PATCH(request: Request) {
+  try {
+    const data = await request.json();
+    const { id, fecha_expiracion, aviso_dias } = data;
+
+    if (!id) return NextResponse.json({ error: 'Falta el ID del documento' }, { status: 400 });
+
+    const fechaExpObj = fecha_expiracion ? new Date(fecha_expiracion) : null;
+    const avisoDiasNum = aviso_dias ? parseInt(aviso_dias) : null;
+    let notificado = false;
+
+    // Validación inmediata al editar
+    if (fechaExpObj && avisoDiasNum !== null) {
+      const hoy = new Date();
+      const diffTime = fechaExpObj.getTime() - hoy.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+      // Si se edita y ya está en zona de riesgo, enviamos correo al instante
+      if (diffDays <= avisoDiasNum) {
+        const docViejo = await prisma.documentos_Unidad.findUnique({ where: { id: Number(id) } });
+        if (docViejo) {
+          const administradores = await prisma.empleados.findMany({
+            where: { Rol: 'ADMIN' },
+            select: { Email: true }
+          });
+          const correosAdmins = administradores.map(admin => admin.Email);
+
+          if (correosAdmins.length > 0) {
+            await enviarCorreo({
+              to: correosAdmins,
+              subject: `⚠️ Aviso Urgente (Actualización): ${docViejo.Consecutivo} - ${docViejo.Titulo}`,
+              react: DocumentoExpiradoEmail({
+                consecutivo: docViejo.Consecutivo,
+                tituloDocumento: docViejo.Titulo,
+                fechaExpiracion: fechaExpObj.toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' }),
+                diasRestantes: diffDays
+              })
+            });
+            notificado = true; 
+          }
+        }
+      }
+    }
+
+    await prisma.documentos_Unidad.update({
+      where: { id: Number(id) },
+      data: { 
+        Fecha_Expiracion: fechaExpObj,
+        Aviso_Dias: avisoDiasNum,
+        Notificado: notificado
+      }
+    });
+
+    return NextResponse.json({ success: true, mensaje: 'Vencimiento actualizado correctamente' });
+
+  } catch (error) {
+    console.error("Error PATCH documentos:", error);
+    return NextResponse.json({ error: 'Error interno al actualizar fechas' }, { status: 500 });
   }
 }
