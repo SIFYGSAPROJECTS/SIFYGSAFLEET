@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { CheckCircle2, AlertCircle, FileText, Upload } from "lucide-react";
+import { CheckCircle2, AlertCircle, FileText, Upload, X } from "lucide-react";
 import { registrarVerificacion } from "@/app/actions/verificaciones";
 import PremiumSelect from "@/components/ui/PremiumSelect";
 
