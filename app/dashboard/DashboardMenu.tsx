@@ -3,7 +3,7 @@
 import { usePathname } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ShieldCheck, Users, FileText, Wrench, User, Car, MousePointerClick, DollarSign, FolderOpen } from 'lucide-react';
+import { ShieldCheck, Users, FileText, Wrench, User, Car, MousePointerClick, DollarSign, FolderOpen, CalendarCheck } from 'lucide-react';
 
 function AnimatedCounter({ value, duration = 1500 }: { value: number, duration?: number }) {
   const [count, setCount] = useState(0);
@@ -70,11 +70,18 @@ export default function DashboardMenu({ userRole, totalAutos, totalEmpleados, ti
   const tarjetasTransporte = (
     <>
       {userRole === 'ADMIN' && (
-        <Link href="/dashboard/inventario" className="p-6 bg-[var(--bg-floating)] border border-[var(--border-cream)] border-t-4 border-t-[#71717a] rounded-xl hover:bg-[var(--bg-hover)] hover:shadow-xl transition-all duration-300 group text-left block">
-          <ShieldCheck className="w-8 h-8 text-[#71717a] mb-4" />
-          <span className="block font-bold text-lg text-[var(--text-main)] font-serif">Inventario de Flota</span>
-          <span className="text-sm text-[var(--text-muted)]">Editar, agregar o dar de baja unidades.</span>
-        </Link>
+        <>
+          <Link href="/dashboard/inventario" className="p-6 bg-[var(--bg-floating)] border border-[var(--border-cream)] border-t-4 border-t-[#71717a] rounded-xl hover:bg-[var(--bg-hover)] hover:shadow-xl transition-all duration-300 group text-left block">
+            <ShieldCheck className="w-8 h-8 text-[#71717a] mb-4" />
+            <span className="block font-bold text-lg text-[var(--text-main)] font-serif">Inventario de Flota</span>
+            <span className="text-sm text-[var(--text-muted)]">Editar, agregar o dar de baja unidades.</span>
+          </Link>
+          <Link href="/verificaciones" className="p-6 bg-[var(--bg-floating)] border border-[var(--border-cream)] border-t-4 border-t-[#71717a] rounded-xl hover:bg-[var(--bg-hover)] hover:shadow-xl transition-all duration-300 group text-left block">
+            <CalendarCheck className="w-8 h-8 text-[#71717a] mb-4" />
+            <span className="block font-bold text-lg text-[var(--text-main)] font-serif">Verificaciones</span>
+            <span className="text-sm text-[var(--text-muted)]">Calendario y control de plazos.</span>
+          </Link>
+        </>
       )}
     </>
   );
@@ -136,8 +143,8 @@ export default function DashboardMenu({ userRole, totalAutos, totalEmpleados, ti
     <div className="space-y-8">
       
       {/* MENÚ DE PESTAÑAS - ESTILO PILL/CAPSULE */}
-      <div className="w-full flex justify-center">
-        <div className="flex bg-[var(--bg-floating)] p-1.5 rounded-full border border-[var(--border-cream)] shadow-inner w-full max-w-4xl overflow-x-auto scrollbar-hide">
+      <div className="w-full flex justify-center px-4">
+        <div className="flex bg-[var(--bg-floating)] p-1.5 rounded-full border border-[var(--border-cream)] shadow-inner w-full max-w-6xl overflow-x-auto scrollbar-hide">
           
           <Link
             href="/dashboard/servicios"
@@ -208,6 +215,19 @@ export default function DashboardMenu({ userRole, totalAutos, totalEmpleados, ti
           >
             <FolderOpen size={18} /> <span className="hidden sm:inline">Documentos</span>
           </Link>
+          
+          {userRole === 'ADMIN' && (
+            <Link
+              href="/verificaciones"
+              className={`flex-1 flex justify-center px-6 py-2.5 font-bold text-sm items-center gap-2 rounded-full transition-all whitespace-nowrap ${
+                activeTab === 'verificaciones' 
+                  ? 'bg-white text-[var(--text-main)] shadow-md' 
+                  : 'text-[var(--text-muted)] hover:text-green-600 hover:bg-[var(--bg-screen)]/50'
+              }`}
+            >
+              <CalendarCheck size={18} /> <span className="hidden sm:inline">Verificaciones</span>
+            </Link>
+          )}
           
         </div>
       </div>

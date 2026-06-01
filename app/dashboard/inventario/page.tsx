@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { Car, Plus, X, Pencil, ArrowLeft, ShieldCheck, AlertTriangle, Wrench, CheckCircle2, Archive, RotateCcw, AlertCircle, User, FileText, Download, DollarSign, Filter, FolderOpen } from 'lucide-react';
+import { Car, Plus, X, Pencil, ArrowLeft, ShieldCheck, AlertTriangle, Wrench, CheckCircle2, Archive, RotateCcw, AlertCircle, User, FileText, Download, DollarSign, Filter, FolderOpen , CalendarCheck } from 'lucide-react';
 import Link from 'next/link';
 import SystemModal, { ModalType } from '@/components/ui/SystemModal';
 import PremiumSelect from '@/components/ui/PremiumSelect';
@@ -305,6 +305,9 @@ export default function InventarioMaestroPage() {
                   </Link>
                   <Link href="/dashboard/costos" className="px-4 py-1.5 text-xs font-bold rounded-full text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap">
                     <DollarSign size={14} /> Costos
+                  </Link>
+                  <Link href="/verificaciones" className="px-4 py-1.5 text-xs font-bold rounded-full text-[var(--text-muted)] hover:text-green-600 hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap">
+                    <CalendarCheck size={14} /> Verificaciones
                   </Link>
                 </div>
               </div>

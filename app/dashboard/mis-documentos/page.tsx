@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react'; 
-import { FileText, ArrowLeft, Car, Palette, CreditCard, ExternalLink, Loader2, AlertCircle, User, Wrench, FolderOpen, ShieldCheck } from 'lucide-react';
+import { FileText, ArrowLeft, Car, Palette, CreditCard, ExternalLink, Loader2, AlertCircle, User, Wrench, FolderOpen, ShieldCheck , CalendarCheck } from 'lucide-react';
 import Link from 'next/link';
 
 export default function MisDocumentosPage() {
