@@ -16,7 +16,7 @@ export default function LoginPage() {
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [resetMessage, setResetMessage] = useState({ text: '', type: '' });
 
-  // ESTADOS PARA LA TRANSICIÓN SUAVE
+  // ESTADOS PARA LA TRANSICIÓN 
   const [loginSuccess, setLoginSuccess] = useState(false);
   const [isFadingOut, setIsFadingOut] = useState(false);
 
