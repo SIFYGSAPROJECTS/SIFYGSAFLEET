@@ -61,6 +61,7 @@ model Inventario_Automoviles {
   checklists     Checklist[]
   documentos     Documentos_Unidad[]
   costos         Costos_Mantenimiento[]
+  verificaciones Verificacion_Vehicular[]
 }
 
 // 3. TELEFONOS DE EMPLEADOS [cite: 3]
@@ -197,4 +198,27 @@ model Costos_Mantenimiento {
 
   // Relacion
   auto Inventario_Automoviles @relation(fields: [Consecutivo], references: [Consecutivo], onDelete: Cascade)
+}
+
+// 11. VERIFICACIONES VEHICULARES
+model Verificacion_Vehicular {
+  Id_Verificacion   Int      @id @default(autoincrement())
+  Consecutivo       String   @db.VarChar(10)
+  
+  Anio              Int      // Año de la verificación (ej. 2024, 2025)
+  Periodo           Int      // 1 (Primer Semestre) o 2 (Segundo Semestre)
+  
+  // Plazo (Esperado según la placa)
+  Fecha_Inicio_Plazo DateTime @db.Date
+  Fecha_Fin_Plazo    DateTime @db.Date
+  
+  // Real (Cuando realmente se hizo)
+  Fecha_Realizacion DateTime? @db.Date
+  Evidencia_PDF     String?   @db.Text
+  Costo             Float?
+
+  Estado            String    @default("PENDIENTE") // PENDIENTE, REALIZADO, VENCIDO
+
+  // Relación
+  vehiculo Inventario_Automoviles @relation(fields: [Consecutivo], references: [Consecutivo], onDelete: Cascade)
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Wrench, History, Activity, ArrowLeft, PlusCircle, User, Car, FileText, Download, DollarSign, FolderOpen } from 'lucide-react';
+import { Wrench, History, Activity, ArrowLeft, PlusCircle, User, Car, FileText, Download, DollarSign, FolderOpen , CalendarCheck } from 'lucide-react';
 import Link from 'next/link';
 
 import TicketForm from '../tickets/nuevo/TicketForm';

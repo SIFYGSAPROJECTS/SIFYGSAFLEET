@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { recalcularPlazosVehiculo } from '@/app/actions/verificaciones';
 
 export async function GET() {
   try {
@@ -64,6 +65,12 @@ export async function POST(request: Request) {
         Kilometraje: body.Kilometraje_Actual ? parseInt(body.Kilometraje_Actual.toString()) : null,
       }
     });
+
+    // Recalcular plazos automáticamente para el año en curso
+    if (vehiculo.Placa) {
+      await recalcularPlazosVehiculo(vehiculo.Consecutivo, vehiculo.Placa, new Date().getFullYear());
+    }
+
     return NextResponse.json({ success: true, data: vehiculo });
   } catch (error: any) {
     return NextResponse.json({ error: 'Error al registrar el vehículo. Verifica que la placa o consecutivo no estén repetidos.' }, { status: 400 });
@@ -93,6 +100,12 @@ export async function PUT(request: Request) {
         Kilometraje: body.Kilometraje_Actual ? parseInt(body.Kilometraje_Actual.toString()) : null,
       }
     });
+
+    // Recalcular plazos si la placa cambió
+    if (vehiculo.Placa) {
+      await recalcularPlazosVehiculo(vehiculo.Consecutivo, vehiculo.Placa, new Date().getFullYear());
+    }
+
     return NextResponse.json({ success: true, data: vehiculo });
   } catch (error) {
     return NextResponse.json({ error: 'Error al actualizar el vehículo' }, { status: 500 });

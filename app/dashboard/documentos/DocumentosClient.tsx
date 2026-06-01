@@ -6,7 +6,7 @@ import {
   ArrowLeft, X, Eye, Download, Trash2, PencilLine, Wrench, DollarSign,
   FolderOpen, ShieldCheck, CreditCard, Info, ChevronDown, FilePlus2,
   CheckCircle2, Calendar, Bell
-} from 'lucide-react';
+, CalendarCheck } from 'lucide-react';
 import SystemModal, { ModalType } from '@/components/ui/SystemModal';
 
 interface Props {
@@ -328,9 +328,14 @@ export default function DocumentosPage({ vehiculos = [], isAdmin = false }: Prop
                   <FolderOpen size={14} /> Documentos
                 </div>
                 {isAdmin && (
-                  <Link href="/dashboard/costos" className="px-4 py-1.5 text-xs font-bold rounded-full text-[var(--text-muted)] hover:text-[#71717a] hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap">
-                    <DollarSign size={14} /> Costos
-                  </Link>
+                  <>
+                    <Link href="/dashboard/costos" className="px-4 py-1.5 text-xs font-bold rounded-full text-[var(--text-muted)] hover:text-[#71717a] hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap">
+                      <DollarSign size={14} /> Costos
+                    </Link>
+                    <Link href="/verificaciones" className="px-4 py-1.5 text-xs font-bold rounded-full text-[var(--text-muted)] hover:text-green-600 hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap">
+                      <CalendarCheck size={14} /> Verificaciones
+                    </Link>
+                  </>
                 )}
               </div>
             </div>
