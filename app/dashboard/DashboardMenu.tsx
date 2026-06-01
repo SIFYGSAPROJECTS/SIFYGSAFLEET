@@ -45,13 +45,14 @@ export default function DashboardMenu({ userRole, totalAutos, totalEmpleados, ti
   const pathname = usePathname();
   
   // Helper para determinar pestaña activa basado en la ruta
-  const getActiveTab = () => {
+  const getActiveTab = (): string => {
     if (pathname.includes('/servicios') || pathname.includes('/tickets')) return 'servicios';
     if (pathname.includes('/inventario')) return 'transporte';
     if (pathname.includes('/costos')) return 'costos';
     if (pathname.includes('/usuarios') || pathname.includes('/perfil')) return 'usuario';
     if (pathname.includes('/checklists') || pathname.includes('/mis-checklists')) return 'checklists';
     if (pathname.includes('/documentos') || pathname.includes('/mis-documentos')) return 'documentos';
+    if (pathname.includes('/verificaciones')) return 'verificaciones';
     return '';
   };
 
