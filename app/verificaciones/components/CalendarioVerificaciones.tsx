@@ -38,6 +38,7 @@ export default function CalendarioVerificaciones({
   const [filtroEmpresa, setFiltroEmpresa] = useState<string>('Todas');
   const [filtroPeriodo, setFiltroPeriodo] = useState<string>('Todos');
   const [filtroEstado, setFiltroEstado] = useState<string>('Todos');
+  const [filtroColor, setFiltroColor] = useState<string>('Todos');
 
   const meses = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
 
@@ -89,22 +90,41 @@ export default function CalendarioVerificaciones({
       if (filtroEmpresa !== 'Todas' && !c.vehiculo.Consecutivo?.startsWith(filtroEmpresa + '-')) {
         return false;
       }
+      
+      // Filtrar Color de Engomado
+      if (filtroColor !== 'Todos') {
+        const color = getEngomadoColor(c.vehiculo.Placa);
+        if (color !== filtroColor) return false;
+      }
+
       // Ocultar vehículo si no tiene verificaciones visibles
       return c.verificaciones.length > 0;
     });
 
-  const getColorClass = (placa: string) => {
-    if (!placa) return "bg-gray-200 border-gray-400";
+  function getEngomadoColor(placa: string): string {
+    if (!placa) return "Desconocido";
     const match = placa.match(/\d/g);
-    if (!match) return "bg-gray-200 border-gray-400";
+    if (!match) return "Desconocido";
     const lastDigit = parseInt(match[match.length - 1], 10);
 
-    if (lastDigit === 5 || lastDigit === 6) return "bg-yellow-200 border-yellow-500 text-yellow-800";
-    if (lastDigit === 7 || lastDigit === 8) return "bg-pink-200 border-pink-500 text-pink-800";
-    if (lastDigit === 3 || lastDigit === 4) return "bg-red-200 border-red-500 text-red-800";
-    if (lastDigit === 1 || lastDigit === 2) return "bg-green-200 border-green-500 text-green-800";
-    if (lastDigit === 9 || lastDigit === 0) return "bg-blue-200 border-blue-500 text-blue-800";
-    return "bg-gray-200 border-gray-400 text-gray-800";
+    if (lastDigit === 5 || lastDigit === 6) return "Amarillo";
+    if (lastDigit === 7 || lastDigit === 8) return "Rosa";
+    if (lastDigit === 3 || lastDigit === 4) return "Rojo";
+    if (lastDigit === 1 || lastDigit === 2) return "Verde";
+    if (lastDigit === 9 || lastDigit === 0) return "Azul";
+    return "Desconocido";
+  }
+
+  const getColorClass = (placa: string) => {
+    const color = getEngomadoColor(placa);
+    switch (color) {
+      case "Amarillo": return "bg-yellow-200 border-yellow-500 text-yellow-800";
+      case "Rosa": return "bg-pink-200 border-pink-500 text-pink-800";
+      case "Rojo": return "bg-red-200 border-red-500 text-red-800";
+      case "Verde": return "bg-green-200 border-green-500 text-green-800";
+      case "Azul": return "bg-blue-200 border-blue-500 text-blue-800";
+      default: return "bg-gray-200 border-gray-400 text-gray-800";
+    }
   };
 
   const handleOpenModal = (verificacion: VerificacionData) => {
@@ -168,6 +188,23 @@ export default function CalendarioVerificaciones({
               { value: 'Todos', label: 'Todos los Periodos' },
               { value: '1', label: '1er Periodo' },
               { value: '2', label: '2do Periodo' }
+            ]}
+            className="w-full sm:w-44"
+            direction="down"
+          />
+          <PremiumSelect
+            compact
+            accent="indigo"
+            placeholder="Engomado"
+            value={filtroColor}
+            onChange={(val) => setFiltroColor(val)}
+            options={[
+              { value: 'Todos', label: 'Todos los Colores' },
+              { value: 'Amarillo', label: '🟡 Amarillo' },
+              { value: 'Rosa', label: '🟣 Rosa' },
+              { value: 'Rojo', label: '🔴 Rojo' },
+              { value: 'Verde', label: '🟢 Verde' },
+              { value: 'Azul', label: '🔵 Azul' }
             ]}
             className="w-full sm:w-40"
             direction="down"
