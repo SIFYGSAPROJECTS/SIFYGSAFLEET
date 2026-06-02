@@ -36,6 +36,8 @@ export default function CalendarioVerificaciones({
   const [fechaReal, setFechaReal] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [filtroEmpresa, setFiltroEmpresa] = useState<string>('Todas');
+  const [filtroPeriodo, setFiltroPeriodo] = useState<string>('Todos');
+  const [filtroEstado, setFiltroEstado] = useState<string>('Todos');
 
   const meses = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
 
@@ -49,7 +51,19 @@ export default function CalendarioVerificaciones({
     if (!carsMap.has(v.Consecutivo)) {
       carsMap.set(v.Consecutivo, { vehiculo: v.vehiculo, verificaciones: [] });
     }
-    carsMap.get(v.Consecutivo)!.verificaciones.push(v);
+    
+    const carData = carsMap.get(v.Consecutivo)!;
+    const existingIndex = carData.verificaciones.findIndex(existing => existing.Periodo === v.Periodo);
+
+    if (existingIndex !== -1) {
+      // Si ya hay un registro para este periodo, priorizamos el que esté completado.
+      const isNewRealizado = v.Estado?.toUpperCase() === 'REALIZADO' || v.Fecha_Realizacion !== null;
+      if (isNewRealizado) {
+        carData.verificaciones[existingIndex] = v;
+      }
+    } else {
+      carData.verificaciones.push(v);
+    }
   });
 
   const carsListAll = Array.from(carsMap.values());
@@ -57,9 +71,27 @@ export default function CalendarioVerificaciones({
     new Set(carsListAll.map(c => c.vehiculo.Consecutivo?.split('-')[0]))
   ).filter(Boolean).sort() as string[];
 
-  const carsList = carsListAll.filter(c => 
-    filtroEmpresa === 'Todas' ? true : c.vehiculo.Consecutivo?.startsWith(filtroEmpresa + '-')
-  );
+  const carsList = carsListAll
+    .map(c => {
+      // Filtrar verificaciones de este vehículo según Periodo y Estado
+      const verificacionesFiltradas = c.verificaciones.filter(v => {
+        const pasaPeriodo = filtroPeriodo === 'Todos' || v.Periodo.toString() === filtroPeriodo;
+        const isRealizado = v.Estado?.toUpperCase() === 'REALIZADO' || v.Fecha_Realizacion !== null;
+        const pasaEstado = filtroEstado === 'Todos' || 
+                           (filtroEstado === 'PENDIENTES' && !isRealizado) ||
+                           (filtroEstado === 'COMPLETADOS' && isRealizado);
+        return pasaPeriodo && pasaEstado;
+      });
+      return { ...c, verificaciones: verificacionesFiltradas };
+    })
+    .filter(c => {
+      // Filtrar Empresa
+      if (filtroEmpresa !== 'Todas' && !c.vehiculo.Consecutivo?.startsWith(filtroEmpresa + '-')) {
+        return false;
+      }
+      // Ocultar vehículo si no tiene verificaciones visibles
+      return c.verificaciones.length > 0;
+    });
 
   const getColorClass = (placa: string) => {
     if (!placa) return "bg-gray-200 border-gray-400";
@@ -107,9 +139,9 @@ export default function CalendarioVerificaciones({
 
   return (
     <div className="bg-white rounded-lg shadow border border-gray-200 overflow-visible">
-      <div className="p-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 bg-gray-50 border-b border-gray-200 rounded-t-lg">
-        <h2 className="text-lg font-bold text-gray-800">Unidades a Verificar</h2>
-        <div className="flex items-center gap-2">
+      <div className="p-4 flex flex-col md:flex-row md:justify-between md:items-center gap-4 bg-gray-50 border-b border-gray-200 rounded-t-lg">
+        <h2 className="text-lg font-bold text-gray-800 shrink-0">Unidades a Verificar</h2>
+        <div className="flex flex-col sm:flex-row flex-wrap items-center gap-2 w-full md:w-auto md:justify-end">
           <PremiumSelect
             compact
             accent="indigo"
@@ -123,7 +155,35 @@ export default function CalendarioVerificaciones({
                 label: `Flota: ${emp}`
               }))
             ]}
-            className="w-full sm:w-56"
+            className="w-full sm:w-48"
+            direction="down"
+          />
+          <PremiumSelect
+            compact
+            accent="indigo"
+            placeholder="Periodo"
+            value={filtroPeriodo}
+            onChange={(val) => setFiltroPeriodo(val)}
+            options={[
+              { value: 'Todos', label: 'Todos los Periodos' },
+              { value: '1', label: '1er Periodo' },
+              { value: '2', label: '2do Periodo' }
+            ]}
+            className="w-full sm:w-40"
+            direction="down"
+          />
+          <PremiumSelect
+            compact
+            accent="indigo"
+            placeholder="Estado"
+            value={filtroEstado}
+            onChange={(val) => setFiltroEstado(val)}
+            options={[
+              { value: 'Todos', label: 'Todos los Estados' },
+              { value: 'PENDIENTES', label: 'Pendientes' },
+              { value: 'COMPLETADOS', label: 'Completados' }
+            ]}
+            className="w-full sm:w-40"
             direction="down"
           />
         </div>
@@ -135,7 +195,10 @@ export default function CalendarioVerificaciones({
               <th className="py-3 px-4 font-semibold w-28 text-left border-r border-gray-200">Consecutivo</th>
               <th className="py-3 px-4 font-semibold w-48 border-r border-gray-200">Vehículo</th>
               {meses.map((m, i) => (
-                <th key={i} className="py-3 px-2 text-center font-semibold border-l border-gray-200 w-16">
+                <th 
+                  key={i} 
+                  className={`py-3 px-2 text-center font-semibold border-gray-200 w-16 ${i === 6 ? 'border-l-2 border-l-gray-400 bg-gray-100' : 'border-l'}`}
+                >
                   {m}
                 </th>
               ))}
@@ -159,7 +222,7 @@ export default function CalendarioVerificaciones({
                     const inicioMes = new Date(v.Fecha_Inicio_Plazo).getUTCMonth();
                     const finMes = new Date(v.Fecha_Fin_Plazo).getUTCMonth();
                     const realMes = v.Fecha_Realizacion ? new Date(v.Fecha_Realizacion).getUTCMonth() : null;
-                    const isRealizado = v.Estado === "REALIZADO";
+                    const isRealizado = v.Estado?.toUpperCase() === 'REALIZADO' || v.Fecha_Realizacion !== null;
 
                     if (isRealizado && realMes === mesIdx) {
                       checkmark = (
@@ -197,7 +260,7 @@ export default function CalendarioVerificaciones({
                   });
 
                   return (
-                    <td key={mesIdx} className="border-b border-l border-gray-200 relative p-0 min-w-[4rem] h-16">
+                    <td key={mesIdx} className={`border-b border-gray-200 relative p-0 min-w-[4rem] h-16 ${mesIdx === 6 ? 'border-l-2 border-l-gray-400 bg-gray-50/50' : 'border-l'}`}>
                       {/* Línea sutil para dividir el carril de Periodo vs el carril de Realizado */}
                       <div className="absolute top-0 left-0 right-0 border-b border-gray-100 h-1/2 pointer-events-none"></div>
                       {contenido}
@@ -212,27 +275,31 @@ export default function CalendarioVerificaciones({
               <tr>
                 <td colSpan={14} className="py-8 text-center text-gray-500">
                   <div className="flex flex-col items-center gap-4">
-                    <p>No hay verificaciones generadas para este año.</p>
-                    <button 
-                      onClick={async () => {
-                        setIsSubmitting(true);
-                        try {
-                          // Importamos la acción de manera dinámica o llamamos a una API.
-                          // Para que sea sencillo, llamaremos al action importado arriba
-                          const { generarPlazosVerificacion } = await import('@/app/actions/verificaciones');
-                          await generarPlazosVerificacion(anio, true);
-                          window.location.reload();
-                        } catch (error) {
-                          alert("Error al generar plazos");
-                        } finally {
-                          setIsSubmitting(false);
-                        }
-                      }}
-                      disabled={isSubmitting}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
-                    >
-                      {isSubmitting ? "Generando Plazos (puede tardar un poco)..." : "Generar Calendario Ahora"}
-                    </button>
+                    {verificaciones.length === 0 ? (
+                      <>
+                        <p>No hay verificaciones generadas para este año.</p>
+                        <button 
+                          onClick={async () => {
+                            setIsSubmitting(true);
+                            try {
+                              const { generarPlazosVerificacion } = await import('@/app/actions/verificaciones');
+                              await generarPlazosVerificacion(anio, true);
+                              window.location.reload();
+                            } catch (error) {
+                              alert("Error al generar plazos");
+                            } finally {
+                              setIsSubmitting(false);
+                            }
+                          }}
+                          disabled={isSubmitting}
+                          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+                        >
+                          {isSubmitting ? "Generando Plazos (puede tardar un poco)..." : "Generar Calendario Ahora"}
+                        </button>
+                      </>
+                    ) : (
+                      <p>No hay resultados que coincidan con los filtros seleccionados.</p>
+                    )}
                   </div>
                 </td>
               </tr>
