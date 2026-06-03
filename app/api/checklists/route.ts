@@ -43,9 +43,7 @@ export async function GET(request: Request) {
       }
     });
 
-    const kmFinal = ultimaSolicitud?.Kilometraje 
-      ? `${ultimaSolicitud.Kilometraje.toLocaleString()} km` 
-      : 'Sin registros';
+    const kmFinal = ultimaSolicitud?.Kilometraje || vehiculo.Kilometraje || null;
 
     //Construimos el nombre completo en lugar de mandar el correo 
     const nombreCompleto = vehiculo.encargado 
@@ -56,10 +54,12 @@ export async function GET(request: Request) {
       checklists,
       vehiculoInfo: {
         marca: vehiculo.Marca,
+        linea: vehiculo.Linea,
         modelo: vehiculo.Modelo,
         color: vehiculo.Color,
         nombreConductor: nombreCompleto,
-        kilometraje: kmFinal 
+        kilometraje: kmFinal,
+        estatus: vehiculo.Estatus_Operativo
       }
     });
   } catch (error) {

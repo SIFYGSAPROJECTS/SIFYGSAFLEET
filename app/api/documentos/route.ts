@@ -69,9 +69,7 @@ export async function GET(request: Request) {
       }
     });
 
-    const kmFinal = ultimaSolicitud?.Kilometraje 
-      ? `${ultimaSolicitud.Kilometraje.toLocaleString()} km` 
-      : 'Sin registros';
+    const kmFinal = ultimaSolicitud?.Kilometraje || vehiculo.Kilometraje || null;
 
     const nombreCompleto = vehiculo.encargado 
       ? `${vehiculo.encargado.Nombre_Empleado} ${vehiculo.encargado.A_Paterno}` 
@@ -81,11 +79,13 @@ export async function GET(request: Request) {
       documentos,
       vehiculoInfo: {
         marca: vehiculo.Marca,
+        linea: vehiculo.Linea,
         modelo: vehiculo.Modelo,
         color: vehiculo.Color,
         placas: vehiculo.Placa || '',
         nombreConductor: nombreCompleto,
-        kilometraje: kmFinal 
+        kilometraje: kmFinal,
+        estatus: vehiculo.Estatus_Operativo
       }
     });
   } catch (error) {
