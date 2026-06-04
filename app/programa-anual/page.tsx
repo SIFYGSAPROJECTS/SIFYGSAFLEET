@@ -163,7 +163,7 @@ export default function ProgramaAnualPage() {
 
       <main className="relative z-10 flex-1 flex flex-col items-center p-6 sm:p-12 pt-28 sm:pt-28">
 
-        <div className="max-w-[1400px] w-full flex flex-col sm:flex-row sm:justify-between items-start sm:items-end mb-8 gap-4">
+        <div className="max-w-[1800px] w-full flex flex-col sm:flex-row sm:justify-between items-start sm:items-end mb-8 gap-4">
           <div>
             <h1 className="text-3xl font-serif font-medium tracking-tight mb-2 text-[var(--text-main)]">Programa anual de mantenimiento de Infraestructura {anio}</h1>
             <p className="text-[var(--text-muted)] text-sm font-light">Matriz de programación (P) y realización (R) de mantenimiento.</p>
@@ -194,7 +194,7 @@ export default function ProgramaAnualPage() {
           </div>
         </div>
 
-        <div className="max-w-[1400px] w-full overflow-x-auto pb-4">
+        <div className="max-w-[1800px] w-full overflow-x-auto pb-4">
           {loading ? (
             <div className="h-64 flex items-center justify-center bg-white border border-[var(--border-cream)] rounded-2xl shadow-sm">
               <Loader2 className="w-8 h-8 animate-spin text-[#D97757]" />
@@ -204,8 +204,8 @@ export default function ProgramaAnualPage() {
               <thead>
                 <tr className="text-white">
                   {/* Seccion 1: Info */}
-                  <th className="p-4 font-bold min-w-[180px] bg-slate-600 border-y border-l border-slate-700 rounded-tl-xl shadow-sm">DESCRIPCIÓN</th>
-                  <th className="p-4 font-bold border-y border-r border-slate-700 bg-slate-600 rounded-tr-xl shadow-sm">EJECUTA</th>
+                  <th className="p-4 font-bold w-[180px] bg-slate-600 border-y border-l border-slate-700 rounded-tl-xl shadow-sm">DESCRIPCIÓN</th>
+                  <th className="p-4 font-bold w-[130px] border-y border-r border-slate-700 bg-slate-600 rounded-tr-xl shadow-sm">EJECUTA</th>
                   
                   {/* Spacer 1 */}
                   <th className="w-2 min-w-[8px] p-0 bg-transparent border-none"></th>
@@ -220,7 +220,7 @@ export default function ProgramaAnualPage() {
                   <th className="w-2 min-w-[8px] p-0 bg-transparent border-none"></th>
 
                   {/* Seccion 3: Observaciones */}
-                  <th className="p-4 font-bold min-w-[200px] bg-slate-600 border border-slate-700 rounded-t-xl shadow-sm">OBSERVACIONES</th>
+                  <th className="p-4 font-bold w-[200px] bg-slate-600 border border-slate-700 rounded-t-xl shadow-sm">OBSERVACIONES</th>
                 </tr>
               </thead>
               <tbody>
