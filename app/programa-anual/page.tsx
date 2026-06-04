@@ -215,10 +215,12 @@ export default function ProgramaAnualPage() {
               <tbody>
                 {programas.map((programa, idx) => {
                   const colors = [
-                    'bg-pink-400/90 hover:bg-pink-500 shadow-[inset_0_0_8px_rgba(236,72,153,0.3)]',
-                    'bg-blue-400/90 hover:bg-blue-500 shadow-[inset_0_0_8px_rgba(59,130,246,0.3)]',
-                    'bg-emerald-400/90 hover:bg-emerald-500 shadow-[inset_0_0_8px_rgba(16,185,129,0.3)]',
-                    'bg-amber-400/90 hover:bg-amber-500 shadow-[inset_0_0_8px_rgba(245,158,11,0.3)]'
+                    'bg-[#F99B3E]', // 01 Naranja
+                    'bg-[#F54F71]', // 02 Rosa
+                    'bg-[#00C26D]', // 03 Verde
+                    'bg-[#8B61FF]', // 04 Morado
+                    'bg-[#00A8F4]', // 05 Azul claro
+                    'bg-[#F02222]'  // 06 Rojo
                   ];
                   const rowColor = colors[idx % colors.length];
 
@@ -246,18 +248,35 @@ export default function ProgramaAnualPage() {
                       const mesObj = programa.meses?.find((m: any) => m.Mes === mesIdx + 1) || { Programado: false, Realizado: false };
                       const numRealizado = programa.meses?.filter((m: any) => m.Mes <= mesIdx + 1 && m.Realizado).length || 0;
 
+                      const isPrevProgramado = mesIdx > 0 && programa.meses?.find((m: any) => m.Mes === mesIdx)?.Programado;
+                      const isNextProgramado = mesIdx < 11 && programa.meses?.find((m: any) => m.Mes === mesIdx + 2)?.Programado;
+
+                      let pillClasses = 'w-full';
+                      if (!isPrevProgramado && !isNextProgramado) {
+                        pillClasses = 'left-[6px] w-[calc(100%-12px)] rounded-full';
+                      } else if (!isPrevProgramado && isNextProgramado) {
+                        pillClasses = 'left-[6px] w-[calc(100%-4px)] rounded-l-full z-20';
+                      } else if (isPrevProgramado && !isNextProgramado) {
+                        pillClasses = 'left-0 w-[calc(100%-6px)] rounded-r-full z-10';
+                      } else {
+                        pillClasses = 'left-0 w-[calc(100%+2px)] z-20';
+                      }
+
                       return (
-                        <td key={mesIdx} className="p-0 border-r border-[var(--border-cream)] min-w-[44px] align-top bg-white">
+                        <td key={mesIdx} className="p-0 border-r border-[var(--border-cream)] min-w-[44px] align-top bg-white relative">
                           <div
                             onClick={() => toggleMes(idx, mesIdx, 'P')}
-                            className={`h-10 flex items-center justify-center border-b border-[var(--border-cream)] cursor-pointer transition-all border-l border-l-transparent hover:border-l-[var(--border-cream)] hover:scale-[1.02] z-10 relative
-                              ${mesObj.Programado ? rowColor : 'hover:bg-[var(--bg-screen)]'}`}
+                            className={`h-10 flex items-center justify-center border-b border-[var(--border-cream)] cursor-pointer transition-all z-10 relative
+                              ${!mesObj.Programado ? 'hover:bg-[var(--bg-screen)]' : ''}`}
                           >
+                            {mesObj.Programado && (
+                              <div className={`absolute top-1/2 -translate-y-1/2 h-[24px] ${rowColor} ${pillClasses} shadow-[0_2px_4px_rgba(0,0,0,0.15)] transition-all hover:brightness-110`}>
+                              </div>
+                            )}
                           </div>
                           <div
                             onClick={() => toggleMes(idx, mesIdx, 'R')}
-                            className={`h-10 flex items-center justify-center cursor-pointer transition-all border-l border-l-transparent hover:border-l-[var(--border-cream)] hover:scale-[1.02] z-10 relative
-                              ${mesObj.Realizado ? 'hover:bg-[var(--bg-screen)]' : 'hover:bg-[var(--bg-screen)]'}`}
+                            className={`h-10 flex items-center justify-center cursor-pointer transition-all z-10 relative hover:bg-[var(--bg-screen)]`}
                           >
                             {mesObj.Realizado && (
                               <div className="w-5 h-5 rounded-full bg-emerald-500 shadow-sm flex items-center justify-center text-white text-[10px] font-bold">
