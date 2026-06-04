@@ -194,53 +194,77 @@ export default function ProgramaAnualPage() {
           </div>
         </div>
 
-        <div className="max-w-[1400px] w-full overflow-x-auto bg-white border border-[var(--border-cream)] rounded-2xl shadow-sm pb-2">
+        <div className="max-w-[1400px] w-full overflow-x-auto pb-4">
           {loading ? (
-            <div className="h-64 flex items-center justify-center">
+            <div className="h-64 flex items-center justify-center bg-white border border-[var(--border-cream)] rounded-2xl shadow-sm">
               <Loader2 className="w-8 h-8 animate-spin text-[#D97757]" />
             </div>
           ) : (
-            <table className="w-full text-left text-xs sm:text-sm">
+            <table className="w-full text-left text-xs sm:text-sm border-separate" style={{ borderSpacing: 0 }}>
               <thead>
-                <tr className="border-b border-[var(--border-cream)] bg-[var(--bg-floating)] text-[var(--text-muted)]">
-                  <th className="p-4 font-bold min-w-[180px]">DESCRIPCIÓN</th>
-                  <th className="p-4 font-bold border-r border-[var(--border-cream)]">EJECUTA</th>
-                  <th className="p-0 border-r border-[var(--border-cream)] w-8 text-center bg-[var(--bg-floating)]"></th>
-                  {mesesNombres.map(mes => (
-                    <th key={mes} className="p-2 border-r border-[var(--border-cream)] text-center font-mono text-[10px] sm:text-xs min-w-[44px]">{mes}</th>
+                <tr className="text-white">
+                  {/* Seccion 1: Info */}
+                  <th className="p-4 font-bold min-w-[180px] bg-slate-600 border-y border-l border-slate-700 rounded-tl-xl shadow-sm">DESCRIPCIÓN</th>
+                  <th className="p-4 font-bold border-y border-r border-slate-700 bg-slate-600 rounded-tr-xl shadow-sm">EJECUTA</th>
+                  
+                  {/* Spacer 1 */}
+                  <th className="w-2 min-w-[8px] p-0 bg-transparent border-none"></th>
+
+                  {/* Seccion 2: Calendario */}
+                  <th className="p-0 border-y border-l border-r border-slate-700 w-8 text-center bg-slate-600 rounded-tl-xl shadow-sm"></th>
+                  {mesesNombres.map((mes, i) => (
+                    <th key={mes} className={`p-2 border-y border-r border-slate-700 text-center font-mono text-[10px] sm:text-xs min-w-[44px] bg-slate-600 shadow-sm ${i === 11 ? 'rounded-tr-xl' : ''}`}>{mes}</th>
                   ))}
-                  <th className="p-4 font-bold min-w-[200px]">OBSERVACIONES</th>
+
+                  {/* Spacer 2 */}
+                  <th className="w-2 min-w-[8px] p-0 bg-transparent border-none"></th>
+
+                  {/* Seccion 3: Observaciones */}
+                  <th className="p-4 font-bold min-w-[200px] bg-slate-600 border border-slate-700 rounded-t-xl shadow-sm">OBSERVACIONES</th>
                 </tr>
               </thead>
               <tbody>
                 {programas.map((programa, idx) => {
                   const colors = [
                     'bg-[#F99B3E]', // 01 Naranja
-                    'bg-[#F54F71]', // 02 Rosa
+                    'bg-[#1D4ED8]', // 02 Azul intenso
                     'bg-[#00C26D]', // 03 Verde
-                    'bg-[#8B61FF]', // 04 Morado
-                    'bg-[#00A8F4]', // 05 Azul claro
-                    'bg-[#F02222]'  // 06 Rojo
+                    'bg-[#F02222]', // 04 Rojo
+                    'bg-[#8B61FF]', // 05 Morado
+                    'bg-[#FACC15]'  // 06 Amarillo
                   ];
                   const rowColor = colors[idx % colors.length];
+                  const isLastRow = idx === programas.length - 1;
+                  const isEven = idx % 2 === 0;
+                  const rowBg = isEven ? 'bg-white' : 'bg-[#E5E8EC]';
+                  const rowHoverBg = isEven ? 'group-hover:bg-slate-50' : 'group-hover:bg-[#D7DCE1]';
 
                   return (
-                  <tr key={idx} className="border-b border-[var(--border-cream)] hover:bg-[var(--bg-screen)] transition-colors">
-                    <td className="p-4 font-bold text-[var(--text-main)]">{programa.Categoria}</td>
-
-                    <td className="p-4 border-r border-[var(--border-cream)]">
+                  <tr key={idx} className="group transition-colors">
+                    {/* Seccion 1 */}
+                    <td className={`p-4 ${rowBg} ${rowHoverBg} border-b border-l border-slate-300 transition-colors ${isLastRow ? 'rounded-bl-xl shadow-sm' : ''}`}>
+                      <div className="font-medium text-[var(--text-main)] truncate">
+                        {programa.Categoria}
+                      </div>
+                    </td>
+                    <td className={`relative p-4 pr-6 ${rowBg} ${rowHoverBg} border-b border-r border-slate-300 transition-colors overflow-hidden ${isLastRow ? 'rounded-br-xl shadow-sm' : ''}`}>
+                      <div className={`absolute right-0 top-1 bottom-1 w-[6px] rounded-l-sm ${rowColor} ${isLastRow ? 'rounded-br-xl' : ''}`}></div>
                       <select
                         value={programa.Ejecuta}
                         onChange={(e) => handleEjecuta(idx, e.target.value)}
-                        className="bg-transparent text-xs text-[var(--text-main)] border border-[var(--border-cream)] rounded p-1.5 outline-none focus:border-[#D97757] w-full"
+                        className="bg-transparent text-xs text-[var(--text-main)] border border-slate-300 rounded p-1.5 outline-none focus:border-[#D97757] w-full"
                       >
                         <option value="INTERNO" className="bg-[var(--bg-screen)]">INTERNO</option>
                         <option value="EXTERNO" className="bg-[var(--bg-screen)]">EXTERNO</option>
                       </select>
                     </td>
 
-                    <td className="p-0 border-r border-[var(--border-cream)] font-mono text-[10px] sm:text-xs bg-[var(--bg-floating)]/50">
-                      <div className="h-10 flex items-center justify-center border-b border-[var(--border-cream)] text-[#D97757] font-bold">P</div>
+                    {/* Spacer 1 */}
+                    <td className="w-2 min-w-[8px] p-0 bg-transparent border-none"></td>
+
+                    {/* Seccion 2 */}
+                    <td className={`p-0 ${rowBg} ${rowHoverBg} border-b border-l border-r border-slate-300 font-mono text-[10px] sm:text-xs transition-colors ${isLastRow ? 'rounded-bl-xl shadow-sm' : ''}`}>
+                      <div className="h-10 flex items-center justify-center border-b border-slate-300 text-[#D97757] font-bold">P</div>
                       <div className="h-10 flex items-center justify-center text-emerald-600 font-bold">R</div>
                     </td>
 
@@ -253,30 +277,32 @@ export default function ProgramaAnualPage() {
 
                       let pillClasses = 'w-full';
                       if (!isPrevProgramado && !isNextProgramado) {
-                        pillClasses = 'left-[6px] w-[calc(100%-12px)] rounded-full';
+                        pillClasses = 'left-0 w-full rounded-full z-10';
                       } else if (!isPrevProgramado && isNextProgramado) {
-                        pillClasses = 'left-[6px] w-[calc(100%-4px)] rounded-l-full z-20';
+                        pillClasses = 'left-0 w-full rounded-l-full z-20';
                       } else if (isPrevProgramado && !isNextProgramado) {
-                        pillClasses = 'left-0 w-[calc(100%-6px)] rounded-r-full z-10';
+                        pillClasses = 'left-[-2px] w-[calc(100%+2px)] rounded-r-full z-10';
                       } else {
-                        pillClasses = 'left-0 w-[calc(100%+2px)] z-20';
+                        pillClasses = 'left-[-2px] w-[calc(100%+2px)] z-20';
                       }
+                      
+                      const isLastMonth = mesIdx === 11;
 
                       return (
-                        <td key={mesIdx} className="p-0 border-r border-[var(--border-cream)] min-w-[44px] align-top bg-white relative">
+                        <td key={mesIdx} className={`p-0 align-top ${rowBg} ${rowHoverBg} border-b border-r border-slate-300 relative transition-colors ${isLastRow && isLastMonth ? 'rounded-br-xl shadow-sm' : ''}`}>
                           <div
                             onClick={() => toggleMes(idx, mesIdx, 'P')}
-                            className={`h-10 flex items-center justify-center border-b border-[var(--border-cream)] cursor-pointer transition-all z-10 relative
-                              ${!mesObj.Programado ? 'hover:bg-[var(--bg-screen)]' : ''}`}
+                            className={`h-10 flex items-center justify-center border-b border-slate-300 cursor-pointer transition-all z-10 relative
+                              ${!mesObj.Programado ? 'hover:bg-slate-50' : ''}`}
                           >
                             {mesObj.Programado && (
-                              <div className={`absolute top-1/2 -translate-y-1/2 h-[24px] ${rowColor} ${pillClasses} shadow-[0_2px_4px_rgba(0,0,0,0.15)] transition-all hover:brightness-110`}>
+                              <div className={`absolute top-1/2 -translate-y-1/2 h-[24px] ${rowColor} ${pillClasses} shadow-md transition-all hover:brightness-110 z-20`}>
                               </div>
                             )}
                           </div>
                           <div
                             onClick={() => toggleMes(idx, mesIdx, 'R')}
-                            className={`h-10 flex items-center justify-center cursor-pointer transition-all z-10 relative hover:bg-[var(--bg-screen)]`}
+                            className={`h-10 flex items-center justify-center cursor-pointer transition-all z-10 relative hover:bg-slate-100/50`}
                           >
                             {mesObj.Realizado && (
                               <div className="w-5 h-5 rounded-full bg-emerald-500 shadow-sm flex items-center justify-center text-white text-[10px] font-bold">
@@ -288,14 +314,18 @@ export default function ProgramaAnualPage() {
                       );
                     })}
 
-                    <td className="p-2 bg-white">
+                    {/* Spacer 2 */}
+                    <td className="w-2 min-w-[8px] p-0 bg-transparent border-none"></td>
+
+                    {/* Seccion 3 */}
+                    <td className={`p-2 ${rowBg} ${rowHoverBg} border-x border-b border-slate-300 transition-colors ${isLastRow ? 'rounded-b-xl shadow-sm' : ''}`}>
                       <div className="flex flex-col gap-1">
                         <input
                           type="text"
                           value={programa.Observaciones || ''}
                           onChange={(e) => handleObservaciones(idx, e.target.value)}
                           placeholder="Ej. Por evento..."
-                          className="w-full bg-[var(--bg-screen)] border border-[var(--border-cream)] hover:border-[#D97757]/50 focus:border-[#D97757] rounded px-3 py-2 outline-none text-xs text-[var(--text-main)] transition-colors"
+                          className="w-full bg-[var(--bg-screen)] border border-slate-300 hover:border-[#D97757]/50 focus:border-[#D97757] rounded px-3 py-2 outline-none text-xs text-[var(--text-main)] transition-colors"
                         />
                         {(() => {
                           if (!programa.meses) return null;
