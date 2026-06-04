@@ -23,7 +23,7 @@ const newsreader = Newsreader({
 });
 
 export const metadata: Metadata = {
-  title: "Sifygsa Fleet",
+  title: "Infraestructura BPMS",
   description: "Diseñado para SIFYGSA S.A DE C.V",
 };
 

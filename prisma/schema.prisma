@@ -222,3 +222,29 @@ model Verificacion_Vehicular {
   // Relación
   vehiculo Inventario_Automoviles @relation(fields: [Consecutivo], references: [Consecutivo], onDelete: Cascade)
 }
+
+// 12. PROGRAMA ANUAL DE MANTENIMIENTO
+model Programa_Anual {
+  Id_Programa   Int      @id @default(autoincrement())
+  Anio          Int
+  Categoria     String
+  Ejecuta       String
+  Observaciones String?  @db.Text
+
+  meses         Programa_Mes[]
+
+  @@unique([Anio, Categoria])
+}
+
+model Programa_Mes {
+  Id          Int     @id @default(autoincrement())
+  Id_Programa Int
+  Mes         Int     
+  Programado  Boolean @default(false) 
+  Realizado   Boolean @default(false) 
+
+  programa Programa_Anual @relation(fields: [Id_Programa], references: [Id_Programa], onDelete: Cascade)
+
+  @@unique([Id_Programa, Mes])
+}
+

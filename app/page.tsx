@@ -45,7 +45,11 @@ export default function LoginPage() {
       }, 500);
 
       setTimeout(() => {
-        router.push('/dashboard');
+        if (data.user?.rol === 'ADMIN') {
+          router.push('/portal');
+        } else {
+          router.push('/dashboard');
+        }
       }, 1500);
 
     } catch (err: any) {
@@ -135,25 +139,37 @@ export default function LoginPage() {
 
           <div className="z-10 w-full max-w-xl px-12 mt-[-5vh] lg:ml-12 flex flex-col items-start">
             <h1 className="text-4xl lg:text-5xl font-serif font-medium text-[#EAE6E0] mb-5 tracking-tight">
-              Control <span className="text-[#D97757] font-serif tracking-normal">Vehicular</span>
+              Infraestructura <span className="text-[#D97757] font-serif tracking-normal">BPMS</span>
             </h1>
             <p className="text-sm text-[#9E9B95] font-light mb-12 max-w-md leading-relaxed">
-              Plataforma integral para el diagnóstico predictivo y gestión operativa de unidades corporativas.
+              Plataforma integral para el diagnóstico predictivo y gestión operativa de infraestructura corporativa.
             </p>
 
             <div className="w-full max-w-md mt-4 animate-in fade-in duration-1000 delay-300">
-              <div className="flex flex-wrap gap-x-8 gap-y-4 text-[11px] font-mono text-[#7C7A77]">
+              <div className="flex flex-wrap gap-x-6 gap-y-3 text-[11px] font-mono text-[#7C7A77]">
                 <span className="flex items-center gap-2 hover:text-[#EAE6E0] transition-colors cursor-default">
-                  <span className="w-1.5 h-1.5 bg-[#D97757] rounded-full animate-pulse"></span> Mantenimiento Predictivo
+                  <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></span> Transporte
                 </span>
                 <span className="flex items-center gap-2 hover:text-[#EAE6E0] transition-colors cursor-default">
-                  <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span> Control de Inventario
+                  <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span> Cómputo
                 </span>
                 <span className="flex items-center gap-2 hover:text-[#EAE6E0] transition-colors cursor-default">
-                  <span className="w-1.5 h-1.5 bg-blue-500 rounded-full"></span> Inspecciones (Checklists)
+                  <span className="w-1.5 h-1.5 bg-purple-500 rounded-full"></span> Telefonía
                 </span>
                 <span className="flex items-center gap-2 hover:text-[#EAE6E0] transition-colors cursor-default">
-                  <span className="w-1.5 h-1.5 bg-purple-500 rounded-full"></span> Gestión de Tickets
+                  <span className="w-1.5 h-1.5 bg-rose-500 rounded-full"></span> Video y vigilancia
+                </span>
+                <span className="flex items-center gap-2 hover:text-[#EAE6E0] transition-colors cursor-default">
+                  <span className="w-1.5 h-1.5 bg-cyan-500 rounded-full"></span> Aires acondicionados
+                </span>
+                <span className="flex items-center gap-2 hover:text-[#EAE6E0] transition-colors cursor-default">
+                  <span className="w-1.5 h-1.5 bg-amber-500 rounded-full"></span> Edificios
+                </span>
+                <span className="flex items-center gap-2 hover:text-[#EAE6E0] transition-colors cursor-default">
+                  <span className="w-1.5 h-1.5 bg-orange-500 rounded-full"></span> Mobiliario
+                </span>
+                <span className="flex items-center gap-2 hover:text-[#EAE6E0] transition-colors cursor-default">
+                  <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full"></span> Programa Anual
                 </span>
               </div>
             </div>
@@ -181,7 +197,7 @@ export default function LoginPage() {
                 priority
               />
               <p className="text-white/60 text-[13px] leading-relaxed">
-                Sistema para mantenimiento de flota y gestión vehicular
+                Sistema para mantenimiento y gestión de infraestructura
               </p>
             </div>
 
@@ -322,7 +338,7 @@ export default function LoginPage() {
               {/* FOOTER RESTAURADO */}
               <div className="mt-10 pt-6 border-t border-white/10 text-center">
                 <span className="text-[11px] font-medium text-white/40">
-                  &copy; {new Date().getFullYear()} SIFYGSA Control de Flotas v2.0
+                  &copy; {new Date().getFullYear()} SIFYGSA Gestión de Infraestructura v0.1
                 </span>
               </div>
             </div>
