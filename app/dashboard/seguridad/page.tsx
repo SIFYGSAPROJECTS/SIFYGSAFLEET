@@ -138,7 +138,7 @@ export default function SeguridadPage() {
                     <Mail size={14} className="text-[#71717a] shrink-0"/> {empleadoEncontrado.Email}
                   </span>
                 </div>
-                <span className={`inline-block mt-3 text-[10px] px-3 py-1 rounded-full font-black tracking-widest uppercase ${empleadoEncontrado.Rol === 'ADMIN' ? 'bg-[#71717a] text-white' : 'bg-[var(--bg-floating)] text-[var(--text-muted)] border border-[var(--border-cream)]'}`}>
+                <span className={`inline-block mt-3 text-[10px] px-3 py-1 rounded-full font-black tracking-widest uppercase ${['ADMIN', 'GERENCIAL'].includes(empleadoEncontrado.Rol) ? 'bg-[#71717a] text-white' : 'bg-[var(--bg-floating)] text-[var(--text-muted)] border border-[var(--border-cream)]'}`}>
                   {empleadoEncontrado.Rol}
                 </span>
               </div>

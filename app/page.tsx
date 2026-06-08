@@ -45,7 +45,7 @@ export default function LoginPage() {
       }, 500);
 
       setTimeout(() => {
-        if (data.user?.rol === 'ADMIN') {
+        if (['ADMIN', 'GERENCIAL'].includes(data.user?.rol)) {
           router.push('/portal');
         } else {
           router.push('/dashboard');

@@ -17,6 +17,7 @@ interface Props {
 }
 
 export default function HistorialClient({ historial, rol }: Props) {
+  const isAdmin = ['ADMIN', 'GERENCIAL'].includes(rol || '');
   const router = useRouter();
   const [filtroAuto, setFiltroAuto] = useState('');
   const [filtroMeses, setFiltroMeses] = useState(''); 
@@ -230,7 +231,7 @@ export default function HistorialClient({ historial, rol }: Props) {
                           >
                             <FileText size={14} /> VER FACTURA
                           </button>
-                          {rol === 'ADMIN' && (
+                          {isAdmin && (
                             <>
                               <label className="cursor-pointer p-1.5 text-slate-500 hover:text-yellow-400 transition-colors" title="Reemplazar">
                                 {editandoFolio === ticket.Pk_folio_ticket ? <Loader2 size={16} className="animate-spin text-yellow-400" /> : <PencilLine size={16} />}
@@ -243,7 +244,7 @@ export default function HistorialClient({ historial, rol }: Props) {
                           )}
                         </div>
                       ) : (
-                        rol === 'ADMIN' ? (
+                        isAdmin ? (
                           <label className="cursor-pointer inline-flex items-center justify-center gap-1.5 text-[var(--text-muted)] bg-white border border-[var(--border-cream)] px-3 py-1.5 rounded-md text-xs font-bold hover:border-[#71717a] hover:text-[#71717a] transition-all shadow-sm">
                             {subiendoFolio === ticket.Pk_folio_ticket ? <><Loader2 size={14} className="animate-spin" /> SUBIENDO</> : <><UploadCloud size={14} /> SUBIR</>}
                             <input type="file" accept=".pdf" className="hidden" onChange={(e) => handleSubirEvidencia(e, ticket.Pk_folio_ticket, ticket.auto?.Consecutivo || 'Unidad', false)} disabled={subiendoFolio === ticket.Pk_folio_ticket} />

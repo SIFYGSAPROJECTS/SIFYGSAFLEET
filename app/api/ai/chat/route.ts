@@ -192,7 +192,7 @@ export async function POST(req: Request) {
     const userEmail = getCookieValue(cookieHeader, "user_email");
     const userName = getCookieValue(cookieHeader, "user_name") || "conductor";
 
-    const isAdmin = userRole.toLowerCase() === "admin";
+    const isAdmin = ['admin', 'gerencial'].includes(userRole.toLowerCase());
 
     // Seleccionar prompt y herramientas según rol
     const systemPrompt = isAdmin ? SYSTEM_PROMPT_ADMIN : buildUserPrompt(userName);

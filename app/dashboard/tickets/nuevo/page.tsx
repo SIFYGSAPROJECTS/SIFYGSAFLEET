@@ -25,7 +25,7 @@ export default async function NuevoTicketPage() {
   });
 
   // 3. Filtro inteligente de vehículos
-  const condicionDeBusqueda = usuario?.Rol === 'ADMIN' 
+  const condicionDeBusqueda = ['ADMIN', 'GERENCIAL'].includes(usuario?.Rol || '') 
     ? {} 
     : { Email_encargado: userEmail };
 
@@ -63,7 +63,7 @@ export default async function NuevoTicketPage() {
 
           <h1 className="text-3xl font-black text-white tracking-tight font-serif">Programar Mantenimiento</h1>
           <p className="text-sm text-slate-400 mt-2">
-            {usuario?.Rol === 'ADMIN' 
+            {['ADMIN', 'GERENCIAL'].includes(usuario?.Rol || '') 
               ? <><span className="text-[#71717a] font-bold"> Administrador:</span> Puedes agendar servicio para cualquier unidad de la flota.</> 
               : <><span className="text-[#71717a] font-bold"> Usuario:</span> Solo puedes solicitar servicio para las unidades que tienes asignadas.</>}
           </p>

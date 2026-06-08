@@ -20,7 +20,7 @@ export default async function HistorialPage() {
     where: { Email: userEmail }
   });
 
-  const condicionDeBusqueda = usuario?.Rol === 'ADMIN' 
+  const condicionDeBusqueda = ['ADMIN', 'GERENCIAL'].includes(usuario?.Rol || '') 
     ? {} 
     : {
         OR: [

@@ -4,7 +4,8 @@ import DocumentosClient from './DocumentosClient';
 
 export default async function DocumentosPage() {
   const cookieStore = await cookies();
-  const isAdmin = cookieStore.get('user_role')?.value === 'ADMIN';
+  const userRole = cookieStore.get('user_role')?.value;
+  const isAdmin = ['ADMIN', 'GERENCIAL'].includes(userRole || '');
 
   const vehiculosDB = await prisma.inventario_Automoviles.findMany({
     select: {

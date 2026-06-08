@@ -18,7 +18,7 @@ export default async function CentralServiciosPage() {
 
   // 1. Obtener Rol
   const usuario = await prisma.empleados.findUnique({ where: { Email: userEmail } });
-  const isAdmin = usuario?.Rol === 'ADMIN';
+  const isAdmin = ['ADMIN', 'GERENCIAL'].includes(usuario?.Rol || '');
 
   // 2. Traer Tickets (Sirve para el Historial y el Seguimiento)
   const condicionTickets = isAdmin ? {} : {

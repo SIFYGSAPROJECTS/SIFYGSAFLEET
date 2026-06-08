@@ -10,10 +10,12 @@ export default async function Dashboard() {
   const userRole = cookieStore.get('user_role')?.value || 'USER';
   const userName = cookieStore.get('user_name')?.value || 'Usuario';
 
+  const isAdmin = ['ADMIN', 'GERENCIAL'].includes(userRole);
+
   // MÉTRICAS 
-  const totalAutos = userRole === 'ADMIN' ? await prisma.inventario_Automoviles.count() : 0;
-  const totalEmpleados = userRole === 'ADMIN' ? await prisma.empleados.count() : 0;
-  const ticketsPendientes = userRole === 'ADMIN' ? await prisma.solicitud.count({
+  const totalAutos = isAdmin ? await prisma.inventario_Automoviles.count() : 0;
+  const totalEmpleados = isAdmin ? await prisma.empleados.count() : 0;
+  const ticketsPendientes = isAdmin ? await prisma.solicitud.count({
     where: { Estado: 'PENDIENTE' }
   }) : 0;
 
@@ -32,8 +34,8 @@ export default async function Dashboard() {
           <div className="flex items-center space-x-4">
             <div className="text-right">
               <p className="text-sm font-medium text-[var(--text-main)]">{userName}</p>
-              <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold ${userRole === 'ADMIN' ? 'bg-[#71717a] text-white' : 'bg-stone-200 text-stone-600'}`}>
-                {userRole === 'ADMIN' ? 'ADMINISTRADOR' : 'EMPLEADO'}
+              <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold ${isAdmin ? 'bg-[#71717a] text-white' : 'bg-stone-200 text-stone-600'}`}>
+                {isAdmin ? 'ADMINISTRADOR' : 'EMPLEADO'}
               </span>
             </div>
             <LogoutButton /> 
@@ -47,13 +49,13 @@ export default async function Dashboard() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div className="text-left">
             <h1 className="text-3xl font-serif font-medium text-[var(--text-main)] tracking-tight">
-              {userRole === 'ADMIN' ? 'Panel de Control' : 'Centro de Servicios'}
+              {isAdmin ? 'Panel de Control' : 'Centro de Servicios'}
             </h1>
             <p className="text-[var(--text-muted)]">Gestión de flota SIFYGSA</p>
           </div>
 
           {/* BOTÓN "NUEVO MANTENIMIENTO" (Solo para clientes/empleados) */}
-          {userRole !== 'ADMIN' && (
+          {!isAdmin && (
             <Link 
               href="/dashboard/servicios" 
               className="bg-[#71717a] hover:bg-[#52525b] text-white px-5 py-2.5 rounded-lg font-bold flex items-center gap-2 transition-all shadow-lg active:scale-95"

@@ -4,7 +4,7 @@ import ChecklistsClient from './ChecklistsClient';
 
 export default async function ChecklistsPage() {
   const cookieStore = await cookies();
-  const isAdmin = cookieStore.get('user_role')?.value === 'ADMIN';
+  const isAdmin = ['ADMIN', 'GERENCIAL'].includes(cookieStore.get('user_role')?.value || '');
 
   const vehiculosDB = await prisma.inventario_Automoviles.findMany({
     select: {

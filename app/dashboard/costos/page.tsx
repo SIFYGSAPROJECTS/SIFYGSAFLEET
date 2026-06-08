@@ -40,6 +40,7 @@ export default function CostosPage() {
   const chartMensualRef = useRef<HTMLDivElement>(null);
   const [isExporting, setIsExporting] = useState(false);
   const [userRole, setUserRole] = useState<string>('USER');
+  const isAdmin = ['ADMIN', 'GERENCIAL'].includes(userRole);
   
   // Filtros
   const [empresaFiltro, setEmpresaFiltro] = useState('');
@@ -387,7 +388,7 @@ export default function CostosPage() {
             ref={fileInputRef}
             onChange={handleFileUpload}
           />
-          {userRole === 'ADMIN' && (
+          {isAdmin && (
             <>
               <button 
                 onClick={handleExportExcel}

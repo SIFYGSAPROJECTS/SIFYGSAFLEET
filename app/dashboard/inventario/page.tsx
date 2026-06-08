@@ -55,6 +55,7 @@ export default function InventarioMaestroPage() {
   const [vehiculoARestaurar, setVehiculoARestaurar] = useState<Vehiculo | null>(null);
   const [procesando, setProcesando] = useState(false);
   const [userRole, setUserRole] = useState<string>('USER');
+  const isAdmin = ['ADMIN', 'GERENCIAL'].includes(userRole);
 
   const cargarVehiculos = async () => {
     setCargando(true);
@@ -336,7 +337,7 @@ export default function InventarioMaestroPage() {
 
           {/* BOTONES DE ACCIÓN */}
           <div className="pb-3 w-full sm:w-auto shrink-0 flex flex-col sm:flex-row items-center justify-end gap-3">
-            {tabPrincipal === 'activos' && userRole === 'ADMIN' && (
+            {tabPrincipal === 'activos' && isAdmin && (
               <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
                 <button onClick={descargarCSV} className="w-full sm:w-auto bg-white hover:bg-[var(--bg-hover)] border border-[var(--border-cream)] text-[var(--text-main)] px-4 py-2.5 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors shadow-sm shrink-0">
                   <Download className="w-4 h-4" /> Exportar Excel
@@ -346,7 +347,7 @@ export default function InventarioMaestroPage() {
                 </button>
               </div>
             )}
-            {tabPrincipal === 'bajas' && userRole === 'ADMIN' && (
+            {tabPrincipal === 'bajas' && isAdmin && (
               <button onClick={descargarCSV} className="w-full sm:w-auto bg-white hover:bg-[var(--bg-hover)] border border-[var(--border-cream)] text-[var(--text-main)] px-4 py-2.5 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors shadow-sm shrink-0">
                 <Download className="w-4 h-4" /> Exportar Excel
               </button>

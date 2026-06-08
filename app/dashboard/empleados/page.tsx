@@ -266,7 +266,7 @@ export default function PersonalPage() {
                   <tr key={emp.Email} className="hover:bg-[var(--bg-hover)] even:bg-[var(--bg-screen)] transition-colors">
                     <td className="p-4">
                       <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center font-black text-xs border shadow-sm transition-transform group-hover:scale-110 ${emp.Rol === 'ADMIN' ? 'bg-[#71717a] border-[#52525b] text-white shadow-[#71717a]/20' : 'bg-white border-[var(--border-cream)] text-[#71717a] shadow-md shadow-stone-200/50'}`}>
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center font-black text-xs border shadow-sm transition-transform group-hover:scale-110 ${['ADMIN', 'GERENCIAL'].includes(emp.Rol) ? 'bg-[#71717a] border-[#52525b] text-white shadow-[#71717a]/20' : 'bg-white border-[var(--border-cream)] text-[#71717a] shadow-md shadow-stone-200/50'}`}>
                           {emp.Nombre_Empleado.charAt(0)}{emp.A_Paterno.charAt(0)}
                         </div>
                         <div>
@@ -281,7 +281,7 @@ export default function PersonalPage() {
                       <div className="text-xs text-[var(--text-muted)]">{emp.Departamento || 'General'}</div>
                     </td>
                     <td className="p-4 text-center">
-                      <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-black tracking-widest border ${emp.Rol === 'ADMIN' ? 'bg-blue-50 text-blue-600 border-blue-200' : 'bg-stone-50 text-[var(--text-muted)] border-[var(--border-cream)]'}`}>
+                      <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-black tracking-widest border ${['ADMIN', 'GERENCIAL'].includes(emp.Rol) ? 'bg-blue-50 text-blue-600 border-blue-200' : 'bg-stone-50 text-[var(--text-muted)] border-[var(--border-cream)]'}`}>
                         {emp.Rol}
                       </span>
                     </td>
@@ -311,7 +311,7 @@ export default function PersonalPage() {
                <div key={emp.Email} className="p-5 flex flex-col gap-4 active:bg-[var(--bg-hover)] transition-colors">
                  <div className="flex justify-between items-start">
                    <div className="flex items-center gap-3">
-                      <div className={`w-12 h-12 rounded-full flex items-center justify-center font-black text-base border shrink-0 shadow-lg ${emp.Rol === 'ADMIN' ? 'bg-[#71717a] border-[#52525b] text-white' : 'bg-white border-[var(--border-cream)] text-[#71717a]'} font-serif`}>
+                      <div className={`w-12 h-12 rounded-full flex items-center justify-center font-black text-base border shrink-0 shadow-lg ${['ADMIN', 'GERENCIAL'].includes(emp.Rol) ? 'bg-[#71717a] border-[#52525b] text-white' : 'bg-white border-[var(--border-cream)] text-[#71717a]'} font-serif`}>
                         {emp.Nombre_Empleado.charAt(0)}{emp.A_Paterno.charAt(0)}
                       </div>
                       <div className="overflow-hidden">
@@ -328,7 +328,7 @@ export default function PersonalPage() {
                     </div>
                     <div className="flex flex-col gap-1 border-l border-[var(--border-cream)] pl-3">
                       <span className="text-[9px] text-[var(--text-muted)] font-black uppercase tracking-widest">Rol</span>
-                      <span className={`text-[10px] font-black tracking-widest uppercase ${emp.Rol === 'ADMIN' ? 'text-blue-600' : 'text-stone-500'}`}>{emp.Rol}</span>
+                      <span className={`text-[10px] font-black tracking-widest uppercase ${['ADMIN', 'GERENCIAL'].includes(emp.Rol) ? 'text-blue-600' : 'text-stone-500'}`}>{emp.Rol}</span>
                     </div>
                  </div>
 
@@ -391,6 +391,7 @@ export default function PersonalPage() {
                     onChange={(val) => setFormData({...formData, Rol: val})}
                     options={[
                       { value: 'USER', label: 'EMPLEADO (USER)' },
+                      { value: 'GERENCIAL', label: 'GERENTE (GERENCIAL)' },
                       { value: 'ADMIN', label: 'ADMINISTRADOR (ADMIN)' },
                     ]}
                   />

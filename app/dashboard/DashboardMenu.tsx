@@ -43,6 +43,7 @@ interface Props {
 
 export default function DashboardMenu({ userRole, totalAutos, totalEmpleados, ticketsPendientes }: Props) {
   const pathname = usePathname();
+  const isAdmin = ['ADMIN', 'GERENCIAL'].includes(userRole);
   
   // Helper para determinar pestaña activa basado en la ruta
   const getActiveTab = (): string => {
@@ -70,7 +71,7 @@ export default function DashboardMenu({ userRole, totalAutos, totalEmpleados, ti
 
   const tarjetasTransporte = (
     <>
-      {userRole === 'ADMIN' && (
+      {isAdmin && (
         <>
           <Link href="/dashboard/inventario" className="p-6 bg-[var(--bg-floating)] border border-[var(--border-cream)] border-t-4 border-t-[#71717a] rounded-xl hover:bg-[var(--bg-hover)] hover:shadow-xl transition-all duration-300 group text-left block">
             <ShieldCheck className="w-8 h-8 text-[#71717a] mb-4" />
@@ -94,7 +95,7 @@ export default function DashboardMenu({ userRole, totalAutos, totalEmpleados, ti
         <span className="block font-bold text-lg text-[var(--text-main)] font-serif">Central de Servicios</span>
         <span className="text-sm text-[var(--text-muted)]">Programar órdenes, historial y estatus en vivo.</span>
       </Link>
-      {userRole === 'ADMIN' && (
+      {isAdmin && (
         <Link href="/dashboard/costos" className="p-6 bg-[var(--bg-floating)] border border-[var(--border-cream)] border-t-4 border-t-[#71717a] rounded-xl hover:bg-[var(--bg-hover)] hover:shadow-xl transition-all duration-300 group text-left block">
           <DollarSign className="w-8 h-8 text-[#71717a] mb-4" />
           <span className="block font-bold text-lg text-[var(--text-main)] font-serif">Control de Costos</span>
@@ -106,7 +107,7 @@ export default function DashboardMenu({ userRole, totalAutos, totalEmpleados, ti
 
   const tarjetasChecklists = (
     <>
-      {userRole === 'ADMIN' ? (
+      {isAdmin ? (
         <Link href="/dashboard/checklists" className="p-6 bg-[var(--bg-floating)] border border-[var(--border-cream)] border-t-4 border-t-[#71717a] rounded-xl hover:bg-[var(--bg-hover)] hover:shadow-xl transition-all duration-300 group text-left block">
           <FileText className="w-8 h-8 text-[#71717a] mb-4" />
           <span className="block font-bold text-lg text-[var(--text-main)] font-serif">Checklists PDF</span>
@@ -124,7 +125,7 @@ export default function DashboardMenu({ userRole, totalAutos, totalEmpleados, ti
 
   const tarjetasDocumentos = (
     <>
-      {userRole === 'ADMIN' ? (
+      {isAdmin ? (
         <Link href="/dashboard/documentos" className="p-6 bg-[var(--bg-floating)] border border-[var(--border-cream)] border-t-4 border-t-[#71717a] rounded-xl hover:bg-[var(--bg-hover)] hover:shadow-xl transition-all duration-300 group text-left block">
           <FolderOpen className="w-8 h-8 text-[#71717a] mb-4" />
           <span className="block font-bold text-lg text-[var(--text-main)] font-serif">Documentos de Unidad</span>
@@ -158,7 +159,7 @@ export default function DashboardMenu({ userRole, totalAutos, totalEmpleados, ti
             <Wrench size={18} /> <span className="hidden sm:inline">Servicios</span>
           </Link>
 
-          {userRole === 'ADMIN' && (
+          {isAdmin && (
             <Link
               href="/dashboard/inventario"
               className={`flex-1 flex justify-center px-6 py-2.5 font-bold text-sm items-center gap-2 rounded-full transition-all whitespace-nowrap ${
@@ -171,7 +172,7 @@ export default function DashboardMenu({ userRole, totalAutos, totalEmpleados, ti
             </Link>
           )}
 
-          {userRole === 'ADMIN' && (
+          {isAdmin && (
             <Link
               href="/dashboard/costos"
               className={`flex-1 flex justify-center px-6 py-2.5 font-bold text-sm items-center gap-2 rounded-full transition-all whitespace-nowrap ${
@@ -196,7 +197,7 @@ export default function DashboardMenu({ userRole, totalAutos, totalEmpleados, ti
           </Link>
           
           <Link
-            href={userRole === 'ADMIN' ? '/dashboard/checklists' : '/dashboard/mis-checklists'}
+            href={isAdmin ? '/dashboard/checklists' : '/dashboard/mis-checklists'}
             className={`flex-1 flex justify-center px-6 py-2.5 font-bold text-sm items-center gap-2 rounded-full transition-all whitespace-nowrap ${
               activeTab === 'checklists' 
                 ? 'bg-white text-[var(--text-main)] shadow-md' 
@@ -207,7 +208,7 @@ export default function DashboardMenu({ userRole, totalAutos, totalEmpleados, ti
           </Link>
           
           <Link
-            href={userRole === 'ADMIN' ? '/dashboard/documentos' : '/dashboard/mis-documentos'}
+            href={isAdmin ? '/dashboard/documentos' : '/dashboard/mis-documentos'}
             className={`flex-1 flex justify-center px-6 py-2.5 font-bold text-sm items-center gap-2 rounded-full transition-all whitespace-nowrap ${
               activeTab === 'documentos' 
                 ? 'bg-white text-[var(--text-main)] shadow-md' 
@@ -217,7 +218,7 @@ export default function DashboardMenu({ userRole, totalAutos, totalEmpleados, ti
             <FolderOpen size={18} /> <span className="hidden sm:inline">Documentos</span>
           </Link>
           
-          {userRole === 'ADMIN' && (
+          {isAdmin && (
             <Link
               href="/verificaciones"
               className={`flex-1 flex justify-center px-6 py-2.5 font-bold text-sm items-center gap-2 rounded-full transition-all whitespace-nowrap ${
@@ -233,7 +234,7 @@ export default function DashboardMenu({ userRole, totalAutos, totalEmpleados, ti
         </div>
       </div>
 
-      {userRole === 'ADMIN' && (
+      {isAdmin && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           
           {/* KPI 1 -> Va a Inventario */}

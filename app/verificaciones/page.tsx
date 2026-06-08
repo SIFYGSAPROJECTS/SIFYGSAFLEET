@@ -20,7 +20,7 @@ export default async function VerificacionesPage({
 
   const cookieStore = await cookies();
   const userRole = cookieStore.get('user_role')?.value || 'USER';
-  const isAdmin = userRole === 'ADMIN';
+  const isAdmin = ['ADMIN', 'GERENCIAL'].includes(userRole);
 
   // No generamos automáticamente al cargar la página para evitar que se quede colgada
   // (es mejor hacerlo con un botón si no hay datos).

@@ -21,7 +21,7 @@ export default async function SeguimientoPage() {
 
   // 2. Obtención de Rol y Datos
   const usuario = await prisma.empleados.findUnique({ where: { Email: userEmail } });
-  const isAdmin = usuario?.Rol === 'ADMIN';
+  const isAdmin = ['ADMIN', 'GERENCIAL'].includes(usuario?.Rol || '');
 
   const condicionDeBusqueda = isAdmin 
     ? {} 
