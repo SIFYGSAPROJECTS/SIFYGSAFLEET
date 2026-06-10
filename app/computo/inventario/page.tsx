@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from 'react';
-import { Laptop, Plus, X, Pencil, ArrowLeft, ShieldCheck, AlertTriangle, Wrench, CheckCircle2, Archive, Download, Filter, UploadCloud } from 'lucide-react';
+import { Laptop, Plus, X, Pencil, ArrowLeft, ShieldCheck, AlertTriangle, Wrench, CheckCircle2, Archive, Download, Filter, UploadCloud, Search } from 'lucide-react';
 import Link from 'next/link';
 import SystemModal, { ModalType } from '@/components/ui/SystemModal';
 import PremiumSelect from '@/components/ui/PremiumSelect';
@@ -24,7 +24,7 @@ interface EquipoComputo {
   Proveedor: string | null;
 }
 
-type TabPrincipal = 'activos' | 'bajas';
+type TabPrincipal = 'activos' | 'bajas' | 'revision';
 
 export default function ComputoInventarioPage() {
   const [equipos, setEquipos] = useState<EquipoComputo[]>([]);
@@ -32,6 +32,8 @@ export default function ComputoInventarioPage() {
 
   const [tabPrincipal, setTabPrincipal] = useState<TabPrincipal>('activos');
   const [filtroEstatus, setFiltroEstatus] = useState<string>('Todos');
+  const [filtroPrefijo, setFiltroPrefijo] = useState<string>('Todos');
+  const [busquedaTexto, setBusquedaTexto] = useState('');
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [importando, setImportando] = useState(false);
@@ -75,11 +77,43 @@ export default function ComputoInventarioPage() {
   }, []);
 
   //  Filtros Básicos
-  const equiposActivos = equipos.filter(e => e.Estatus !== 'Baja');
-  const equiposBaja = equipos.filter(e => e.Estatus === 'Baja');
+  const esBaja = (e: EquipoComputo) => e.Estatus?.toLowerCase() === 'baja';
+  const esRevision = (e: EquipoComputo) => {
+    const s = e.Estatus?.toLowerCase() || '';
+    return s.includes('revis') || s.includes('reparac') || s.includes('taller');
+  };
+  const esAsignado = (e: EquipoComputo) => {
+    const s = e.Estatus?.toLowerCase() || '';
+    return s.includes('activo') || s.includes('asignado');
+  };
 
-  const equiposFiltrados = equiposActivos.filter(e => {
+  const equiposActivos = equipos.filter(e => !esBaja(e) && !esRevision(e));
+  const equiposRevision = equipos.filter(e => esRevision(e));
+  const equiposBaja = equipos.filter(e => esBaja(e));
+
+  const equiposAMostrar = tabPrincipal === 'activos' ? equiposActivos : (tabPrincipal === 'revision' ? equiposRevision : equiposBaja);
+
+  const equiposFiltrados = equiposAMostrar.filter(e => {
+    if (busquedaTexto) {
+      const b = busquedaTexto.toLowerCase();
+      const matchUsuario = e.Usuario?.toLowerCase().includes(b) || false;
+      const matchST = e.Service_Tag?.toLowerCase().includes(b) || false;
+      const matchCargador = e.Cargador?.toLowerCase().includes(b) || false;
+      const matchCodigo = e.C_Interno?.toLowerCase().includes(b) || false;
+      const matchMarca = e.Marca?.toLowerCase().includes(b) || false;
+      if (!matchUsuario && !matchST && !matchCargador && !matchCodigo && !matchMarca) return false;
+    }
+
+    if (filtroPrefijo !== 'Todos') {
+      const parts = e.C_Interno.split('-');
+      const prefix = parts.length > 1 ? parts[0].toUpperCase() : 'OTROS';
+      if (prefix !== filtroPrefijo) return false;
+    }
+
     if (filtroEstatus === 'Todos') return true;
+    if (filtroEstatus === 'En Revisión') return esRevision(e);
+    if (filtroEstatus === 'Disponible') return e.Estatus?.toLowerCase().includes('stock') || e.Estatus?.toLowerCase().includes('disponible');
+    if (filtroEstatus === 'Asignado') return esAsignado(e);
     return e.Estatus === filtroEstatus;
   });
 
@@ -199,7 +233,7 @@ export default function ComputoInventarioPage() {
 
       const equiposExtraidos: any[] = [];
       let headerRow = worksheet.getRow(1);
-      
+
       const getColIndex = (name: string) => {
         let idx = -1;
         headerRow.eachCell((cell, colNumber) => {
@@ -216,7 +250,7 @@ export default function ComputoInventarioPage() {
         Modelo: getColIndex('Modelo') !== -1 ? getColIndex('Modelo') : 5,
         Service_Tag: getColIndex('Service Tag') !== -1 ? getColIndex('Service Tag') : 6,
         Cargador: getColIndex('Cargador') !== -1 ? getColIndex('Cargador') : 7,
-        Usuario: getColIndex('Usuario') !== -1 ? getColIndex('Usuario') : 8,
+        Usuario: getColIndex('Usuario') !== -1 ? getColIndex('Usuario') : (getColIndex('Usuario') !== -1 ? getColIndex('Uusario') : 8),
         Departamento: getColIndex('Departamento') !== -1 ? getColIndex('Departamento') : 9,
         Puesto_Proyecto: getColIndex('Puesto/Proyecto') !== -1 ? getColIndex('Puesto/Proyecto') : 10,
         N_EMP: getColIndex('N_EMP') !== -1 ? getColIndex('N_EMP') : 11,
@@ -228,26 +262,54 @@ export default function ComputoInventarioPage() {
 
       worksheet.eachRow((row, rowNumber) => {
         if (rowNumber === 1) return; // Saltar headers
-        
-        const c_interno = row.getCell(mapNames.C_Interno).value?.toString();
+
+        const c_interno = row.getCell(mapNames.C_Interno).value?.toString()?.trim();
         if (!c_interno) return;
+
+        const cleanString = (val: any) => {
+          if (val === null || val === undefined) return null;
+          const str = val.toString().trim();
+          if (str === '' || str.toLowerCase() === 'no asignado' || str.toLowerCase() === 'indefinido') return null;
+          return str;
+        };
+
+        const rawCR = row.getCell(mapNames.CR).value?.toString()?.toUpperCase()?.trim();
+        const crValue = (rawCR === 'SI' || rawCR === 'SÍ') ? 'SI' : 'NO';
+
+        let fechaCR: any = row.getCell(mapNames.Fecha_CR).value;
+        if (fechaCR) {
+          const fechaStr = fechaCR.toString().trim();
+          if (fechaStr === '0000-00-00' || fechaStr === '') {
+            fechaCR = null;
+          } else if (typeof fechaCR === 'string' && fechaCR.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
+            const [day, month, year] = fechaCR.split('/');
+            fechaCR = new Date(`${year}-${month}-${day}T12:00:00Z`);
+          } else if (!(fechaCR instanceof Date)) {
+            const parsed = new Date(fechaCR);
+            if (!isNaN(parsed.getTime())) {
+              fechaCR = parsed;
+            } else {
+              fechaCR = null;
+            }
+          }
+        }
 
         equiposExtraidos.push({
           C_Interno: c_interno,
-          Empresa: row.getCell(mapNames.Empresa).value?.toString(),
-          Tipo: row.getCell(mapNames.Tipo).value?.toString(),
-          Marca: row.getCell(mapNames.Marca).value?.toString(),
-          Modelo: row.getCell(mapNames.Modelo).value?.toString(),
-          Service_Tag: row.getCell(mapNames.Service_Tag).value?.toString(),
-          Cargador: row.getCell(mapNames.Cargador).value?.toString(),
-          Usuario: row.getCell(mapNames.Usuario).value?.toString(),
-          Departamento: row.getCell(mapNames.Departamento).value?.toString(),
-          Puesto_Proyecto: row.getCell(mapNames.Puesto_Proyecto).value?.toString(),
-          N_EMP: row.getCell(mapNames.N_EMP).value?.toString(),
-          Estatus: row.getCell(mapNames.Estatus).value?.toString(),
-          CR: row.getCell(mapNames.CR).value?.toString(),
-          Fecha_CR: row.getCell(mapNames.Fecha_CR).value,
-          Proveedor: row.getCell(mapNames.Proveedor).value?.toString(),
+          Empresa: cleanString(row.getCell(mapNames.Empresa).value),
+          Tipo: cleanString(row.getCell(mapNames.Tipo).value),
+          Marca: cleanString(row.getCell(mapNames.Marca).value),
+          Modelo: cleanString(row.getCell(mapNames.Modelo).value),
+          Service_Tag: cleanString(row.getCell(mapNames.Service_Tag).value),
+          Cargador: cleanString(row.getCell(mapNames.Cargador).value),
+          Usuario: cleanString(row.getCell(mapNames.Usuario).value),
+          Departamento: cleanString(row.getCell(mapNames.Departamento).value),
+          Puesto_Proyecto: cleanString(row.getCell(mapNames.Puesto_Proyecto).value),
+          N_EMP: cleanString(row.getCell(mapNames.N_EMP).value) === '0' ? null : cleanString(row.getCell(mapNames.N_EMP).value),
+          Estatus: cleanString(row.getCell(mapNames.Estatus).value) || 'Asignado',
+          CR: crValue,
+          Fecha_CR: fechaCR,
+          Proveedor: cleanString(row.getCell(mapNames.Proveedor).value),
         });
       });
 
@@ -258,7 +320,7 @@ export default function ComputoInventarioPage() {
       });
 
       const data = await res.json();
-      
+
       if (res.ok) {
         setSysModal({ isOpen: true, type: 'success', title: 'Importación Exitosa', message: `Se procesó el archivo. Insertados: ${data.insertados}. Omitidos por duplicado o error: ${data.errores}.` });
         cargarEquipos();
@@ -297,6 +359,10 @@ export default function ComputoInventarioPage() {
               <ShieldCheck size={20} /> Equipos Activos
               <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${tabPrincipal === 'activos' ? 'bg-emerald-500 text-white' : 'bg-stone-200 text-stone-600'}`}>{equiposActivos.length}</span>
             </button>
+            <button onClick={() => setTabPrincipal('revision')} className={`px-4 sm:px-6 py-3.5 font-bold text-sm sm:text-base flex items-center gap-2 border-b-2 transition-all whitespace-nowrap shrink-0 ${tabPrincipal === 'revision' ? 'border-amber-500 text-amber-600' : 'border-transparent text-[var(--text-muted)] hover:text-amber-500'}`}>
+              <Wrench size={20} /> Revisión (Taller)
+              <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${tabPrincipal === 'revision' ? 'bg-amber-500 text-white' : 'bg-stone-200 text-stone-600'}`}>{equiposRevision.length}</span>
+            </button>
             <button onClick={() => setTabPrincipal('bajas')} className={`px-4 sm:px-6 py-3.5 font-bold text-sm sm:text-base flex items-center gap-2 border-b-2 transition-all whitespace-nowrap shrink-0 ${tabPrincipal === 'bajas' ? 'border-red-500 text-red-500' : 'border-transparent text-[var(--text-muted)] hover:text-red-500'}`}>
               <Archive size={20} /> Equipos de Baja
               <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${tabPrincipal === 'bajas' ? 'bg-red-500 text-white' : 'bg-stone-200 text-stone-600'}`}>{equiposBaja.length}</span>
@@ -322,44 +388,121 @@ export default function ComputoInventarioPage() {
         </div>
 
         {/* TABLA */}
-        {tabPrincipal === 'activos' && (
-          <div className="animate-in fade-in duration-500 w-full">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 px-1 gap-3 relative z-20">
-              <div className="flex items-center gap-2 text-slate-500">
-                <Filter size={14} className="text-emerald-500" />
-                <span className="text-[10px] font-black uppercase tracking-[0.2em]">Filtro Operativo</span>
+        <div className="animate-in fade-in duration-500 w-full">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 px-1 gap-3 relative z-20">
+            <div className="flex items-center gap-2 text-slate-500 shrink-0">
+              <Filter size={14} className="text-emerald-500" />
+              <span className="text-[10px] font-black uppercase tracking-[0.2em]">Filtros</span>
+            </div>
+            <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+              <div className="relative w-full sm:w-56">
+                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-stone-400">
+                  <Search className="w-4 h-4" />
+                </div>
+                <input
+                  type="text"
+                  value={busquedaTexto}
+                  onChange={(e) => setBusquedaTexto(e.target.value)}
+                  placeholder="Buscar..."
+                  className="w-full bg-white border border-[var(--border-cream)] text-[var(--text-main)] text-sm rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 block pl-10 p-2 shadow-sm transition-all placeholder:text-stone-400"
+                />
               </div>
+              <PremiumSelect
+                compact accent="indigo" placeholder="Empresa" value={filtroPrefijo}
+                onChange={(val) => setFiltroPrefijo(val)}
+                options={[
+                  { value: 'Todos', label: 'Todas las Empresas' },
+                  ...Array.from(new Set(equipos.map(e => e.C_Interno.split('-').length > 1 ? e.C_Interno.split('-')[0].toUpperCase() : 'OTROS'))).sort().map(p => ({ value: p, label: p }))
+                ]}
+                className="w-full sm:w-48" direction="down"
+              />
               <PremiumSelect
                 compact accent="indigo" placeholder="Estatus" value={filtroEstatus}
                 onChange={(val) => setFiltroEstatus(val)}
                 options={[
                   { value: 'Todos', label: 'Todos los Estatus' },
                   { value: 'Asignado', label: 'Asignados' },
-                  { value: 'En Revisión', label: 'En Revisión (Taller)' },
                   { value: 'Disponible', label: 'Disponibles (Stock)' },
                 ]}
-                className="w-full sm:w-56" direction="down"
+                className="w-full sm:w-48" direction="down"
               />
             </div>
+          </div>
 
-            <div className={`bg-[var(--bg-floating)] rounded-xl shadow-xl border border-[var(--border-cream)] border-t-4 overflow-hidden border-t-emerald-500`}>
+          {tabPrincipal === 'bajas' || tabPrincipal === 'revision' ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {cargando ? (
+                <div className="col-span-full p-8 text-center text-[var(--text-muted)] font-bold">Cargando inventario...</div>
+              ) : equiposFiltrados.length === 0 ? (
+                <div className="col-span-full p-8 text-center text-[var(--text-muted)] bg-[var(--bg-floating)] rounded-xl shadow border border-[var(--border-cream)]">No hay equipos que coincidan con los filtros.</div>
+              ) : (
+                equiposFiltrados.map((equipo) => (
+                  <div key={equipo.C_Interno} className={`bg-[var(--bg-floating)] rounded-xl shadow-lg border border-[var(--border-cream)] border-t-4 ${tabPrincipal === 'revision' ? 'border-t-amber-500' : 'border-t-red-500'} overflow-hidden hover:shadow-xl transition-all flex flex-col`}>
+                    <div className="p-5 flex-grow">
+                      <div className="flex justify-between items-start mb-4">
+                        <div>
+                          <h3 className="font-bold text-[var(--text-main)] text-lg font-serif">{equipo.C_Interno}</h3>
+                          <p className="text-xs text-[var(--text-muted)] font-mono mt-0.5">{equipo.Empresa}</p>
+                        </div>
+                        <span className={`${tabPrincipal === 'revision' ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'} px-2 py-0.5 rounded text-[10px] font-bold uppercase shrink-0 ml-2`}>{equipo.Estatus}</span>
+                      </div>
+
+                      <div className="space-y-4 mb-2">
+                        <div>
+                          <p className="text-[10px] text-stone-500 uppercase font-bold tracking-wider mb-1">Equipo</p>
+                          <p className="font-medium text-sm text-[var(--text-main)]">{equipo.Tipo} {equipo.Marca}</p>
+                          <p className="text-xs text-[var(--text-muted)]">{equipo.Modelo}</p>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="bg-[var(--bg-screen)] p-2 rounded-lg border border-[var(--border-cream)]">
+                            <p className="text-[10px] text-stone-500 uppercase font-bold mb-1">Service Tag</p>
+                            <p className="text-xs font-medium text-[var(--text-main)] truncate" title={equipo.Service_Tag || 'N/A'}>{equipo.Service_Tag || 'N/A'}</p>
+                          </div>
+                          <div className="bg-[var(--bg-screen)] p-2 rounded-lg border border-[var(--border-cream)]">
+                            <p className="text-[10px] text-stone-500 uppercase font-bold mb-1">Cargador</p>
+                            <p className="text-xs font-medium text-[var(--text-main)] truncate" title={equipo.Cargador || 'N/A'}>{equipo.Cargador || 'N/A'}</p>
+                          </div>
+                        </div>
+
+                        <div>
+                          <p className="text-[10px] text-stone-500 uppercase font-bold tracking-wider mb-1">Último Asignado</p>
+                          <p className="font-medium text-sm text-[var(--text-main)] truncate" title={equipo.Usuario || 'N/A'}>{equipo.Usuario || <span className="text-stone-400 italic">Sin asignar</span>}</p>
+                          <p className="text-xs text-[var(--text-muted)] truncate" title={equipo.Departamento || ''}>{equipo.Departamento} {equipo.N_EMP ? `(#${equipo.N_EMP})` : ''}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-[var(--bg-screen)] border-t border-[var(--border-cream)] p-3 flex justify-between items-center px-5 mt-auto">
+                      <div className="text-xs text-[var(--text-muted)]"><span className="font-bold text-stone-500">CR:</span> {equipo.CR === 'SI' ? '✅ SI' : '❌ NO'}</div>
+                      <button onClick={() => abrirModalEditar(equipo)} className="p-2 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors" title="Editar Equipo">
+                        <Pencil className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          ) : (
+            <div className={`bg-[var(--bg-floating)] rounded-xl shadow-xl border border-[var(--border-cream)] border-t-4 overflow-hidden ${tabPrincipal === 'activos' ? 'border-t-emerald-500' : 'border-t-amber-500'}`}>
               <div className="overflow-x-auto">
                 <table className="min-w-[1200px] w-full text-left border-collapse">
                   <thead>
                     <tr className="bg-[var(--bg-screen)] border-b border-[var(--border-cream)] text-[var(--text-muted)] text-xs uppercase tracking-wider">
-                      <th className="p-4 font-semibold">Código Interno</th>
+                      <th className="p-4 font-semibold">Consecutivo</th>
                       <th className="p-4 font-semibold">Equipo (Marca / Modelo)</th>
                       <th className="p-4 font-semibold">Service Tag / Cargador</th>
                       <th className="p-4 font-semibold">Usuario y Depto.</th>
+                      <th className="p-4 font-semibold">Proyecto Asignado</th>
                       <th className="p-4 font-semibold text-center">Estatus y CR</th>
-                      <th className="p-4 font-semibold text-center">Acciones</th>
+                      <th className="p-4 font-semibold text-center">Editar</th>
                     </tr>
                   </thead>
                   <tbody>
                     {cargando ? (
-                      <tr><td colSpan={6} className="text-center p-8 text-[var(--text-muted)] font-bold">Cargando inventario...</td></tr>
+                      <tr><td colSpan={7} className="text-center p-8 text-[var(--text-muted)] font-bold">Cargando inventario...</td></tr>
                     ) : equiposFiltrados.length === 0 ? (
-                      <tr><td colSpan={6} className="text-center p-8 text-[var(--text-muted)]">No hay equipos que coincidan con los filtros.</td></tr>
+                      <tr><td colSpan={7} className="text-center p-8 text-[var(--text-muted)]">No hay equipos que coincidan con los filtros.</td></tr>
                     ) : (
                       equiposFiltrados.map((equipo) => (
                         <tr key={equipo.C_Interno} className="hover:bg-[var(--bg-hover)] even:bg-[var(--bg-screen)] transition-colors border-b border-[var(--border-cream)] last:border-0">
@@ -379,8 +522,11 @@ export default function ComputoInventarioPage() {
                             <div className="text-sm font-medium text-[var(--text-main)]">{equipo.Usuario || <span className="text-stone-400 italic">Sin asignar</span>}</div>
                             <div className="text-xs text-[var(--text-muted)]">{equipo.Departamento} {equipo.N_EMP ? `(#${equipo.N_EMP})` : ''}</div>
                           </td>
+                          <td className="p-4">
+                            <div className="text-sm text-[var(--text-main)] font-medium">{equipo.Puesto_Proyecto || <span className="text-stone-400 italic">N/A</span>}</div>
+                          </td>
                           <td className="p-4 text-center">
-                            <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase mb-1 ${equipo.Estatus === 'Asignado' ? 'bg-emerald-100 text-emerald-700' : equipo.Estatus === 'En Revisión' ? 'bg-amber-100 text-amber-700' : 'bg-stone-200 text-stone-700'}`}>{equipo.Estatus}</span>
+                            <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase mb-1 ${esAsignado(equipo) ? 'bg-emerald-100 text-emerald-700' : esRevision(equipo) ? 'bg-amber-100 text-amber-700' : esBaja(equipo) ? 'bg-red-100 text-red-700' : 'bg-stone-200 text-stone-700'}`}>{equipo.Estatus}</span>
                             <div className="text-xs text-[var(--text-muted)]"><span className="font-bold text-stone-500">CR:</span> {equipo.CR === 'SI' ? '✅ SI' : '❌ NO'}</div>
                           </td>
                           <td className="p-4 text-center">
@@ -395,19 +541,9 @@ export default function ComputoInventarioPage() {
                 </table>
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
-        {tabPrincipal === 'bajas' && (
-          <div className="animate-in fade-in duration-500 w-full">
-            <div className={`bg-[var(--bg-floating)] rounded-xl shadow-xl border border-[var(--border-cream)] border-t-4 overflow-hidden border-t-red-500`}>
-              <div className="p-8 text-center text-[var(--text-muted)] font-bold">
-                {equiposBaja.length === 0 ? 'No hay equipos registrados como bajas.' : `${equiposBaja.length} equipos en el historial de bajas.`}
-                {/* Aquí podríamos reutilizar la misma tabla adaptada para bajas en un futuro */}
-              </div>
-            </div>
-          </div>
-        )}
 
       </div>
 
@@ -424,7 +560,7 @@ export default function ComputoInventarioPage() {
             </div>
 
             <form onSubmit={guardarEquipo} className="p-6 max-h-[80vh] overflow-y-auto bg-white">
-              
+
               {/* BLOQUE 1: IDENTIFICACIÓN */}
               <h3 className="text-xs font-black text-emerald-600 uppercase tracking-wider mb-3 border-b border-[var(--border-cream)] pb-2">1. Identificación del Equipo</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">

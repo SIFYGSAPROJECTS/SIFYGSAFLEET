@@ -256,26 +256,25 @@ model Programa_Mes {
 // ==========================================
 
 model Inventario_Computo {
-  C_Interno   String  @id @db.VarChar(20)
-  Empresa     String? @db.VarChar(50)
-  Tipo        String? @db.VarChar(50)
-  Marca       String? @db.VarChar(50)
-  Modelo      String? @db.VarChar(50)
-  Service_Tag String? @db.VarChar(50)
+  C_Interno   String  @id @db.VarChar(100)
+  Empresa     String? @db.VarChar(100)
+  Tipo        String? @db.VarChar(100)
+  Marca       String? @db.VarChar(100)
+  Modelo      String? @db.VarChar(100)
+  Service_Tag String? @db.VarChar(100)
   Cargador    String? @db.VarChar(100)
 
   Usuario         String? @db.VarChar(100)
-  Departamento    String? @db.VarChar(80)
-  Puesto_Proyecto String? @db.VarChar(80)
-  N_EMP           String? @db.VarChar(20)
+  Departamento    String? @db.VarChar(100)
+  Puesto_Proyecto String? @db.VarChar(100)
+  N_EMP           String? @db.VarChar(100)
 
-  Estatus   String?   @default("Asignado") @db.VarChar(50)
-  CR        String?   @db.VarChar(20)
+  Estatus   String?   @default("Asignado") @db.VarChar(100)
+  CR        String?   @db.VarChar(100)
   Fecha_CR  DateTime? @db.Date
   Proveedor String?   @db.VarChar(100)
 
-  // Opcional: si "Usuario" es solo el nombre, podemos mantener el Email oculto para relacionar con Empleados si se desea
-  Email_Empleado String?    @db.VarChar(50)
+  Email_Empleado String?    @db.VarChar(100)
   empleado       Empleados? @relation(fields: [Email_Empleado], references: [Email])
 
   historial_reg Historial_Registro_Computo[]
@@ -286,8 +285,8 @@ model Inventario_Computo {
 
 model Historial_Registro_Computo {
   Id_Historial_Reg Int      @id @default(autoincrement())
-  C_Interno        String   @db.VarChar(20)
-  Email_Personal   String?  @db.VarChar(50)
+  C_Interno        String   @db.VarChar(100)
+  Email_Personal   String?  @db.VarChar(100)
   Fecha_Cambio     DateTime @default(now())
   Detalle          String?  @db.Text
 
@@ -297,8 +296,8 @@ model Historial_Registro_Computo {
 
 model Documentos_Computo {
   id           Int      @id @default(autoincrement())
-  C_Interno    String   @db.VarChar(20)
-  Titulo       String   @db.VarChar(100)
+  C_Interno    String   @db.VarChar(100)
+  Titulo       String   @db.VarChar(150)
   Ruta_PDF     String   @db.Text
   Fecha_Subida DateTime @default(now())
 
@@ -306,11 +305,11 @@ model Documentos_Computo {
 }
 
 model Solicitud_Computo {
-  Pk_folio_ticket   String   @id @db.VarChar(25)
-  C_Interno         String   @db.VarChar(20)
-  Email_Empleado    String   @db.VarChar(50)
-  Asesor            String?  @db.VarChar(50)
-  Tipo_Servicio     String?  @db.VarChar(30)
+  Pk_folio_ticket   String   @id @db.VarChar(100)
+  C_Interno         String   @db.VarChar(100)
+  Email_Empleado    String   @db.VarChar(100)
+  Asesor            String?  @db.VarChar(100)
+  Tipo_Servicio     String?  @db.VarChar(100)
   Descripcion       String?  @db.Text
   Fecha_Realizacion DateTime @default(now()) @db.Date
   Estado            String   @default("PENDIENTE")
@@ -323,7 +322,7 @@ model Costos_Computo {
   Id_Costo          Int      @id @default(autoincrement())
   Fecha             DateTime
   Servicio          String   @db.Text
-  C_Interno         String   @db.VarChar(20)
+  C_Interno         String   @db.VarChar(100)
   Costo_Refacciones Float
   Costo_MO          Float?
   Total             Float
