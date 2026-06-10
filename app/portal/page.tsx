@@ -7,7 +7,7 @@ import Image from 'next/image';
 
 const modules = [
   { id: 'transporte', name: 'Transporte', icon: Car, route: '/dashboard', color: 'text-blue-400', bg: 'bg-blue-400/10' },
-  { id: 'computo', name: 'Cómputo', icon: Laptop, route: null, color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
+  { id: 'computo', name: 'Cómputo', icon: Laptop, route: '/computo', color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
   { id: 'telefonia', name: 'Telefonía', icon: Phone, route: null, color: 'text-purple-400', bg: 'bg-purple-400/10' },
   { id: 'video', name: 'Video y vigilancia', icon: Cctv, route: null, color: 'text-rose-400', bg: 'bg-rose-400/10' },
   { id: 'clima', name: 'Aires acondicionados', icon: Wind, route: null, color: 'text-cyan-400', bg: 'bg-cyan-400/10' },

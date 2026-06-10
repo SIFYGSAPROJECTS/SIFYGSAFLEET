@@ -26,12 +26,15 @@ model Empleados {
   Rol                    String    @default("USER")
 
   // Relaciones
-  telefonos         Telefono[]
-  autos_encargados  Inventario_Automoviles[]       @relation("EncargadoAuto")
-  historial_autos   Historial_Registro_Automovil[]
-  historial_propios Historial_Empleados[]
-  solicitudes       Solicitud[]
-  procesos          Procesos[]
+  telefonos                 Telefono[]
+  autos_encargados          Inventario_Automoviles[]       @relation("EncargadoAuto")
+  historial_autos           Historial_Registro_Automovil[]
+  historial_propios         Historial_Empleados[]
+  solicitudes               Solicitud[]
+  procesos                  Procesos[]
+  inventarioComputos        Inventario_Computo[]
+  historialRegistroComputos Historial_Registro_Computo[]
+  solicitudComputos         Solicitud_Computo[]
 }
 
 // 2. INVENTARIO DE UNIDADES [cite: 2]
@@ -123,7 +126,7 @@ model Documentos_Unidad {
   Titulo       String   @db.VarChar(100)
   Ruta_PDF     String   @db.Text
   Fecha_Subida DateTime @default(now())
-  
+
   Fecha_Expiracion DateTime? @db.Date
   Aviso_Dias       Int?
   Notificado       Boolean   @default(false)
@@ -159,8 +162,8 @@ model Solicitud {
   Link_Taller       String?  @db.Text
   Kilometraje       Int?
   Tipo_Servicio     String?  @db.VarChar(30)
-  Evidencia         String?  // Usado históricamente para Facturas
-  Foto_Evidencia    String?  // Nuevo campo para la fotografía del ticket
+  Evidencia         String? // Usado históricamente para Facturas
+  Foto_Evidencia    String? // Nuevo campo para la fotografía del ticket
   Descripcion       String?  @db.Text
   Fecha_Realizacion DateTime @default(now()) @db.Date
   Estado            String   @default("PENDIENTE")
@@ -202,22 +205,22 @@ model Costos_Mantenimiento {
 
 // 11. VERIFICACIONES VEHICULARES
 model Verificacion_Vehicular {
-  Id_Verificacion   Int      @id @default(autoincrement())
-  Consecutivo       String   @db.VarChar(10)
-  
-  Anio              Int      // Año de la verificación (ej. 2024, 2025)
-  Periodo           Int      // 1 (Primer Semestre) o 2 (Segundo Semestre)
-  
+  Id_Verificacion Int    @id @default(autoincrement())
+  Consecutivo     String @db.VarChar(10)
+
+  Anio    Int // Año de la verificación (ej. 2024, 2025)
+  Periodo Int // 1 (Primer Semestre) o 2 (Segundo Semestre)
+
   // Plazo (Esperado según la placa)
   Fecha_Inicio_Plazo DateTime @db.Date
   Fecha_Fin_Plazo    DateTime @db.Date
-  
+
   // Real (Cuando realmente se hizo)
   Fecha_Realizacion DateTime? @db.Date
   Evidencia_PDF     String?   @db.Text
   Costo             Float?
 
-  Estado            String    @default("PENDIENTE") // PENDIENTE, REALIZADO, VENCIDO
+  Estado String @default("PENDIENTE") // PENDIENTE, REALIZADO, VENCIDO
 
   // Relación
   vehiculo Inventario_Automoviles @relation(fields: [Consecutivo], references: [Consecutivo], onDelete: Cascade)
@@ -225,13 +228,13 @@ model Verificacion_Vehicular {
 
 // 12. PROGRAMA ANUAL DE MANTENIMIENTO
 model Programa_Anual {
-  Id_Programa   Int      @id @default(autoincrement())
+  Id_Programa   Int     @id @default(autoincrement())
   Anio          Int
   Categoria     String
   Ejecuta       String
-  Observaciones String?  @db.Text
+  Observaciones String? @db.Text
 
-  meses         Programa_Mes[]
+  meses Programa_Mes[]
 
   @@unique([Anio, Categoria])
 }
@@ -239,12 +242,95 @@ model Programa_Anual {
 model Programa_Mes {
   Id          Int     @id @default(autoincrement())
   Id_Programa Int
-  Mes         Int     
-  Programado  Boolean @default(false) 
-  Realizado   Boolean @default(false) 
+  Mes         Int
+  Programado  Boolean @default(false)
+  Realizado   Boolean @default(false)
 
   programa Programa_Anual @relation(fields: [Id_Programa], references: [Id_Programa], onDelete: Cascade)
 
   @@unique([Id_Programa, Mes])
 }
 
+// ==========================================
+// MÓDULO DE CÓMPUTO
+// ==========================================
+
+model Inventario_Computo {
+  C_Interno   String  @id @db.VarChar(20)
+  Empresa     String? @db.VarChar(50)
+  Tipo        String? @db.VarChar(50)
+  Marca       String? @db.VarChar(50)
+  Modelo      String? @db.VarChar(50)
+  Service_Tag String? @db.VarChar(50)
+  Cargador    String? @db.VarChar(100)
+
+  Usuario         String? @db.VarChar(100)
+  Departamento    String? @db.VarChar(80)
+  Puesto_Proyecto String? @db.VarChar(80)
+  N_EMP           String? @db.VarChar(20)
+
+  Estatus   String?   @default("Asignado") @db.VarChar(50)
+  CR        String?   @db.VarChar(20)
+  Fecha_CR  DateTime? @db.Date
+  Proveedor String?   @db.VarChar(100)
+
+  // Opcional: si "Usuario" es solo el nombre, podemos mantener el Email oculto para relacionar con Empleados si se desea
+  Email_Empleado String?    @db.VarChar(50)
+  empleado       Empleados? @relation(fields: [Email_Empleado], references: [Email])
+
+  historial_reg Historial_Registro_Computo[]
+  documentos    Documentos_Computo[]
+  solicitudes   Solicitud_Computo[]
+  costos        Costos_Computo[]
+}
+
+model Historial_Registro_Computo {
+  Id_Historial_Reg Int      @id @default(autoincrement())
+  C_Interno        String   @db.VarChar(20)
+  Email_Personal   String?  @db.VarChar(50)
+  Fecha_Cambio     DateTime @default(now())
+  Detalle          String?  @db.Text
+
+  equipo   Inventario_Computo @relation(fields: [C_Interno], references: [C_Interno], onDelete: Cascade)
+  empleado Empleados?         @relation(fields: [Email_Personal], references: [Email])
+}
+
+model Documentos_Computo {
+  id           Int      @id @default(autoincrement())
+  C_Interno    String   @db.VarChar(20)
+  Titulo       String   @db.VarChar(100)
+  Ruta_PDF     String   @db.Text
+  Fecha_Subida DateTime @default(now())
+
+  equipo Inventario_Computo @relation(fields: [C_Interno], references: [C_Interno], onDelete: Cascade)
+}
+
+model Solicitud_Computo {
+  Pk_folio_ticket   String   @id @db.VarChar(25)
+  C_Interno         String   @db.VarChar(20)
+  Email_Empleado    String   @db.VarChar(50)
+  Asesor            String?  @db.VarChar(50)
+  Tipo_Servicio     String?  @db.VarChar(30)
+  Descripcion       String?  @db.Text
+  Fecha_Realizacion DateTime @default(now()) @db.Date
+  Estado            String   @default("PENDIENTE")
+
+  equipo   Inventario_Computo @relation(fields: [C_Interno], references: [C_Interno])
+  empleado Empleados          @relation(fields: [Email_Empleado], references: [Email])
+}
+
+model Costos_Computo {
+  Id_Costo          Int      @id @default(autoincrement())
+  Fecha             DateTime
+  Servicio          String   @db.Text
+  C_Interno         String   @db.VarChar(20)
+  Costo_Refacciones Float
+  Costo_MO          Float?
+  Total             Float
+  Proveedor         String   @db.Text
+  Empresa           String   @db.Text
+  Tipo_Mtto         String   @db.Text
+  Factura_CDG       String?  @db.Text
+
+  equipo Inventario_Computo @relation(fields: [C_Interno], references: [C_Interno], onDelete: Cascade)
+}
