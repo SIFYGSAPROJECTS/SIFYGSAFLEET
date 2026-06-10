@@ -303,6 +303,13 @@ export async function POST(req: Request) {
       if (isAdmin && isArray && functionResult.length > 0 && userAskedForExcel) {
         excelBase64 = await generateExcelBase64(functionResult);
         aiResponseData = { info: "Excel generado.", muestra: functionResult.slice(0, 3), total: functionResult.length };
+      } else if (isArray && functionResult.length > 15) {
+        // Evitamos enviar una respuesta gigantesca a Groq para prevenir el error 413 (Payload Too Large)
+        aiResponseData = { 
+          info: "Lista grande recibida. Se muestra una muestra reducida para el contexto del asistente.", 
+          muestra: functionResult.slice(0, 10), 
+          total: functionResult.length 
+        };
       }
 
       groqMessages.push(messageResponse);
