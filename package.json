@@ -6,7 +6,7 @@
     "dev": "next dev",
     "prebuild": "node -e \"const fs = require('fs'); ['.next/server', '.next/static', '.next/types'].forEach(p => { try { fs.rmSync(p, { recursive: true, force: true }); } catch (e) {} });\"",
     "build": "prisma generate && next build",
-    "start": "next start -p 3000 -H 0.0.0.0",
+    "start": "next start -H 0.0.0.0",
     "lint": "next lint"
   },
   "dependencies": {
