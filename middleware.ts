@@ -3,7 +3,8 @@ import type { NextRequest } from 'next/server';
 
 const allowedOrigins = [
   'https://cloud.sifygsa.com',
-  'http://localhost:3000'
+  'http://localhost:3000',
+  'http://localhost:3001'
 ];
 
 export function middleware(request: NextRequest) {

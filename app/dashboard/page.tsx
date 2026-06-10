@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/db';
-import { Car, PlusCircle } from 'lucide-react'; 
+import { Car, PlusCircle, LayoutGrid } from 'lucide-react'; 
 import { cookies } from 'next/headers';
 import Link from 'next/link';
 import LogoutButton from './LogoutButton'; 
@@ -32,6 +32,12 @@ export default async function Dashboard() {
             <span className="font-serif font-medium text-xl tracking-wide text-[var(--text-main)]">SIFYGSA <span className="text-[#71717a] font-serif">Fleet</span></span>
           </div>
           <div className="flex items-center space-x-4">
+            <Link 
+              href="/portal"
+              className="bg-[var(--bg-floating)] hover:bg-[var(--bg-hover)] border border-[var(--border-cream)] text-[var(--text-main)] px-3 py-1.5 rounded-lg text-xs flex items-center gap-2 transition-all font-bold shadow-sm"
+            >
+              <LayoutGrid size={14} /> Panel Maestro
+            </Link>
             <div className="text-right">
               <p className="text-sm font-medium text-[var(--text-main)]">{userName}</p>
               <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold ${isAdmin ? 'bg-[#71717a] text-white' : 'bg-stone-200 text-stone-600'}`}>
