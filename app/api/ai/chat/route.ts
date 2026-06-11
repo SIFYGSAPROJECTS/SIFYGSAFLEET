@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { 
-  get_unit_details, 
+import {
+  get_unit_details,
   get_fleet_status_summary,
   get_fleet_report,
   get_fleet_costs,
@@ -40,7 +40,6 @@ Responde de forma estructurada que puedes ayudar con:
 3. **Análisis de Costos**: Obtener reportes de gastos de mantenimiento de la flota o por empresa.
 4. **Predicción de Servicios**: Analizar kilometraje para predecir qué vehículos necesitarán servicio pronto.
 5. **Auditoría de Checklists**: Revisar qué vehículos activos no han entregado su checklist en el último mes.
-
 IMPORTANTE: No puedes alterar datos ni modificar tickets, solo eres una herramienta de consulta analítica y gerencial.
 
 PERSONALIDAD: Breve, directo y profesional.
@@ -69,69 +68,69 @@ PERSONALIDAD: Amigable, directo y orientado al conductor.
 // ─── Herramientas por rol ────────────────────────────────────────────────────
 
 const TOOLS_ADMIN = [
-  { 
-    type: "function", 
+  {
+    type: "function",
     function: {
-      name: "get_fleet_report", 
+      name: "get_fleet_report",
       description: "Obtener LISTA DETALLADA para generar REPORTES EXCEL de unidades y conductores.",
-      parameters: { 
-        type: "object", 
-        properties: { 
+      parameters: {
+        type: "object",
+        properties: {
           empresa_flota: { type: "string", description: "Opcional. Prefijo de empresa (Ej. AVH). Usa 'Todas' si piden flota total." },
           estatus: { type: "string", description: "Opcional. Filtro de estatus. Usa 'Todos' por defecto." }
-        } 
+        }
       }
     }
   },
-  { 
-    type: "function", 
+  {
+    type: "function",
     function: {
-      name: "get_pending_services", 
+      name: "get_pending_services",
       description: "Obtener LISTA DETALLADA de servicios para Excel.",
       parameters: { type: "object", properties: { query: { type: "string" } } }
     }
   },
-  { 
-    type: "function", 
+  {
+    type: "function",
     function: {
-      name: "get_fleet_status_summary", 
+      name: "get_fleet_status_summary",
       description: "Ver conteos rápidos de flota (Texto). NO sirve para Excel.",
-      parameters: { 
-        type: "object", 
-        properties: { 
+      parameters: {
+        type: "object",
+        properties: {
           empresa_flota: { type: "string", description: "Opcional. Prefijo de empresa (Ej. AVH)." }
-        } 
+        }
       }
     }
   },
-  { 
-    type: "function", 
+  {
+    type: "function",
     function: {
-      name: "get_unit_details", 
-      description: "Ver datos de un auto específico por placa o consecutivo.", 
-      parameters: { type: "object", properties: { identificador: { type: "string" } }, required: ["identificador"] } 
+      name: "get_unit_details",
+      description: "Ver datos de un auto específico por placa o consecutivo.",
+      parameters: { type: "object", properties: { identificador: { type: "string" } }, required: ["identificador"] }
     }
   },
-  { 
-    type: "function", 
+  {
+    type: "function",
     function: {
-      name: "get_fleet_costs", 
+      name: "get_fleet_costs",
       description: "Obtener la suma total de costos de mantenimiento de la flota.",
       parameters: { type: "object", properties: { empresa: { type: "string", description: "Opcional. Prefijo de empresa (Ej. AVH)." } } }
     }
   },
-  { 
-    type: "function", 
+  {
+    type: "function",
     function: {
-      name: "predict_upcoming_services", 
+      name: "predict_upcoming_services",
       description: "Predice qué vehículos necesitarán mantenimiento pronto analizando su kilometraje.",
       parameters: { type: "object", properties: {} }
     }
   },
-  { 
-    type: "function", 
+  {
+    type: "function",
     function: {
-      name: "audit_checklist_compliance", 
+      name: "audit_checklist_compliance",
       description: "Revisa qué vehículos activos no han subido su revisión de checklist en los últimos 30 días.",
       parameters: { type: "object", properties: {} }
     }
@@ -158,7 +157,7 @@ async function callGroq(messages: any[], tools?: any[], temp = 0) {
     temperature: temp,
     max_tokens: 1024
   };
-  
+
   if (tools && tools.length > 0) {
     body.tools = tools;
     body.tool_choice = "auto";
@@ -207,7 +206,7 @@ export async function POST(req: Request) {
 
     const completion = await callGroq(groqMessages, tools, 0);
     const messageResponse = completion.choices[0].message;
-    
+
     let text = messageResponse.content || "";
     let excelBase64 = null;
     let fileUrl = null;
@@ -216,7 +215,7 @@ export async function POST(req: Request) {
     // Fallback por si el modelo escribe la llamada como texto en lugar de tool_call
     const functionRegex = /<function=(\w+)>(.*?)<\/function>/s;
     const match = text.match(functionRegex);
-    
+
     if (!messageResponse.tool_calls && match) {
       messageResponse.tool_calls = [{
         id: "call_" + Date.now(),
@@ -231,8 +230,8 @@ export async function POST(req: Request) {
       const toolCall = messageResponse.tool_calls[0];
       const functionName = toolCall.function.name;
       let args: any = {};
-      try { args = JSON.parse(toolCall.function.arguments || "{}"); } catch(e){}
-      
+      try { args = JSON.parse(toolCall.function.arguments || "{}"); } catch (e) { }
+
       let functionResult: any = null;
       let toolError = false;
 
@@ -242,7 +241,7 @@ export async function POST(req: Request) {
         functionResult = "Acceso denegado. Solo puedes consultar información de tu propia unidad.";
         toolError = true;
       }
-      
+
       if (!toolError) {
         try {
           switch (functionName) {
@@ -305,10 +304,10 @@ export async function POST(req: Request) {
         aiResponseData = { info: "Excel generado.", muestra: functionResult.slice(0, 3), total: functionResult.length };
       } else if (isArray && functionResult.length > 15) {
         // Evitamos enviar una respuesta gigantesca a Groq para prevenir el error 413 (Payload Too Large)
-        aiResponseData = { 
-          info: "Lista grande recibida. Se muestra una muestra reducida para el contexto del asistente.", 
-          muestra: functionResult.slice(0, 10), 
-          total: functionResult.length 
+        aiResponseData = {
+          info: "Lista grande recibida. Se muestra una muestra reducida para el contexto del asistente.",
+          muestra: functionResult.slice(0, 10),
+          total: functionResult.length
         };
       }
 
@@ -328,6 +327,6 @@ export async function POST(req: Request) {
 
   } catch (error: any) {
     console.error("Final catch error:", error);
-    return NextResponse.json({ text: "Lo siento, hubo un problema técnico. Por favor, intenta de nuevo." }, { status: 200 }); 
+    return NextResponse.json({ text: "Lo siento, hubo un problema técnico. Por favor, intenta de nuevo." }, { status: 200 });
   }
 }
