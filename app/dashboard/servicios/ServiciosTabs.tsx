@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Wrench, History, Activity, ArrowLeft, PlusCircle, User, Car, FileText, Download, DollarSign, FolderOpen , CalendarCheck } from 'lucide-react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 
 import TicketForm from '../tickets/nuevo/TicketForm';
 import HistorialClient from '../historial/HistorialClient';
@@ -16,8 +17,17 @@ interface Props {
 }
 
 export default function ServiciosTabs({ tickets, vehiculos, isAdmin, rol }: Props) {
-  // Inicializa la pestaña activa en 'Nueva Orden' por defecto
-  const [activeTab, setActiveTab] = useState('nueva');
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get('tab');
+
+  // Inicializa la pestaña activa en 'Nueva Orden' por defecto o el parámetro de la URL
+  const [activeTab, setActiveTab] = useState(tabParam || 'nueva');
+
+  useEffect(() => {
+    if (tabParam) {
+      setActiveTab(tabParam);
+    }
+  }, [tabParam]);
 
   const activos = tickets.filter(t => t.Estado !== 'LISTO');
   // Conserva un límite de 30 tickets recientes para mantener el rendimiento de la vista

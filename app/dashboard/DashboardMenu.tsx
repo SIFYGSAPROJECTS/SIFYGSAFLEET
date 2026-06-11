@@ -258,7 +258,7 @@ export default function DashboardMenu({ userRole, totalAutos, totalEmpleados, ti
           </Link>
 
           {/* KPI 3 -> Va a Servicios */}
-          <Link href="/dashboard/servicios" className="bg-[var(--bg-floating)] p-5 rounded-xl shadow-lg border border-[var(--border-cream)] border-t-4 border-t-[#71717a] hover:bg-[var(--bg-hover)] hover:scale-[1.02] transition-all cursor-pointer group">
+          <Link href="/dashboard/servicios?tab=seguimiento" className="bg-[var(--bg-floating)] p-5 rounded-xl shadow-lg border border-[var(--border-cream)] border-t-4 border-t-[#71717a] hover:bg-[var(--bg-hover)] hover:scale-[1.02] transition-all cursor-pointer group">
             <div className="flex justify-between items-start mb-2">
               <h2 className="text-xs font-bold text-[var(--text-muted)] group-hover:text-[#71717a] transition-colors uppercase tracking-widest">SERVICIOS PENDIENTES</h2>
               <Wrench className="text-[#71717a]" size={18} />
