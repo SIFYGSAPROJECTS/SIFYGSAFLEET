@@ -645,18 +645,17 @@ export default function DocumentosComputoClient({ equipos = [], isAdmin = false 
         {/* Modal de Eliminación */}
         <SystemModal
           isOpen={modalEliminar}
-          onClose={() => setModalEliminar(false)}
+          onCancel={() => setModalEliminar(false)}
           type="warning"
           title="Eliminar Documento"
           message={`¿Estás seguro de eliminar el documento "${documentoAEliminar?.titulo}"? Esta acción no se puede deshacer y el archivo PDF se borrará del servidor.`}
-          showCancel
           onConfirm={confirmarEliminacion}
         />
 
         {/* Modal del Sistema */}
         <SystemModal
           isOpen={sysModal.isOpen}
-          onClose={() => setSysModal({ ...sysModal, isOpen: false })}
+          onConfirm={() => setSysModal({ ...sysModal, isOpen: false })}
           type={sysModal.type}
           title={sysModal.title}
           message={sysModal.message}
