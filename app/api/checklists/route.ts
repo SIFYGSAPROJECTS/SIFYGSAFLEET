@@ -7,7 +7,7 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const consecutivo = searchParams.get('consecutivo');
-
+    //comentario en blanco
     if (!consecutivo) {
       return NextResponse.json({ error: 'Falta el consecutivo' }, { status: 400 });
     }
@@ -30,24 +30,24 @@ export async function GET(request: Request) {
     });
 
     const ultimaSolicitud = await prisma.solicitud.findFirst({
-      where: { 
-        auto: { 
-          Consecutivo: consecutivo 
-        } 
+      where: {
+        auto: {
+          Consecutivo: consecutivo
+        }
       },
-      orderBy: { 
-        Fecha_Realizacion: 'desc' 
+      orderBy: {
+        Fecha_Realizacion: 'desc'
       },
-      select: { 
-        Kilometraje: true 
+      select: {
+        Kilometraje: true
       }
     });
 
     const kmFinal = ultimaSolicitud?.Kilometraje || vehiculo.Kilometraje || null;
 
     //Construimos el nombre completo en lugar de mandar el correo 
-    const nombreCompleto = vehiculo.encargado 
-      ? `${vehiculo.encargado.Nombre_Empleado} ${vehiculo.encargado.A_Paterno}` 
+    const nombreCompleto = vehiculo.encargado
+      ? `${vehiculo.encargado.Nombre_Empleado} ${vehiculo.encargado.A_Paterno}`
       : 'Sin asignar';
 
     return NextResponse.json({
@@ -126,11 +126,11 @@ export async function DELETE(request: Request) {
 
     // 2. Extraemos el nombre del archivo y lo borramos de MinIO
     if (checklist.Ruta_PDF.includes('/checklists/')) {
-       const parts = checklist.Ruta_PDF.split('/checklists/');
-       if (parts.length > 1) {
-         const nombreArchivo = parts[1];
-         await minioClient.removeObject('checklists', nombreArchivo).catch(console.error);
-       }
+      const parts = checklist.Ruta_PDF.split('/checklists/');
+      if (parts.length > 1) {
+        const nombreArchivo = parts[1];
+        await minioClient.removeObject('checklists', nombreArchivo).catch(console.error);
+      }
     }
 
     // 4. Lo borramos de la base de datos de Prisma
@@ -160,8 +160,8 @@ export async function PUT(request: Request) {
     if (checklistViejo.Ruta_PDF.includes('/checklists/')) {
       const parts = checklistViejo.Ruta_PDF.split('/checklists/');
       if (parts.length > 1) {
-         const nombreArchivoViejo = parts[1];
-         await minioClient.removeObject('checklists', nombreArchivoViejo).catch(console.error);
+        const nombreArchivoViejo = parts[1];
+        await minioClient.removeObject('checklists', nombreArchivoViejo).catch(console.error);
       }
     }
 
