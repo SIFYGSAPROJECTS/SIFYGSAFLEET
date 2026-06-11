@@ -74,10 +74,10 @@ export default function ComputoMenu({ userRole, totalEquipos, equiposReparacion 
 
   const tarjetasDocumentos = (
     <>
-      <Link href="#" className="p-6 bg-[var(--bg-floating)] border border-[var(--border-cream)] border-t-4 border-t-emerald-500 rounded-xl opacity-70 cursor-not-allowed text-left block">
-        <FolderOpen className="w-8 h-8 text-stone-400 mb-4" />
-        <span className="block font-bold text-lg text-[var(--text-main)] font-serif">Cartas Responsivas</span>
-        <span className="text-sm text-[var(--text-muted)]">Próximamente...</span>
+      <Link href="/computo/documentos" className="p-6 bg-[var(--bg-floating)] border border-[var(--border-cream)] border-t-4 border-t-emerald-500 rounded-xl hover:bg-[var(--bg-hover)] hover:shadow-xl transition-all duration-300 group text-left block">
+        <FolderOpen className="w-8 h-8 text-emerald-500 mb-4" />
+        <span className="block font-bold text-lg text-[var(--text-main)] font-serif">Cartas Responsivas y Facturas</span>
+        <span className="text-sm text-[var(--text-muted)]">Subir y consultar documentos de los equipos.</span>
       </Link>
     </>
   );
@@ -111,11 +111,11 @@ export default function ComputoMenu({ userRole, totalEquipos, equiposReparacion 
           </Link>
 
           <Link
-            href="#"
+            href="/computo/documentos"
             className={`flex-1 flex justify-center px-6 py-2.5 font-bold text-sm items-center gap-2 rounded-full transition-all whitespace-nowrap ${
               activeTab === 'documentos' 
                 ? 'bg-white text-[var(--text-main)] shadow-md' 
-                : 'text-[var(--text-muted)] hover:text-emerald-600 hover:bg-[var(--bg-screen)]/50 opacity-60'
+                : 'text-[var(--text-muted)] hover:text-emerald-600 hover:bg-[var(--bg-screen)]/50'
             }`}
           >
             <FolderOpen size={18} /> <span className="hidden sm:inline">Documentos</span>
