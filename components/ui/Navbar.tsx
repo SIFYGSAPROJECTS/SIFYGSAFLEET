@@ -88,8 +88,8 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
               <div className="bg-emerald-500 p-2 rounded-xl shadow-lg shadow-emerald-500/20 group-hover:scale-105 transition-transform duration-300">
                 <Server className="text-white h-5 w-5" />
               </div>
-              <span className="font-serif font-medium text-xl tracking-wide text-[var(--text-main)] transition-colors group-hover:text-emerald-500">
-                SIFYGSA <span className="text-emerald-600 font-serif">TI</span>
+              <span className="font-serif font-medium text-xl tracking-wide text-white transition-colors group-hover:text-emerald-400">
+                SIFYGSA <span className="text-emerald-400 font-serif">TI</span>
               </span>
             </Link>
           ) : (
@@ -97,8 +97,8 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
               <div className="bg-[#71717a] p-2 rounded-xl shadow-lg shadow-[#71717a]/20 group-hover:scale-105 transition-transform duration-300">
                 <Car className="text-white h-5 w-5" />
               </div>
-              <span className="font-serif font-medium text-xl tracking-wide text-[var(--text-main)] transition-colors group-hover:text-stone-400">
-                SIFYGSA <span className="text-[#71717a] font-serif">Fleet</span>
+              <span className="font-serif font-medium text-xl tracking-wide text-white transition-colors group-hover:text-stone-300">
+                SIFYGSA <span className="text-stone-400 font-serif">Fleet</span>
               </span>
             </Link>
           )}
@@ -108,19 +108,19 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
             {type !== 'portal' && (
               <a
                 href="/portal"
-                className="bg-[var(--bg-floating)] hover:bg-[var(--bg-hover)] border border-[var(--border-cream)] text-[var(--text-main)] px-4 py-2 rounded-xl text-xs flex items-center gap-2 transition-all font-bold shadow-sm"
+                className="bg-white/5 hover:bg-white/10 border border-white/10 text-white px-4 py-2 rounded-xl text-xs flex items-center gap-2 transition-all font-bold shadow-sm"
               >
-                <LayoutGrid size={14} /> Panel Maestro
+                <LayoutGrid size={14} className="text-[#FF7420]" /> Panel Maestro
               </a>
             )}
 
             {type !== 'portal' && (
               <div className="text-right">
-                <p className="text-sm font-semibold text-[var(--text-main)] leading-none mb-1">{userName}</p>
-                <span className={`text-[9px] px-2 py-0.5 rounded-full font-black tracking-wider uppercase ${
+                <p className="text-sm font-semibold text-white leading-none mb-1">{userName}</p>
+                <span className={`text-[9px] px-2 py-0.5 rounded-full font-black tracking-wider uppercase border ${
                   type === 'computo'
-                    ? (isAdmin ? 'bg-emerald-500 text-white' : 'bg-stone-200 text-stone-600')
-                    : (isAdmin ? 'bg-[#71717a] text-white' : 'bg-stone-200 text-stone-600')
+                    ? (isAdmin ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-white/5 text-white/50 border-white/10')
+                    : (isAdmin ? 'bg-[#71717a]/20 text-stone-300 border-[#71717a]/30' : 'bg-white/5 text-white/50 border-white/10')
                 }`}>
                   {isAdmin ? 'ADMINISTRADOR' : 'EMPLEADO'}
                 </span>
