@@ -1,9 +1,7 @@
 import { cookies } from 'next/headers';
 import { PrismaClient } from '@prisma/client';
 import ComputoMenu from './ComputoMenu';
-import Link from 'next/link';
-import { Server, LayoutGrid } from 'lucide-react';
-import LogoutButton from '@/app/dashboard/LogoutButton';
+import Navbar from '@/components/ui/Navbar';
 
 const prisma = new PrismaClient();
 
@@ -23,31 +21,7 @@ export default async function ComputoDashboardPage() {
     <div className="min-h-screen bg-transparent">
       
       {/* NAVBAR */}
-      <nav className="bg-transparent text-[var(--text-main)] p-4 sticky top-0 z-10 pt-6">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <div className="flex items-center space-x-2">
-            <div className="bg-emerald-500 p-1.5 rounded-lg shadow-lg shadow-emerald-500/20">
-              <Server className="text-white h-5 w-5" />
-            </div>
-            <span className="font-serif font-medium text-xl tracking-wide text-[var(--text-main)]">SIFYGSA <span className="text-emerald-600 font-serif">TI</span></span>
-          </div>
-          <div className="flex items-center space-x-4">
-            <Link 
-              href="/portal"
-              className="bg-[var(--bg-floating)] hover:bg-[var(--bg-hover)] border border-[var(--border-cream)] text-[var(--text-main)] px-3 py-1.5 rounded-lg text-xs flex items-center gap-2 transition-all font-bold shadow-sm"
-            >
-              <LayoutGrid size={14} /> Panel Maestro
-            </Link>
-            <div className="text-right">
-              <p className="text-sm font-medium text-[var(--text-main)]">{userName}</p>
-              <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold ${isAdmin ? 'bg-emerald-500 text-white' : 'bg-stone-200 text-stone-600'}`}>
-                {isAdmin ? 'ADMINISTRADOR' : 'EMPLEADO'}
-              </span>
-            </div>
-            <LogoutButton /> 
-          </div>
-        </div>
-      </nav>
+      <Navbar type="computo" userName={userName} userRole={userRole} isAdmin={isAdmin} />
 
       <main className="max-w-7xl mx-auto p-6 space-y-6 mt-4">
         

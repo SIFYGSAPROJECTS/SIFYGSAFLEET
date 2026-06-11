@@ -1,9 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { Car, Laptop, Phone, Cctv, Wind, Building, CalendarDays, Package, LogOut, Info } from 'lucide-react';
+import { Car, Laptop, Phone, Cctv, Wind, Building, CalendarDays, Package, Info } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import Navbar from '@/components/ui/Navbar';
 
 const modules = [
   { id: 'transporte', name: 'Transporte', icon: Car, route: '/dashboard', color: 'text-blue-400', bg: 'bg-blue-400/10' },
@@ -27,10 +28,6 @@ export default function PortalPage() {
       setActiveMessage(`El módulo de ${name} estará disponible próximamente.`);
       setTimeout(() => setActiveMessage(null), 3000);
     }
-  };
-
-  const handleLogout = () => {
-    router.push('/');
   };
 
   return (
@@ -79,26 +76,7 @@ export default function PortalPage() {
       </div>
 
       {/* HEADER */}
-      <header className="fixed top-0 left-0 right-0 z-[100] w-full px-8 py-3 flex justify-between items-center border-b border-white/5 bg-black/20 backdrop-blur-md">
-        <div className="flex items-center gap-4">
-          <Image
-            src="/logo.png"
-            alt="Logo SIFYGSA"
-            width={120}
-            height={50}
-            className="object-contain"
-          />
-          <div className="h-8 w-px bg-white/10 hidden sm:block"></div>
-          <h2 className="hidden sm:block text-sm font-medium text-white/60 tracking-wider">GESTIÓN DE INFRAESTRUCTURA</h2>
-        </div>
-        <button
-          onClick={handleLogout}
-          className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-white/60 hover:text-white bg-white/5 hover:bg-white/10 rounded-full transition-colors border border-white/5"
-        >
-          <LogOut className="w-4 h-4" />
-          Cerrar Sesión
-        </button>
-      </header>
+      <Navbar type="portal" />
 
       {/* MAIN CONTENT */}
       <main className="relative z-10 flex-1 flex flex-col items-center justify-center p-6 sm:p-12 pt-32 sm:pt-32">
