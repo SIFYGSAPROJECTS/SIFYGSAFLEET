@@ -23,7 +23,7 @@ export default async function ComputoDashboardPage() {
       {/* NAVBAR */}
       <Navbar type="computo" userName={userName} userRole={userRole} isAdmin={isAdmin} />
 
-      <main className="max-w-7xl mx-auto p-6 space-y-6 mt-4">
+      <main className="max-w-7xl mx-auto p-6 space-y-6 pt-24">
         
         {/* ENCABEZADO */}
         <div className="text-left animate-in fade-in slide-in-from-top-4 duration-700">

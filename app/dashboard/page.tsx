@@ -25,7 +25,7 @@ export default async function Dashboard() {
       {/* NAVBAR */}
       <Navbar type="dashboard" userName={userName} userRole={userRole} isAdmin={isAdmin} />
 
-      <main className="max-w-7xl mx-auto p-6 space-y-6 mt-4">
+      <main className="max-w-7xl mx-auto p-6 space-y-6 pt-24">
         
         {/* ENCABEZADO CON BOTÓN DE ACCIÓN RÁPIDA */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
