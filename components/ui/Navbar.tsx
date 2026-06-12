@@ -8,10 +8,11 @@ import { Menu, X, Car, Server, LayoutGrid, LogOut, CalendarDays } from 'lucide-r
 import LogoutButton from '@/app/dashboard/LogoutButton';
 
 interface NavbarProps {
-  type: 'portal' | 'dashboard' | 'computo';
+  type: 'portal' | 'dashboard' | 'computo' | 'programa';
   userName?: string;
   userRole?: string;
   isAdmin?: boolean;
+  maxWidth?: string;
 }
 
 // Helper client-side helper to read cookies
@@ -23,11 +24,16 @@ const getCookie = (name: string): string => {
   return '';
 };
 
-export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', isAdmin = false }: NavbarProps) {
+export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', isAdmin = false, maxWidth }: NavbarProps) {
   const router = useRouter();
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+
+  // Dynamic maxWidth based on pathname to align properly with custom page grids
+  const resolvedMaxWidth = pathname === '/computo/inventario' 
+    ? 'max-w-[90rem]' 
+    : (pathname === '/programa-anual' ? 'max-w-[1800px]' : (maxWidth || 'max-w-7xl'));
 
   // Client-side dynamic state for session
   const [localUserName, setLocalUserName] = useState(userName);
@@ -193,12 +199,22 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
   return (
     <>
       {/* Header Container - Transparent Wrapper */}
-      <header className="fixed top-4 left-6 right-6 z-[100] max-w-7xl mx-auto transition-all duration-300">
-        <div className="flex items-center justify-between h-16">
+      <header className={`fixed top-4 left-4 right-4 z-[100] mx-auto transition-all duration-300 ${resolvedMaxWidth}`}>
+        {/* Background blur bridge - hardware accelerated fade & scale */}
+        <div className={`absolute inset-0 -z-10 rounded-2xl transition-all duration-700 ease-in-out ${
+          scrolled 
+            ? 'bg-zinc-900/90 backdrop-blur-md border border-white/10 shadow-lg shadow-black/25 opacity-100 scale-100' 
+            : 'bg-transparent border border-transparent shadow-none opacity-0 scale-[0.98] pointer-events-none'
+        }`} />
+        <div className="px-6 flex items-center justify-between h-16">
           
           {/* LEFT SIDE: Brand Logo / Title */}
           {type === 'computo' ? (
-            <Link href="/computo" className="flex items-center space-x-3 group bg-zinc-900/90 border border-white/10 px-4 py-2 rounded-xl backdrop-blur-md shadow-lg shadow-black/20">
+            <Link href="/computo" className={`flex items-center space-x-3 group px-4 py-2 rounded-xl transition-all duration-700 ease-in-out ${
+              scrolled 
+                ? 'bg-transparent border border-transparent shadow-none' 
+                : 'bg-zinc-900/90 border border-white/10 backdrop-blur-md shadow-lg shadow-black/20'
+            }`}>
               <div className="bg-emerald-500 p-2 rounded-xl shadow-lg shadow-emerald-500/20 group-hover:scale-105 transition-transform duration-300">
                 <Server className="text-white h-5 w-5" />
               </div>
@@ -206,8 +222,25 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                 SIFYGSA <span className="text-emerald-400 font-serif">TI</span>
               </span>
             </Link>
+          ) : type === 'programa' ? (
+            <Link href="/programa-anual" className={`flex items-center space-x-3 group px-4 py-2 rounded-xl transition-all duration-700 ease-in-out ${
+              scrolled 
+                ? 'bg-transparent border border-transparent shadow-none' 
+                : 'bg-zinc-900/90 border border-white/10 backdrop-blur-md shadow-lg shadow-black/20'
+            }`}>
+              <div className="bg-indigo-500 p-2 rounded-xl shadow-lg shadow-indigo-500/20 group-hover:scale-105 transition-transform duration-300">
+                <CalendarDays className="text-white h-5 w-5" />
+              </div>
+              <span className="font-serif font-medium text-xl tracking-wide text-white transition-colors group-hover:text-indigo-400">
+                SIFYGSA <span className="text-indigo-400 font-serif">Plan</span>
+              </span>
+            </Link>
           ) : (
-            <Link href="/dashboard" className="flex items-center space-x-3 group bg-zinc-900/90 border border-white/10 px-4 py-2 rounded-xl backdrop-blur-md shadow-lg shadow-black/20">
+            <Link href="/dashboard" className={`flex items-center space-x-3 group px-4 py-2 rounded-xl transition-all duration-700 ease-in-out ${
+              scrolled 
+                ? 'bg-transparent border border-transparent shadow-none' 
+                : 'bg-zinc-900/90 border border-white/10 backdrop-blur-md shadow-lg shadow-black/20'
+            }`}>
               <div className="bg-[#71717a] p-2 rounded-xl shadow-lg shadow-[#71717a]/20 group-hover:scale-105 transition-transform duration-300">
                 <Car className="text-white h-5 w-5" />
               </div>
@@ -218,7 +251,11 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
           )}
 
           {/* RIGHT SIDE: Action Buttons (Desktop Only) - Hover Dropdowns */}
-          <div className="hidden md:flex items-center bg-zinc-900/90 border border-white/10 rounded-xl p-0.5 shadow-lg shadow-black/25 backdrop-blur-md">
+          <div className={`hidden md:flex items-center rounded-xl p-0.5 transition-all duration-700 ease-in-out ${
+            scrolled 
+              ? 'bg-transparent border border-transparent shadow-none' 
+              : 'bg-zinc-900/90 border border-white/10 backdrop-blur-md shadow-lg shadow-black/25'
+          }`}>
             
             {/* Módulos Hover Dropdown */}
             {localIsAdmin && (
@@ -278,7 +315,9 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                   <span className={`text-[7.5px] font-black tracking-wider uppercase block leading-tight ${
                     type === 'computo'
                       ? (localIsAdmin ? 'text-emerald-400' : 'text-white/50')
-                      : (localIsAdmin ? 'text-stone-300' : 'text-white/50')
+                      : type === 'programa'
+                        ? (localIsAdmin ? 'text-indigo-400' : 'text-white/50')
+                        : (localIsAdmin ? 'text-stone-300' : 'text-white/50')
                   }`}>
                     {localIsAdmin ? 'ADMINISTRADOR' : 'EMPLEADO'}
                   </span>
@@ -300,7 +339,11 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
 
           {/* Burger Menu Button (Mobile Only) - Floating Glass button */}
           <button
-            className="md:hidden relative z-[110] w-10 h-10 flex items-center justify-center rounded-xl bg-zinc-900/90 border border-white/10 text-white hover:bg-zinc-950 transition-colors shadow-lg backdrop-blur-md"
+            className={`md:hidden relative z-[110] w-10 h-10 flex items-center justify-center rounded-xl text-white transition-all duration-700 ease-in-out ${
+              scrolled 
+                ? 'bg-transparent border border-transparent hover:bg-white/5' 
+                : 'bg-zinc-900/90 border border-white/10 hover:bg-zinc-950 shadow-lg backdrop-blur-md'
+            }`}
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             aria-label="Toggle menu"
           >

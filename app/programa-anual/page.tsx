@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { ArrowLeft, Save, Loader2, Info, Check, Calendar } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import Navbar from '@/components/ui/Navbar';
 
 const categoriasIniciales = [
   'Equipo de Cómputo',
@@ -146,22 +147,11 @@ export default function ProgramaAnualPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--bg-screen)] text-[var(--text-main)] font-sans relative overflow-x-hidden flex flex-col">
-      <header className="fixed top-0 left-0 right-0 z-[100] w-full px-8 py-3 flex justify-between items-center border-b border-white/5 bg-[#141413] shadow-sm">
-        <div className="flex items-center gap-4">
-          <Image src="/logo.png" alt="Logo SIFYGSA" width={120} height={50} className="object-contain" />
-          <div className="h-8 w-px bg-white/10 hidden sm:block"></div>
-          <h2 className="hidden sm:block text-sm font-medium text-white/60 tracking-wider">PROGRAMA DE MANTENIMIENTO</h2>
-        </div>
-        <button
-          onClick={() => router.push('/portal')}
-          className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-white/60 hover:text-white bg-white/5 hover:bg-white/10 rounded-full transition-colors border border-white/5"
-        >
-          <ArrowLeft className="w-4 h-4" /> Volver al Portal
-        </button>
-      </header>
+    <div className="min-h-screen bg-[var(--bg-screen)] text-[var(--text-main)] font-sans relative overflow-x-hidden flex flex-col pt-24">
+      {/* NAVBAR */}
+      <Navbar type="programa" maxWidth="max-w-[1800px]" />
 
-      <main className="relative z-10 flex-1 flex flex-col items-center p-6 sm:p-12 pt-28 sm:pt-28">
+      <main className="relative z-10 flex-1 flex flex-col items-center p-6 sm:p-12 pt-4 sm:pt-4">
 
         <div className="max-w-[1800px] w-full flex flex-col sm:flex-row sm:justify-between items-start sm:items-end mb-8 gap-4">
           <div>
@@ -200,59 +190,59 @@ export default function ProgramaAnualPage() {
               <Loader2 className="w-8 h-8 animate-spin text-[#D97757]" />
             </div>
           ) : (
-            <table className="w-full text-left text-xs sm:text-sm border-separate" style={{ borderSpacing: 0 }}>
+            <table className="w-full text-left text-xs sm:text-sm border-separate border border-[var(--border-cream)] border-t-4 border-t-[#71717a] rounded-xl overflow-hidden shadow-sm" style={{ borderSpacing: 0 }}>
               <thead>
-                <tr className="text-white">
+                <tr className="text-[var(--text-muted)] uppercase tracking-wider text-xs">
                   {/* Seccion 1: Info */}
-                  <th className="p-4 font-bold w-[180px] bg-slate-600 border-y border-l border-slate-700 rounded-tl-xl shadow-sm">DESCRIPCIÓN</th>
-                  <th className="p-4 font-bold w-[130px] border-y border-r border-slate-700 bg-slate-600 rounded-tr-xl shadow-sm">EJECUTA</th>
+                  <th className="p-4 font-bold w-[180px] bg-[var(--bg-screen)] border-b border-[var(--border-cream)] rounded-tl-xl shadow-sm">DESCRIPCIÓN</th>
+                  <th className="p-4 font-bold w-[130px] border-b border-[var(--border-cream)] bg-[var(--bg-screen)] shadow-sm">EJECUTA</th>
                   
                   {/* Spacer 1 */}
                   <th className="w-2 min-w-[8px] p-0 bg-transparent border-none"></th>
 
                   {/* Seccion 2: Calendario */}
-                  <th className="p-0 border-y border-l border-r border-slate-700 w-8 text-center bg-slate-600 rounded-tl-xl shadow-sm"></th>
+                  <th className="p-0 border-b border-l border-r border-[var(--border-cream)] w-8 text-center bg-[var(--bg-screen)] shadow-sm"></th>
                   {mesesNombres.map((mes, i) => (
-                    <th key={mes} className={`p-2 border-y border-r border-slate-700 text-center font-mono text-[10px] sm:text-xs min-w-[44px] bg-slate-600 shadow-sm ${i === 11 ? 'rounded-tr-xl' : ''}`}>{mes}</th>
+                    <th key={mes} className={`p-2 border-b border-r border-[var(--border-cream)] text-center font-mono text-[10px] sm:text-xs min-w-[44px] bg-[var(--bg-screen)] shadow-sm ${i === 11 ? 'rounded-tr-xl' : ''}`}>{mes}</th>
                   ))}
 
                   {/* Spacer 2 */}
                   <th className="w-2 min-w-[8px] p-0 bg-transparent border-none"></th>
 
                   {/* Seccion 3: Observaciones */}
-                  <th className="p-4 font-bold w-[200px] bg-slate-600 border border-slate-700 rounded-t-xl shadow-sm">OBSERVACIONES</th>
+                  <th className="p-4 font-bold w-[200px] bg-[var(--bg-screen)] border-b border-[var(--border-cream)] rounded-tr-xl shadow-sm">OBSERVACIONES</th>
                 </tr>
               </thead>
               <tbody>
                 {programas.map((programa, idx) => {
                   const colors = [
-                    'bg-[#F99B3E]', // 01 Naranja
-                    'bg-[#1D4ED8]', // 02 Azul intenso
-                    'bg-[#00C26D]', // 03 Verde
-                    'bg-[#F02222]', // 04 Rojo
-                    'bg-[#8B61FF]', // 05 Morado
-                    'bg-[#FACC15]'  // 06 Amarillo
+                    'bg-[#FFA07A]', // 01 Light Salmon
+                    'bg-[#90EE90]', // 02 Light Green
+                    'bg-[#87CEFA]', // 03 Light Sky Blue
+                    'bg-[#9370D8]', // 04 Medium Purple
+                    'bg-[#CD853F]', // 05 Peru
+                    'bg-[#F0E68C]'  // 06 Khaki
                   ];
                   const rowColor = colors[idx % colors.length];
                   const isLastRow = idx === programas.length - 1;
                   const isEven = idx % 2 === 0;
-                  const rowBg = isEven ? 'bg-white' : 'bg-[#E5E8EC]';
-                  const rowHoverBg = isEven ? 'group-hover:bg-slate-50' : 'group-hover:bg-[#D7DCE1]';
+                  const rowBg = isEven ? 'bg-white' : 'bg-[var(--bg-screen)]';
+                  const rowHoverBg = 'group-hover:bg-[var(--bg-hover)]';
 
                   return (
                   <tr key={idx} className="group transition-colors">
                     {/* Seccion 1 */}
-                    <td className={`p-4 ${rowBg} ${rowHoverBg} border-b border-l border-slate-300 transition-colors ${isLastRow ? 'rounded-bl-xl shadow-sm' : ''}`}>
+                    <td className={`p-4 ${rowBg} ${rowHoverBg} border-b border-l border-[var(--border-cream)] transition-colors ${isLastRow ? 'rounded-bl-xl shadow-sm' : ''}`}>
                       <div className="font-medium text-[var(--text-main)] truncate">
                         {programa.Categoria}
                       </div>
                     </td>
-                    <td className={`relative p-4 pr-6 ${rowBg} ${rowHoverBg} border-b border-r border-slate-300 transition-colors overflow-hidden ${isLastRow ? 'rounded-br-xl shadow-sm' : ''}`}>
+                    <td className={`relative p-4 pr-6 ${rowBg} ${rowHoverBg} border-b border-r border-[var(--border-cream)] transition-colors overflow-hidden ${isLastRow ? 'rounded-br-xl shadow-sm' : ''}`}>
                       <div className={`absolute right-0 top-1 bottom-1 w-[6px] rounded-l-sm ${rowColor} ${isLastRow ? 'rounded-br-xl' : ''}`}></div>
                       <select
                         value={programa.Ejecuta}
                         onChange={(e) => handleEjecuta(idx, e.target.value)}
-                        className="bg-transparent text-xs text-[var(--text-main)] border border-slate-300 rounded p-1.5 outline-none focus:border-[#D97757] w-full"
+                        className="bg-transparent text-xs text-[var(--text-main)] border border-[var(--border-cream)] rounded p-1.5 outline-none focus:border-[#D97757] w-full"
                       >
                         <option value="INTERNO" className="bg-[var(--bg-screen)]">INTERNO</option>
                         <option value="EXTERNO" className="bg-[var(--bg-screen)]">EXTERNO</option>
@@ -263,8 +253,8 @@ export default function ProgramaAnualPage() {
                     <td className="w-2 min-w-[8px] p-0 bg-transparent border-none"></td>
 
                     {/* Seccion 2 */}
-                    <td className={`p-0 ${rowBg} ${rowHoverBg} border-b border-l border-r border-slate-300 font-mono text-[10px] sm:text-xs transition-colors ${isLastRow ? 'rounded-bl-xl shadow-sm' : ''}`}>
-                      <div className="h-10 flex items-center justify-center border-b border-slate-300 text-[#D97757] font-bold">P</div>
+                    <td className={`p-0 ${rowBg} ${rowHoverBg} border-b border-l border-r border-[var(--border-cream)] font-mono text-[10px] sm:text-xs transition-colors ${isLastRow ? 'rounded-bl-xl shadow-sm' : ''}`}>
+                      <div className="h-10 flex items-center justify-center border-b border-[var(--border-cream)] text-[#D97757] font-bold">P</div>
                       <div className="h-10 flex items-center justify-center text-emerald-600 font-bold">R</div>
                     </td>
 
@@ -289,11 +279,11 @@ export default function ProgramaAnualPage() {
                       const isLastMonth = mesIdx === 11;
 
                       return (
-                        <td key={mesIdx} className={`p-0 align-top ${rowBg} ${rowHoverBg} border-b border-r border-slate-300 relative transition-colors ${isLastRow && isLastMonth ? 'rounded-br-xl shadow-sm' : ''}`}>
+                        <td key={mesIdx} className={`p-0 align-top ${rowBg} ${rowHoverBg} border-b border-r border-[var(--border-cream)] relative transition-colors ${isLastRow && isLastMonth ? 'rounded-br-xl shadow-sm' : ''}`}>
                           <div
                             onClick={() => toggleMes(idx, mesIdx, 'P')}
-                            className={`h-10 flex items-center justify-center border-b border-slate-300 cursor-pointer transition-all z-10 relative
-                              ${!mesObj.Programado ? 'hover:bg-slate-50' : ''}`}
+                            className={`h-10 flex items-center justify-center border-b border-[var(--border-cream)] cursor-pointer transition-all z-10 relative
+                              ${!mesObj.Programado ? 'hover:bg-[var(--bg-hover)]/30' : ''}`}
                           >
                             {mesObj.Programado && (
                               <div className={`absolute top-1/2 -translate-y-1/2 h-[24px] ${rowColor} ${pillClasses} shadow-md transition-all hover:brightness-110 z-20`}>
@@ -302,7 +292,7 @@ export default function ProgramaAnualPage() {
                           </div>
                           <div
                             onClick={() => toggleMes(idx, mesIdx, 'R')}
-                            className={`h-10 flex items-center justify-center cursor-pointer transition-all z-10 relative hover:bg-slate-100/50`}
+                            className={`h-10 flex items-center justify-center cursor-pointer transition-all z-10 relative hover:bg-[var(--bg-hover)]/30`}
                           >
                             {mesObj.Realizado && (
                               <div className="w-5 h-5 rounded-full bg-emerald-500 shadow-sm flex items-center justify-center text-white text-[10px] font-bold">
@@ -318,14 +308,14 @@ export default function ProgramaAnualPage() {
                     <td className="w-2 min-w-[8px] p-0 bg-transparent border-none"></td>
 
                     {/* Seccion 3 */}
-                    <td className={`p-2 ${rowBg} ${rowHoverBg} border-x border-b border-slate-300 transition-colors ${isLastRow ? 'rounded-b-xl shadow-sm' : ''}`}>
+                    <td className={`p-2 ${rowBg} ${rowHoverBg} border-x border-b border-[var(--border-cream)] transition-colors ${isLastRow ? 'rounded-b-xl shadow-sm' : ''}`}>
                       <div className="flex flex-col gap-1">
                         <input
                           type="text"
                           value={programa.Observaciones || ''}
                           onChange={(e) => handleObservaciones(idx, e.target.value)}
                           placeholder="Ej. Por evento..."
-                          className="w-full bg-[var(--bg-screen)] border border-slate-300 hover:border-[#D97757]/50 focus:border-[#D97757] rounded px-3 py-2 outline-none text-xs text-[var(--text-main)] transition-colors"
+                          className="w-full bg-[var(--bg-screen)] border border-[var(--border-cream)] hover:border-[#D97757]/50 focus:border-[#D97757] rounded px-3 py-2 outline-none text-xs text-[var(--text-main)] transition-colors"
                         />
                         {(() => {
                           if (!programa.meses) return null;

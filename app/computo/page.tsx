@@ -1,7 +1,6 @@
 import { cookies } from 'next/headers';
 import { PrismaClient } from '@prisma/client';
 import ComputoMenu from './ComputoMenu';
-import Navbar from '@/components/ui/Navbar';
 
 const prisma = new PrismaClient();
 
@@ -19,11 +18,8 @@ export default async function ComputoDashboardPage() {
 
   return (
     <div className="min-h-screen bg-transparent">
-      
-      {/* NAVBAR */}
-      <Navbar type="computo" userName={userName} userRole={userRole} isAdmin={isAdmin} />
 
-      <main className="max-w-7xl mx-auto p-6 space-y-6 pt-24">
+      <main className="max-w-7xl mx-auto p-6 space-y-6 pt-4">
         
         {/* ENCABEZADO */}
         <div className="text-left animate-in fade-in slide-in-from-top-4 duration-700">

@@ -6,6 +6,7 @@ import { cookies } from "next/headers";
 import { ArrowLeft, CalendarCheck, Car, DollarSign, FileText, FolderOpen, User, Wrench } from "lucide-react";
 import ScrollToTop from "@/components/ui/ScrollToTop";
 import CopilotChat from "@/components/ai/CopilotChat";
+import Navbar from "@/components/ui/Navbar";
 
 export const dynamic = 'force-dynamic';
 
@@ -20,6 +21,7 @@ export default async function VerificacionesPage({
 
   const cookieStore = await cookies();
   const userRole = cookieStore.get('user_role')?.value || 'USER';
+  const userName = cookieStore.get('user_name')?.value || 'Usuario';
   const isAdmin = ['ADMIN', 'GERENCIAL'].includes(userRole);
 
   // No generamos automáticamente al cargar la página para evitar que se quede colgada
@@ -29,7 +31,9 @@ export default async function VerificacionesPage({
   const verificaciones = response.success ? response.data : [];
 
   return (
-    <div className="p-4 sm:p-8 max-w-7xl mx-auto min-h-screen relative">
+    <div className="px-4 sm:px-8 pt-28 pb-4 sm:pb-8 max-w-7xl mx-auto min-h-screen relative">
+      {/* NAVBAR */}
+      <Navbar type="dashboard" userName={userName} userRole={userRole} isAdmin={isAdmin} maxWidth="max-w-7xl" />
       <ScrollToTop />
       <CopilotChat />
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-5 mb-8">

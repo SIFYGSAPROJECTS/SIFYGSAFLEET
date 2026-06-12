@@ -3,7 +3,6 @@ import { PlusCircle } from 'lucide-react';
 import { cookies } from 'next/headers';
 import Link from 'next/link';
 import DashboardMenu from './DashboardMenu';
-import Navbar from '@/components/ui/Navbar';
 
 export default async function Dashboard() {
   const cookieStore = await cookies();
@@ -21,11 +20,8 @@ export default async function Dashboard() {
 
   return (
     <div className="min-h-screen bg-transparent">
-      
-      {/* NAVBAR */}
-      <Navbar type="dashboard" userName={userName} userRole={userRole} isAdmin={isAdmin} />
 
-      <main className="max-w-7xl mx-auto p-6 space-y-6 pt-24">
+      <main className="max-w-7xl mx-auto p-6 space-y-6 pt-4">
         
         {/* ENCABEZADO CON BOTÓN DE ACCIÓN RÁPIDA */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">

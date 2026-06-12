@@ -146,11 +146,11 @@ export default function DashboardMenu({ userRole, totalAutos, totalEmpleados, ti
       
       {/* MENÚ DE PESTAÑAS - ESTILO PILL/CAPSULE */}
       <div className="w-full">
-        <div className="flex bg-[var(--bg-floating)] p-1.5 rounded-full border border-[var(--border-cream)] shadow-inner w-full overflow-x-auto scrollbar-hide">
+        <div className="flex bg-[var(--bg-floating)] p-1.5 rounded-xl border border-[var(--border-cream)] shadow-inner w-full overflow-x-auto scrollbar-hide">
           
           <Link
             href="/dashboard/servicios"
-            className={`flex-1 flex justify-center px-6 py-2.5 font-bold text-sm items-center gap-2 rounded-full transition-all whitespace-nowrap ${
+            className={`flex-1 flex justify-center px-6 py-2.5 font-bold text-sm items-center gap-2 rounded-lg transition-all whitespace-nowrap ${
               activeTab === 'servicios' 
                 ? 'bg-white text-[var(--text-main)] shadow-md' 
                 : 'text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-screen)]/50'
@@ -162,7 +162,7 @@ export default function DashboardMenu({ userRole, totalAutos, totalEmpleados, ti
           {isAdmin && (
             <Link
               href="/dashboard/inventario"
-              className={`flex-1 flex justify-center px-6 py-2.5 font-bold text-sm items-center gap-2 rounded-full transition-all whitespace-nowrap ${
+              className={`flex-1 flex justify-center px-6 py-2.5 font-bold text-sm items-center gap-2 rounded-lg transition-all whitespace-nowrap ${
                 activeTab === 'transporte' 
                   ? 'bg-white text-[var(--text-main)] shadow-md' 
                   : 'text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-screen)]/50'
@@ -175,7 +175,7 @@ export default function DashboardMenu({ userRole, totalAutos, totalEmpleados, ti
           {isAdmin && (
             <Link
               href="/dashboard/costos"
-              className={`flex-1 flex justify-center px-6 py-2.5 font-bold text-sm items-center gap-2 rounded-full transition-all whitespace-nowrap ${
+              className={`flex-1 flex justify-center px-6 py-2.5 font-bold text-sm items-center gap-2 rounded-lg transition-all whitespace-nowrap ${
                 activeTab === 'costos' 
                   ? 'bg-white text-[var(--text-main)] shadow-md' 
                   : 'text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-screen)]/50'
@@ -187,7 +187,7 @@ export default function DashboardMenu({ userRole, totalAutos, totalEmpleados, ti
 
           <Link
             href="/dashboard/usuarios"
-            className={`flex-1 flex justify-center px-6 py-2.5 font-bold text-sm items-center gap-2 rounded-full transition-all whitespace-nowrap ${
+            className={`flex-1 flex justify-center px-6 py-2.5 font-bold text-sm items-center gap-2 rounded-lg transition-all whitespace-nowrap ${
               activeTab === 'usuario' 
                 ? 'bg-white text-[var(--text-main)] shadow-md' 
                 : 'text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-screen)]/50'
@@ -198,7 +198,7 @@ export default function DashboardMenu({ userRole, totalAutos, totalEmpleados, ti
           
           <Link
             href={isAdmin ? '/dashboard/checklists' : '/dashboard/mis-checklists'}
-            className={`flex-1 flex justify-center px-6 py-2.5 font-bold text-sm items-center gap-2 rounded-full transition-all whitespace-nowrap ${
+            className={`flex-1 flex justify-center px-6 py-2.5 font-bold text-sm items-center gap-2 rounded-lg transition-all whitespace-nowrap ${
               activeTab === 'checklists' 
                 ? 'bg-white text-[var(--text-main)] shadow-md' 
                 : 'text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-screen)]/50'
@@ -209,7 +209,7 @@ export default function DashboardMenu({ userRole, totalAutos, totalEmpleados, ti
           
           <Link
             href={isAdmin ? '/dashboard/documentos' : '/dashboard/mis-documentos'}
-            className={`flex-1 flex justify-center px-6 py-2.5 font-bold text-sm items-center gap-2 rounded-full transition-all whitespace-nowrap ${
+            className={`flex-1 flex justify-center px-6 py-2.5 font-bold text-sm items-center gap-2 rounded-lg transition-all whitespace-nowrap ${
               activeTab === 'documentos' 
                 ? 'bg-white text-[var(--text-main)] shadow-md' 
                 : 'text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-screen)]/50'
@@ -221,7 +221,7 @@ export default function DashboardMenu({ userRole, totalAutos, totalEmpleados, ti
           {isAdmin && (
             <Link
               href="/verificaciones"
-              className={`flex-1 flex justify-center px-6 py-2.5 font-bold text-sm items-center gap-2 rounded-full transition-all whitespace-nowrap ${
+              className={`flex-1 flex justify-center px-6 py-2.5 font-bold text-sm items-center gap-2 rounded-lg transition-all whitespace-nowrap ${
                 activeTab === 'verificaciones' 
                   ? 'bg-white text-[var(--text-main)] shadow-md' 
                   : 'text-[var(--text-muted)] hover:text-green-600 hover:bg-[var(--bg-screen)]/50'

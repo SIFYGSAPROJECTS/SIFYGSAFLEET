@@ -86,11 +86,11 @@ export default function ComputoMenu({ userRole, totalEquipos, equiposReparacion 
     <div className="space-y-8">
       
       <div className="w-full">
-        <div className="flex bg-[var(--bg-floating)] p-1.5 rounded-full border border-[var(--border-cream)] shadow-inner w-full overflow-x-auto scrollbar-hide">
+        <div className="flex bg-[var(--bg-floating)] p-1.5 rounded-xl border border-[var(--border-cream)] shadow-inner w-full overflow-x-auto scrollbar-hide">
           
           <Link
             href="/computo/inventario"
-            className={`flex-1 flex justify-center px-6 py-2.5 font-bold text-sm items-center gap-2 rounded-full transition-all whitespace-nowrap ${
+            className={`flex-1 flex justify-center px-6 py-2.5 font-bold text-sm items-center gap-2 rounded-lg transition-all whitespace-nowrap ${
               activeTab === 'inventario' 
                 ? 'bg-white text-[var(--text-main)] shadow-md' 
                 : 'text-[var(--text-muted)] hover:text-emerald-600 hover:bg-[var(--bg-screen)]/50'
@@ -101,7 +101,7 @@ export default function ComputoMenu({ userRole, totalEquipos, equiposReparacion 
 
           <Link
             href="#"
-            className={`flex-1 flex justify-center px-6 py-2.5 font-bold text-sm items-center gap-2 rounded-full transition-all whitespace-nowrap ${
+            className={`flex-1 flex justify-center px-6 py-2.5 font-bold text-sm items-center gap-2 rounded-lg transition-all whitespace-nowrap ${
               activeTab === 'tickets' 
                 ? 'bg-white text-[var(--text-main)] shadow-md' 
                 : 'text-[var(--text-muted)] hover:text-emerald-600 hover:bg-[var(--bg-screen)]/50 opacity-60'
@@ -112,7 +112,7 @@ export default function ComputoMenu({ userRole, totalEquipos, equiposReparacion 
 
           <Link
             href="/computo/documentos"
-            className={`flex-1 flex justify-center px-6 py-2.5 font-bold text-sm items-center gap-2 rounded-full transition-all whitespace-nowrap ${
+            className={`flex-1 flex justify-center px-6 py-2.5 font-bold text-sm items-center gap-2 rounded-lg transition-all whitespace-nowrap ${
               activeTab === 'documentos' 
                 ? 'bg-white text-[var(--text-main)] shadow-md' 
                 : 'text-[var(--text-muted)] hover:text-emerald-600 hover:bg-[var(--bg-screen)]/50'

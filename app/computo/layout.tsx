@@ -4,6 +4,7 @@ import IdleTimer from '@/components/security/IdleTimer';
 import RoleGuard from '@/components/security/RoleGuard';
 import CopilotChat from '@/components/ai/CopilotChat';
 import ScrollToTop from '@/components/ui/ScrollToTop';
+import Navbar from '@/components/ui/Navbar';
 
 export default async function ComputoLayout({
   children,
@@ -14,8 +15,12 @@ export default async function ComputoLayout({
   const userEmail = cookieStore.get('user_email')?.value;
 
   if (!userEmail) {
-    redirect('/login');
+    redirect('/');
   }
+
+  const userRole = cookieStore.get('user_role')?.value || 'USER';
+  const userName = cookieStore.get('user_name')?.value || 'Usuario';
+  const isAdmin = ['ADMIN', 'GERENCIAL'].includes(userRole);
 
   return (
     <>
@@ -23,8 +28,11 @@ export default async function ComputoLayout({
       <div className="min-h-screen bg-transparent">
         <IdleTimer />
         <RoleGuard />
+        
+        {/* HEADER GLOBAL DEL MÓDULO */}
+        <Navbar type="computo" userName={userName} userRole={userRole} isAdmin={isAdmin} maxWidth="max-w-7xl" />
 
-        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-emerald-50/10">
+        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-emerald-50/10 pt-24">
           {children}
         </main>
       </div>
