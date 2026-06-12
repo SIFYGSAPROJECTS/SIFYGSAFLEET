@@ -49,7 +49,7 @@ export default function MisChecklistsPage() {
               className="inline-flex items-center gap-2 text-slate-400 hover:text-[#71717a] transition-colors font-medium text-sm mb-4"
             >
               <ArrowLeft className="w-4 h-4" /> 
-              Volver al Panel Maestro
+              Volver al Panel Principal
             </Link>
 
             {/* Encabezado Principal integrado a la izquierda */}
