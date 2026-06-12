@@ -33,13 +33,43 @@ export function middleware(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
 
-  // Protección de rutas de Dashboard
-  if (pathname.startsWith('/dashboard')) {
+  // Rutas que requieren autenticación
+  const protectedPaths = ['/portal', '/dashboard', '/computo', '/programa-anual', '/verificaciones'];
+  const isProtectedPath = protectedPaths.some(path => pathname === path || pathname.startsWith(path + '/'));
+
+  if (isProtectedPath) {
     const session = request.cookies.get('user_email');
 
+    // Si no está autenticado, redirigir al login
     if (!session || !session.value) {
       const loginUrl = new URL("/", request.url);
       return NextResponse.redirect(loginUrl);
+    }
+
+    // Comprobación de roles
+    const userRoleCookie = request.cookies.get('user_role');
+    const userRole = userRoleCookie?.value || 'USER';
+    const isAdmin = ['ADMIN', 'GERENCIAL'].includes(userRole);
+
+    // Módulos raíz o páginas completas exclusivas para administrador
+    const adminOnlyPaths = ['/portal', '/computo', '/programa-anual', '/verificaciones'];
+    const isAdminOnlyPath = adminOnlyPaths.some(path => pathname === path || pathname.startsWith(path + '/'));
+
+    // Sub-rutas de /dashboard exclusivas para administrador
+    const adminOnlyDashboardPaths = [
+      '/dashboard/inventario',
+      '/dashboard/costos',
+      '/dashboard/checklists',
+      '/dashboard/documentos',
+      '/dashboard/empleados',
+      '/dashboard/seguridad',
+    ];
+    const isAdminOnlyDashboardPath = adminOnlyDashboardPaths.some(path => pathname === path || pathname.startsWith(path + '/'));
+
+    // Si intenta acceder a una ruta de administrador sin ser administrador, redirigir al dashboard básico
+    if ((isAdminOnlyPath || isAdminOnlyDashboardPath) && !isAdmin) {
+      const dashboardUrl = new URL("/dashboard", request.url);
+      return NextResponse.redirect(dashboardUrl);
     }
   }
 
