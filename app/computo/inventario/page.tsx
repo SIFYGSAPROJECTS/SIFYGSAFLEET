@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect, useRef } from 'react';
-import { Laptop, Plus, X, Pencil, ArrowLeft, ShieldCheck, AlertTriangle, Wrench, CheckCircle2, Archive, Download, Filter, UploadCloud, Search } from 'lucide-react';
+import { Laptop, Plus, X, Pencil, ArrowLeft, ShieldCheck, AlertTriangle, Wrench, CheckCircle2, Archive, Download, Filter, UploadCloud, Search, FileText } from 'lucide-react';
 import Link from 'next/link';
 import SystemModal, { ModalType } from '@/components/ui/SystemModal';
+import { generarCartaResponsiva } from '@/lib/pdf/generarCartaComputo';
 import PremiumSelect from '@/components/ui/PremiumSelect';
 
 interface EquipoComputo {
@@ -470,14 +471,24 @@ export default function ComputoInventarioPage() {
                           <p className="font-medium text-sm text-[var(--text-main)] truncate" title={equipo.Usuario || 'N/A'}>{equipo.Usuario || <span className="text-stone-400 italic">Sin asignar</span>}</p>
                           <p className="text-xs text-[var(--text-muted)] truncate" title={equipo.Departamento || ''}>{equipo.Departamento} {equipo.N_EMP ? `(#${equipo.N_EMP})` : ''}</p>
                         </div>
+
+                        <div className="bg-[var(--bg-screen)] p-2 rounded-lg border border-[var(--border-cream)] mt-1">
+                          <p className="text-[10px] text-stone-500 uppercase font-bold mb-1">Proveedor / Rentadora</p>
+                          <p className="text-xs font-medium text-[var(--text-main)] truncate" title={equipo.Proveedor || 'N/A'}>{equipo.Proveedor || <span className="text-stone-400 italic">N/A</span>}</p>
+                        </div>
                       </div>
                     </div>
 
                     <div className="bg-[var(--bg-screen)] border-t border-[var(--border-cream)] p-3 flex justify-between items-center px-5 mt-auto">
                       <div className="text-xs text-[var(--text-muted)]"><span className="font-bold text-stone-500">CR:</span> {equipo.CR === 'SI' ? '✅ SI' : '❌ NO'}</div>
-                      <button onClick={() => abrirModalEditar(equipo)} className="p-2 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors" title="Editar Equipo">
-                        <Pencil className="w-4 h-4" />
-                      </button>
+                      <div className="flex gap-1">
+                        <button onClick={() => generarCartaResponsiva(equipo as any)} className="p-2 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="Generar Carta Responsiva">
+                          <FileText className="w-4 h-4" />
+                        </button>
+                        <button onClick={() => abrirModalEditar(equipo)} className="p-2 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors" title="Editar Equipo">
+                          <Pencil className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))
@@ -494,15 +505,17 @@ export default function ComputoInventarioPage() {
                       <th className="p-4 font-semibold">Service Tag / Cargador</th>
                       <th className="p-4 font-semibold">Usuario y Depto.</th>
                       <th className="p-4 font-semibold">Proyecto Asignado</th>
+                      <th className="p-4 font-semibold">Proveedor</th>
+                      <th className="p-4 font-semibold text-center">Carta</th>
                       <th className="p-4 font-semibold text-center">Estatus y CR</th>
                       <th className="p-4 font-semibold text-center">Editar</th>
                     </tr>
                   </thead>
                   <tbody>
                     {cargando ? (
-                      <tr><td colSpan={7} className="text-center p-8 text-[var(--text-muted)] font-bold">Cargando inventario...</td></tr>
+                      <tr><td colSpan={9} className="text-center p-8 text-[var(--text-muted)] font-bold">Cargando inventario...</td></tr>
                     ) : equiposFiltrados.length === 0 ? (
-                      <tr><td colSpan={7} className="text-center p-8 text-[var(--text-muted)]">No hay equipos que coincidan con los filtros.</td></tr>
+                      <tr><td colSpan={9} className="text-center p-8 text-[var(--text-muted)]">No hay equipos que coincidan con los filtros.</td></tr>
                     ) : (
                       equiposFiltrados.map((equipo) => (
                         <tr key={equipo.C_Interno} className="hover:bg-[var(--bg-hover)] even:bg-[var(--bg-screen)] transition-colors border-b border-[var(--border-cream)] last:border-0">
@@ -524,6 +537,14 @@ export default function ComputoInventarioPage() {
                           </td>
                           <td className="p-4">
                             <div className="text-sm text-[var(--text-main)] font-medium">{equipo.Puesto_Proyecto || <span className="text-stone-400 italic">N/A</span>}</div>
+                          </td>
+                          <td className="p-4">
+                            <div className="text-sm text-[var(--text-main)]">{equipo.Proveedor || <span className="text-stone-400 italic">N/A</span>}</div>
+                          </td>
+                          <td className="p-4 text-center">
+                            <button onClick={() => generarCartaResponsiva(equipo as any)} className="p-2 text-indigo-500 hover:text-white hover:bg-indigo-500 rounded-lg transition-colors border border-indigo-200 shadow-sm" title="Descargar PDF Carta Responsiva">
+                              <FileText className="w-5 h-5" />
+                            </button>
                           </td>
                           <td className="p-4 text-center">
                             <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase mb-1 ${esAsignado(equipo) ? 'bg-emerald-100 text-emerald-700' : esRevision(equipo) ? 'bg-amber-100 text-amber-700' : esBaja(equipo) ? 'bg-red-100 text-red-700' : 'bg-stone-200 text-stone-700'}`}>{equipo.Estatus}</span>
