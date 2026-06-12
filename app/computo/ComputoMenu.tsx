@@ -85,8 +85,8 @@ export default function ComputoMenu({ userRole, totalEquipos, equiposReparacion 
   return (
     <div className="space-y-8">
       
-      <div className="w-full flex justify-center px-4">
-        <div className="flex bg-[var(--bg-floating)] p-1.5 rounded-full border border-[var(--border-cream)] shadow-inner w-full max-w-4xl overflow-x-auto scrollbar-hide">
+      <div className="w-full">
+        <div className="flex bg-[var(--bg-floating)] p-1.5 rounded-full border border-[var(--border-cream)] shadow-inner w-full overflow-x-auto scrollbar-hide">
           
           <Link
             href="/computo/inventario"

@@ -193,8 +193,8 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
   return (
     <>
       {/* Header Container - Transparent Wrapper */}
-      <header className="fixed top-4 left-4 right-4 z-[100] max-w-7xl mx-auto transition-all duration-300">
-        <div className="px-6 md:px-8 flex items-center justify-between h-16">
+      <header className="fixed top-4 left-6 right-6 z-[100] max-w-7xl mx-auto transition-all duration-300">
+        <div className="flex items-center justify-between h-16">
           
           {/* LEFT SIDE: Brand Logo / Title */}
           {type === 'computo' ? (
@@ -220,52 +220,56 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
           {/* RIGHT SIDE: Action Buttons (Desktop Only) - Hover Dropdowns */}
           <div className="hidden md:flex items-center bg-zinc-900/90 border border-white/10 rounded-xl p-0.5 shadow-lg shadow-black/25 backdrop-blur-md">
             
-            {/* Portal Hover Dropdown */}
-            <div className="relative group">
-              <a
-                href="/portal"
-                className="hover:bg-white/10 text-white px-4 py-2 rounded-lg text-xs flex items-center gap-2 transition-all font-bold"
-              >
-                <LayoutGrid size={14} className="text-[#FF7420]" /> Portal
-              </a>
+            {/* Módulos Hover Dropdown */}
+            {localIsAdmin && (
+              <div className="relative group">
+                <a
+                  href="/portal"
+                  className="hover:bg-white/10 text-white px-4 py-2 rounded-lg text-xs flex items-center gap-2 transition-all font-bold"
+                >
+                  <LayoutGrid size={14} className="text-[#FF7420]" /> Módulos
+                </a>
 
-              {/* Modules Dropdown with pt-2 to bridge hover gap */}
-              <div 
-                className="absolute top-full left-1/2 pt-2 w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[120]"
-                style={{ transform: 'translateX(-50%)' }}
-              >
-                <div className="bg-zinc-950/95 border border-white/10 rounded-xl shadow-2xl p-1.5 backdrop-blur-md">
-                  <div className="px-3 py-1.5 text-[9px] font-black text-white/40 tracking-wider uppercase border-b border-white/5 mb-1">
-                    Módulos Disponibles
+                {/* Modules Dropdown with pt-2 to bridge hover gap */}
+                <div 
+                  className="absolute top-full left-1/2 pt-2 w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[120]"
+                  style={{ transform: 'translateX(-50%)' }}
+                >
+                  <div className="bg-zinc-950/95 border border-white/10 rounded-xl shadow-2xl p-1.5 backdrop-blur-md">
+                    <div className="px-3 py-1.5 text-[9px] font-black text-white/40 tracking-wider uppercase border-b border-white/5 mb-1">
+                      Módulos Disponibles
+                    </div>
+                    <Link
+                      href="/dashboard"
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-white/80 hover:text-white hover:bg-white/5 transition-all"
+                    >
+                      <Car size={14} className="text-[#FF7420]" />
+                      <span>Transporte (Flota)</span>
+                    </Link>
+                    <Link
+                      href="/computo"
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-white/80 hover:text-white hover:bg-white/5 transition-all"
+                    >
+                      <Server size={14} className="text-[#FF7420]" />
+                      <span>Cómputo (TI)</span>
+                    </Link>
+                    <Link
+                      href="/programa-anual"
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-white/80 hover:text-white hover:bg-white/5 transition-all"
+                    >
+                      <CalendarDays size={14} className="text-[#FF7420]" />
+                      <span>Programa Anual</span>
+                    </Link>
                   </div>
-                  <Link
-                    href="/dashboard"
-                    className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-white/80 hover:text-white hover:bg-white/5 transition-all"
-                  >
-                    <Car size={14} className="text-[#FF7420]" />
-                    <span>Transporte (Flota)</span>
-                  </Link>
-                  <Link
-                    href="/computo"
-                    className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-white/80 hover:text-white hover:bg-white/5 transition-all"
-                  >
-                    <Server size={14} className="text-[#FF7420]" />
-                    <span>Cómputo (TI)</span>
-                  </Link>
-                  <Link
-                    href="/programa-anual"
-                    className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-white/80 hover:text-white hover:bg-white/5 transition-all"
-                  >
-                    <CalendarDays size={14} className="text-[#FF7420]" />
-                    <span>Programa Anual</span>
-                  </Link>
                 </div>
               </div>
-            </div>
+            )}
 
             {/* User Dropdown for Logout */}
-            <div className="relative group border-l border-white/10">
-              <div className="px-4 py-2 flex items-center gap-3 cursor-pointer hover:bg-white/5 rounded-r-xl transition-all">
+            <div className={`relative group ${localIsAdmin ? 'border-l border-white/10' : ''}`}>
+              <div className={`px-4 py-2 flex items-center gap-3 cursor-pointer hover:bg-white/5 transition-all ${
+                localIsAdmin ? 'rounded-r-xl' : 'rounded-xl'
+              }`}>
                 <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-[10px] font-bold text-[#FF7420] shrink-0">
                   {localUserName.charAt(0).toUpperCase()}
                 </div>
@@ -348,38 +352,42 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
           </div>
 
           <nav className="flex flex-col space-y-3">
-            <div className="text-[10px] font-black text-white/30 uppercase tracking-widest pl-2 mb-1">Módulos</div>
-            <Link
-              href="/dashboard"
-              onClick={() => setIsMenuOpen(false)}
-              className="bg-white/5 hover:bg-white/10 border border-white/5 text-white/90 px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold"
-            >
-              <Car size={14} className="text-[#FF7420]" /> Transporte (Flota)
-            </Link>
-            <Link
-              href="/computo"
-              onClick={() => setIsMenuOpen(false)}
-              className="bg-white/5 hover:bg-white/10 border border-white/5 text-white/90 px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold"
-            >
-              <Server size={14} className="text-[#FF7420]" /> Cómputo (TI)
-            </Link>
-            <Link
-              href="/programa-anual"
-              onClick={() => setIsMenuOpen(false)}
-              className="bg-white/5 hover:bg-white/10 border border-white/5 text-white/90 px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold"
-            >
-              <CalendarDays size={14} className="text-[#FF7420]" /> Programa Anual
-            </Link>
+            {localIsAdmin && (
+              <>
+                <div className="text-[10px] font-black text-white/30 uppercase tracking-widest pl-2 mb-1">Módulos</div>
+                <Link
+                  href="/dashboard"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="bg-white/5 hover:bg-white/10 border border-white/5 text-white/90 px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold"
+                >
+                  <Car size={14} className="text-[#FF7420]" /> Transporte (Flota)
+                </Link>
+                <Link
+                  href="/computo"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="bg-white/5 hover:bg-white/10 border border-white/5 text-white/90 px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold"
+                >
+                  <Server size={14} className="text-[#FF7420]" /> Cómputo (TI)
+                </Link>
+                <Link
+                  href="/programa-anual"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="bg-white/5 hover:bg-white/10 border border-white/5 text-white/90 px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold"
+                >
+                  <CalendarDays size={14} className="text-[#FF7420]" /> Programa Anual
+                </Link>
 
-            <div className="h-px bg-white/5 my-2"></div>
-            
-            <a
-              href="/portal"
-              onClick={() => setIsMenuOpen(false)}
-              className="bg-white/5 hover:bg-white/10 border border-white/5 text-white/90 px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 transition-all font-bold"
-            >
-              <LayoutGrid size={14} className="text-[#FF7420]" /> Volver al Portal
-            </a>
+                <div className="h-px bg-white/5 my-2"></div>
+                
+                <a
+                  href="/portal"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="bg-white/5 hover:bg-white/10 border border-white/5 text-white/90 px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 transition-all font-bold"
+                >
+                  <LayoutGrid size={14} className="text-[#FF7420]" /> Volver a Módulos
+                </a>
+              </>
+            )}
 
             <div className="pt-2">
               <LogoutButton variant="minimal" />

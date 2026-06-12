@@ -145,8 +145,8 @@ export default function DashboardMenu({ userRole, totalAutos, totalEmpleados, ti
     <div className="space-y-8">
       
       {/* MENÚ DE PESTAÑAS - ESTILO PILL/CAPSULE */}
-      <div className="w-full flex justify-center px-4">
-        <div className="flex bg-[var(--bg-floating)] p-1.5 rounded-full border border-[var(--border-cream)] shadow-inner w-full max-w-6xl overflow-x-auto scrollbar-hide">
+      <div className="w-full">
+        <div className="flex bg-[var(--bg-floating)] p-1.5 rounded-full border border-[var(--border-cream)] shadow-inner w-full overflow-x-auto scrollbar-hide">
           
           <Link
             href="/dashboard/servicios"
