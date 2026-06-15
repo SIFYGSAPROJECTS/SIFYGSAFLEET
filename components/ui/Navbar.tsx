@@ -39,6 +39,7 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
   const [localUserName, setLocalUserName] = useState(userName);
   const [localUserRole, setLocalUserRole] = useState(userRole);
   const [localIsAdmin, setLocalIsAdmin] = useState(isAdmin);
+  const [localUserAreas, setLocalUserAreas] = useState<string[]>([]);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -54,10 +55,16 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
     // Read session cookies on client side if default values are present
     const cookieName = getCookie('user_name');
     const cookieRole = getCookie('user_role');
+    const cookieAreas = getCookie('user_areas');
     if (cookieName) setLocalUserName(cookieName);
     if (cookieRole) {
       setLocalUserRole(cookieRole);
       setLocalIsAdmin(['ADMIN', 'GERENCIAL'].includes(cookieRole));
+    }
+    if (cookieAreas) {
+      try {
+        setLocalUserAreas(JSON.parse(cookieAreas));
+      } catch (e) {}
     }
   }, [userName, userRole]);
 
@@ -258,7 +265,7 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
           }`}>
             
             {/* Módulos Hover Dropdown */}
-            {localIsAdmin && (
+            {(localIsAdmin || localUserAreas.length > 0) && (
               <div className="relative group">
                 <a
                   href="/portal"
@@ -276,27 +283,33 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                     <div className="px-3 py-1.5 text-[9px] font-black text-white/40 tracking-wider uppercase border-b border-white/5 mb-1">
                       Módulos Disponibles
                     </div>
-                    <Link
-                      href="/dashboard"
-                      className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-white/80 hover:text-white hover:bg-white/5 transition-all"
-                    >
-                      <Car size={14} className="text-[#FF7420]" />
-                      <span>Transporte (Flota)</span>
-                    </Link>
-                    <Link
-                      href="/computo"
-                      className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-white/80 hover:text-white hover:bg-white/5 transition-all"
-                    >
-                      <Server size={14} className="text-[#FF7420]" />
-                      <span>Cómputo (TI)</span>
-                    </Link>
-                    <Link
-                      href="/programa-anual"
-                      className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-white/80 hover:text-white hover:bg-white/5 transition-all"
-                    >
-                      <CalendarDays size={14} className="text-[#FF7420]" />
-                      <span>Programa Anual</span>
-                    </Link>
+                    {(localIsAdmin || localUserAreas.includes('AUTOS')) && (
+                      <Link
+                        href="/dashboard"
+                        className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-white/80 hover:text-white hover:bg-white/5 transition-all"
+                      >
+                        <Car size={14} className="text-[#FF7420]" />
+                        <span>Transporte (Flota)</span>
+                      </Link>
+                    )}
+                    {(localIsAdmin || localUserAreas.includes('COMPUTO')) && (
+                      <Link
+                        href="/computo"
+                        className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-white/80 hover:text-white hover:bg-white/5 transition-all"
+                      >
+                        <Server size={14} className="text-[#FF7420]" />
+                        <span>Cómputo (TI)</span>
+                      </Link>
+                    )}
+                    {localIsAdmin && (
+                      <Link
+                        href="/programa-anual"
+                        className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-white/80 hover:text-white hover:bg-white/5 transition-all"
+                      >
+                        <CalendarDays size={14} className="text-[#FF7420]" />
+                        <span>Programa Anual</span>
+                      </Link>
+                    )}
                   </div>
                 </div>
               </div>
@@ -395,30 +408,36 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
           </div>
 
           <nav className="flex flex-col space-y-3">
-            {localIsAdmin && (
+            {(localIsAdmin || localUserAreas.length > 0) && (
               <>
                 <div className="text-[10px] font-black text-white/30 uppercase tracking-widest pl-2 mb-1">Módulos</div>
-                <Link
-                  href="/dashboard"
-                  onClick={() => setIsMenuOpen(false)}
-                  className="bg-white/5 hover:bg-white/10 border border-white/5 text-white/90 px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold"
-                >
-                  <Car size={14} className="text-[#FF7420]" /> Transporte (Flota)
-                </Link>
-                <Link
-                  href="/computo"
-                  onClick={() => setIsMenuOpen(false)}
-                  className="bg-white/5 hover:bg-white/10 border border-white/5 text-white/90 px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold"
-                >
-                  <Server size={14} className="text-[#FF7420]" /> Cómputo (TI)
-                </Link>
-                <Link
-                  href="/programa-anual"
-                  onClick={() => setIsMenuOpen(false)}
-                  className="bg-white/5 hover:bg-white/10 border border-white/5 text-white/90 px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold"
-                >
-                  <CalendarDays size={14} className="text-[#FF7420]" /> Programa Anual
-                </Link>
+                {(localIsAdmin || localUserAreas.includes('AUTOS')) && (
+                  <Link
+                    href="/dashboard"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="bg-white/5 hover:bg-white/10 border border-white/5 text-white/90 px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold"
+                  >
+                    <Car size={14} className="text-[#FF7420]" /> Transporte (Flota)
+                  </Link>
+                )}
+                {(localIsAdmin || localUserAreas.includes('COMPUTO')) && (
+                  <Link
+                    href="/computo"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="bg-white/5 hover:bg-white/10 border border-white/5 text-white/90 px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold"
+                  >
+                    <Server size={14} className="text-[#FF7420]" /> Cómputo (TI)
+                  </Link>
+                )}
+                {localIsAdmin && (
+                  <Link
+                    href="/programa-anual"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="bg-white/5 hover:bg-white/10 border border-white/5 text-white/90 px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold"
+                  >
+                    <CalendarDays size={14} className="text-[#FF7420]" /> Programa Anual
+                  </Link>
+                )}
 
                 <div className="h-px bg-white/5 my-2"></div>
                 

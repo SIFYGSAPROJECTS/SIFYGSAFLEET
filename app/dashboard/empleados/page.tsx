@@ -438,12 +438,13 @@ export default function PersonalPage() {
                               <button
                                 key={unidad.Consecutivo}
                                 type="button"
+                                disabled={ocupadoPorOtro}
                                 onClick={() => {
                                   setVehiculoSeleccionado(unidad);
                                   setBusquedaVehiculo(unidad.Consecutivo);
                                   setMostrarSugerencias(false);
                                 }}
-                                className={`w-full px-4 py-3 text-left border-b border-[var(--border-cream)] last:border-none flex justify-between items-center group transition-colors ${ocupadoPorOtro ? 'hover:bg-red-50' : 'hover:bg-[var(--bg-hover)]'}`}
+                                className={`w-full px-4 py-3 text-left border-b border-[var(--border-cream)] last:border-none flex justify-between items-center group transition-colors ${ocupadoPorOtro ? 'bg-red-50/50 cursor-not-allowed opacity-60' : 'hover:bg-[var(--bg-hover)]'}`}
                               >
                                 <div>
                                   <p className={`text-sm font-bold transition-colors ${ocupadoPorOtro ? 'text-stone-400 group-hover:text-red-500' : 'text-[var(--text-main)] group-hover:text-[#71717a]'}`}>

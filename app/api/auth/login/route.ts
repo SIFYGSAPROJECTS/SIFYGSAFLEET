@@ -91,15 +91,33 @@ export async function POST(request: Request) {
       });
     }
 
+    // Verificación dinámica de áreas
+    const tieneAuto = await prisma.inventario_Automoviles.findFirst({
+      where: { Email_encargado: identifier }
+    });
+
+    const tieneComputo = await prisma.inventario_Computo.findFirst({
+      where: { Email_Empleado: identifier }
+    });
+
+    let areas: string[] = [];
+    if (tieneAuto) areas.push('AUTOS');
+    if (tieneComputo) areas.push('COMPUTO');
+
+    if (['ADMIN', 'GERENCIAL'].includes(usuario.Rol)) {
+      areas = ['AUTOS', 'COMPUTO'];
+    }
+
     // Guardamos la información en las Cookies
     const cookieStore = await cookies();
     cookieStore.set('user_role', usuario.Rol); 
     cookieStore.set('user_name', usuario.Nombre_Empleado);
     cookieStore.set('user_email', usuario.Email);
+    cookieStore.set('user_areas', JSON.stringify(areas));
 
     return NextResponse.json({
       success: true,
-      user: { nombre: usuario.Nombre_Empleado, rol: usuario.Rol }
+      user: { nombre: usuario.Nombre_Empleado, rol: usuario.Rol, areas }
     });
 
   } catch (error) {
