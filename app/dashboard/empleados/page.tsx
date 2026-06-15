@@ -432,7 +432,7 @@ export default function PersonalPage() {
                       <div className="absolute z-[60] w-full mt-1 bg-white border border-[var(--border-cream)] rounded-xl shadow-2xl max-h-52 overflow-y-auto scrollbar-hide">
                         {sugerenciasVehiculos.length > 0 ? (
                           sugerenciasVehiculos.map((unidad) => {
-                            const ocupadoPorOtro = unidad.Email_encargado && unidad.Email_encargado !== formData.Email;
+                            const ocupadoPorOtro = !!(unidad.Email_encargado && unidad.Email_encargado !== formData.Email);
                             
                             return (
                               <button
