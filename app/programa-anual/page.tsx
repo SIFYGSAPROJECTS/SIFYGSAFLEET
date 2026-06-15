@@ -192,25 +192,25 @@ export default function ProgramaAnualPage() {
           ) : (
             <table className="w-full text-left text-xs sm:text-sm border-separate border border-[var(--border-cream)] border-t-4 border-t-[#71717a] rounded-xl overflow-hidden shadow-sm" style={{ borderSpacing: 0 }}>
               <thead>
-                <tr className="text-[var(--text-muted)] uppercase tracking-wider text-xs">
+                <tr className="text-[var(--text-main)] uppercase tracking-wider text-xs">
                   {/* Seccion 1: Info */}
-                  <th className="p-4 font-bold w-[180px] bg-[var(--bg-screen)] border-b border-[var(--border-cream)] rounded-tl-xl shadow-sm">DESCRIPCIÓN</th>
-                  <th className="p-4 font-bold w-[130px] border-b border-[var(--border-cream)] bg-[var(--bg-screen)] shadow-sm">EJECUTA</th>
+                  <th className="p-4 font-bold w-[180px] bg-[var(--bg-hover)]/70 border-b-2 border-stone-400/20 rounded-tl-xl shadow-sm">DESCRIPCIÓN</th>
+                  <th className="p-4 font-bold w-[130px] border-b-2 border-stone-400/20 bg-[var(--bg-hover)]/70 shadow-sm">EJECUTA</th>
                   
                   {/* Spacer 1 */}
                   <th className="w-2 min-w-[8px] p-0 bg-transparent border-none"></th>
 
                   {/* Seccion 2: Calendario */}
-                  <th className="p-0 border-b border-l border-r border-[var(--border-cream)] w-8 text-center bg-[var(--bg-screen)] shadow-sm"></th>
+                  <th className="p-0 border-b-2 border-l border-r border-[var(--border-cream)] border-b-stone-400/20 w-8 text-center bg-[var(--bg-hover)]/70 shadow-sm"></th>
                   {mesesNombres.map((mes, i) => (
-                    <th key={mes} className={`p-2 border-b border-r border-[var(--border-cream)] text-center font-mono text-[10px] sm:text-xs min-w-[44px] bg-[var(--bg-screen)] shadow-sm ${i === 11 ? 'rounded-tr-xl' : ''}`}>{mes}</th>
+                    <th key={mes} className={`p-2 border-b-2 border-r border-[var(--border-cream)] border-b-stone-400/20 text-center font-mono text-[10px] sm:text-xs min-w-[44px] bg-[var(--bg-hover)]/70 shadow-sm ${i === 11 ? 'rounded-tr-xl' : ''}`}>{mes}</th>
                   ))}
 
                   {/* Spacer 2 */}
                   <th className="w-2 min-w-[8px] p-0 bg-transparent border-none"></th>
 
                   {/* Seccion 3: Observaciones */}
-                  <th className="p-4 font-bold w-[200px] bg-[var(--bg-screen)] border-b border-[var(--border-cream)] rounded-tr-xl shadow-sm">OBSERVACIONES</th>
+                  <th className="p-4 font-bold w-[200px] bg-[var(--bg-hover)]/70 border-b-2 border-stone-400/20 rounded-tr-xl shadow-sm">OBSERVACIONES</th>
                 </tr>
               </thead>
               <tbody>

@@ -547,15 +547,15 @@ export default function CostosPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-[var(--bg-screen)] border-b border-[var(--border-cream)]">
-                <th className="p-4 font-bold text-[var(--text-muted)] text-sm">Fecha</th>
-                <th className="p-4 font-bold text-[var(--text-muted)] text-sm">Servicio</th>
-                <th className="p-4 font-bold text-[var(--text-muted)] text-sm">Unidad</th>
-                <th className="p-4 font-bold text-[var(--text-muted)] text-sm">Costo MO</th>
-                <th className="p-4 font-bold text-[var(--text-muted)] text-sm">Costo Ref.</th>
-                <th className="p-4 font-bold text-[var(--text-muted)] text-sm">Total</th>
-                <th className="p-4 font-bold text-[var(--text-muted)] text-sm">Empresa</th>
-                <th className="p-4 font-bold text-[var(--text-muted)] text-sm">Proveedor</th>
+              <tr className="bg-[var(--bg-hover)]/70 border-b border-[var(--border-cream)] text-[var(--text-main)] text-sm uppercase tracking-wider font-bold">
+                <th className="p-4 font-bold border-b-2 border-stone-400/20">Fecha</th>
+                <th className="p-4 font-bold border-b-2 border-stone-400/20">Servicio</th>
+                <th className="p-4 font-bold border-b-2 border-stone-400/20">Unidad</th>
+                <th className="p-4 font-bold border-b-2 border-stone-400/20">Costo MO</th>
+                <th className="p-4 font-bold border-b-2 border-stone-400/20">Costo Ref.</th>
+                <th className="p-4 font-bold border-b-2 border-stone-400/20">Total</th>
+                <th className="p-4 font-bold border-b-2 border-stone-400/20">Empresa</th>
+                <th className="p-4 font-bold border-b-2 border-stone-400/20">Proveedor</th>
               </tr>
             </thead>
             <tbody>

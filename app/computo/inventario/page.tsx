@@ -499,16 +499,16 @@ export default function ComputoInventarioPage() {
               <div className="overflow-x-auto">
                 <table className="min-w-[1200px] w-full text-left border-collapse">
                   <thead>
-                    <tr className="bg-[var(--bg-screen)] border-b border-[var(--border-cream)] text-[var(--text-muted)] text-xs uppercase tracking-wider">
-                      <th className="p-4 font-semibold">Consecutivo</th>
-                      <th className="p-4 font-semibold">Equipo (Marca / Modelo)</th>
-                      <th className="p-4 font-semibold">Service Tag / Cargador</th>
-                      <th className="p-4 font-semibold">Usuario y Depto.</th>
-                      <th className="p-4 font-semibold">Proyecto Asignado</th>
-                      <th className="p-4 font-semibold">Proveedor</th>
-                      <th className="p-4 font-semibold text-center">Carta</th>
-                      <th className="p-4 font-semibold text-center">Estatus y CR</th>
-                      <th className="p-4 font-semibold text-center">Editar</th>
+                    <tr className="bg-[var(--bg-hover)]/70 border-b border-[var(--border-cream)] text-[var(--text-main)] text-xs uppercase tracking-wider font-bold">
+                      <th className="p-4 font-bold border-b-2 border-stone-400/20">Consecutivo</th>
+                      <th className="p-4 font-bold border-b-2 border-stone-400/20">Equipo (Marca / Modelo)</th>
+                      <th className="p-4 font-bold border-b-2 border-stone-400/20">Service Tag / Cargador</th>
+                      <th className="p-4 font-bold border-b-2 border-stone-400/20">Usuario y Depto.</th>
+                      <th className="p-4 font-bold border-b-2 border-stone-400/20">Proyecto Asignado</th>
+                      <th className="p-4 font-bold border-b-2 border-stone-400/20">Proveedor</th>
+                      <th className="p-4 font-bold border-b-2 border-stone-400/20 text-center">Carta</th>
+                      <th className="p-4 font-bold border-b-2 border-stone-400/20 text-center">Estatus y CR</th>
+                      <th className="p-4 font-bold border-b-2 border-stone-400/20 text-center">Editar</th>
                     </tr>
                   </thead>
                   <tbody>

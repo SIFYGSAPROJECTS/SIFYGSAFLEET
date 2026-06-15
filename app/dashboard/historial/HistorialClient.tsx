@@ -176,14 +176,14 @@ export default function HistorialClient({ historial, rol }: Props) {
         <div className="overflow-x-auto">
           <table className="min-w-[1000px] w-full text-left border-collapse">
             <thead>
-              <tr className="bg-[var(--bg-screen)] text-[var(--text-muted)] text-xs uppercase tracking-wider border-b border-[var(--border-cream)]">
-                <th className="p-4 font-semibold">Folio</th>
-                <th className="p-4 font-semibold">Fecha</th>
-                <th className="p-4 font-semibold">Vehículo</th>
-                <th className="p-4 font-semibold">Solicitante</th>
-                <th className="p-4 font-semibold text-center">Tipo Servicio</th>
-                <th className="p-4 font-semibold text-center w-64">Factura</th>
-                <th className="p-4 font-semibold text-center">Acción</th>
+              <tr className="bg-[var(--bg-hover)]/70 text-[var(--text-main)] text-xs uppercase tracking-wider border-b border-[var(--border-cream)] font-bold">
+                <th className="p-4 font-bold border-b-2 border-stone-400/20">Folio</th>
+                <th className="p-4 font-bold border-b-2 border-stone-400/20">Fecha</th>
+                <th className="p-4 font-bold border-b-2 border-stone-400/20">Vehículo</th>
+                <th className="p-4 font-bold border-b-2 border-stone-400/20">Solicitante</th>
+                <th className="p-4 font-bold border-b-2 border-stone-400/20 text-center">Tipo Servicio</th>
+                <th className="p-4 font-bold border-b-2 border-stone-400/20 text-center w-64">Factura</th>
+                <th className="p-4 font-bold border-b-2 border-stone-400/20 text-center">Acción</th>
               </tr>
             </thead>
             <tbody className="">

@@ -248,12 +248,12 @@ export default function PersonalPage() {
         <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-[var(--bg-screen)] border-b border-[var(--border-cream)] text-[var(--text-muted)] text-sm uppercase tracking-wider">
-                <th className="p-4 font-semibold">Empleado</th>
-                <th className="p-4 font-semibold">Contacto</th>
-                <th className="p-4 font-semibold">Puesto</th>
-                <th className="p-4 font-semibold text-center">Nivel</th>
-                <th className="p-4 font-semibold text-center">Acciones</th>
+              <tr className="bg-[var(--bg-hover)]/70 border-b border-[var(--border-cream)] text-[var(--text-main)] text-sm uppercase tracking-wider font-bold">
+                <th className="p-4 font-bold border-b-2 border-stone-400/20">Empleado</th>
+                <th className="p-4 font-bold border-b-2 border-stone-400/20">Contacto</th>
+                <th className="p-4 font-bold border-b-2 border-stone-400/20">Puesto</th>
+                <th className="p-4 font-bold border-b-2 border-stone-400/20 text-center">Nivel</th>
+                <th className="p-4 font-bold border-b-2 border-stone-400/20 text-center">Acciones</th>
               </tr>
             </thead>
             <tbody className="">

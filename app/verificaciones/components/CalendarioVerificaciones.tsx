@@ -227,14 +227,16 @@ export default function CalendarioVerificaciones({
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-sm text-left">
-          <thead className="bg-gray-50 border-b border-gray-200 text-gray-700">
+          <thead className="bg-[var(--bg-hover)]/70 border-b border-[var(--border-cream)] text-[var(--text-main)] text-sm uppercase tracking-wider font-bold">
             <tr>
-              <th className="py-3 px-4 font-semibold w-28 text-left border-r border-gray-200">Consecutivo</th>
-              <th className="py-3 px-4 font-semibold w-48 border-r border-gray-200">Vehículo</th>
+              <th className="py-3 px-4 font-bold w-28 text-left border-r border-[var(--border-cream)] border-b-2 border-stone-400/20">Consecutivo</th>
+              <th className="py-3 px-4 font-bold w-48 border-r border-[var(--border-cream)] border-b-2 border-stone-400/20">Vehículo</th>
               {meses.map((m, i) => (
                 <th 
                   key={i} 
-                  className={`py-3 px-2 text-center font-semibold border-gray-200 w-16 ${i === 6 ? 'border-l-2 border-l-gray-400 bg-gray-100' : 'border-l'}`}
+                  className={`py-3 px-2 text-center font-bold border-b-2 border-stone-400/20 w-16 ${
+                    i === 6 ? 'border-l-2 border-l-stone-400 bg-[var(--bg-hover)]' : 'border-l border-l-[var(--border-cream)]'
+                  }`}
                 >
                   {m}
                 </th>

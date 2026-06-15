@@ -412,13 +412,13 @@ export default function InventarioMaestroPage() {
               <div className="overflow-x-auto">
                 <table className="min-w-[1000px] w-full text-left border-collapse">
                   <thead>
-                    <tr className="bg-[var(--bg-screen)] border-b border-[var(--border-cream)] text-[var(--text-muted)] text-sm uppercase tracking-wider">
-                      <th className="p-4 font-semibold">Unidad</th>
-                      <th className="p-4 font-semibold">Vehículo</th>
-                      <th className="p-4 font-semibold">Detalles Operativos</th>
-                      <th className="p-4 font-semibold text-center">Kilometraje</th>
-                      <th className="p-4 font-semibold">Asignación</th>
-                      <th className="p-4 font-semibold text-center">Editar</th>
+                    <tr className="bg-[var(--bg-hover)]/70 border-b border-[var(--border-cream)] text-[var(--text-main)] text-sm uppercase tracking-wider font-bold">
+                      <th className="p-4 font-bold border-b-2 border-stone-400/20">Unidad</th>
+                      <th className="p-4 font-bold border-b-2 border-stone-400/20">Vehículo</th>
+                      <th className="p-4 font-bold border-b-2 border-stone-400/20">Detalles Operativos</th>
+                      <th className="p-4 font-bold border-b-2 border-stone-400/20 text-center">Kilometraje</th>
+                      <th className="p-4 font-bold border-b-2 border-stone-400/20">Asignación</th>
+                      <th className="p-4 font-bold border-b-2 border-stone-400/20 text-center">Editar</th>
                     </tr>
                   </thead>
                   <tbody className="">
