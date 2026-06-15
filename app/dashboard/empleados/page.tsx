@@ -432,18 +432,19 @@ export default function PersonalPage() {
                       <div className="absolute z-[60] w-full mt-1 bg-white border border-[var(--border-cream)] rounded-xl shadow-2xl max-h-52 overflow-y-auto scrollbar-hide">
                         {sugerenciasVehiculos.length > 0 ? (
                           sugerenciasVehiculos.map((unidad) => {
-                            const ocupadoPorOtro = unidad.Email_encargado && unidad.Email_encargado !== formData.Email;
+                            const ocupadoPorOtro = !!(unidad.Email_encargado && unidad.Email_encargado !== formData.Email);
                             
                             return (
                               <button
                                 key={unidad.Consecutivo}
                                 type="button"
+                                disabled={ocupadoPorOtro}
                                 onClick={() => {
                                   setVehiculoSeleccionado(unidad);
                                   setBusquedaVehiculo(unidad.Consecutivo);
                                   setMostrarSugerencias(false);
                                 }}
-                                className={`w-full px-4 py-3 text-left border-b border-[var(--border-cream)] last:border-none flex justify-between items-center group transition-colors ${ocupadoPorOtro ? 'hover:bg-red-50' : 'hover:bg-[var(--bg-hover)]'}`}
+                                className={`w-full px-4 py-3 text-left border-b border-[var(--border-cream)] last:border-none flex justify-between items-center group transition-colors ${ocupadoPorOtro ? 'bg-red-50/50 cursor-not-allowed opacity-60' : 'hover:bg-[var(--bg-hover)]'}`}
                               >
                                 <div>
                                   <p className={`text-sm font-bold transition-colors ${ocupadoPorOtro ? 'text-stone-400 group-hover:text-red-500' : 'text-[var(--text-main)] group-hover:text-[#71717a]'}`}>

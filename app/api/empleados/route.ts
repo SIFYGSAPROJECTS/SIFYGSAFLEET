@@ -17,77 +17,142 @@ export async function GET() {
   }
 }
 
-// Crea un nuevo empleado, genera credenciales temporales y asigna vehículo si corresponde
+// Crea un nuevo empleado, o si ya existe, solo actualiza sus datos y su asignación (sin enviar correo duplicado)
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { Email, Nombre_Empleado, A_Paterno, A_Materno, Cargo, Departamento, Rol, Estatus_Acceso, Consecutivo_Vehiculo } = body;
+    const { Email, Nombre_Empleado, A_Paterno, A_Materno, Cargo, Departamento, Rol, Estatus_Acceso, Consecutivo_Vehiculo, C_Interno_Computo } = body;
+    const emailLower = Email.toLowerCase();
 
-    const passwordTemporal = Math.random().toString(36).slice(-8) + "S!fy";
-    const hashedPassword = await bcrypt.hash(passwordTemporal, 12);
+    // Verificamos si el empleado ya existe
+    const empleadoExistente = await prisma.empleados.findUnique({
+      where: { Email: emailLower }
+    });
 
-    // Transacción para garantizar atomicidad entre creación de empleado y asignación de vehículo
-    const nuevoEmpleado = await prisma.$transaction(async (tx) => {
-      const empleado = await tx.empleados.create({
-        data: {
-          Email: Email.toLowerCase(),
-          Nombre_Empleado,
-          A_Paterno,
-          A_Materno,
-          Cargo,
-          Departamento,
-          Rol: Rol || 'USER',
-          Estatus_Acceso: Estatus_Acceso || 'Activo',
-          Password: hashedPassword, 
+    let nuevoEmpleado;
+
+    if (empleadoExistente) {
+      // SI YA EXISTE: Solo actualizamos sus datos y asignaciones, no reenviamos correo ni tocamos contraseña
+      nuevoEmpleado = await prisma.$transaction(async (tx) => {
+        const empleado = await tx.empleados.update({
+          where: { Email: emailLower },
+          data: {
+            Nombre_Empleado, A_Paterno, A_Materno, Cargo, Departamento,
+            Rol: Rol || empleadoExistente.Rol,
+            Estatus_Acceso: Estatus_Acceso || empleadoExistente.Estatus_Acceso
+          }
+        });
+
+        if (Consecutivo_Vehiculo) {
+          await tx.inventario_Automoviles.update({
+            where: { Consecutivo: Consecutivo_Vehiculo },
+            data: { Email_encargado: emailLower }
+          });
         }
+
+        if (C_Interno_Computo) {
+          await tx.inventario_Computo.update({
+            where: { C_Interno: C_Interno_Computo },
+            data: { Email_Empleado: emailLower }
+          });
+        }
+        return empleado;
       });
 
-      if (Consecutivo_Vehiculo) {
-        await tx.inventario_Automoviles.update({
-          where: { Consecutivo: Consecutivo_Vehiculo },
-          data: { Email_encargado: Email.toLowerCase() }
+      // Retornamos éxito indicando que ya existía (no enviamos correo)
+      return NextResponse.json({ success: true, data: nuevoEmpleado, message: 'El usuario ya existía, se han actualizado sus accesos y asignaciones sin enviar correo.' });
+    } else {
+      // SI NO EXISTE: Flujo normal de creación (generamos contraseña y enviamos correo)
+      const passwordTemporal = Math.random().toString(36).slice(-8) + "S!fy";
+      const hashedPassword = await bcrypt.hash(passwordTemporal, 12);
+
+      nuevoEmpleado = await prisma.$transaction(async (tx) => {
+        const empleado = await tx.empleados.create({
+          data: {
+            Email: emailLower, Nombre_Empleado, A_Paterno, A_Materno, Cargo, Departamento,
+            Rol: Rol || 'USER', Estatus_Acceso: Estatus_Acceso || 'Activo',
+            Password: hashedPassword, 
+          }
         });
-      }
 
-      return empleado;
-    });
+        if (Consecutivo_Vehiculo) {
+          await tx.inventario_Automoviles.update({
+            where: { Consecutivo: Consecutivo_Vehiculo },
+            data: { Email_encargado: emailLower }
+          });
+        }
 
-    // Envío de credenciales de acceso por correo electrónico a través de Resend
-    await enviarCorreo({
-      to: Email.toLowerCase(),
-      subject: '🔐 Bienvenido a SIFYGSA Fleet - Tus Credenciales de Acceso',
-      react: WelcomeEmail({
-        nombre: Nombre_Empleado,
-        apellidoPaterno: A_Paterno,
-        email: Email,
-        passwordTemporal: passwordTemporal,
-        rol: Rol || 'USER'
-      })
-    });
+        if (C_Interno_Computo) {
+          await tx.inventario_Computo.update({
+            where: { C_Interno: C_Interno_Computo },
+            data: { Email_Empleado: emailLower }
+          });
+        }
+        return empleado;
+      });
 
-    return NextResponse.json({ success: true, data: nuevoEmpleado });
+      // Envío de credenciales solo a usuarios NUEVOS
+      await enviarCorreo({
+        to: emailLower,
+        subject: '🔐 Bienvenido a SIFYGSA - Tus Credenciales de Acceso',
+        react: WelcomeEmail({
+          nombre: Nombre_Empleado,
+          apellidoPaterno: A_Paterno,
+          email: emailLower,
+          passwordTemporal: passwordTemporal,
+          rol: Rol || 'USER'
+        })
+      });
+
+      return NextResponse.json({ success: true, data: nuevoEmpleado, message: 'Usuario creado y correo enviado.' });
+    }
+
   } catch (error: any) {
     if (error.code === 'P2002') {
-      return NextResponse.json({ error: 'Este correo electrónico ya está registrado o el vehículo ya está asignado.' }, { status: 400 });
+      return NextResponse.json({ error: 'El equipo o vehículo ya está asignado a otra persona.' }, { status: 400 });
     }
     console.error('Error interno:', error);
     return NextResponse.json({ error: 'Error interno en el servidor' }, { status: 500 });
   }
 }
 
-// Actualiza los datos del empleado y gestiona la reasignación de vehículos
+// Actualiza los datos del empleado y gestiona la reasignación de vehículos y computadoras independientemente
 export async function PUT(request: Request) {
   try {
     const body = await request.json();
-    const { Email, Nombre_Empleado, A_Paterno, A_Materno, Cargo, Departamento, Rol, Estatus_Acceso, Consecutivo_Vehiculo } = body;
+    const { Email, Nombre_Empleado, A_Paterno, A_Materno, Cargo, Departamento, Rol, Estatus_Acceso, Consecutivo_Vehiculo, C_Interno_Computo } = body;
 
     const empleadoActualizado = await prisma.$transaction(async (tx) => {
       
-      // Libera cualquier vehículo previamente asignado al empleado
-      await tx.inventario_Automoviles.updateMany({
-        where: { Email_encargado: Email },
-        data: { Email_encargado: null }
-      });
+      // SOLO si la petición incluye Consecutivo_Vehiculo (aunque sea null), actualizamos autos
+      if (Consecutivo_Vehiculo !== undefined) {
+        await tx.inventario_Automoviles.updateMany({
+          where: { Email_encargado: Email },
+          data: { Email_encargado: null }
+        });
+
+        if (Consecutivo_Vehiculo) {
+          await tx.inventario_Automoviles.update({
+            where: { Consecutivo: Consecutivo_Vehiculo },
+            data: { Email_encargado: Email }
+          });
+        }
+      }
+
+      // SOLO si la petición incluye C_Interno_Computo (aunque sea null), actualizamos computadoras
+      if (C_Interno_Computo !== undefined) {
+        await tx.inventario_Computo.updateMany({
+          where: { Email_Empleado: Email },
+          data: { Email_Empleado: null }
+        });
+
+        if (C_Interno_Computo) {
+          await tx.inventario_Computo.update({
+            where: { C_Interno: C_Interno_Computo },
+            data: { Email_Empleado: Email }
+          });
+        }
+      }
 
       // Actualiza la información principal del empleado
       const emp = await tx.empleados.update({
@@ -102,14 +167,6 @@ export async function PUT(request: Request) {
           Estatus_Acceso, 
         }
       });
-
-      // Asigna el nuevo vehículo si se proporcionó uno
-      if (Consecutivo_Vehiculo) {
-        await tx.inventario_Automoviles.update({
-          where: { Consecutivo: Consecutivo_Vehiculo },
-          data: { Email_encargado: Email }
-        });
-      }
 
       return emp;
     });

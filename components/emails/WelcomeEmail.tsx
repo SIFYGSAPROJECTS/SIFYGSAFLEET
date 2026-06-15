@@ -29,17 +29,17 @@ export const WelcomeEmail = ({
   return (
     <Html>
       <Head />
-      <Preview>🔐 Bienvenido a SIFYGSA Fleet - Tus Credenciales de Acceso</Preview>
+      <Preview>🔐 Bienvenido a SIFYGSA - Tus Credenciales de Acceso</Preview>
       <Body style={main}>
         <Container style={container}>
           <Section style={header}>
-            <Heading style={headerTitle}>SIFYGSA FLEET</Heading>
+            <Heading style={headerTitle}>SIFYGSA</Heading>
           </Section>
           
           <Section style={content}>
-            <Heading style={title}>¡Bienvenido al Equipo! 🚛</Heading>
+            <Heading style={title}>¡Bienvenido al Equipo!</Heading>
             <Text style={text}>
-              Hola <strong>{nombre} {apellidoPaterno}</strong>, se ha creado tu cuenta corporativa en el Sistema de Gestión de Flota SIFYGSA. A continuación, tus credenciales de acceso:
+              Hola <strong>{nombre} {apellidoPaterno}</strong>, se ha creado tu cuenta corporativa en el Sistema de Gestión SIFYGSA. A continuación, tus credenciales de acceso:
             </Text>
             
             <Section style={infoBox}>

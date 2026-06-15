@@ -48,7 +48,16 @@ export default function LoginPage() {
         if (['ADMIN', 'GERENCIAL'].includes(data.user?.rol)) {
           router.push('/portal');
         } else {
-          router.push('/dashboard');
+          const areas = data.user?.areas || [];
+          if (areas.length > 1) {
+            router.push('/portal');
+          } else if (areas.includes('COMPUTO')) {
+            router.push('/computo');
+          } else if (areas.includes('AUTOS')) {
+            router.push('/dashboard');
+          } else {
+            router.push('/portal');
+          }
         }
       }, 1500);
 

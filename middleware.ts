@@ -46,13 +46,16 @@ export function middleware(request: NextRequest) {
       return NextResponse.redirect(loginUrl);
     }
 
-    // Comprobación de roles
+    // Comprobación de roles y áreas
     const userRoleCookie = request.cookies.get('user_role');
     const userRole = userRoleCookie?.value || 'USER';
     const isAdmin = ['ADMIN', 'GERENCIAL'].includes(userRole);
 
+    const userAreasCookie = request.cookies.get('user_areas');
+    const userAreas = userAreasCookie?.value ? JSON.parse(userAreasCookie.value) : [];
+
     // Módulos raíz o páginas completas exclusivas para administrador
-    const adminOnlyPaths = ['/portal', '/computo', '/programa-anual', '/verificaciones'];
+    const adminOnlyPaths = ['/programa-anual', '/verificaciones'];
     const isAdminOnlyPath = adminOnlyPaths.some(path => pathname === path || pathname.startsWith(path + '/'));
 
     // Sub-rutas de /dashboard exclusivas para administrador
@@ -66,10 +69,22 @@ export function middleware(request: NextRequest) {
     ];
     const isAdminOnlyDashboardPath = adminOnlyDashboardPaths.some(path => pathname === path || pathname.startsWith(path + '/'));
 
-    // Si intenta acceder a una ruta de administrador sin ser administrador, redirigir al dashboard básico
+    // Si intenta acceder a una ruta de administrador sin ser administrador, redirigir al portal o inicio
     if ((isAdminOnlyPath || isAdminOnlyDashboardPath) && !isAdmin) {
-      const dashboardUrl = new URL("/dashboard", request.url);
-      return NextResponse.redirect(dashboardUrl);
+      const homeUrl = new URL("/portal", request.url);
+      return NextResponse.redirect(homeUrl);
+    }
+
+    // Verificación de acceso por área para usuarios normales
+    if (!isAdmin) {
+      if (pathname.startsWith('/dashboard') && !userAreas.includes('AUTOS')) {
+        // No tiene acceso a autos
+        return NextResponse.redirect(new URL("/portal", request.url));
+      }
+      if (pathname.startsWith('/computo') && !userAreas.includes('COMPUTO')) {
+        // No tiene acceso a computo
+        return NextResponse.redirect(new URL("/portal", request.url));
+      }
     }
   }
 
