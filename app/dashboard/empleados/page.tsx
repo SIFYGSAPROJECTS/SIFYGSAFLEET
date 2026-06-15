@@ -219,7 +219,7 @@ export default function PersonalPage() {
   };
 
   return (
-    <div className="w-full">
+    <div className="p-4 sm:p-8 max-w-7xl mx-auto">
       {/* BARRA DE BOTONES SUPERIOR */}
       <div className="flex flex-col sm:flex-row justify-between gap-4 mb-6 border-b border-[var(--border-cream)] pb-4">
         <div className="flex gap-3 overflow-x-auto scrollbar-hide">

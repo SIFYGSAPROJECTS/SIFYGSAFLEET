@@ -31,7 +31,7 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
   const [scrolled, setScrolled] = useState(false);
 
   // Dynamic maxWidth based on pathname to align properly with custom page grids
-  const resolvedMaxWidth = pathname === '/computo/inventario' 
+  const resolvedMaxWidth = (pathname === '/computo/inventario' || pathname === '/computo/empleados')
     ? 'max-w-[90rem]' 
     : (pathname === '/programa-anual' ? 'max-w-[1800px]' : (maxWidth || 'max-w-7xl'));
 
