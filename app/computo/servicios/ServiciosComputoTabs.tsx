@@ -112,38 +112,33 @@ export default function ServiciosComputoTabs({ tickets, equipos, isAdmin, rol }:
           </p>
         </div>
 
-        <div className="w-full md:w-auto overflow-x-auto scrollbar-hide pb-3">
-          <div className="flex w-full justify-start sm:justify-center md:justify-end min-w-max px-1">
-            <div className="inline-flex items-center bg-[var(--bg-floating)] border border-[var(--border-cream)] rounded-full p-1.5 shadow-lg shrink-0 gap-1">
-              
-              {isAdmin && (
-                <Link href="/computo/inventario" className="px-4 py-1.5 text-xs font-bold rounded-full text-slate-500 hover:text-emerald-600 hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap">
-                  <Laptop size={14} /> Inventario
-                </Link>
-              )}
-              
-              <div className="px-4 py-1.5 text-xs font-bold rounded-full bg-white text-[var(--text-main)] cursor-default flex items-center gap-2 shadow-sm border border-[var(--border-cream)] whitespace-nowrap">
-                <Wrench size={14} className="text-emerald-500" /> Soporte TI
+          <div className="w-full md:w-auto overflow-x-auto scrollbar-hide pb-3">
+            <div className="flex w-full justify-start sm:justify-center md:justify-end min-w-max px-1">
+              <div className="inline-flex items-center bg-[var(--bg-floating)] border border-[var(--border-cream)] rounded-full p-1.5 shadow-lg shrink-0 gap-1">
+                {isAdmin && (
+                  <Link href="/computo/inventario" className="px-4 py-1.5 text-xs font-bold rounded-full text-slate-500 hover:text-emerald-600 hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap">
+                    <Laptop size={14} /> Inventario
+                  </Link>
+                )}
+                <div className="px-4 py-1.5 text-xs font-bold rounded-full bg-white text-[var(--text-main)] cursor-default flex items-center gap-2 shadow-sm border border-[var(--border-cream)] whitespace-nowrap">
+                  <Wrench size={14} className="text-emerald-500" /> Soporte TI
+                </div>
+                {isAdmin && (
+                  <Link 
+                    href="/computo/documentos" 
+                    className="px-4 py-1.5 text-xs font-bold rounded-full text-slate-500 hover:text-emerald-600 hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap"
+                  >
+                    <FolderOpen size={14} /> Documentos
+                  </Link>
+                )}
+                {isAdmin && (
+                  <Link href="/computo/empleados" className="px-4 py-1.5 text-xs font-bold rounded-full text-slate-500 hover:text-emerald-600 hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap">
+                    <User size={14} /> Personal
+                  </Link>
+                )}
               </div>
-
-              {isAdmin && (
-                <Link 
-                  href="/computo/documentos" 
-                  className="px-4 py-1.5 text-xs font-bold rounded-full text-slate-500 hover:text-emerald-600 hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap"
-                >
-                  <FolderOpen size={14} /> Documentos
-                </Link>
-              )}
-
-              {isAdmin && (
-                <Link href="/computo/empleados" className="px-4 py-1.5 text-xs font-bold rounded-full text-slate-500 hover:text-emerald-600 hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap">
-                  <User size={14} /> Personal
-                </Link>
-              )}
-
             </div>
           </div>
-        </div>
       </div>
 
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end border-b border-[var(--border-cream)] mb-6 w-full gap-4 sm:gap-0">

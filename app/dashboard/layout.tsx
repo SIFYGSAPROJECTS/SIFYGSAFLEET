@@ -31,9 +31,9 @@ export default async function DashboardLayout({
         <RoleGuard />
         
         {/* HEADER GLOBAL DEL MÓDULO */}
-        <Navbar type="dashboard" userName={userName} userRole={userRole} isAdmin={isAdmin} maxWidth="max-w-7xl" />
+        <Navbar type="dashboard" userName={userName} userRole={userRole} isAdmin={isAdmin} maxWidth="max-w-[95%]" />
 
-        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50/50 pt-24">
+        <main className="flex-1 w-full bg-gray-50/50 pt-20">
           {children}
         </main>
       </div>

@@ -114,18 +114,6 @@ export default function ServiciosTabs({ tickets, vehiculos, isAdmin, rol }: Prop
     <div className="space-y-6">
       
       <div className="flex flex-col md:flex-row justify-between md:items-center gap-5 mb-8">
-        
-        <div className="flex-1 flex flex-col items-start w-full text-left">
-          <Link href="/dashboard" className="inline-flex items-center gap-2 text-slate-400 hover:text-[#71717a] transition-colors mb-3 font-medium text-sm">
-            <ArrowLeft className="w-4 h-4" /> Volver al Panel Principal
-          </Link>
-          <h1 className="text-2xl sm:text-3xl font-black text-[var(--text-main)] flex items-center gap-3 font-serif">
-            <Wrench className="text-[#71717a]" size={32} /> Central de Servicios
-          </h1>
-          <p className="text-[var(--text-muted)] mt-2 font-medium text-sm sm:text-base">
-            {isAdmin ? 'Panel unificado para gestión de órdenes y seguimiento.' : 'Solicita mantenimientos y rastrea tu unidad.'}
-          </p>
-        </div>
 
         <div className="w-full md:w-auto overflow-x-auto scrollbar-hide pb-3">
           <div className="flex w-full justify-start sm:justify-center md:justify-end min-w-max px-1">

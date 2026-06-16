@@ -28,17 +28,7 @@ export default function UsuariosTabs({ isAdmin, empleadosIniciales }: Props) {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-5 mb-8">
         
         {/* TEXTO ALINEADO A LA IZQUIERDA */}
-        <div className="flex-1 flex flex-col items-start w-full text-left">
-          <Link href="/dashboard" className="inline-flex items-center gap-2 text-slate-400 hover:text-[#71717a] transition-colors mb-3 font-medium text-sm">
-            <ArrowLeft className="w-4 h-4" /> Volver al Panel Principal
-          </Link>
-          <h1 className="text-2xl sm:text-3xl font-black text-[var(--text-main)] flex items-center gap-3 font-serif">
-            <User className="text-[#71717a] shrink-0" size={32} /> Configuración de Usuario
-          </h1>
-          <p className="text-[var(--text-muted)] mt-2 font-medium text-sm sm:text-base leading-relaxed">
-            {isAdmin ? 'Gestión global de perfiles, permisos y seguridad de credenciales.' : 'Administra tus datos personales y contraseña.'}
-          </p>
-        </div>
+
 
         {/*  BARRA DE ACCESOS DIRECTOS RESPONSIVA  */}
         <div className="w-full md:w-auto overflow-x-auto scrollbar-hide pb-3">

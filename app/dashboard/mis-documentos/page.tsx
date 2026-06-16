@@ -52,32 +52,11 @@ export default function MisDocumentosPage() {
     <div className="min-h-screen bg-transparent">
       <div className="p-4 sm:p-8 max-w-5xl mx-auto">
         
+
+
+
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-5 mb-10">
-          
-          <div className="flex-1 flex flex-col items-start w-full text-left">
-            {/* Enlace de regreso */}
-            <Link 
-              href="/dashboard" 
-              className="inline-flex items-center gap-2 text-slate-400 hover:text-[#71717a] transition-colors font-medium text-sm mb-4"
-            >
-              <ArrowLeft className="w-4 h-4" /> 
-              Volver al Panel Principal
-            </Link>
-
-            {/* Encabezado Principal */}
-            <div className="flex items-center gap-4">
-              <div className="bg-[#71717a]/10 p-3 rounded-xl border border-[#71717a]/20 shrink-0">
-                <FolderOpen className="w-8 h-8 text-[#71717a]" />
-              </div>
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-black text-[var(--text-main)] tracking-tight font-serif">Mis Documentos</h1>
-                <p className="text-[var(--text-muted)] text-sm mt-1">Expediente de documentos oficiales de tu unidad asignada.</p>
-              </div>
-            </div>
-          </div>
-
-          {/* BARRA DE ACCESOS DIRECTOS */}
-          <div className="w-full md:w-auto overflow-x-auto scrollbar-hide pb-3 pt-2 md:pt-0">
+<div className="w-full md:w-auto overflow-x-auto scrollbar-hide pb-3 pt-2 md:pt-0">
             <div className="flex w-full justify-start sm:justify-center md:justify-end min-w-max px-1">
               <div className="inline-flex items-center bg-[var(--bg-floating)] border border-[var(--border-cream)] rounded-full p-1.5 shadow-lg shrink-0 gap-1">
                 
@@ -101,10 +80,8 @@ export default function MisDocumentosPage() {
               </div>
             </div>
           </div>
-
-        </div>
-
-        {/* ESTADO DE CARGA */}
+</div>
+{/* ESTADO DE CARGA */}
         {cargando ? (
            <div className="flex flex-col items-center justify-center p-20 text-[var(--text-muted)] gap-4">
               <Loader2 className="w-8 h-8 animate-spin text-[#71717a]" />

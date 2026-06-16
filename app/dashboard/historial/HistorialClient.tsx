@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { 
   FileText, Filter, UploadCloud, 
@@ -22,6 +22,33 @@ export default function HistorialClient({ historial, rol }: Props) {
   const [filtroAuto, setFiltroAuto] = useState('');
   const [filtroMeses, setFiltroMeses] = useState(''); 
   const [subiendoFolio, setSubiendoFolio] = useState<string | null>(null);
+
+  const [scrolled, setScrolled] = useState(false);
+  const [headerHeight, setHeaderHeight] = useState(72);
+
+
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 30);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const updateHeaderHeight = () => {
+      const header = document.getElementById('sticky-header-dashboard-historial');
+      if (header) {
+        setHeaderHeight(header.offsetHeight + 72);
+      } else {
+        setHeaderHeight(72);
+      }
+    };
+    updateHeaderHeight();
+    window.addEventListener('resize', updateHeaderHeight);
+    return () => window.removeEventListener('resize', updateHeaderHeight);
+  }, [scrolled]);
   
   const [sysModal, setSysModal] = useState<{isOpen: boolean, type: ModalType, title: string, message: React.ReactNode}>({ isOpen: false, type: 'info', title: '', message: '' });
 
@@ -131,59 +158,61 @@ export default function HistorialClient({ historial, rol }: Props) {
     <div className="w-full">
       
       {/*  BARRA DE FILTROS REDISEÑADA (Sutil y minimalista)  */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 px-1 gap-3">
-        <div className="flex items-center gap-2 text-slate-500">
-          <Filter size={14} className="text-[#71717a]" />
-          <span className="text-[10px] font-black uppercase tracking-[0.2em]">Historial de Servicios</span>
-        </div>
-        
-        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-          <PremiumSelect
-            compact
-            accent="indigo"
-            placeholder="Todas las unidades"
-            value={filtroAuto}
-            onChange={(val) => setFiltroAuto(val)}
-            options={[
-              { value: '', label: 'Todas las unidades' },
-              ...autosUnicos.map((auto: any) => ({
-                value: auto.Consecutivo,
-                label: `${auto.Consecutivo} - ${auto.Marca} ${auto.Modelo || ''}`
-              }))
-            ]}
-            className="w-48"
-          />
+      <div id="sticky-header-dashboard-historial" className={`sticky top-[72px] z-40 transition-all duration-300 pt-2 pb-2 mb-4 px-0 ${scrolled ? 'bg-[#f8fafc] border-b border-[var(--border-cream)] shadow-xl' : 'bg-transparent border-transparent'}`}>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between px-1 gap-3">
+          <div className="flex items-center gap-2 text-slate-500">
+            <Filter size={14} className="text-[#71717a]" />
+            <span className="text-[10px] font-black uppercase tracking-[0.2em]">Historial de Servicios</span>
+          </div>
+          
+          <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+            <PremiumSelect
+              compact
+              accent="indigo"
+              placeholder="Todas las unidades"
+              value={filtroAuto}
+              onChange={(val) => setFiltroAuto(val)}
+              options={[
+                { value: '', label: 'Todas las unidades' },
+                ...autosUnicos.map((auto: any) => ({
+                  value: auto.Consecutivo,
+                  label: `${auto.Consecutivo} - ${auto.Marca} ${auto.Modelo || ''}`
+                }))
+              ]}
+              className="w-48"
+            />
 
-          <PremiumSelect
-            compact
-            accent="indigo"
-            placeholder="Rango: Todo"
-            value={filtroMeses}
-            onChange={(val) => setFiltroMeses(val)}
-            options={[
-              { value: '', label: 'Rango: Todo' },
-              { value: '2', label: 'Últimos 2 meses' },
-              { value: '6', label: 'Últimos 6 meses' },
-              { value: '12', label: 'Último año' },
-            ]}
-            className="w-44"
-          />
+            <PremiumSelect
+              compact
+              accent="indigo"
+              placeholder="Rango: Todo"
+              value={filtroMeses}
+              onChange={(val) => setFiltroMeses(val)}
+              options={[
+                { value: '', label: 'Rango: Todo' },
+                { value: '2', label: 'Últimos 2 meses' },
+                { value: '6', label: 'Últimos 6 meses' },
+                { value: '12', label: 'Último año' },
+              ]}
+              className="w-44"
+            />
+          </div>
         </div>
       </div>
 
       {/* TABLA DE HISTORIAL */}
-      <div className="bg-[var(--bg-floating)] rounded-xl shadow-xl border border-[var(--border-cream)] border-t-4 border-t-[#71717a] overflow-hidden">
-        <div className="overflow-x-auto">
+      <div className="bg-[var(--bg-floating)] rounded-xl shadow-xl border border-[var(--border-cream)] border-t-4 border-t-[#71717a]">
+        <div className="w-full">
           <table className="min-w-[1000px] w-full text-left border-collapse">
             <thead>
               <tr className="bg-[var(--bg-hover)]/70 text-[var(--text-main)] text-xs uppercase tracking-wider border-b border-[var(--border-cream)] font-bold">
-                <th className="p-4 font-bold border-b-2 border-stone-400/20">Folio</th>
-                <th className="p-4 font-bold border-b-2 border-stone-400/20">Fecha</th>
-                <th className="p-4 font-bold border-b-2 border-stone-400/20">Vehículo</th>
-                <th className="p-4 font-bold border-b-2 border-stone-400/20">Solicitante</th>
-                <th className="p-4 font-bold border-b-2 border-stone-400/20 text-center">Tipo Servicio</th>
-                <th className="p-4 font-bold border-b-2 border-stone-400/20 text-center w-64">Factura</th>
-                <th className="p-4 font-bold border-b-2 border-stone-400/20 text-center">Acción</th>
+                <th className="sticky z-30 p-4 font-bold border-b-2 border-stone-400/20 bg-[var(--bg-hover)] shadow-sm rounded-tl-lg" style={{ top: `${headerHeight}px` }}>Folio</th>
+                <th className="sticky z-30 p-4 font-bold border-b-2 border-stone-400/20 bg-[var(--bg-hover)] shadow-sm" style={{ top: `${headerHeight}px` }}>Fecha</th>
+                <th className="sticky z-30 p-4 font-bold border-b-2 border-stone-400/20 bg-[var(--bg-hover)] shadow-sm" style={{ top: `${headerHeight}px` }}>Vehículo</th>
+                <th className="sticky z-30 p-4 font-bold border-b-2 border-stone-400/20 bg-[var(--bg-hover)] shadow-sm" style={{ top: `${headerHeight}px` }}>Solicitante</th>
+                <th className="sticky z-30 p-4 font-bold border-b-2 border-stone-400/20 text-center bg-[var(--bg-hover)] shadow-sm" style={{ top: `${headerHeight}px` }}>Tipo Servicio</th>
+                <th className="sticky z-30 p-4 font-bold border-b-2 border-stone-400/20 text-center w-64 bg-[var(--bg-hover)] shadow-sm" style={{ top: `${headerHeight}px` }}>Factura</th>
+                <th className="sticky z-30 p-4 font-bold border-b-2 border-stone-400/20 text-center bg-[var(--bg-hover)] shadow-sm rounded-tr-lg" style={{ top: `${headerHeight}px` }}>Acción</th>
               </tr>
             </thead>
             <tbody className="">

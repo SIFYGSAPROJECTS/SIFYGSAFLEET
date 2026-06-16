@@ -57,6 +57,29 @@ export default function InventarioMaestroPage() {
   const [userRole, setUserRole] = useState<string>('USER');
   const isAdmin = ['ADMIN', 'GERENCIAL'].includes(userRole);
 
+  const [scrolled, setScrolled] = useState(false);
+  const [headerHeight, setHeaderHeight] = useState(210);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 30);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const updateHeaderHeight = () => {
+      const header = document.getElementById('sticky-header-inventario');
+      if (header) {
+        setHeaderHeight(header.offsetHeight + 72); // 72px for the floating black Navbar (top-2 + h-16)
+      }
+    };
+    updateHeaderHeight();
+    window.addEventListener('resize', updateHeaderHeight);
+    return () => window.removeEventListener('resize', updateHeaderHeight);
+  }, [tabPrincipal, scrolled]);
+
   const cargarVehiculos = async () => {
     setCargando(true);
     try {
@@ -271,122 +294,101 @@ export default function InventarioMaestroPage() {
 
   return (
     <div className="min-h-screen bg-transparent relative">
-      <div className="p-4 sm:p-8 max-w-7xl mx-auto">
-
-        <div className="flex flex-col lg:flex-row justify-between lg:items-center gap-5 mb-8">
-
-          <div className="flex-1 flex flex-col items-start w-full text-left">
-            <Link href="/dashboard" className="inline-flex items-center gap-2 text-[var(--text-muted)] hover:text-[#71717a] transition-colors mb-3 font-medium text-sm">
-              <ArrowLeft className="w-4 h-4" /> Volver al Panel Principal
-            </Link>
-            <h1 className="text-2xl sm:text-3xl font-black text-[var(--text-main)] flex items-center gap-3 font-serif">
-              <Car className="text-[#71717a] shrink-0" size={32} /> Gestión de Flota
-            </h1>
-            <p className="text-[var(--text-muted)] mt-2 font-medium text-sm sm:text-base">Centro de control unificado de unidades SIFYGSA</p>
-          </div>
-
-          <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-end gap-4 w-full lg:w-auto">
-            <div className="w-full sm:w-auto overflow-x-auto scrollbar-hide pb-3">
-              <div className="flex w-full justify-start sm:justify-center lg:justify-end min-w-max px-1">
-                <div className="inline-flex items-center bg-[var(--bg-floating)] border border-[var(--border-cream)] rounded-full p-1.5 shadow-lg shrink-0 gap-1">
-                  <Link href="/dashboard/usuarios" className="px-4 py-1.5 text-xs font-bold rounded-full text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap">
-                    <User size={14} /> Usuarios
-                  </Link>
-                  <div className="px-4 py-1.5 text-xs font-bold rounded-full bg-white text-[var(--text-main)] cursor-default flex items-center gap-2 shadow-sm border border-[var(--border-cream)] whitespace-nowrap">
-                    <Car size={14} className="text-blue-600" /> Flota
-                  </div>
-                  <Link href="/dashboard/servicios" className="px-4 py-1.5 text-xs font-bold rounded-full text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap">
-                    <Wrench size={14} /> Servicios
-                  </Link>
-                  <Link href="/dashboard/checklists" className="px-4 py-1.5 text-xs font-bold rounded-full text-[var(--text-muted)] hover:text-cyan-600 hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap">
-                    <FileText size={14} /> Checklists
-                  </Link>
-                  <Link href="/dashboard/documentos" className="px-4 py-1.5 text-xs font-bold rounded-full text-[var(--text-muted)] hover:text-orange-500 hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap">
-                    <FolderOpen size={14} /> Documentos
-                  </Link>
-                  <Link href="/dashboard/costos" className="px-4 py-1.5 text-xs font-bold rounded-full text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap">
-                    <DollarSign size={14} /> Costos
-                  </Link>
-                  <Link href="/verificaciones" className="px-4 py-1.5 text-xs font-bold rounded-full text-[var(--text-muted)] hover:text-green-600 hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap">
-                    <CalendarCheck size={14} /> Verificaciones
-                  </Link>
+      <div className="pt-2 pb-8 sm:pt-4 sm:pb-8 max-w-[95%] mx-auto">
+        <div className={`transition-all duration-300 overflow-hidden ${scrolled ? 'max-h-0 opacity-0 mb-0' : 'max-h-20 opacity-100 mb-2'}`}>
+          <div className="w-full sm:w-auto overflow-x-auto scrollbar-hide pb-3">
+            <div className="flex w-full justify-start sm:justify-center lg:justify-end min-w-max px-1">
+              <div className="inline-flex items-center bg-[var(--bg-floating)] border border-[var(--border-cream)] rounded-full p-1.5 shadow-lg shrink-0 gap-1">
+                <Link href="/dashboard/usuarios" className="px-4 py-1.5 text-xs font-bold rounded-full text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap">
+                  <User size={14} /> Usuarios
+                </Link>
+                <div className="px-4 py-1.5 text-xs font-bold rounded-full bg-white text-[var(--text-main)] cursor-default flex items-center gap-2 shadow-sm border border-[var(--border-cream)] whitespace-nowrap">
+                  <Car size={14} className="text-blue-600" /> Flota
                 </div>
+                <Link href="/dashboard/servicios" className="px-4 py-1.5 text-xs font-bold rounded-full text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap">
+                  <Wrench size={14} /> Servicios
+                </Link>
+                <Link href="/dashboard/checklists" className="px-4 py-1.5 text-xs font-bold rounded-full text-[var(--text-muted)] hover:text-cyan-600 hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap">
+                  <FileText size={14} /> Checklists
+                </Link>
+                <Link href="/dashboard/documentos" className="px-4 py-1.5 text-xs font-bold rounded-full text-[var(--text-muted)] hover:text-orange-500 hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap">
+                  <FolderOpen size={14} /> Documentos
+                </Link>
+                <Link href="/dashboard/costos" className="px-4 py-1.5 text-xs font-bold rounded-full text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap">
+                  <DollarSign size={14} /> Costos
+                </Link>
+                <Link href="/verificaciones" className="px-4 py-1.5 text-xs font-bold rounded-full text-[var(--text-muted)] hover:text-green-600 hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap">
+                  <CalendarCheck size={14} /> Verificaciones
+                </Link>
               </div>
             </div>
           </div>
         </div>
+        {/* ENCABEZADO STICKY DE TABS Y FILTROS */}
+        <div id="sticky-header-inventario" className={`sticky top-[72px] z-40 transition-all duration-300 pt-2 pb-2 ${scrolled ? 'bg-[#f8fafc] border-x border-b border-[var(--border-cream)] shadow-xl px-0' : 'bg-transparent border-transparent px-0'}`}>
+          
+          {/* FILTRO DE EMPRESAS (Fila 1) */}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end w-full gap-4 sm:gap-0 pb-2">
+            <div className="flex space-x-1 sm:space-x-4 overflow-x-auto scrollbar-hide w-full sm:w-auto">
+              <button
+                onClick={() => setTabPrincipal('activos')}
+                className={`px-4 sm:px-6 py-2.5 font-bold text-sm sm:text-base flex items-center gap-2 border-b-2 transition-all whitespace-nowrap shrink-0 ${tabPrincipal === 'activos' ? 'border-[#71717a] text-[#71717a]' : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text-main)]'}`}
+              >
+                <ShieldCheck size={20} /> Flota Activa
+                <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${tabPrincipal === 'activos' ? 'bg-[#71717a] text-white' : 'bg-[var(--bg-hover)] text-[var(--text-muted)]'}`}>{vehiculosActivosFlota.length}</span>
+              </button>
+              <button
+                onClick={() => setTabPrincipal('bajas')}
+                className={`px-4 sm:px-6 py-2.5 font-bold text-sm sm:text-base flex items-center gap-2 border-b-2 transition-all whitespace-nowrap shrink-0 ${tabPrincipal === 'bajas' ? 'border-red-500 text-red-500' : 'border-transparent text-[var(--text-muted)] hover:text-red-500'}`}
+              >
+                <Archive size={20} /> Unidades (bajas)
+                <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${tabPrincipal === 'bajas' ? 'bg-red-500 text-white' : 'bg-[var(--bg-hover)] text-[var(--text-muted)]'}`}>{vehiculosBaja.length}</span>
+              </button>
+            </div>
 
-        {/* FILTRO DE EMPRESAS */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end border-b border-[var(--border-cream)] mb-8 w-full gap-4 sm:gap-0">
-          <div className="flex space-x-1 sm:space-x-4 overflow-x-auto scrollbar-hide w-full sm:w-auto">
-            <button
-              onClick={() => setTabPrincipal('activos')}
-              className={`px-4 sm:px-6 py-3.5 font-bold text-sm sm:text-base flex items-center gap-2 border-b-2 transition-all whitespace-nowrap shrink-0 ${tabPrincipal === 'activos' ? 'border-[#71717a] text-[#71717a]' : 'border-transparent text-[var(--text-muted)] hover:text-[#71717a]'}`}
-            >
-              <ShieldCheck size={20} /> Flota Activa
-              <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${tabPrincipal === 'activos' ? 'bg-[#71717a] text-white' : 'bg-stone-200 text-stone-600'}`}>{vehiculosActivosFlota.length}</span>
-            </button>
-            <button
-              onClick={() => setTabPrincipal('bajas')}
-              className={`px-4 sm:px-6 py-3.5 font-bold text-sm sm:text-base flex items-center gap-2 border-b-2 transition-all whitespace-nowrap shrink-0 ${tabPrincipal === 'bajas' ? 'border-red-500 text-red-500' : 'border-transparent text-[var(--text-muted)] hover:text-red-500'}`}
-            >
-              <Archive size={20} /> Unidades (bajas)
-              <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${tabPrincipal === 'bajas' ? 'bg-red-500 text-white' : 'bg-stone-200 text-stone-600'}`}>{vehiculosBaja.length}</span>
-            </button>
-          </div>
-
-          {/* BOTONES DE ACCIÓN */}
-          <div className="pb-3 w-full sm:w-auto shrink-0 flex flex-col sm:flex-row items-center justify-end gap-3">
-            {tabPrincipal === 'activos' && isAdmin && (
-              <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-                <button onClick={descargarCSV} className="w-full sm:w-auto bg-white hover:bg-[var(--bg-hover)] border border-[var(--border-cream)] text-[var(--text-main)] px-4 py-2.5 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors shadow-sm shrink-0">
+            {/* BOTONES DE ACCIÓN */}
+            <div className="w-full sm:w-auto shrink-0 flex flex-col sm:flex-row items-center justify-end gap-3">
+              {tabPrincipal === 'activos' && isAdmin && (
+                <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                  <button onClick={descargarCSV} className="w-full sm:w-auto bg-white hover:bg-[var(--bg-hover)] border border-[var(--border-cream)] text-[var(--text-main)] px-4 py-2 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors shadow-sm shrink-0">
+                    <Download className="w-4 h-4" /> Exportar Excel
+                  </button>
+                  <button onClick={abrirModalNuevo} className="w-full sm:w-auto bg-[#71717a] hover:bg-[#52525b] text-white px-5 py-2 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg active:scale-95 shrink-0">
+                    <Plus className="w-5 h-5" /> Nuevo Vehículo
+                  </button>
+                </div>
+              )}
+              {tabPrincipal === 'bajas' && isAdmin && (
+                <button onClick={descargarCSV} className="w-full sm:w-auto bg-white hover:bg-[var(--bg-hover)] border border-[var(--border-cream)] text-[var(--text-main)] px-4 py-2 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors shadow-sm shrink-0">
                   <Download className="w-4 h-4" /> Exportar Excel
                 </button>
-                <button onClick={abrirModalNuevo} className="w-full sm:w-auto bg-[#71717a] hover:bg-[#52525b] text-white px-5 py-2.5 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg active:scale-95 shrink-0">
-                  <Plus className="w-5 h-5" /> Nuevo Vehículo
-                </button>
-              </div>
-            )}
-            {tabPrincipal === 'bajas' && isAdmin && (
-              <button onClick={descargarCSV} className="w-full sm:w-auto bg-white hover:bg-[var(--bg-hover)] border border-[var(--border-cream)] text-[var(--text-main)] px-4 py-2.5 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors shadow-sm shrink-0">
-                <Download className="w-4 h-4" /> Exportar Excel
-              </button>
-            )}
-          </div>
-        </div>
-
-        {tabPrincipal === 'activos' && (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 w-full">
-
-            <div className="flex space-x-2 sm:space-x-4 mb-6 overflow-x-auto pb-2 scrollbar-hide w-full">
-              <button onClick={() => setFiltroActivo('Activo en flota')} className={`flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-lg font-bold transition-all text-sm sm:text-base whitespace-nowrap shrink-0 ${filtroActivo === 'Activo en flota' ? 'bg-[#71717a]/10 text-[#71717a] border border-[#71717a]/50 shadow-md' : 'text-[var(--text-muted)] hover:text-[#71717a] hover:bg-[var(--bg-hover)] border border-transparent'}`}>
-                <ShieldCheck size={18} className="shrink-0" /> <span className="whitespace-nowrap">Operativos</span>
-                <span className={`ml-1 px-2 py-0.5 rounded-full text-[10px] ${filtroActivo === 'Activo en flota' ? 'bg-[#71717a] text-white' : 'bg-stone-200 text-stone-600'}`}>{totalActivos}</span>
-              </button>
-
-              <button onClick={() => setFiltroActivo('En Reparación')} className={`flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-lg font-bold transition-all text-sm sm:text-base whitespace-nowrap shrink-0 ${filtroActivo === 'En Reparación' ? 'bg-yellow-500/10 text-yellow-600 border border-yellow-500/50 shadow-md' : 'text-[var(--text-muted)] hover:text-yellow-600 hover:bg-[var(--bg-hover)] border border-transparent'}`}>
-                <Wrench size={18} className="shrink-0" /> <span className="whitespace-nowrap">Taller</span>
-                <span className={`ml-1 px-2 py-0.5 rounded-full text-[10px] ${filtroActivo === 'En Reparación' ? 'bg-yellow-500 text-white font-extrabold' : 'bg-stone-200 text-stone-600'}`}>{totalReparacion}</span>
-              </button>
-
-              <button onClick={() => setFiltroActivo('Disponibles')} className={`flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-lg font-bold transition-all text-sm sm:text-base whitespace-nowrap shrink-0 ${filtroActivo === 'Disponibles' ? 'bg-stone-500/10 text-stone-600 border border-stone-500/50 shadow-md' : 'text-[var(--text-muted)] hover:text-stone-600 hover:bg-[var(--bg-hover)] border border-transparent'}`}>
-                <CheckCircle2 size={18} className="shrink-0" /> <span className="whitespace-nowrap">Sin Asignar</span>
-                <span className={`ml-1 px-2 py-0.5 rounded-full text-[10px] ${filtroActivo === 'Disponibles' ? 'bg-stone-500 text-white font-extrabold' : 'bg-stone-200 text-stone-600'}`}>{totalDisponibles}</span>
-              </button>
-
-              <button onClick={() => setFiltroActivo('Siniestrado')} className={`flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-lg font-bold transition-all text-sm sm:text-base whitespace-nowrap shrink-0 ${filtroActivo === 'Siniestrado' ? 'bg-red-500/10 text-red-600 border border-red-500/50 shadow-md' : 'text-[var(--text-muted)] hover:text-red-600 hover:bg-[var(--bg-hover)] border border-transparent'}`}>
-                <AlertTriangle size={18} className="shrink-0" /> <span className="whitespace-nowrap">Siniestrados</span>
-                <span className={`ml-1 px-2 py-0.5 rounded-full text-[10px] ${filtroActivo === 'Siniestrado' ? 'bg-red-500 text-white' : 'bg-stone-200 text-stone-600'}`}>{totalSiniestrados}</span>
-              </button>
+              )}
             </div>
+          </div>
 
-            {/* BARRA DE FILTROS REDISEÑADA (Sutil y minimalista) */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 px-1 gap-3 relative z-20">
-              <div className="flex items-center gap-2 text-slate-500">
-                <Filter size={14} className="text-[#71717a]" />
-                <span className="text-[10px] font-black uppercase tracking-[0.2em]">Filtros de Tabla</span>
-              </div>
+          {/* FILTROS SECUNDARIOS (Fila 2) */}
+          {tabPrincipal === 'activos' && (
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 w-full mt-2 pt-2 border-t border-[var(--border-cream)]">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-4 mb-2 pb-2 w-full">
+                <button onClick={() => setFiltroActivo('Activo en flota')} className={`flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-lg font-bold transition-all text-sm sm:text-base whitespace-nowrap shrink-0 ${filtroActivo === 'Activo en flota' ? 'bg-[#71717a]/10 text-[#71717a] border border-[#71717a]/50 shadow-md' : 'text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-hover)] border border-transparent'}`}>
+                <ShieldCheck size={18} className="shrink-0" /> <span className="whitespace-nowrap">Operativos</span>
+                <span className={`ml-1 px-2 py-0.5 rounded-full text-[10px] ${filtroActivo === 'Activo en flota' ? 'bg-[#71717a] text-white' : 'bg-[var(--bg-hover)] text-[var(--text-muted)]'}`}>{totalActivos}</span>
+              </button>
 
+              <button onClick={() => setFiltroActivo('En Reparación')} className={`flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-lg font-bold transition-all text-sm sm:text-base whitespace-nowrap shrink-0 ${filtroActivo === 'En Reparación' ? 'bg-yellow-500/10 text-yellow-600 border border-yellow-500/50 shadow-md' : 'text-[var(--text-muted)] hover:text-yellow-500 hover:bg-[var(--bg-hover)] border border-transparent'}`}>
+                <Wrench size={18} className="shrink-0" /> <span className="whitespace-nowrap">Taller</span>
+                <span className={`ml-1 px-2 py-0.5 rounded-full text-[10px] ${filtroActivo === 'En Reparación' ? 'bg-yellow-500 text-white font-extrabold' : 'bg-[var(--bg-hover)] text-[var(--text-muted)]'}`}>{totalReparacion}</span>
+              </button>
+
+              <button onClick={() => setFiltroActivo('Disponibles')} className={`flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-lg font-bold transition-all text-sm sm:text-base whitespace-nowrap shrink-0 ${filtroActivo === 'Disponibles' ? 'bg-stone-500/10 text-stone-600 border border-stone-500/50 shadow-md' : 'text-[var(--text-muted)] hover:text-stone-400 hover:bg-[var(--bg-hover)] border border-transparent'}`}>
+                <CheckCircle2 size={18} className="shrink-0" /> <span className="whitespace-nowrap">Sin Asignar</span>
+                <span className={`ml-1 px-2 py-0.5 rounded-full text-[10px] ${filtroActivo === 'Disponibles' ? 'bg-stone-500 text-white font-extrabold' : 'bg-[var(--bg-hover)] text-[var(--text-muted)]'}`}>{totalDisponibles}</span>
+              </button>
+
+              <button onClick={() => setFiltroActivo('Siniestrado')} className={`flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-lg font-bold transition-all text-sm sm:text-base whitespace-nowrap shrink-0 ${filtroActivo === 'Siniestrado' ? 'bg-red-500/10 text-red-600 border border-red-500/50 shadow-md' : 'text-[var(--text-muted)] hover:text-red-500 hover:bg-[var(--bg-hover)] border border-transparent'}`}>
+                <AlertTriangle size={18} className="shrink-0" /> <span className="whitespace-nowrap">Siniestrados</span>
+                <span className={`ml-1 px-2 py-0.5 rounded-full text-[10px] ${filtroActivo === 'Siniestrado' ? 'bg-red-500 text-white' : 'bg-[var(--bg-hover)] text-[var(--text-muted)]'}`}>{totalSiniestrados}</span>
+              </button>
               <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                 <PremiumSelect
                   compact
@@ -406,19 +408,27 @@ export default function InventarioMaestroPage() {
                 />
               </div>
             </div>
+            </div>
+          )}
+        </div>
 
-            {/* TABLA DE ACTIVOS */}
-            <div className={`bg-[var(--bg-floating)] rounded-xl shadow-xl border border-[var(--border-cream)] border-t-4 overflow-hidden transition-colors duration-500 ${colorBordeTabla}`}>
-              <div className="overflow-x-auto">
+        {/* TABLA DE ACTIVOS */}
+        {tabPrincipal === 'activos' && (
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 w-full">
+            <div className={`bg-[var(--bg-floating)] rounded-xl shadow-xl border border-[var(--border-cream)] border-t-4 transition-colors duration-500 ${colorBordeTabla}`}>
+              <div 
+                id="table-scroll-container"
+                className="w-full transition-all duration-300" 
+              >
                 <table className="min-w-[1000px] w-full text-left border-collapse">
                   <thead>
-                    <tr className="bg-[var(--bg-hover)]/70 border-b border-[var(--border-cream)] text-[var(--text-main)] text-sm uppercase tracking-wider font-bold">
-                      <th className="p-4 font-bold border-b-2 border-stone-400/20">Unidad</th>
-                      <th className="p-4 font-bold border-b-2 border-stone-400/20">Vehículo</th>
-                      <th className="p-4 font-bold border-b-2 border-stone-400/20">Detalles Operativos</th>
-                      <th className="p-4 font-bold border-b-2 border-stone-400/20 text-center">Kilometraje</th>
-                      <th className="p-4 font-bold border-b-2 border-stone-400/20">Asignación</th>
-                      <th className="p-4 font-bold border-b-2 border-stone-400/20 text-center">Editar</th>
+                    <tr className="bg-[#e5e5e5] border-b border-[var(--border-cream)] text-[var(--text-main)] text-sm uppercase tracking-wider font-bold">
+                      <th className="sticky z-30 p-4 font-bold border-b-2 border-stone-400/20 bg-[#e5e5e5] shadow-sm rounded-tl-lg" style={{ top: `${headerHeight}px` }}>Unidad</th>
+                      <th className="sticky z-30 p-4 font-bold border-b-2 border-stone-400/20 bg-[#e5e5e5] shadow-sm" style={{ top: `${headerHeight}px` }}>Vehículo</th>
+                      <th className="sticky z-30 p-4 font-bold border-b-2 border-stone-400/20 bg-[#e5e5e5] shadow-sm" style={{ top: `${headerHeight}px` }}>Detalles Operativos</th>
+                      <th className="sticky z-30 p-4 font-bold border-b-2 border-stone-400/20 text-center bg-[#e5e5e5] shadow-sm" style={{ top: `${headerHeight}px` }}>Kilometraje</th>
+                      <th className="sticky z-30 p-4 font-bold border-b-2 border-stone-400/20 bg-[#e5e5e5] shadow-sm" style={{ top: `${headerHeight}px` }}>Asignación</th>
+                      <th className="sticky z-30 p-4 font-bold border-b-2 border-stone-400/20 text-center bg-[#e5e5e5] shadow-sm rounded-tr-lg" style={{ top: `${headerHeight}px` }}>Editar</th>
                     </tr>
                   </thead>
                   <tbody className="">
@@ -480,8 +490,12 @@ export default function InventarioMaestroPage() {
 
         {tabPrincipal === 'bajas' && (
           <div className="animate-in fade-in slide-in-from-right-8 duration-500">
-            {/* BARRA DE FILTROS REDISEÑADA (Sutil y minimalista) */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 px-1 gap-3 relative z-20">
+            <div 
+              className={`sticky z-50 pt-2 pb-2 mb-2 px-0 transition-all duration-500 ${scrolled ? 'bg-[#f8fafc] border-b-2 border-stone-300 shadow-2xl shadow-stone-200/50' : 'bg-transparent border-transparent shadow-none'}`}
+              style={{ top: `${headerHeight}px` }}
+            >
+              {/* BARRA DE FILTROS REDISEÑADA (Sutil y minimalista) */}
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between px-1 gap-3 relative z-20">
               <div className="flex items-center gap-2 text-slate-500">
                 <Filter size={14} className="text-[#71717a]" />
                 <span className="text-[10px] font-black uppercase tracking-[0.2em]">Filtros de Tabla</span>
@@ -505,6 +519,7 @@ export default function InventarioMaestroPage() {
                   direction="down"
                 />
               </div>
+            </div>
             </div>
 
             {cargando ? (

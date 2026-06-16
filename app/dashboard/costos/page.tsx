@@ -41,6 +41,31 @@ export default function CostosPage() {
   const [isExporting, setIsExporting] = useState(false);
   const [userRole, setUserRole] = useState<string>('USER');
   const isAdmin = ['ADMIN', 'GERENCIAL'].includes(userRole);
+
+  const [scrolled, setScrolled] = useState(false);
+  const [headerHeight, setHeaderHeight] = useState(72);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 30);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const updateHeaderHeight = () => {
+      const header = document.getElementById('sticky-header-dashboard-costos');
+      if (header) {
+        setHeaderHeight(header.offsetHeight + 72);
+      } else {
+        setHeaderHeight(72);
+      }
+    };
+    updateHeaderHeight();
+    window.addEventListener('resize', updateHeaderHeight);
+    return () => window.removeEventListener('resize', updateHeaderHeight);
+  }, [scrolled]);
   
   // Filtros
   const [empresaFiltro, setEmpresaFiltro] = useState('');
@@ -336,22 +361,11 @@ export default function CostosPage() {
 
   return (
     <div className="min-h-screen bg-transparent relative">
-      <div className="p-4 sm:p-8 max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500">
+      <div className="pt-2 pb-8 sm:pt-4 sm:pb-8 max-w-[95%] mx-auto space-y-8 animate-in fade-in duration-500 relative">
         
         {/* ENCABEZADO Y NAVEGACIÓN */}
         <div className="flex flex-col lg:flex-row justify-between lg:items-center gap-5 mb-2">
-          <div className="flex-1 flex flex-col items-start w-full text-left">
-            <Link href="/dashboard" className="inline-flex items-center gap-2 text-[var(--text-muted)] hover:text-[#71717a] transition-colors mb-3 font-medium text-sm">
-              <ArrowLeft className="w-4 h-4" /> Volver al Panel Principal
-            </Link>
-            <h1 className="text-2xl sm:text-3xl font-black text-[var(--text-main)] flex items-center gap-3 font-serif">
-              <DollarSign className="text-[#71717a] shrink-0" size={32} /> Control de Costos
-            </h1>
-            <p className="text-[var(--text-muted)] mt-2 font-medium text-sm sm:text-base">
-              Gestión y análisis de gastos de mantenimiento por unidad y empresa.
-            </p>
-          </div>
-
+        <div className="transition-all duration-300 overflow-hidden mb-2">
           <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-end gap-4 w-full lg:w-auto">
             <div className="w-full sm:w-auto overflow-x-auto scrollbar-hide pb-3">
               <div className="flex w-full justify-start sm:justify-center lg:justify-end min-w-max px-1">
@@ -379,8 +393,9 @@ export default function CostosPage() {
             </div>
           </div>
         </div>
+        </div>
 
-        <div className="flex flex-wrap justify-center sm:justify-end items-center gap-2 sm:gap-3 w-full border-b border-[var(--border-cream)] pb-6">
+        <div className="flex flex-wrap justify-center sm:justify-end items-center gap-2 sm:gap-3 w-full border-b border-[var(--border-cream)] pb-4 mb-6">
           <input 
             type="file" 
             accept=".xlsx, .xls" 
@@ -495,7 +510,8 @@ export default function CostosPage() {
       </div>
 
       {/* Filtros Inteligentes */}
-      <div className="bg-[var(--bg-floating)] border border-[var(--border-cream)] p-3 px-5 rounded-xl flex flex-col md:flex-row gap-4 items-center relative z-20">
+      <div id="sticky-header-dashboard-costos" className={`sticky top-[72px] z-40 transition-all duration-300 pt-2 pb-2 mb-4 px-0 ${scrolled ? 'bg-[#f8fafc] border-b border-[var(--border-cream)] shadow-xl' : 'bg-transparent border-transparent'}`}>
+        <div className="bg-[var(--bg-floating)] border border-[var(--border-cream)] p-3 px-5 rounded-xl flex flex-col md:flex-row gap-4 items-center relative shadow-sm">
         <div className="flex items-center gap-2 text-[var(--text-muted)] w-full md:w-auto mr-auto">
           <Filter size={18} />
           <span className="font-bold text-sm">Filtros:</span>
@@ -541,21 +557,22 @@ export default function CostosPage() {
           />
         </div>
       </div>
+      </div>
 
       {/* Tabla de Datos */}
-      <div className="bg-[var(--bg-floating)] border border-[var(--border-cream)] rounded-xl overflow-hidden shadow-sm">
-        <div className="overflow-x-auto">
+      <div className="bg-[var(--bg-floating)] border border-[var(--border-cream)] rounded-xl shadow-sm">
+        <div className="w-full">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-[var(--bg-hover)]/70 border-b border-[var(--border-cream)] text-[var(--text-main)] text-sm uppercase tracking-wider font-bold">
-                <th className="p-4 font-bold border-b-2 border-stone-400/20">Fecha</th>
-                <th className="p-4 font-bold border-b-2 border-stone-400/20">Servicio</th>
-                <th className="p-4 font-bold border-b-2 border-stone-400/20">Unidad</th>
-                <th className="p-4 font-bold border-b-2 border-stone-400/20">Costo MO</th>
-                <th className="p-4 font-bold border-b-2 border-stone-400/20">Costo Ref.</th>
-                <th className="p-4 font-bold border-b-2 border-stone-400/20">Total</th>
-                <th className="p-4 font-bold border-b-2 border-stone-400/20">Empresa</th>
-                <th className="p-4 font-bold border-b-2 border-stone-400/20">Proveedor</th>
+                <th className="sticky z-30 p-4 font-bold border-b-2 border-stone-400/20 bg-[var(--bg-hover)] shadow-sm rounded-tl-lg" style={{ top: `${headerHeight}px` }}>Fecha</th>
+                <th className="sticky z-30 p-4 font-bold border-b-2 border-stone-400/20 bg-[var(--bg-hover)] shadow-sm" style={{ top: `${headerHeight}px` }}>Servicio</th>
+                <th className="sticky z-30 p-4 font-bold border-b-2 border-stone-400/20 bg-[var(--bg-hover)] shadow-sm" style={{ top: `${headerHeight}px` }}>Unidad</th>
+                <th className="sticky z-30 p-4 font-bold border-b-2 border-stone-400/20 bg-[var(--bg-hover)] shadow-sm" style={{ top: `${headerHeight}px` }}>Costo MO</th>
+                <th className="sticky z-30 p-4 font-bold border-b-2 border-stone-400/20 bg-[var(--bg-hover)] shadow-sm" style={{ top: `${headerHeight}px` }}>Costo Ref.</th>
+                <th className="sticky z-30 p-4 font-bold border-b-2 border-stone-400/20 bg-[var(--bg-hover)] shadow-sm" style={{ top: `${headerHeight}px` }}>Total</th>
+                <th className="sticky z-30 p-4 font-bold border-b-2 border-stone-400/20 bg-[var(--bg-hover)] shadow-sm" style={{ top: `${headerHeight}px` }}>Empresa</th>
+                <th className="sticky z-30 p-4 font-bold border-b-2 border-stone-400/20 bg-[var(--bg-hover)] shadow-sm rounded-tr-lg" style={{ top: `${headerHeight}px` }}>Proveedor</th>
               </tr>
             </thead>
             <tbody>

@@ -31,9 +31,14 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
   const [scrolled, setScrolled] = useState(false);
 
   // Dynamic maxWidth based on pathname to align properly with custom page grids
-  const resolvedMaxWidth = (pathname === '/computo/inventario' || pathname === '/computo/empleados')
-    ? 'max-w-[90rem]' 
-    : (pathname === '/programa-anual' ? 'max-w-[1800px]' : (maxWidth || 'max-w-7xl'));
+  let resolvedMaxWidth = maxWidth || 'max-w-7xl';
+  if (pathname === '/dashboard' || pathname === '/computo') {
+    resolvedMaxWidth = 'max-w-7xl';
+  } else if (pathname.startsWith('/dashboard/') || pathname.startsWith('/computo/')) {
+    resolvedMaxWidth = 'max-w-[95%]';
+  } else if (pathname === '/programa-anual') {
+    resolvedMaxWidth = 'max-w-[1800px]';
+  }
 
   // Client-side dynamic state for session
   const [localUserName, setLocalUserName] = useState(userName);
@@ -203,66 +208,70 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
   }
 
   // --- DASHBOARD & COMPUTO HEADER LAYOUT ---
+  const getPageTitle = () => {
+    if (pathname.includes('/inventario')) return 'Gestión de Flota';
+    if (pathname.includes('/servicios')) return 'Central de Servicios';
+    if (pathname.includes('/empleados') || pathname.includes('/usuarios')) return 'Gestión de Personal';
+    if (pathname.includes('/costos')) return 'Centro de Costos';
+    if (pathname.includes('/checklists')) return 'Control de Checklists';
+    if (pathname.includes('/documentos')) return 'Centro de Documentos';
+    if (pathname.includes('/verificaciones')) return 'Verificaciones';
+    if (type === 'computo') return 'Cómputo TI';
+    if (type === 'programa') return 'Programa Anual';
+    return 'Panel de Control';
+  };
+
   return (
     <>
-      {/* Header Container - Transparent Wrapper */}
-      <header className={`fixed top-4 left-4 right-4 z-[100] mx-auto transition-all duration-300 ${resolvedMaxWidth}`}>
-        {/* Background blur bridge - hardware accelerated fade & scale */}
-        <div className={`absolute inset-0 -z-10 rounded-2xl transition-all duration-700 ease-in-out ${
-          scrolled 
-            ? 'bg-zinc-900/90 backdrop-blur-md border border-white/10 shadow-lg shadow-black/25 opacity-100 scale-100' 
-            : 'bg-transparent border border-transparent shadow-none opacity-0 scale-[0.98] pointer-events-none'
-        }`} />
+      {/* Backdrop Blocker - Prevents content from peeking around the floating Navbar when scrolled */}
+      <div className={`fixed top-0 left-0 right-0 h-[72px] bg-[#f8fafc] z-[90] transition-opacity duration-300 pointer-events-none ${scrolled ? 'opacity-100' : 'opacity-0'}`} />
+      
+      {/* Header Container - Floating Unified Black Ribbon */}
+      <header className={`fixed top-2 left-4 right-4 z-[100] mx-auto transition-all duration-300 ${resolvedMaxWidth}`}>
+        <div className={`absolute inset-0 -z-10 rounded-2xl transition-all duration-700 ease-in-out bg-[#0a0a0a] border border-white/10 shadow-lg shadow-black/40`} />
         <div className="px-6 flex items-center justify-between h-16">
           
           {/* LEFT SIDE: Brand Logo / Title */}
-          {type === 'computo' ? (
-            <Link href="/computo" className={`flex items-center space-x-3 group px-4 py-2 rounded-xl transition-all duration-700 ease-in-out ${
-              scrolled 
-                ? 'bg-transparent border border-transparent shadow-none' 
-                : 'bg-zinc-900/90 border border-white/10 backdrop-blur-md shadow-lg shadow-black/20'
-            }`}>
-              <div className="bg-emerald-500 p-2 rounded-xl shadow-lg shadow-emerald-500/20 group-hover:scale-105 transition-transform duration-300">
-                <Server className="text-white h-5 w-5" />
-              </div>
-              <span className="font-serif font-medium text-xl tracking-wide text-white transition-colors group-hover:text-emerald-400">
-                SIFYGSA <span className="text-emerald-400 font-serif">TI</span>
-              </span>
-            </Link>
-          ) : type === 'programa' ? (
-            <Link href="/programa-anual" className={`flex items-center space-x-3 group px-4 py-2 rounded-xl transition-all duration-700 ease-in-out ${
-              scrolled 
-                ? 'bg-transparent border border-transparent shadow-none' 
-                : 'bg-zinc-900/90 border border-white/10 backdrop-blur-md shadow-lg shadow-black/20'
-            }`}>
-              <div className="bg-indigo-500 p-2 rounded-xl shadow-lg shadow-indigo-500/20 group-hover:scale-105 transition-transform duration-300">
-                <CalendarDays className="text-white h-5 w-5" />
-              </div>
-              <span className="font-serif font-medium text-xl tracking-wide text-white transition-colors group-hover:text-indigo-400">
-                SIFYGSA <span className="text-indigo-400 font-serif">Plan</span>
-              </span>
-            </Link>
-          ) : (
-            <Link href="/dashboard" className={`flex items-center space-x-3 group px-4 py-2 rounded-xl transition-all duration-700 ease-in-out ${
-              scrolled 
-                ? 'bg-transparent border border-transparent shadow-none' 
-                : 'bg-zinc-900/90 border border-white/10 backdrop-blur-md shadow-lg shadow-black/20'
-            }`}>
-              <div className="bg-[#71717a] p-2 rounded-xl shadow-lg shadow-[#71717a]/20 group-hover:scale-105 transition-transform duration-300">
-                <Car className="text-white h-5 w-5" />
-              </div>
-              <span className="font-serif font-medium text-xl tracking-wide text-white transition-colors group-hover:text-stone-300">
-                SIFYGSA <span className="text-stone-400 font-serif">Fleet</span>
-              </span>
-            </Link>
-          )}
+          <div className="flex-1 flex justify-start">
+            {type === 'computo' ? (
+              <Link href="/computo" className={`flex items-center space-x-3 group px-2 transition-all`}>
+                <div className="bg-emerald-500 p-1.5 rounded-lg shadow-lg shadow-emerald-500/20 group-hover:scale-105 transition-transform duration-300">
+                  <Server className="text-white h-4 w-4" />
+                </div>
+                <span className="hidden sm:block font-serif font-medium text-lg tracking-wide text-white transition-colors group-hover:text-emerald-400">
+                  SIFYGSA <span className="text-emerald-400 font-serif">TI</span>
+                </span>
+              </Link>
+            ) : type === 'programa' ? (
+              <Link href="/programa-anual" className={`flex items-center space-x-3 group px-2 transition-all`}>
+                <div className="bg-indigo-500 p-1.5 rounded-lg shadow-lg shadow-indigo-500/20 group-hover:scale-105 transition-transform duration-300">
+                  <CalendarDays className="text-white h-4 w-4" />
+                </div>
+                <span className="hidden sm:block font-serif font-medium text-lg tracking-wide text-white transition-colors group-hover:text-indigo-400">
+                  SIFYGSA <span className="text-indigo-400 font-serif">Plan</span>
+                </span>
+              </Link>
+            ) : (
+              <Link href="/dashboard" className={`flex items-center space-x-3 group px-2 transition-all`}>
+                <div className="bg-[#71717a] p-1.5 rounded-lg shadow-lg shadow-[#71717a]/20 group-hover:scale-105 transition-transform duration-300">
+                  <Car className="text-white h-4 w-4" />
+                </div>
+                <span className="hidden sm:block font-serif font-medium text-lg tracking-wide text-white transition-colors group-hover:text-stone-300">
+                  SIFYGSA <span className="text-stone-400 font-serif">Fleet</span>
+                </span>
+              </Link>
+            )}
+          </div>
+
+          {/* CENTER: Page Title */}
+          <div className="hidden md:flex flex-1 justify-center items-center">
+            <h1 className="text-white font-bold text-lg tracking-wide flex items-center gap-2">
+              {getPageTitle()}
+            </h1>
+          </div>
 
           {/* RIGHT SIDE: Action Buttons (Desktop Only) - Hover Dropdowns */}
-          <div className={`hidden md:flex items-center rounded-xl p-0.5 transition-all duration-700 ease-in-out ${
-            scrolled 
-              ? 'bg-transparent border border-transparent shadow-none' 
-              : 'bg-zinc-900/90 border border-white/10 backdrop-blur-md shadow-lg shadow-black/25'
-          }`}>
+          <div className="flex-1 hidden md:flex justify-end items-center bg-white/5 border border-white/5 rounded-xl p-0.5 shadow-inner backdrop-blur-md">
             
             {/* Módulos Hover Dropdown */}
             {(localIsAdmin || localUserAreas.length > 0) && (
@@ -350,23 +359,21 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
 
           </div>
 
-          {/* Burger Menu Button (Mobile Only) - Floating Glass button */}
-          <button
-            className={`md:hidden relative z-[110] w-10 h-10 flex items-center justify-center rounded-xl text-white transition-all duration-700 ease-in-out ${
-              scrolled 
-                ? 'bg-transparent border border-transparent hover:bg-white/5' 
-                : 'bg-zinc-900/90 border border-white/10 hover:bg-zinc-950 shadow-lg backdrop-blur-md'
-            }`}
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            aria-label="Toggle menu"
-          >
-            <span className={`absolute transition-all duration-200 ${isMenuOpen ? 'opacity-100 rotate-0' : 'opacity-0 rotate-90'}`}>
-              <X size={18} />
-            </span>
-            <span className={`absolute transition-all duration-200 ${isMenuOpen ? 'opacity-0 -rotate-90' : 'opacity-100 rotate-0'}`}>
-              <Menu size={18} />
-            </span>
-          </button>
+          {/* Burger Menu Button (Mobile Only) */}
+          <div className="flex-1 flex md:hidden justify-end items-center">
+            <button
+              className="relative z-[110] w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-colors"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              aria-label="Toggle menu"
+            >
+              <span className={`absolute transition-all duration-200 ${isMenuOpen ? 'opacity-100 rotate-0' : 'opacity-0 rotate-90'}`}>
+                <X size={18} />
+              </span>
+              <span className={`absolute transition-all duration-200 ${isMenuOpen ? 'opacity-0 -rotate-90' : 'opacity-100 rotate-0'}`}>
+                <Menu size={18} />
+              </span>
+            </button>
+          </div>
 
         </div>
       </header>

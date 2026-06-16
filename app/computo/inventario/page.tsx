@@ -69,6 +69,31 @@ export default function ComputoInventarioPage() {
     }
   };
 
+  const [scrolled, setScrolled] = useState(false);
+  const [headerHeight, setHeaderHeight] = useState(72);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 30);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const updateHeaderHeight = () => {
+      const header = document.getElementById('sticky-header-computo');
+      if (header) {
+        setHeaderHeight(header.offsetHeight + 72);
+      } else {
+        setHeaderHeight(72);
+      }
+    };
+    updateHeaderHeight();
+    window.addEventListener('resize', updateHeaderHeight);
+    return () => window.removeEventListener('resize', updateHeaderHeight);
+  }, [tabPrincipal, scrolled]);
+
   useEffect(() => {
     cargarEquipos();
     const match = document.cookie.match(new RegExp('(^| )user_role=([^;]+)'));
@@ -340,7 +365,7 @@ export default function ComputoInventarioPage() {
 
   return (
     <div className="min-h-screen bg-transparent relative">
-      <div className="p-4 sm:p-8 max-w-[90rem] mx-auto">
+      <div className="pt-2 pb-8 sm:pt-4 sm:pb-8 max-w-[95%] mx-auto relative">
 
         <div className="flex flex-col lg:flex-row justify-between lg:items-center gap-5 mb-8">
           <div className="flex-1 flex flex-col items-start w-full text-left">
@@ -353,44 +378,43 @@ export default function ComputoInventarioPage() {
           </div>
         </div>
 
-        {/* TABS PRINCIPALES */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end border-b border-[var(--border-cream)] mb-6 w-full gap-4 sm:gap-0">
-          <div className="flex space-x-1 sm:space-x-4 overflow-x-auto scrollbar-hide w-full sm:w-auto">
-            <button onClick={() => setTabPrincipal('activos')} className={`px-4 sm:px-6 py-3.5 font-bold text-sm sm:text-base flex items-center gap-2 border-b-2 transition-all whitespace-nowrap shrink-0 ${tabPrincipal === 'activos' ? 'border-emerald-500 text-emerald-600' : 'border-transparent text-[var(--text-muted)] hover:text-emerald-500'}`}>
-              <ShieldCheck size={20} /> Equipos Activos
-              <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${tabPrincipal === 'activos' ? 'bg-emerald-500 text-white' : 'bg-stone-200 text-stone-600'}`}>{equiposActivos.length}</span>
-            </button>
-            <button onClick={() => setTabPrincipal('revision')} className={`px-4 sm:px-6 py-3.5 font-bold text-sm sm:text-base flex items-center gap-2 border-b-2 transition-all whitespace-nowrap shrink-0 ${tabPrincipal === 'revision' ? 'border-amber-500 text-amber-600' : 'border-transparent text-[var(--text-muted)] hover:text-amber-500'}`}>
-              <Wrench size={20} /> Revisión (Taller)
-              <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${tabPrincipal === 'revision' ? 'bg-amber-500 text-white' : 'bg-stone-200 text-stone-600'}`}>{equiposRevision.length}</span>
-            </button>
-            <button onClick={() => setTabPrincipal('bajas')} className={`px-4 sm:px-6 py-3.5 font-bold text-sm sm:text-base flex items-center gap-2 border-b-2 transition-all whitespace-nowrap shrink-0 ${tabPrincipal === 'bajas' ? 'border-red-500 text-red-500' : 'border-transparent text-[var(--text-muted)] hover:text-red-500'}`}>
-              <Archive size={20} /> Equipos de Baja
-              <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${tabPrincipal === 'bajas' ? 'bg-red-500 text-white' : 'bg-stone-200 text-stone-600'}`}>{equiposBaja.length}</span>
-            </button>
+        {/* ENCABEZADO STICKY DE TABS Y FILTROS */}
+        <div id="sticky-header-computo" className={`sticky top-[72px] z-40 transition-all duration-300 pt-2 pb-2 mb-4 px-0 ${scrolled ? 'bg-[#f8fafc] border-b border-[var(--border-cream)] shadow-xl' : 'bg-transparent border-transparent'}`}>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end border-b border-[var(--border-cream)] mb-4 w-full gap-4 sm:gap-0 pb-2">
+            <div className="flex space-x-1 sm:space-x-4 overflow-x-auto scrollbar-hide w-full sm:w-auto">
+              <button onClick={() => setTabPrincipal('activos')} className={`px-4 sm:px-6 py-2.5 font-bold text-sm sm:text-base flex items-center gap-2 border-b-2 transition-all whitespace-nowrap shrink-0 ${tabPrincipal === 'activos' ? 'border-emerald-500 text-emerald-600' : 'border-transparent text-[var(--text-muted)] hover:text-emerald-500'}`}>
+                <ShieldCheck size={20} /> Equipos Activos
+                <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${tabPrincipal === 'activos' ? 'bg-emerald-500 text-white' : 'bg-stone-200 text-stone-600'}`}>{equiposActivos.length}</span>
+              </button>
+              <button onClick={() => setTabPrincipal('revision')} className={`px-4 sm:px-6 py-2.5 font-bold text-sm sm:text-base flex items-center gap-2 border-b-2 transition-all whitespace-nowrap shrink-0 ${tabPrincipal === 'revision' ? 'border-amber-500 text-amber-600' : 'border-transparent text-[var(--text-muted)] hover:text-amber-500'}`}>
+                <Wrench size={20} /> Revisión (Taller)
+                <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${tabPrincipal === 'revision' ? 'bg-amber-500 text-white' : 'bg-stone-200 text-stone-600'}`}>{equiposRevision.length}</span>
+              </button>
+              <button onClick={() => setTabPrincipal('bajas')} className={`px-4 sm:px-6 py-2.5 font-bold text-sm sm:text-base flex items-center gap-2 border-b-2 transition-all whitespace-nowrap shrink-0 ${tabPrincipal === 'bajas' ? 'border-red-500 text-red-500' : 'border-transparent text-[var(--text-muted)] hover:text-red-500'}`}>
+                <Archive size={20} /> Equipos de Baja
+                <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${tabPrincipal === 'bajas' ? 'bg-red-500 text-white' : 'bg-stone-200 text-stone-600'}`}>{equiposBaja.length}</span>
+              </button>
+            </div>
+
+            <div className="pb-1 w-full sm:w-auto shrink-0 flex flex-col sm:flex-row items-center justify-end gap-3">
+              {isAdmin && (
+                <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                  <input type="file" accept=".xlsx, .xls" ref={fileInputRef} onChange={procesarExcel} className="hidden" />
+                  <button onClick={() => fileInputRef.current?.click()} disabled={importando} className="w-full sm:w-auto bg-stone-100 hover:bg-stone-200 border border-[var(--border-cream)] text-[var(--text-main)] px-4 py-2 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors shadow-sm shrink-0">
+                    <UploadCloud className="w-4 h-4 text-emerald-600" /> {importando ? 'Procesando...' : 'Importar Excel'}
+                  </button>
+                  <button onClick={descargarCSV} className="w-full sm:w-auto bg-white hover:bg-[var(--bg-hover)] border border-[var(--border-cream)] text-[var(--text-main)] px-4 py-2 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors shadow-sm shrink-0">
+                    <Download className="w-4 h-4" /> Exportar Excel
+                  </button>
+                  <button onClick={abrirModalNuevo} className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg active:scale-95 shrink-0">
+                    <Plus className="w-5 h-5" /> Registrar Equipo
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
 
-          <div className="pb-3 w-full sm:w-auto shrink-0 flex flex-col sm:flex-row items-center justify-end gap-3">
-            {isAdmin && (
-              <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-                <input type="file" accept=".xlsx, .xls" ref={fileInputRef} onChange={procesarExcel} className="hidden" />
-                <button onClick={() => fileInputRef.current?.click()} disabled={importando} className="w-full sm:w-auto bg-stone-100 hover:bg-stone-200 border border-[var(--border-cream)] text-[var(--text-main)] px-4 py-2.5 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors shadow-sm shrink-0">
-                  <UploadCloud className="w-4 h-4 text-emerald-600" /> {importando ? 'Procesando...' : 'Importar Excel'}
-                </button>
-                <button onClick={descargarCSV} className="w-full sm:w-auto bg-white hover:bg-[var(--bg-hover)] border border-[var(--border-cream)] text-[var(--text-main)] px-4 py-2.5 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors shadow-sm shrink-0">
-                  <Download className="w-4 h-4" /> Exportar Excel
-                </button>
-                <button onClick={abrirModalNuevo} className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg active:scale-95 shrink-0">
-                  <Plus className="w-5 h-5" /> Registrar Equipo
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* TABLA */}
-        <div className="animate-in fade-in duration-500 w-full">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 px-1 gap-3 relative z-20">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between px-1 gap-3 relative z-20">
             <div className="flex items-center gap-2 text-slate-500 shrink-0">
               <Filter size={14} className="text-emerald-500" />
               <span className="text-[10px] font-black uppercase tracking-[0.2em]">Filtros</span>
@@ -429,7 +453,10 @@ export default function ComputoInventarioPage() {
               />
             </div>
           </div>
+        </div>
 
+        {/* CONTENIDO PRINCIPAL */}
+        <div className="animate-in fade-in duration-500 w-full mt-2">
           {tabPrincipal === 'bajas' || tabPrincipal === 'revision' ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {cargando ? (
@@ -495,20 +522,20 @@ export default function ComputoInventarioPage() {
               )}
             </div>
           ) : (
-            <div className={`bg-[var(--bg-floating)] rounded-xl shadow-xl border border-[var(--border-cream)] border-t-4 overflow-hidden ${tabPrincipal === 'activos' ? 'border-t-emerald-500' : 'border-t-amber-500'}`}>
-              <div className="overflow-x-auto">
+            <div className={`bg-[var(--bg-floating)] rounded-xl shadow-xl border border-[var(--border-cream)] border-t-4 ${tabPrincipal === 'activos' ? 'border-t-emerald-500' : 'border-t-amber-500'}`}>
+              <div className="w-full">
                 <table className="min-w-[1200px] w-full text-left border-collapse">
                   <thead>
-                    <tr className="bg-[var(--bg-hover)]/70 border-b border-[var(--border-cream)] text-[var(--text-main)] text-xs uppercase tracking-wider font-bold">
-                      <th className="p-4 font-bold border-b-2 border-stone-400/20">Consecutivo</th>
-                      <th className="p-4 font-bold border-b-2 border-stone-400/20">Equipo (Marca / Modelo)</th>
-                      <th className="p-4 font-bold border-b-2 border-stone-400/20">Service Tag / Cargador</th>
-                      <th className="p-4 font-bold border-b-2 border-stone-400/20">Usuario y Depto.</th>
-                      <th className="p-4 font-bold border-b-2 border-stone-400/20">Proyecto Asignado</th>
-                      <th className="p-4 font-bold border-b-2 border-stone-400/20">Proveedor</th>
-                      <th className="p-4 font-bold border-b-2 border-stone-400/20 text-center">Carta</th>
-                      <th className="p-4 font-bold border-b-2 border-stone-400/20 text-center">Estatus y CR</th>
-                      <th className="p-4 font-bold border-b-2 border-stone-400/20 text-center">Editar</th>
+                    <tr className="bg-[#e5e5e5] border-b border-[var(--border-cream)] text-[var(--text-main)] text-xs uppercase tracking-wider font-bold">
+                      <th className="sticky z-30 p-4 font-bold border-b-2 border-stone-400/20 bg-[#e5e5e5] shadow-sm rounded-tl-lg" style={{ top: `${headerHeight}px` }}>Consecutivo</th>
+                      <th className="sticky z-30 p-4 font-bold border-b-2 border-stone-400/20 bg-[#e5e5e5] shadow-sm" style={{ top: `${headerHeight}px` }}>Equipo (Marca / Modelo)</th>
+                      <th className="sticky z-30 p-4 font-bold border-b-2 border-stone-400/20 bg-[#e5e5e5] shadow-sm" style={{ top: `${headerHeight}px` }}>Service Tag / Cargador</th>
+                      <th className="sticky z-30 p-4 font-bold border-b-2 border-stone-400/20 bg-[#e5e5e5] shadow-sm" style={{ top: `${headerHeight}px` }}>Usuario y Depto.</th>
+                      <th className="sticky z-30 p-4 font-bold border-b-2 border-stone-400/20 bg-[#e5e5e5] shadow-sm" style={{ top: `${headerHeight}px` }}>Proyecto Asignado</th>
+                      <th className="sticky z-30 p-4 font-bold border-b-2 border-stone-400/20 bg-[#e5e5e5] shadow-sm" style={{ top: `${headerHeight}px` }}>Proveedor</th>
+                      <th className="sticky z-30 p-4 font-bold border-b-2 border-stone-400/20 text-center bg-[#e5e5e5] shadow-sm" style={{ top: `${headerHeight}px` }}>Carta</th>
+                      <th className="sticky z-30 p-4 font-bold border-b-2 border-stone-400/20 text-center bg-[#e5e5e5] shadow-sm" style={{ top: `${headerHeight}px` }}>Estatus y CR</th>
+                      <th className="sticky z-30 p-4 font-bold border-b-2 border-stone-400/20 text-center bg-[#e5e5e5] shadow-sm rounded-tr-lg" style={{ top: `${headerHeight}px` }}>Editar</th>
                     </tr>
                   </thead>
                   <tbody>

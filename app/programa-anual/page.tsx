@@ -25,6 +25,26 @@ export default function ProgramaAnualPage() {
   const [saving, setSaving] = useState(false);
   const [mensaje, setMensaje] = useState<string | null>(null);
 
+  const [scrolled, setScrolled] = useState(false);
+  const [headerHeight, setHeaderHeight] = useState(72);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 30);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const updateHeaderHeight = () => {
+      setHeaderHeight(72);
+    };
+    updateHeaderHeight();
+    window.addEventListener('resize', updateHeaderHeight);
+    return () => window.removeEventListener('resize', updateHeaderHeight);
+  }, [scrolled]);
+
   useEffect(() => {
     cargarDatos();
   }, [anio]);
@@ -151,7 +171,7 @@ export default function ProgramaAnualPage() {
       {/* NAVBAR */}
       <Navbar type="programa" maxWidth="max-w-[1800px]" />
 
-      <main className="relative z-10 flex-1 flex flex-col items-center p-6 sm:p-12 pt-4 sm:pt-4">
+      <main className="relative z-10 flex-1 flex flex-col items-center pt-4 sm:pt-4 px-2 sm:px-0">
 
         <div className="max-w-[1800px] w-full flex flex-col sm:flex-row sm:justify-between items-start sm:items-end mb-8 gap-4">
           <div>
@@ -190,27 +210,27 @@ export default function ProgramaAnualPage() {
               <Loader2 className="w-8 h-8 animate-spin text-[#D97757]" />
             </div>
           ) : (
-            <table className="w-full text-left text-xs sm:text-sm border-separate border border-[var(--border-cream)] border-t-4 border-t-[#71717a] rounded-xl overflow-hidden shadow-sm" style={{ borderSpacing: 0 }}>
+            <table className="w-full text-left text-xs sm:text-sm border-separate border border-[var(--border-cream)] border-t-4 border-t-[#71717a] rounded-xl shadow-sm" style={{ borderSpacing: 0 }}>
               <thead>
                 <tr className="text-[var(--text-main)] uppercase tracking-wider text-xs">
                   {/* Seccion 1: Info */}
-                  <th className="p-4 font-bold w-[180px] bg-[var(--bg-hover)]/70 border-b-2 border-stone-400/20 rounded-tl-xl shadow-sm">DESCRIPCIÓN</th>
-                  <th className="p-4 font-bold w-[130px] border-b-2 border-stone-400/20 bg-[var(--bg-hover)]/70 shadow-sm">EJECUTA</th>
+                  <th className="sticky z-30 p-4 font-bold w-[180px] bg-[var(--bg-hover)] border-b-2 border-stone-400/20 rounded-tl-xl shadow-sm" style={{ top: `${headerHeight}px` }}>DESCRIPCIÓN</th>
+                  <th className="sticky z-30 p-4 font-bold w-[130px] border-b-2 border-stone-400/20 bg-[var(--bg-hover)] shadow-sm" style={{ top: `${headerHeight}px` }}>EJECUTA</th>
                   
                   {/* Spacer 1 */}
                   <th className="w-2 min-w-[8px] p-0 bg-transparent border-none"></th>
 
                   {/* Seccion 2: Calendario */}
-                  <th className="p-0 border-b-2 border-l border-r border-[var(--border-cream)] border-b-stone-400/20 w-8 text-center bg-[var(--bg-hover)]/70 shadow-sm"></th>
+                  <th className="sticky z-30 p-0 border-b-2 border-l border-r border-[var(--border-cream)] border-b-stone-400/20 w-8 text-center bg-[var(--bg-hover)] shadow-sm" style={{ top: `${headerHeight}px` }}></th>
                   {mesesNombres.map((mes, i) => (
-                    <th key={mes} className={`p-2 border-b-2 border-r border-[var(--border-cream)] border-b-stone-400/20 text-center font-mono text-[10px] sm:text-xs min-w-[44px] bg-[var(--bg-hover)]/70 shadow-sm ${i === 11 ? 'rounded-tr-xl' : ''}`}>{mes}</th>
+                    <th key={mes} className={`sticky z-30 p-2 border-b-2 border-r border-[var(--border-cream)] border-b-stone-400/20 text-center font-mono text-[10px] sm:text-xs min-w-[44px] bg-[var(--bg-hover)] shadow-sm ${i === 11 ? 'rounded-tr-xl' : ''}`} style={{ top: `${headerHeight}px` }}>{mes}</th>
                   ))}
 
                   {/* Spacer 2 */}
                   <th className="w-2 min-w-[8px] p-0 bg-transparent border-none"></th>
 
                   {/* Seccion 3: Observaciones */}
-                  <th className="p-4 font-bold w-[200px] bg-[var(--bg-hover)]/70 border-b-2 border-stone-400/20 rounded-tr-xl shadow-sm">OBSERVACIONES</th>
+                  <th className="sticky z-30 p-4 font-bold w-[200px] bg-[var(--bg-hover)] border-b-2 border-stone-400/20 rounded-tr-xl shadow-sm" style={{ top: `${headerHeight}px` }}>OBSERVACIONES</th>
                 </tr>
               </thead>
               <tbody>

@@ -250,18 +250,7 @@ export default function DocumentosComputoClient({ equipos = [], isAdmin = false 
             <p className="text-sm text-[var(--text-muted)] mt-1">Expediente digital de facturas, responsivas y garantías.</p>
           </div>
 
-          <div className="w-full md:w-auto overflow-x-auto scrollbar-hide pb-3">
-            <div className="flex w-full justify-start sm:justify-center md:justify-end min-w-max px-1">
-              <div className="inline-flex items-center bg-[var(--bg-floating)] border border-[var(--border-cream)] rounded-full p-1.5 shadow-lg shrink-0 gap-1">
-                <Link href="/computo/inventario" className="px-4 py-1.5 text-xs font-bold rounded-full text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap">
-                  <Laptop size={14} /> Inventario
-                </Link>
-                <div className="px-4 py-1.5 text-xs font-bold rounded-full bg-white text-emerald-600 cursor-default flex items-center gap-2 shadow-sm border border-emerald-200 whitespace-nowrap">
-                  <FolderOpen size={14} /> Documentos
-                </div>
-              </div>
-            </div>
-          </div>
+
         </div>
 
         {/* ─── LAYOUT PRINCIPAL: DOS COLUMNAS ─────────────────────────── */}

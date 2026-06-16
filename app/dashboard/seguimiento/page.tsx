@@ -45,20 +45,7 @@ export default async function SeguimientoPage() {
     <div className="min-h-screen bg-transparent">
       <div className="max-w-5xl mx-auto p-8">
         
-        {/* ENCABEZADO PREMIUM DARK */}
-        <div className="mb-10">
-          <Link href="/dashboard" className="text-slate-400 hover:text-[#71717a] flex items-center gap-2 text-sm mb-6 w-fit transition-colors font-medium">
-            <ArrowLeft size={16} /> Volver al Panel Principal
-          </Link>
-          <h1 className="text-3xl font-black text-white tracking-tight flex items-center gap-3 font-serif">
-            <Activity className="text-[#71717a]" size={32} /> Seguimiento de Unidades
-          </h1>
-          <p className="text-slate-400 mt-2 font-medium">
-            {isAdmin 
-              ? ' Panel de Control: Controla los 4 estatus y gestiona las citas de mantenimiento.' 
-              : ' Centro de Rastreo: Consulta en tiempo real la etapa de tu unidad asignada.'}
-          </p>
-        </div>
+
 
         {/* 3. Renderizado del Cliente */}
         {tickets.length === 0 ? (

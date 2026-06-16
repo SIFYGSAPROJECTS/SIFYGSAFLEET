@@ -42,27 +42,7 @@ export default function MisChecklistsPage() {
         
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-5 mb-10">
           
-          <div className="flex-1 flex flex-col items-start w-full text-left">
-            {/* Enlace de regreso */}
-            <Link 
-              href="/dashboard" 
-              className="inline-flex items-center gap-2 text-slate-400 hover:text-[#71717a] transition-colors font-medium text-sm mb-4"
-            >
-              <ArrowLeft className="w-4 h-4" /> 
-              Volver al Panel Principal
-            </Link>
 
-            {/* Encabezado Principal integrado a la izquierda */}
-            <div className="flex items-center gap-4">
-              <div className="bg-[#71717a]/10 p-3 rounded-xl border border-[#71717a]/20 shrink-0">
-                <FileText className="w-8 h-8 text-[#71717a]" />
-              </div>
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-black text-[var(--text-main)] tracking-tight font-serif">Mis Checklists</h1>
-                <p className="text-[var(--text-muted)] text-sm mt-1">Consulta el historial de revisiones de tu unidad a cargo.</p>
-              </div>
-            </div>
-          </div>
 
           {/* BARRA DE ACCESOS DIRECTOS RESPONSIVA  */}
           <div className="w-full md:w-auto overflow-x-auto scrollbar-hide pb-3 pt-2 md:pt-0">

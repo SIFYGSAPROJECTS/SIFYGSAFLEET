@@ -41,7 +41,7 @@ export default async function HistorialPage() {
   //  Ahora solo mandamos llamar al cliente dentro del fondo negro
   return (
     <div className="min-h-screen bg-transparent">
-      <div className="p-8 max-w-7xl mx-auto">
+      <div className="pt-2 pb-8 sm:pt-4 sm:pb-8 max-w-[95%] mx-auto relative">
         <HistorialClient historial={historial} rol={usuario?.Rol} />
       </div>
     </div>

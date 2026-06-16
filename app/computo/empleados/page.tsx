@@ -70,6 +70,31 @@ export default function PersonalPage() {
     }
   };
 
+  const [scrolled, setScrolled] = useState(false);
+  const [headerHeight, setHeaderHeight] = useState(72);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 30);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const updateHeaderHeight = () => {
+      const header = document.getElementById('sticky-header-computo-empleados');
+      if (header) {
+        setHeaderHeight(header.offsetHeight + 72);
+      } else {
+        setHeaderHeight(72);
+      }
+    };
+    updateHeaderHeight();
+    window.addEventListener('resize', updateHeaderHeight);
+    return () => window.removeEventListener('resize', updateHeaderHeight);
+  }, [filtroTab, scrolled]);
+
   useEffect(() => {
     cargarEmpleados();
     cargarEquipos(); // Traemos los equipos al abrir la página
@@ -221,7 +246,7 @@ export default function PersonalPage() {
 
   return (
     <div className="min-h-screen bg-transparent relative">
-      <div className="p-4 sm:p-8 max-w-[90rem] mx-auto">
+      <div className="pt-2 pb-8 sm:pt-4 sm:pb-8 max-w-[95%] mx-auto relative">
         <div className="flex flex-col lg:flex-row justify-between lg:items-center gap-5 mb-8">
           <div className="flex-1 flex flex-col items-start w-full text-left">
             <Link href="/computo" className="inline-flex items-center gap-2 text-[var(--text-muted)] hover:text-emerald-500 transition-colors mb-3 font-medium text-sm">
@@ -234,40 +259,42 @@ export default function PersonalPage() {
         </div>
 
         {/* BARRA DE BOTONES SUPERIOR */}
-        <div className="flex flex-col sm:flex-row justify-between gap-4 mb-6 border-b border-[var(--border-cream)] pb-4">
-          <div className="flex gap-3 overflow-x-auto scrollbar-hide">
-            <button onClick={() => setFiltroTab('Activo')} className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm sm:text-base whitespace-nowrap transition-all ${filtroTab === 'Activo' ? 'bg-[#71717a]/10 text-[#71717a] border border-[#71717a]/50 shadow-md' : 'text-[var(--text-muted)] hover:text-[#71717a] hover:bg-[var(--bg-hover)]'}`}>
-              <ShieldCheck size={18} /> Personal Activo
-              <span className={`ml-1 px-2 py-0.5 rounded-full text-[10px] ${filtroTab === 'Activo' ? 'bg-[#71717a] text-white' : 'bg-stone-200 text-stone-600'}`}>{totalActivos}</span>
-            </button>
-            <button onClick={() => setFiltroTab('Inactivo')} className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm sm:text-base whitespace-nowrap transition-all ${filtroTab === 'Inactivo' ? 'bg-red-500/10 text-red-600 border border-red-500/50 shadow-md' : 'text-[var(--text-muted)] hover:text-red-600 hover:bg-[var(--bg-hover)]'}`}>
-              <ShieldAlert size={18} /> Personal Inactivo
-              <span className={`ml-1 px-2 py-0.5 rounded-full text-[10px] ${filtroTab === 'Inactivo' ? 'bg-red-500 text-white' : 'bg-stone-200 text-stone-600'}`}>{totalInactivos}</span>
-            </button>
-          </div>
-          <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-            <button onClick={descargarCSV} className="w-full sm:w-auto bg-white hover:bg-[var(--bg-hover)] border border-[var(--border-cream)] text-[var(--text-main)] px-4 py-2.5 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors shadow-sm shrink-0">
-              <Download className="w-4 h-4" /> Exportar Excel
-            </button>
-            <button onClick={abrirModalNuevo} className="w-full sm:w-auto bg-[#71717a] hover:bg-[#52525b] text-white px-5 py-2.5 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg active:scale-95 shrink-0">
-              <UserPlus className="w-5 h-5" /> Nuevo Empleado
-            </button>
+        <div id="sticky-header-computo-empleados" className={`sticky top-[72px] z-40 transition-all duration-300 pt-2 pb-2 mb-4 px-0 ${scrolled ? 'bg-[#f8fafc] border-b border-[var(--border-cream)] shadow-xl' : 'bg-transparent border-transparent'}`}>
+          <div className="flex flex-col sm:flex-row justify-between gap-4 border-b border-[var(--border-cream)] pb-4">
+            <div className="flex gap-3 overflow-x-auto scrollbar-hide">
+              <button onClick={() => setFiltroTab('Activo')} className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm sm:text-base whitespace-nowrap transition-all ${filtroTab === 'Activo' ? 'bg-[#71717a]/10 text-[#71717a] border border-[#71717a]/50 shadow-md' : 'text-[var(--text-muted)] hover:text-[#71717a] hover:bg-[var(--bg-hover)]'}`}>
+                <ShieldCheck size={18} /> Personal Activo
+                <span className={`ml-1 px-2 py-0.5 rounded-full text-[10px] ${filtroTab === 'Activo' ? 'bg-[#71717a] text-white' : 'bg-stone-200 text-stone-600'}`}>{totalActivos}</span>
+              </button>
+              <button onClick={() => setFiltroTab('Inactivo')} className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm sm:text-base whitespace-nowrap transition-all ${filtroTab === 'Inactivo' ? 'bg-red-500/10 text-red-600 border border-red-500/50 shadow-md' : 'text-[var(--text-muted)] hover:text-red-600 hover:bg-[var(--bg-hover)]'}`}>
+                <ShieldAlert size={18} /> Personal Inactivo
+                <span className={`ml-1 px-2 py-0.5 rounded-full text-[10px] ${filtroTab === 'Inactivo' ? 'bg-red-500 text-white' : 'bg-stone-200 text-stone-600'}`}>{totalInactivos}</span>
+              </button>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+              <button onClick={descargarCSV} className="w-full sm:w-auto bg-white hover:bg-[var(--bg-hover)] border border-[var(--border-cream)] text-[var(--text-main)] px-4 py-2.5 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors shadow-sm shrink-0">
+                <Download className="w-4 h-4" /> Exportar Excel
+              </button>
+              <button onClick={abrirModalNuevo} className="w-full sm:w-auto bg-[#71717a] hover:bg-[#52525b] text-white px-5 py-2.5 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg active:scale-95 shrink-0">
+                <UserPlus className="w-5 h-5" /> Nuevo Empleado
+              </button>
+            </div>
           </div>
         </div>
 
-        <div className={`bg-[var(--bg-floating)] rounded-xl shadow-xl border border-[var(--border-cream)] border-t-4 overflow-hidden transition-all duration-500 ${filtroTab === 'Inactivo' ? 'border-t-red-500' : 'border-t-purple-500'}`}>
+        <div className={`bg-[var(--bg-floating)] rounded-xl shadow-xl border border-[var(--border-cream)] border-t-4 transition-all duration-500 ${filtroTab === 'Inactivo' ? 'border-t-red-500' : 'border-t-purple-500'}`}>
 
           {/* TABLA ESCRITORIO */}
-          <div className="hidden md:block overflow-x-auto">
+          <div className="hidden md:block w-full">
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-[var(--bg-screen)] border-b border-[var(--border-cream)] text-[var(--text-muted)] text-sm uppercase tracking-wider">
-                  <th className="p-4 font-semibold">Empleado</th>
-                  <th className="p-4 font-semibold">Contacto</th>
-                  <th className="p-4 font-semibold">Puesto</th>
-                  <th className="p-4 font-semibold">Equipo Asignado</th>
-                  <th className="p-4 font-semibold text-center">Nivel</th>
-                  <th className="p-4 font-semibold text-center">Acciones</th>
+                  <th className="sticky z-30 p-4 font-semibold border-b-2 border-stone-400/20 bg-[var(--bg-screen)] shadow-sm rounded-tl-lg" style={{ top: `${headerHeight}px` }}>Empleado</th>
+                  <th className="sticky z-30 p-4 font-semibold border-b-2 border-stone-400/20 bg-[var(--bg-screen)] shadow-sm" style={{ top: `${headerHeight}px` }}>Contacto</th>
+                  <th className="sticky z-30 p-4 font-semibold border-b-2 border-stone-400/20 bg-[var(--bg-screen)] shadow-sm" style={{ top: `${headerHeight}px` }}>Puesto</th>
+                  <th className="sticky z-30 p-4 font-semibold border-b-2 border-stone-400/20 bg-[var(--bg-screen)] shadow-sm" style={{ top: `${headerHeight}px` }}>Equipo Asignado</th>
+                  <th className="sticky z-30 p-4 font-semibold border-b-2 border-stone-400/20 bg-[var(--bg-screen)] shadow-sm text-center" style={{ top: `${headerHeight}px` }}>Nivel</th>
+                  <th className="sticky z-30 p-4 font-semibold border-b-2 border-stone-400/20 bg-[var(--bg-screen)] shadow-sm text-center rounded-tr-lg" style={{ top: `${headerHeight}px` }}>Acciones</th>
                 </tr>
               </thead>
               <tbody className="">
