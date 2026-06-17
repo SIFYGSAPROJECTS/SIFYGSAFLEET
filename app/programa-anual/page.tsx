@@ -186,7 +186,7 @@ export default function ProgramaAnualPage() {
           </div>
         </div>
 
-        <div className="max-w-[1800px] w-full overflow-x-auto pb-4">
+        <div className="max-w-[1800px] w-full overflow-auto max-h-[calc(100vh-220px)] pb-4">
           {loading ? (
             <div className="h-64 flex items-center justify-center bg-white border border-[var(--border-cream)] rounded-2xl shadow-sm">
               <Loader2 className="w-8 h-8 animate-spin text-[#D97757]" />

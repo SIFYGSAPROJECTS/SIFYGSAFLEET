@@ -35,6 +35,9 @@ model Empleados {
   inventarioComputos        Inventario_Computo[]
   historialRegistroComputos Historial_Registro_Computo[]
   solicitudComputos         Solicitud_Computo[]
+  cajaChica                 Caja_Chica[]
+  viaticos                  Viaticos[]
+  comprobacionGastos        Comprobacion_Gastos[]
 }
 
 // 2. INVENTARIO DE UNIDADES [cite: 2]
@@ -332,4 +335,75 @@ model Costos_Computo {
   Factura_CDG       String?  @db.Text
 
   equipo Inventario_Computo @relation(fields: [C_Interno], references: [C_Interno], onDelete: Cascade)
+}
+
+// ==========================================
+// MÓDULO DE GASTOS GENERALES
+// ==========================================
+
+model Caja_Chica {
+  Id_CajaChica Int      @id @default(autoincrement())
+  Fecha        DateTime @db.Date
+  No_Factura   String?  @db.VarChar(100)
+  Concepto     String   @db.Text
+  Cargo        Float?   @default(0)
+  Abono        Float?   @default(0)
+  Saldo        Float    @default(0)
+  
+  // Opcional: para saber quién registró o a quién pertenece
+  Email_Empleado String?    @db.VarChar(50)
+  empleado       Empleados? @relation(fields: [Email_Empleado], references: [Email])
+  
+  // Archivo adjunto (PDF o imagen del ticket)
+  Evidencia_PDF  String?  @db.Text
+  // Agrupación por semana
+  Semana         Int      @default(1)
+  Anio           Int      @default(2026)
+
+  Fecha_Registro DateTime @default(now())
+}
+
+model Viaticos {
+  Id_Viatico      Int      @id @default(autoincrement())
+  Email_Empleado  String?  @db.VarChar(50)
+  empleado        Empleados? @relation(fields: [Email_Empleado], references: [Email])
+  
+  Categoria       String?  @db.VarChar(50)
+  Fecha           DateTime? @db.Date
+  Importe         Float?   @default(0)
+  Concepto        String?  @db.VarChar(150)
+  Vehiculo        String?  @db.VarChar(100)
+  Observaciones   String?  @db.Text
+  Origen          String?  @db.VarChar(150)
+  Destino         String?  @db.VarChar(150)
+  
+  Evidencia_PDF   String?  @db.Text
+  
+  // Agrupación por semana
+  Semana          Int      @default(1)
+  Anio            Int      @default(2026)
+
+  Fecha_Registro  DateTime @default(now())
+}
+
+model Comprobacion_Gastos {
+  Id              Int      @id @default(autoincrement())
+  Email_Empleado  String   @db.VarChar(50)
+  empleado        Empleados @relation(fields: [Email_Empleado], references: [Email])
+  
+  Fecha           DateTime? @db.Date
+  No_Factura      String?  @db.VarChar(100)
+  Concepto        String   @db.Text
+  
+  Abono           Float?   @default(0)
+  Cargo           Float?   @default(0)
+  Saldo           Float?   @default(0) // Se puede calcular: (Abono - Cargo) y acumular
+  
+  Evidencia_PDF   String?  @db.Text
+  
+  // Agrupación por semana
+  Semana          Int      @default(1)
+  Anio            Int      @default(2026)
+
+  Fecha_Registro  DateTime @default(now())
 }

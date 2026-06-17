@@ -4,11 +4,11 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import Image from 'next/image';
-import { Menu, X, Car, Server, LayoutGrid, LogOut, CalendarDays, Laptop, Wrench, FolderOpen, User, DollarSign, CalendarCheck, FileText } from 'lucide-react';
+import { Menu, X, Car, Server, LayoutGrid, LogOut, CalendarDays, Laptop, Wrench, FolderOpen, User, DollarSign, CalendarCheck, FileText, Wallet } from 'lucide-react';
 import LogoutButton from '@/app/dashboard/LogoutButton';
 
 interface NavbarProps {
-  type: 'portal' | 'dashboard' | 'computo' | 'programa';
+  type: 'portal' | 'dashboard' | 'computo' | 'programa' | 'gastos';
   userName?: string;
   userRole?: string;
   isAdmin?: boolean;
@@ -218,6 +218,12 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
     if (pathname.includes('/checklists')) return 'Control de Checklists';
     if (pathname.includes('/documentos')) return 'Centro de Documentos';
     if (pathname.includes('/verificaciones')) return 'Verificaciones';
+<<<<<<< HEAD
+=======
+    if (type === 'computo') return 'Cómputo TI';
+    if (type === 'programa') return 'Programa Anual';
+    if (type === 'gastos') return 'Gastos Generales';
+>>>>>>> 51e5f86 (Auto-commit: guardando cambios locales)
     return 'Panel de Control';
   };
 
@@ -249,6 +255,15 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                 </div>
                 <span className="hidden sm:block font-serif font-medium text-lg tracking-wide text-white transition-colors group-hover:text-indigo-400">
                   SIFYGSA <span className="text-indigo-400 font-serif">Plan</span>
+                </span>
+              </Link>
+            ) : type === 'gastos' ? (
+              <Link href="/gastos" className={`flex items-center space-x-3 group px-2 transition-all`}>
+                <div className="bg-teal-500 p-1.5 rounded-lg shadow-lg shadow-teal-500/20 group-hover:scale-105 transition-transform duration-300">
+                  <Wallet className="text-white h-4 w-4" />
+                </div>
+                <span className="hidden sm:block font-serif font-medium text-lg tracking-wide text-white transition-colors group-hover:text-teal-400">
+                  SIFYGSA <span className="text-teal-400 font-serif">Gastos</span>
                 </span>
               </Link>
             ) : (
