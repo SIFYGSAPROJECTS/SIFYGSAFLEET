@@ -122,7 +122,7 @@ model Checklist {
   vehiculo Inventario_Automoviles @relation(fields: [Consecutivo], references: [Consecutivo], onDelete: Cascade)
 }
 
-// 6.2. DOCUMENTOS DE UNIDAD
+// 6.2. DOCUMENTOS DE UNIDADES
 model Documentos_Unidad {
   id           Int      @id @default(autoincrement())
   Consecutivo  String   @db.VarChar(10)
