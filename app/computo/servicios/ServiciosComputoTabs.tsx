@@ -98,6 +98,7 @@ export default function ServiciosComputoTabs({ tickets, equipos, isAdmin, rol }:
   return (
     <div className="space-y-6">
       
+      <div className="max-w-[95%] mx-auto">
       <div className="flex flex-col md:flex-row justify-between md:items-center gap-5 mb-8">
         
         <div className="flex-1 flex flex-col items-start w-full text-left">
@@ -140,7 +141,9 @@ export default function ServiciosComputoTabs({ tickets, equipos, isAdmin, rol }:
             </div>
           </div>
       </div>
+      </div>
 
+      <div className="max-w-[95%] mx-auto">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end border-b border-[var(--border-cream)] mb-6 w-full gap-4 sm:gap-0">
         <div className="flex space-x-1 sm:space-x-4 overflow-x-auto scrollbar-hide w-full sm:w-auto">
           
@@ -183,9 +186,11 @@ export default function ServiciosComputoTabs({ tickets, equipos, isAdmin, rol }:
           )}
         </div>
       </div>
+      </div>
 
       <div className="">
         {activeTab === 'nueva' && (
+          <div className="max-w-[95%] mx-auto">
           <div className="max-w-3xl mx-auto">
              {equipos.length === 0 ? (
                 <div className="bg-emerald-600/10 border border-emerald-600/30 text-emerald-700 p-6 rounded-xl text-center shadow-lg">
@@ -196,16 +201,19 @@ export default function ServiciosComputoTabs({ tickets, equipos, isAdmin, rol }:
                 <TicketComputoForm equipos={equipos} />
               )}
           </div>
+          </div>
         )}
 
         {activeTab === 'seguimiento' && (
+          <div className="max-w-[95%] mx-auto">
           <div className="bg-[var(--bg-floating)]/50 p-1 rounded-xl">
             <SeguimientoComputoClient ticketsIniciales={ticketsSeguimiento} isAdmin={isAdmin} />
+          </div>
           </div>
         )}
 
         {activeTab === 'historial' && (
-          <div>
+          <div className="w-full">
             <HistorialComputoClient historial={tickets} rol={rol} />
           </div>
         )}

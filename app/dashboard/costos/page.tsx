@@ -361,7 +361,8 @@ export default function CostosPage() {
 
   return (
     <div className="min-h-screen bg-transparent relative">
-      <div className="pt-2 pb-8 sm:pt-4 sm:pb-8 max-w-[95%] mx-auto space-y-8 animate-in fade-in duration-500 relative">
+      <div className="pt-2 pb-8 sm:pt-4 sm:pb-8 relative">
+        <div className="max-w-[95%] mx-auto space-y-8 animate-in fade-in duration-500">
         
         {/* ENCABEZADO Y NAVEGACIÓN */}
         <div className="flex flex-col lg:flex-row justify-between lg:items-center gap-5 mb-2">
@@ -509,8 +510,11 @@ export default function CostosPage() {
         </div>
       </div>
 
+      </div>
+
       {/* Filtros Inteligentes */}
-      <div id="sticky-header-dashboard-costos" className={`sticky top-[72px] z-40 transition-all duration-300 pt-2 pb-2 mb-4 px-0 ${scrolled ? 'bg-[#f8fafc] border-b border-[var(--border-cream)] shadow-xl' : 'bg-transparent border-transparent'}`}>
+      <div id="sticky-header-dashboard-costos" className={`sticky top-[72px] z-40 transition duration-300 pt-2 pb-0 mb-6 px-0 ${scrolled ? 'bg-[#f8fafc]' : 'bg-transparent'}`}>
+        <div className={`max-w-[95%] mx-auto transition duration-300 ${scrolled ? 'border-b border-stone-300 shadow-xl pb-2 px-0' : 'border-transparent pb-2 px-0 shadow-none'}`}>
         <div className="bg-[var(--bg-floating)] border border-[var(--border-cream)] p-3 px-5 rounded-xl flex flex-col md:flex-row gap-4 items-center relative shadow-sm">
         <div className="flex items-center gap-2 text-[var(--text-muted)] w-full md:w-auto mr-auto">
           <Filter size={18} />
@@ -556,23 +560,25 @@ export default function CostosPage() {
             compact
           />
         </div>
+        </div>
       </div>
       </div>
 
       {/* Tabla de Datos */}
+      <div className="max-w-[95%] mx-auto">
       <div className="bg-[var(--bg-floating)] border border-[var(--border-cream)] rounded-xl shadow-sm">
         <div className="w-full">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-[var(--bg-hover)]/70 border-b border-[var(--border-cream)] text-[var(--text-main)] text-sm uppercase tracking-wider font-bold">
-                <th className="sticky z-30 p-4 font-bold border-b-2 border-stone-400/20 bg-[var(--bg-hover)] shadow-sm rounded-tl-lg" style={{ top: `${headerHeight}px` }}>Fecha</th>
-                <th className="sticky z-30 p-4 font-bold border-b-2 border-stone-400/20 bg-[var(--bg-hover)] shadow-sm" style={{ top: `${headerHeight}px` }}>Servicio</th>
-                <th className="sticky z-30 p-4 font-bold border-b-2 border-stone-400/20 bg-[var(--bg-hover)] shadow-sm" style={{ top: `${headerHeight}px` }}>Unidad</th>
-                <th className="sticky z-30 p-4 font-bold border-b-2 border-stone-400/20 bg-[var(--bg-hover)] shadow-sm" style={{ top: `${headerHeight}px` }}>Costo MO</th>
-                <th className="sticky z-30 p-4 font-bold border-b-2 border-stone-400/20 bg-[var(--bg-hover)] shadow-sm" style={{ top: `${headerHeight}px` }}>Costo Ref.</th>
-                <th className="sticky z-30 p-4 font-bold border-b-2 border-stone-400/20 bg-[var(--bg-hover)] shadow-sm" style={{ top: `${headerHeight}px` }}>Total</th>
-                <th className="sticky z-30 p-4 font-bold border-b-2 border-stone-400/20 bg-[var(--bg-hover)] shadow-sm" style={{ top: `${headerHeight}px` }}>Empresa</th>
-                <th className="sticky z-30 p-4 font-bold border-b-2 border-stone-400/20 bg-[var(--bg-hover)] shadow-sm rounded-tr-lg" style={{ top: `${headerHeight}px` }}>Proveedor</th>
+              <tr className="border-b border-[var(--border-cream)] text-stone-500 text-[11px] uppercase tracking-widest font-black">
+                <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Fecha</th>
+                <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Servicio</th>
+                <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Unidad</th>
+                <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Costo MO</th>
+                <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Costo Ref.</th>
+                <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Total</th>
+                <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Empresa</th>
+                <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Proveedor</th>
               </tr>
             </thead>
             <tbody>
@@ -604,8 +610,9 @@ export default function CostosPage() {
           </table>
         </div>
       </div>
+      </div>
 
-      {/* Modal */}
+      {/* Modal Registrar Gasto */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-[var(--bg-floating)] rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl border border-[var(--border-cream)] animate-in zoom-in-95 duration-200">

@@ -294,8 +294,9 @@ export default function InventarioMaestroPage() {
 
   return (
     <div className="min-h-screen bg-transparent relative">
-      <div className="pt-2 pb-8 sm:pt-4 sm:pb-8 max-w-[95%] mx-auto">
-        <div className={`transition-all duration-300 overflow-hidden ${scrolled ? 'max-h-0 opacity-0 mb-0' : 'max-h-20 opacity-100 mb-2'}`}>
+      <div className="pt-2 pb-8 sm:pt-4 sm:pb-8">
+        <div className="max-w-[95%] mx-auto">
+          <div className={`transition-all duration-300 overflow-hidden ${scrolled ? 'max-h-0 opacity-0 mb-0' : 'max-h-20 opacity-100 mb-2'}`}>
           <div className="w-full sm:w-auto overflow-x-auto scrollbar-hide pb-3">
             <div className="flex w-full justify-start sm:justify-center lg:justify-end min-w-max px-1">
               <div className="inline-flex items-center bg-[var(--bg-floating)] border border-[var(--border-cream)] rounded-full p-1.5 shadow-lg shrink-0 gap-1">
@@ -324,9 +325,10 @@ export default function InventarioMaestroPage() {
             </div>
           </div>
         </div>
+        </div>
         {/* ENCABEZADO STICKY DE TABS Y FILTROS */}
-        <div id="sticky-header-inventario" className={`sticky top-[72px] z-40 transition-all duration-300 pt-2 pb-2 ${scrolled ? 'bg-[#f8fafc] border-x border-b border-[var(--border-cream)] shadow-xl px-0' : 'bg-transparent border-transparent px-0'}`}>
-          
+        <div id="sticky-header-inventario" className={`sticky top-[72px] z-40 transition duration-300 pt-2 pb-0 ${scrolled ? 'bg-[#f8fafc]' : 'bg-transparent'}`}>
+          <div className={`max-w-[95%] mx-auto transition duration-300 ${scrolled ? 'border-b border-stone-300 shadow-xl pb-2 px-0' : 'border-transparent pb-2 px-0'}`}>
           {/* FILTRO DE EMPRESAS (Fila 1) */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end w-full gap-4 sm:gap-0 pb-2">
             <div className="flex space-x-1 sm:space-x-4 overflow-x-auto scrollbar-hide w-full sm:w-auto">
@@ -368,8 +370,8 @@ export default function InventarioMaestroPage() {
 
           {/* FILTROS SECUNDARIOS (Fila 2) */}
           {tabPrincipal === 'activos' && (
-            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 w-full mt-2 pt-2 border-t border-[var(--border-cream)]">
-              <div className="flex flex-wrap items-center gap-2 sm:gap-4 mb-2 pb-2 w-full">
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 w-full mt-3 pt-3 border-t border-[var(--border-cream)]">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-4 mb-4 pb-1 w-full">
                 <button onClick={() => setFiltroActivo('Activo en flota')} className={`flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-lg font-bold transition-all text-sm sm:text-base whitespace-nowrap shrink-0 ${filtroActivo === 'Activo en flota' ? 'bg-[#71717a]/10 text-[#71717a] border border-[#71717a]/50 shadow-md' : 'text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-hover)] border border-transparent'}`}>
                 <ShieldCheck size={18} className="shrink-0" /> <span className="whitespace-nowrap">Operativos</span>
                 <span className={`ml-1 px-2 py-0.5 rounded-full text-[10px] ${filtroActivo === 'Activo en flota' ? 'bg-[#71717a] text-white' : 'bg-[var(--bg-hover)] text-[var(--text-muted)]'}`}>{totalActivos}</span>
@@ -407,11 +409,13 @@ export default function InventarioMaestroPage() {
                   direction="down"
                 />
               </div>
-            </div>
+              </div>
             </div>
           )}
+          </div>
         </div>
 
+        <div className="max-w-[95%] mx-auto mt-4">
         {/* TABLA DE ACTIVOS */}
         {tabPrincipal === 'activos' && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 w-full">
@@ -422,13 +426,13 @@ export default function InventarioMaestroPage() {
               >
                 <table className="min-w-[1000px] w-full text-left border-collapse">
                   <thead>
-                    <tr className="bg-[#e5e5e5] border-b border-[var(--border-cream)] text-[var(--text-main)] text-sm uppercase tracking-wider font-bold">
-                      <th className="sticky z-30 p-4 font-bold border-b-2 border-stone-400/20 bg-[#e5e5e5] shadow-sm rounded-tl-lg" style={{ top: `${headerHeight}px` }}>Unidad</th>
-                      <th className="sticky z-30 p-4 font-bold border-b-2 border-stone-400/20 bg-[#e5e5e5] shadow-sm" style={{ top: `${headerHeight}px` }}>Vehículo</th>
-                      <th className="sticky z-30 p-4 font-bold border-b-2 border-stone-400/20 bg-[#e5e5e5] shadow-sm" style={{ top: `${headerHeight}px` }}>Detalles Operativos</th>
-                      <th className="sticky z-30 p-4 font-bold border-b-2 border-stone-400/20 text-center bg-[#e5e5e5] shadow-sm" style={{ top: `${headerHeight}px` }}>Kilometraje</th>
-                      <th className="sticky z-30 p-4 font-bold border-b-2 border-stone-400/20 bg-[#e5e5e5] shadow-sm" style={{ top: `${headerHeight}px` }}>Asignación</th>
-                      <th className="sticky z-30 p-4 font-bold border-b-2 border-stone-400/20 text-center bg-[#e5e5e5] shadow-sm rounded-tr-lg" style={{ top: `${headerHeight}px` }}>Editar</th>
+                    <tr className="border-b border-[var(--border-cream)] text-stone-500 text-[11px] uppercase tracking-widest font-black">
+                      <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Unidad</th>
+                      <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Vehículo</th>
+                      <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Detalles Operativos</th>
+                      <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 text-center bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Kilometraje</th>
+                      <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Asignación</th>
+                      <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 text-center bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Editar</th>
                     </tr>
                   </thead>
                   <tbody className="">
@@ -491,9 +495,10 @@ export default function InventarioMaestroPage() {
         {tabPrincipal === 'bajas' && (
           <div className="animate-in fade-in slide-in-from-right-8 duration-500">
             <div 
-              className={`sticky z-50 pt-2 pb-2 mb-2 px-0 transition-all duration-500 ${scrolled ? 'bg-[#f8fafc] border-b-2 border-stone-300 shadow-2xl shadow-stone-200/50' : 'bg-transparent border-transparent shadow-none'}`}
+              className={`sticky z-50 pt-2 pb-0 px-0 transition duration-300 ${scrolled ? 'bg-[#f8fafc]' : 'bg-transparent'}`}
               style={{ top: `${headerHeight}px` }}
             >
+              <div className={`max-w-[95%] mx-auto transition duration-300 ${scrolled ? 'border-b-2 border-stone-300 shadow-2xl shadow-stone-200/50 pb-2 px-0' : 'border-transparent pb-2 px-0 shadow-none'}`}>
               {/* BARRA DE FILTROS REDISEÑADA (Sutil y minimalista) */}
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between px-1 gap-3 relative z-20">
               <div className="flex items-center gap-2 text-slate-500">
@@ -518,10 +523,12 @@ export default function InventarioMaestroPage() {
                   className="w-full sm:w-56"
                   direction="down"
                 />
-              </div>
+                </div>
+            </div>
             </div>
             </div>
 
+            <div className="max-w-[95%] mx-auto">
             {cargando ? (
               <div className="text-center p-12 text-[var(--text-muted)] font-bold">Cargando archivo histórico...</div>
             ) : vehiculosBaja.length === 0 ? (
@@ -562,7 +569,9 @@ export default function InventarioMaestroPage() {
               </div>
             )}
           </div>
+          </div>
         )}
+        </div>
 
       </div>
 

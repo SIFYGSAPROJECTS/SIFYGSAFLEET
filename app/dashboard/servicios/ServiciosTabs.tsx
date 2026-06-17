@@ -113,6 +113,7 @@ export default function ServiciosTabs({ tickets, vehiculos, isAdmin, rol }: Prop
   return (
     <div className="space-y-6">
       
+      <div className="max-w-[95%] mx-auto">
       <div className="flex flex-col md:flex-row justify-between md:items-center gap-5 mb-8">
 
         <div className="w-full md:w-auto overflow-x-auto scrollbar-hide pb-3">
@@ -157,7 +158,9 @@ export default function ServiciosTabs({ tickets, vehiculos, isAdmin, rol }: Prop
           </div>
         </div>
       </div>
+      </div>
 
+      <div className="max-w-[95%] mx-auto">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end border-b border-[var(--border-cream)] mb-6 w-full gap-4 sm:gap-0">
         <div className="flex space-x-1 sm:space-x-4 overflow-x-auto scrollbar-hide w-full sm:w-auto">
           
@@ -200,9 +203,11 @@ export default function ServiciosTabs({ tickets, vehiculos, isAdmin, rol }: Prop
           )}
         </div>
       </div>
+      </div>
 
       <div className="">
         {activeTab === 'nueva' && (
+          <div className="max-w-[95%] mx-auto">
           <div className="max-w-3xl mx-auto">
              {vehiculos.length === 0 ? (
                 <div className="bg-[#71717a]/10 border border-[#71717a]/30 text-[#71717a] p-6 rounded-xl text-center shadow-lg">
@@ -213,16 +218,19 @@ export default function ServiciosTabs({ tickets, vehiculos, isAdmin, rol }: Prop
                 <TicketForm vehiculos={vehiculos} />
               )}
           </div>
+          </div>
         )}
 
         {activeTab === 'seguimiento' && (
+          <div className="max-w-[95%] mx-auto">
           <div className="bg-[var(--bg-floating)]/50 p-1 rounded-xl">
             <SeguimientoClient ticketsIniciales={ticketsSeguimiento} isAdmin={isAdmin} />
+          </div>
           </div>
         )}
 
         {activeTab === 'historial' && (
-          <div>
+          <div className="w-full">
             <HistorialClient historial={tickets} rol={rol} />
           </div>
         )}

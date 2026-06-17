@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import Image from 'next/image';
-import { Menu, X, Car, Server, LayoutGrid, LogOut, CalendarDays } from 'lucide-react';
+import { Menu, X, Car, Server, LayoutGrid, LogOut, CalendarDays, Laptop } from 'lucide-react';
 import LogoutButton from '@/app/dashboard/LogoutButton';
 
 interface NavbarProps {
@@ -271,14 +271,14 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
           </div>
 
           {/* RIGHT SIDE: Action Buttons (Desktop Only) - Hover Dropdowns */}
-          <div className="flex-1 hidden md:flex justify-end items-center bg-white/5 border border-white/5 rounded-xl p-0.5 shadow-inner backdrop-blur-md">
+          <div className="flex-1 hidden md:flex justify-end items-center gap-2">
             
             {/* Módulos Hover Dropdown */}
             {(localIsAdmin || localUserAreas.length > 0) && (
               <div className="relative group">
                 <a
                   href="/portal"
-                  className="hover:bg-white/10 text-white px-4 py-2 rounded-lg text-xs flex items-center gap-2 transition-all font-bold"
+                  className="hover:bg-white/10 text-white px-4 py-2 rounded-xl text-xs flex items-center gap-2 transition-all font-bold"
                 >
                   <LayoutGrid size={14} className="text-[#FF7420]" /> Módulos
                 </a>
@@ -298,16 +298,16 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                         className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-white/80 hover:text-white hover:bg-white/5 transition-all"
                       >
                         <Car size={14} className="text-[#FF7420]" />
-                        <span>Transporte (Flota)</span>
+                        <span>Control Vehicular</span>
                       </Link>
                     )}
                     {(localIsAdmin || localUserAreas.includes('COMPUTO')) && (
                       <Link
-                        href="/computo"
+                        href="/computo/inventario"
                         className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-white/80 hover:text-white hover:bg-white/5 transition-all"
                       >
-                        <Server size={14} className="text-[#FF7420]" />
-                        <span>Cómputo (TI)</span>
+                        <Laptop size={14} className="text-[#FF7420]" />
+                        <span>Activos TI</span>
                       </Link>
                     )}
                     {localIsAdmin && (
@@ -325,10 +325,8 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
             )}
 
             {/* User Dropdown for Logout */}
-            <div className={`relative group ${localIsAdmin ? 'border-l border-white/10' : ''}`}>
-              <div className={`px-4 py-2 flex items-center gap-3 cursor-pointer hover:bg-white/5 transition-all ${
-                localIsAdmin ? 'rounded-r-xl' : 'rounded-xl'
-              }`}>
+            <div className={`relative group`}>
+              <div className={`px-4 py-2 flex items-center gap-3 cursor-pointer hover:bg-white/10 transition-all rounded-xl`}>
                 <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-[10px] font-bold text-[#FF7420] shrink-0">
                   {localUserName.charAt(0).toUpperCase()}
                 </div>
@@ -424,16 +422,16 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                     onClick={() => setIsMenuOpen(false)}
                     className="bg-white/5 hover:bg-white/10 border border-white/5 text-white/90 px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold"
                   >
-                    <Car size={14} className="text-[#FF7420]" /> Transporte (Flota)
+                    <Car size={14} className="text-[#FF7420]" /> Control Vehicular
                   </Link>
                 )}
                 {(localIsAdmin || localUserAreas.includes('COMPUTO')) && (
                   <Link
-                    href="/computo"
+                    href="/computo/inventario"
                     onClick={() => setIsMenuOpen(false)}
                     className="bg-white/5 hover:bg-white/10 border border-white/5 text-white/90 px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold"
                   >
-                    <Server size={14} className="text-[#FF7420]" /> Cómputo (TI)
+                    <Laptop size={14} className="text-[#FF7420]" /> Activos TI
                   </Link>
                 )}
                 {localIsAdmin && (

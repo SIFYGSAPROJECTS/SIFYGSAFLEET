@@ -185,7 +185,7 @@ export default function CalendarioVerificaciones({
 
   return (
     <div className="bg-white rounded-lg shadow border border-gray-200">
-      <div id="sticky-header-verificaciones" className={`sticky top-[72px] z-40 transition-all duration-300 rounded-t-lg ${scrolled ? 'shadow-xl border-b border-gray-300' : ''}`}>
+      <div id="sticky-header-verificaciones" className={`sticky top-[72px] z-40 transition duration-300 rounded-t-lg ${scrolled ? 'shadow-xl border-b border-gray-300' : ''}`}>
         <div className={`p-4 flex flex-col md:flex-row md:justify-between md:items-center gap-4 bg-gray-50 ${scrolled ? '' : 'border-b border-gray-200'} rounded-t-lg`}>
           <h2 className="text-lg font-bold text-gray-800 shrink-0">Unidades a Verificar</h2>
         <div className="flex flex-col sm:flex-row flex-wrap items-center gap-2 w-full md:w-auto md:justify-end">
@@ -255,14 +255,14 @@ export default function CalendarioVerificaciones({
       </div>
       <div className="w-full">
         <table className="w-full text-sm text-left">
-          <thead className="bg-[var(--bg-hover)]/70 border-b border-[var(--border-cream)] text-[var(--text-main)] text-sm uppercase tracking-wider font-bold">
+          <thead className="border-b border-[var(--border-cream)] text-stone-500 text-[11px] uppercase tracking-widest font-black">
             <tr>
-              <th className="sticky z-30 py-3 px-4 font-bold w-28 text-left border-r border-[var(--border-cream)] border-b-2 border-stone-400/20 bg-gray-100" style={{ top: `${headerHeight}px` }}>Consecutivo</th>
-              <th className="sticky z-30 py-3 px-4 font-bold w-48 border-r border-[var(--border-cream)] border-b-2 border-stone-400/20 bg-gray-100" style={{ top: `${headerHeight}px` }}>Vehículo</th>
+              <th className="sticky z-30 p-5 font-bold w-28 text-left border-r border-[var(--border-cream)] border-b border-stone-200/50 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Consecutivo</th>
+              <th className="sticky z-30 p-5 font-bold w-48 border-r border-[var(--border-cream)] border-b border-stone-200/50 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Vehículo</th>
               {meses.map((m, i) => (
                 <th 
                   key={i} 
-                  className={`sticky z-30 py-3 px-2 text-center font-bold border-b-2 border-stone-400/20 w-16 bg-gray-100 ${
+                  className={`sticky z-30 p-5 text-center font-bold border-b border-stone-200/50 w-16 bg-stone-50/90 backdrop-blur-md ${
                     i === 6 ? 'border-l-2 border-l-stone-400' : 'border-l border-l-[var(--border-cream)]'
                   }`}
                   style={{ top: `${headerHeight}px` }}

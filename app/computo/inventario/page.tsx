@@ -365,8 +365,9 @@ export default function ComputoInventarioPage() {
 
   return (
     <div className="min-h-screen bg-transparent relative">
-      <div className="pt-2 pb-8 sm:pt-4 sm:pb-8 max-w-[95%] mx-auto relative">
+      <div className="pt-2 pb-8 sm:pt-4 sm:pb-8 relative">
 
+        <div className="max-w-[95%] mx-auto">
         <div className="flex flex-col lg:flex-row justify-between lg:items-center gap-5 mb-8">
           <div className="flex-1 flex flex-col items-start w-full text-left">
             <Link href="/computo" className="inline-flex items-center gap-2 text-[var(--text-muted)] hover:text-emerald-500 transition-colors mb-3 font-medium text-sm">
@@ -377,9 +378,11 @@ export default function ComputoInventarioPage() {
             </h1>
           </div>
         </div>
+        </div>
 
         {/* ENCABEZADO STICKY DE TABS Y FILTROS */}
-        <div id="sticky-header-computo" className={`sticky top-[72px] z-40 transition-all duration-300 pt-2 pb-2 mb-4 px-0 ${scrolled ? 'bg-[#f8fafc] border-b border-[var(--border-cream)] shadow-xl' : 'bg-transparent border-transparent'}`}>
+        <div id="sticky-header-computo" className={`sticky top-[72px] z-40 transition duration-300 pt-2 pb-0 mb-4 px-0 ${scrolled ? 'bg-[#f8fafc]' : 'bg-transparent'}`}>
+          <div className={`max-w-[95%] mx-auto transition duration-300 ${scrolled ? 'border-b border-stone-300 shadow-xl pb-2 px-0' : 'border-transparent pb-2 px-0 shadow-none'}`}>
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end border-b border-[var(--border-cream)] mb-4 w-full gap-4 sm:gap-0 pb-2">
             <div className="flex space-x-1 sm:space-x-4 overflow-x-auto scrollbar-hide w-full sm:w-auto">
               <button onClick={() => setTabPrincipal('activos')} className={`px-4 sm:px-6 py-2.5 font-bold text-sm sm:text-base flex items-center gap-2 border-b-2 transition-all whitespace-nowrap shrink-0 ${tabPrincipal === 'activos' ? 'border-emerald-500 text-emerald-600' : 'border-transparent text-[var(--text-muted)] hover:text-emerald-500'}`}>
@@ -453,10 +456,12 @@ export default function ComputoInventarioPage() {
               />
             </div>
           </div>
+          </div>
         </div>
 
         {/* CONTENIDO PRINCIPAL */}
-        <div className="animate-in fade-in duration-500 w-full mt-2">
+        <div className="max-w-[95%] mx-auto">
+        <div className="animate-in fade-in duration-500 w-full mt-4">
           {tabPrincipal === 'bajas' || tabPrincipal === 'revision' ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {cargando ? (
@@ -526,16 +531,16 @@ export default function ComputoInventarioPage() {
               <div className="w-full">
                 <table className="min-w-[1200px] w-full text-left border-collapse">
                   <thead>
-                    <tr className="bg-[#e5e5e5] border-b border-[var(--border-cream)] text-[var(--text-main)] text-xs uppercase tracking-wider font-bold">
-                      <th className="sticky z-30 p-4 font-bold border-b-2 border-stone-400/20 bg-[#e5e5e5] shadow-sm rounded-tl-lg" style={{ top: `${headerHeight}px` }}>Consecutivo</th>
-                      <th className="sticky z-30 p-4 font-bold border-b-2 border-stone-400/20 bg-[#e5e5e5] shadow-sm" style={{ top: `${headerHeight}px` }}>Equipo (Marca / Modelo)</th>
-                      <th className="sticky z-30 p-4 font-bold border-b-2 border-stone-400/20 bg-[#e5e5e5] shadow-sm" style={{ top: `${headerHeight}px` }}>Service Tag / Cargador</th>
-                      <th className="sticky z-30 p-4 font-bold border-b-2 border-stone-400/20 bg-[#e5e5e5] shadow-sm" style={{ top: `${headerHeight}px` }}>Usuario y Depto.</th>
-                      <th className="sticky z-30 p-4 font-bold border-b-2 border-stone-400/20 bg-[#e5e5e5] shadow-sm" style={{ top: `${headerHeight}px` }}>Proyecto Asignado</th>
-                      <th className="sticky z-30 p-4 font-bold border-b-2 border-stone-400/20 bg-[#e5e5e5] shadow-sm" style={{ top: `${headerHeight}px` }}>Proveedor</th>
-                      <th className="sticky z-30 p-4 font-bold border-b-2 border-stone-400/20 text-center bg-[#e5e5e5] shadow-sm" style={{ top: `${headerHeight}px` }}>Carta</th>
-                      <th className="sticky z-30 p-4 font-bold border-b-2 border-stone-400/20 text-center bg-[#e5e5e5] shadow-sm" style={{ top: `${headerHeight}px` }}>Estatus y CR</th>
-                      <th className="sticky z-30 p-4 font-bold border-b-2 border-stone-400/20 text-center bg-[#e5e5e5] shadow-sm rounded-tr-lg" style={{ top: `${headerHeight}px` }}>Editar</th>
+                    <tr className="border-b border-[var(--border-cream)] text-stone-500 text-[11px] uppercase tracking-widest font-black">
+                      <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Consecutivo</th>
+                      <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Equipo (Marca / Modelo)</th>
+                      <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Service Tag / Cargador</th>
+                      <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Usuario y Depto.</th>
+                      <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Proyecto Asignado</th>
+                      <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Proveedor</th>
+                      <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 text-center bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Carta</th>
+                      <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 text-center bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Estatus y CR</th>
+                      <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 text-center bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Editar</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -590,6 +595,7 @@ export default function ComputoInventarioPage() {
               </div>
             </div>
           )}
+        </div>
         </div>
 
 

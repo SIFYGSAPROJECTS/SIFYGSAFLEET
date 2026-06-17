@@ -43,7 +43,7 @@ export default async function CentralSoporteTIPage() {
 
   return (
     <div className="min-h-screen bg-transparent">
-      <div className="pt-2 pb-8 sm:pt-4 sm:pb-8 max-w-[95%] mx-auto relative">
+      <div className="pt-2 pb-8 sm:pt-4 sm:pb-8 relative">
         <ServiciosComputoTabs 
           tickets={tickets} 
           equipos={equipos} 

@@ -246,7 +246,8 @@ export default function PersonalPage() {
   return (
     <div className="w-full relative">
       {/* BARRA DE BOTONES SUPERIOR */}
-      <div id="sticky-header-dashboard-empleados" className={`sticky top-[72px] z-40 transition-all duration-300 pt-2 pb-2 mb-4 px-0 ${scrolled ? 'bg-[#f8fafc] border-b border-[var(--border-cream)] shadow-xl' : 'bg-transparent border-transparent'}`}>
+      <div id="sticky-header-dashboard-empleados" className={`sticky top-[72px] z-40 transition duration-300 pt-2 pb-0 mb-6 px-0 ${scrolled ? 'bg-[#f8fafc]' : 'bg-transparent'}`}>
+        <div className={`max-w-[95%] mx-auto transition duration-300 ${scrolled ? 'border-b border-stone-300 shadow-xl pb-2 px-0' : 'border-transparent pb-2 px-0 shadow-none'}`}>
         <div className="flex flex-col sm:flex-row justify-between gap-4 border-b border-[var(--border-cream)] pb-4">
           <div className="flex gap-3 overflow-x-auto scrollbar-hide">
             <button onClick={() => setFiltroTab('Activo')} className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm sm:text-base whitespace-nowrap transition-all ${filtroTab === 'Activo' ? 'bg-[#71717a]/10 text-[#71717a] border border-[#71717a]/50 shadow-md' : 'text-[var(--text-muted)] hover:text-[#71717a] hover:bg-[var(--bg-hover)]'}`}>
@@ -267,20 +268,22 @@ export default function PersonalPage() {
             </button>
           </div>
         </div>
+        </div>
       </div>
 
+      <div className="max-w-[95%] mx-auto">
       <div className={`bg-[var(--bg-floating)] rounded-xl shadow-xl border border-[var(--border-cream)] border-t-4 transition-all duration-500 ${filtroTab === 'Inactivo' ? 'border-t-red-500' : 'border-t-purple-500'}`}>
         
         {/* TABLA ESCRITORIO */}
         <div className="hidden md:block w-full">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-[var(--bg-hover)]/70 border-b border-[var(--border-cream)] text-[var(--text-main)] text-sm uppercase tracking-wider font-bold">
-                <th className="sticky z-30 p-4 font-bold border-b-2 border-stone-400/20 bg-[var(--bg-screen)] shadow-sm rounded-tl-lg" style={{ top: `${headerHeight}px` }}>Empleado</th>
-                <th className="sticky z-30 p-4 font-bold border-b-2 border-stone-400/20 bg-[var(--bg-screen)] shadow-sm" style={{ top: `${headerHeight}px` }}>Contacto</th>
-                <th className="sticky z-30 p-4 font-bold border-b-2 border-stone-400/20 bg-[var(--bg-screen)] shadow-sm" style={{ top: `${headerHeight}px` }}>Puesto</th>
-                <th className="sticky z-30 p-4 font-bold border-b-2 border-stone-400/20 bg-[var(--bg-screen)] shadow-sm text-center" style={{ top: `${headerHeight}px` }}>Nivel</th>
-                <th className="sticky z-30 p-4 font-bold border-b-2 border-stone-400/20 bg-[var(--bg-screen)] shadow-sm text-center rounded-tr-lg" style={{ top: `${headerHeight}px` }}>Acciones</th>
+              <tr className="border-b border-[var(--border-cream)] text-stone-500 text-[11px] uppercase tracking-widest font-black">
+                <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Empleado</th>
+                <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Contacto</th>
+                <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Puesto</th>
+                <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 text-center bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Nivel</th>
+                <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 text-center bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Acciones</th>
               </tr>
             </thead>
             <tbody className="">
@@ -371,6 +374,7 @@ export default function PersonalPage() {
              ))
           )}
         </div>
+      </div>
       </div>
 
       {/* MODAL DE EDICIÓN CON EL BUSCADOR INTELIGENTE */}

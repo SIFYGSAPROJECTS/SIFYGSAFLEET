@@ -158,7 +158,8 @@ export default function HistorialClient({ historial, rol }: Props) {
     <div className="w-full">
       
       {/*  BARRA DE FILTROS REDISEÑADA (Sutil y minimalista)  */}
-      <div id="sticky-header-dashboard-historial" className={`sticky top-[72px] z-40 transition-all duration-300 pt-2 pb-2 mb-4 px-0 ${scrolled ? 'bg-[#f8fafc] border-b border-[var(--border-cream)] shadow-xl' : 'bg-transparent border-transparent'}`}>
+      <div id="sticky-header-dashboard-historial" className={`sticky top-[72px] z-40 transition duration-300 pt-2 pb-0 mb-6 px-0 ${scrolled ? 'bg-[#f8fafc]' : 'bg-transparent'}`}>
+        <div className={`max-w-[95%] mx-auto transition duration-300 ${scrolled ? 'border-b border-stone-300 shadow-xl pb-2 px-0' : 'border-transparent pb-2 px-0 shadow-none'}`}>
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between px-1 gap-3">
           <div className="flex items-center gap-2 text-slate-500">
             <Filter size={14} className="text-[#71717a]" />
@@ -198,21 +199,23 @@ export default function HistorialClient({ historial, rol }: Props) {
             />
           </div>
         </div>
+        </div>
       </div>
 
       {/* TABLA DE HISTORIAL */}
+      <div className="max-w-[95%] mx-auto">
       <div className="bg-[var(--bg-floating)] rounded-xl shadow-xl border border-[var(--border-cream)] border-t-4 border-t-[#71717a]">
         <div className="w-full">
           <table className="min-w-[1000px] w-full text-left border-collapse">
             <thead>
-              <tr className="bg-[var(--bg-hover)]/70 text-[var(--text-main)] text-xs uppercase tracking-wider border-b border-[var(--border-cream)] font-bold">
-                <th className="sticky z-30 p-4 font-bold border-b-2 border-stone-400/20 bg-[var(--bg-hover)] shadow-sm rounded-tl-lg" style={{ top: `${headerHeight}px` }}>Folio</th>
-                <th className="sticky z-30 p-4 font-bold border-b-2 border-stone-400/20 bg-[var(--bg-hover)] shadow-sm" style={{ top: `${headerHeight}px` }}>Fecha</th>
-                <th className="sticky z-30 p-4 font-bold border-b-2 border-stone-400/20 bg-[var(--bg-hover)] shadow-sm" style={{ top: `${headerHeight}px` }}>Vehículo</th>
-                <th className="sticky z-30 p-4 font-bold border-b-2 border-stone-400/20 bg-[var(--bg-hover)] shadow-sm" style={{ top: `${headerHeight}px` }}>Solicitante</th>
-                <th className="sticky z-30 p-4 font-bold border-b-2 border-stone-400/20 text-center bg-[var(--bg-hover)] shadow-sm" style={{ top: `${headerHeight}px` }}>Tipo Servicio</th>
-                <th className="sticky z-30 p-4 font-bold border-b-2 border-stone-400/20 text-center w-64 bg-[var(--bg-hover)] shadow-sm" style={{ top: `${headerHeight}px` }}>Factura</th>
-                <th className="sticky z-30 p-4 font-bold border-b-2 border-stone-400/20 text-center bg-[var(--bg-hover)] shadow-sm rounded-tr-lg" style={{ top: `${headerHeight}px` }}>Acción</th>
+              <tr className="border-b border-[var(--border-cream)] text-stone-500 text-[11px] uppercase tracking-widest font-black">
+                <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Folio</th>
+                <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Fecha</th>
+                <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Vehículo</th>
+                <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Solicitante</th>
+                <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 text-center bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Tipo Servicio</th>
+                <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 text-center w-64 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Factura</th>
+                <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 text-center bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Acción</th>
               </tr>
             </thead>
             <tbody className="">
@@ -295,6 +298,7 @@ export default function HistorialClient({ historial, rol }: Props) {
             </tbody>
           </table>
         </div>
+      </div>
       </div>
 
       {/* MODALES DEL SISTEMA */}

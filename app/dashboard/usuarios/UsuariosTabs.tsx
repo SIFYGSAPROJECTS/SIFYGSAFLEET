@@ -25,6 +25,7 @@ export default function UsuariosTabs({ isAdmin, empleadosIniciales }: Props) {
   return (
     <div className="space-y-6">
       
+      <div className="max-w-[95%] mx-auto">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-5 mb-8">
         
         {/* TEXTO ALINEADO A LA IZQUIERDA */}
@@ -79,7 +80,9 @@ export default function UsuariosTabs({ isAdmin, empleadosIniciales }: Props) {
           </div>
         </div>
       </div>
+      </div>
 
+      <div className="max-w-[95%] mx-auto">
       <div className="w-full overflow-x-auto pb-1 mb-6 scrollbar-hide">
         <div className="flex space-x-2 border-b border-[var(--border-cream)] min-w-max pb-px">
           
@@ -119,12 +122,13 @@ export default function UsuariosTabs({ isAdmin, empleadosIniciales }: Props) {
 
         </div>
       </div>
+      </div>
 
       <div className="pt-4">
 
         {/* VISTA 1: MI PERFIL */}
         {activeTab === 'perfil' && (
-          <div>
+          <div className="max-w-[95%] mx-auto">
             <MiPerfilPage />
           </div>
         )}
@@ -138,7 +142,7 @@ export default function UsuariosTabs({ isAdmin, empleadosIniciales }: Props) {
 
         {/* VISTA 3: SEGURIDAD (Solo Admin) */}
         {activeTab === 'seguridad' && isAdmin && (
-          <div>
+          <div className="max-w-[95%] mx-auto">
             <SeguridadPage />
           </div>
         )}
