@@ -27,7 +27,7 @@ export default async function ComputoDashboardPage() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 animate-in fade-in slide-in-from-top-4 duration-700">
           <div className="text-left">
             <h1 className="text-3xl font-serif font-medium text-[var(--text-main)] tracking-tight">
-              {isAdmin ? 'Central de Cómputo TI' : 'Soporte y Servicios TI'}
+              {isAdmin ? 'Panel de Control' : 'Soporte y Servicios'}
             </h1>
             <p className="text-[var(--text-muted)] mt-1">
               {isAdmin 

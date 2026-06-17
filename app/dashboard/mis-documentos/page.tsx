@@ -50,37 +50,7 @@ export default function MisDocumentosPage() {
 
   return (
     <div className="min-h-screen bg-transparent">
-      <div className="p-4 sm:p-8 max-w-5xl mx-auto">
-        
-
-
-
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-5 mb-10">
-<div className="w-full md:w-auto overflow-x-auto scrollbar-hide pb-3 pt-2 md:pt-0">
-            <div className="flex w-full justify-start sm:justify-center md:justify-end min-w-max px-1">
-              <div className="inline-flex items-center bg-[var(--bg-floating)] border border-[var(--border-cream)] rounded-full p-1.5 shadow-lg shrink-0 gap-1">
-                
-                <Link href="/dashboard/usuarios" className="px-4 py-1.5 text-xs font-bold rounded-full text-[var(--text-muted)] hover:text-[#71717a] hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap">
-                  <User size={14} /> Usuarios
-                </Link>
-
-                <Link href="/dashboard/servicios" className="px-4 py-1.5 text-xs font-bold rounded-full text-[var(--text-muted)] hover:text-[#71717a] hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap">
-                  <Wrench size={14} /> Servicios
-                </Link>
-
-                <Link href="/dashboard/mis-checklists" className="px-4 py-1.5 text-xs font-bold rounded-full text-[var(--text-muted)] hover:text-[#71717a] hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap">
-                  <FileText size={14} /> Checklists
-                </Link>
-
-                {/* BOTÓN ACTIVO: DOCUMENTOS */}
-                <div className="px-4 py-1.5 text-xs font-bold rounded-full bg-white text-[var(--text-main)] cursor-default flex items-center gap-2 shadow-sm border border-[var(--border-cream)] whitespace-nowrap">
-                  <FolderOpen size={14} className="text-amber-600" /> Documentos
-                </div>
-
-              </div>
-            </div>
-          </div>
-</div>
+      <div className="pt-0 px-4 sm:px-6 pb-8 max-w-5xl mx-auto">
 {/* ESTADO DE CARGA */}
         {cargando ? (
            <div className="flex flex-col items-center justify-center p-20 text-[var(--text-muted)] gap-4">

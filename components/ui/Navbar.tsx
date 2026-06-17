@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import Image from 'next/image';
-import { Menu, X, Car, Server, LayoutGrid, LogOut, CalendarDays, Laptop } from 'lucide-react';
+import { Menu, X, Car, Server, LayoutGrid, LogOut, CalendarDays, Laptop, Wrench, FolderOpen, User, DollarSign, CalendarCheck, FileText } from 'lucide-react';
 import LogoutButton from '@/app/dashboard/LogoutButton';
 
 interface NavbarProps {
@@ -273,6 +273,185 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
           {/* RIGHT SIDE: Action Buttons (Desktop Only) - Hover Dropdowns */}
           <div className="flex-1 hidden md:flex justify-end items-center gap-2">
             
+            {/* Cómputo TI Sub-navigation (Dropdown similar to Módulos) */}
+            {type === 'computo' && pathname !== '/computo' && (
+              <div className="relative group">
+                <Link
+                  href="/computo"
+                  className="hover:bg-white/10 text-white px-4 py-2 rounded-xl text-xs flex items-center gap-2 transition-all font-bold"
+                >
+                  <Laptop size={14} className="text-emerald-400" /> Accesos TI
+                </Link>
+
+                {/* Dropdown with pt-2 to bridge hover gap */}
+                <div 
+                  className="absolute top-full left-1/2 pt-2 w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[120]"
+                  style={{ transform: 'translateX(-50%)' }}
+                >
+                  <div className="bg-zinc-950/95 border border-white/10 rounded-xl shadow-2xl p-1.5 backdrop-blur-md text-left">
+                    <div className="px-3 py-1.5 text-[9px] font-black text-white/40 tracking-wider uppercase border-b border-white/5 mb-1">
+                      Accesos TI
+                    </div>
+                    {localIsAdmin && (
+                      <Link
+                        href="/computo/inventario"
+                        className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
+                          pathname === '/computo/inventario' 
+                            ? 'bg-emerald-600/20 text-emerald-400 font-bold' 
+                            : 'text-white/80 hover:text-white hover:bg-white/5'
+                        }`}
+                      >
+                        <Laptop size={14} className="text-emerald-400" />
+                        <span>Inventario</span>
+                      </Link>
+                    )}
+                    <Link
+                      href="/computo/servicios"
+                      className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
+                        pathname === '/computo/servicios' 
+                          ? 'bg-emerald-600/20 text-emerald-400 font-bold' 
+                          : 'text-white/80 hover:text-white hover:bg-white/5'
+                      }`}
+                    >
+                      <Wrench size={14} className="text-emerald-400" />
+                      <span>Soporte TI</span>
+                    </Link>
+                    {localIsAdmin && (
+                      <Link
+                        href="/computo/documentos"
+                        className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
+                          pathname === '/computo/documentos' 
+                            ? 'bg-emerald-600/20 text-emerald-400 font-bold' 
+                            : 'text-white/80 hover:text-white hover:bg-white/5'
+                        }`}
+                      >
+                        <FolderOpen size={14} className="text-emerald-400" />
+                        <span>Documentos</span>
+                      </Link>
+                    )}
+                    {localIsAdmin && (
+                      <Link
+                        href="/computo/empleados"
+                        className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
+                          pathname === '/computo/empleados' 
+                            ? 'bg-emerald-600/20 text-emerald-400 font-bold' 
+                            : 'text-white/80 hover:text-white hover:bg-white/5'
+                        }`}
+                      >
+                        <User size={14} className="text-emerald-400" />
+                        <span>Personal</span>
+                      </Link>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+            {/* Fleet Sub-navigation Dropdown */}
+            {type === 'dashboard' && pathname !== '/dashboard' && (
+              <div className="relative group">
+                <button
+                  className="hover:bg-white/10 text-white px-4 py-2 rounded-xl text-xs flex items-center gap-2 transition-all font-bold"
+                >
+                  <Car size={14} className="text-zinc-400" /> Accesos Flota
+                </button>
+
+                {/* Dropdown with pt-2 to bridge hover gap */}
+                <div 
+                  className="absolute top-full left-1/2 pt-2 w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[120]"
+                  style={{ transform: 'translateX(-50%)' }}
+                >
+                  <div className="bg-zinc-950/95 border border-white/10 rounded-xl shadow-2xl p-1.5 backdrop-blur-md text-left">
+                    <div className="px-3 py-1.5 text-[9px] font-black text-white/40 tracking-wider uppercase border-b border-white/5 mb-1">
+                      Accesos Flota
+                    </div>
+                    <Link
+                      href="/dashboard/servicios"
+                      className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
+                        pathname === '/dashboard/servicios' 
+                          ? 'bg-zinc-800 text-white font-bold' 
+                          : 'text-white/80 hover:text-white hover:bg-white/5'
+                      }`}
+                    >
+                      <Wrench size={14} className="text-zinc-400" />
+                      <span>Servicios</span>
+                    </Link>
+                    {localIsAdmin && (
+                      <Link
+                        href="/dashboard/inventario"
+                        className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
+                          pathname === '/dashboard/inventario' 
+                            ? 'bg-zinc-800 text-white font-bold' 
+                            : 'text-white/80 hover:text-white hover:bg-white/5'
+                        }`}
+                      >
+                        <Car size={14} className="text-zinc-400" />
+                        <span>Flota</span>
+                      </Link>
+                    )}
+                    {localIsAdmin && (
+                      <Link
+                        href="/dashboard/costos"
+                        className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
+                          pathname === '/dashboard/costos' 
+                            ? 'bg-zinc-800 text-white font-bold' 
+                            : 'text-white/80 hover:text-white hover:bg-white/5'
+                        }`}
+                      >
+                        <DollarSign size={14} className="text-zinc-400" />
+                        <span>Costos</span>
+                      </Link>
+                    )}
+                    <Link
+                      href="/dashboard/usuarios"
+                      className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
+                        pathname === '/dashboard/usuarios' 
+                          ? 'bg-zinc-800 text-white font-bold' 
+                          : 'text-white/80 hover:text-white hover:bg-white/5'
+                      }`}
+                    >
+                      <User size={14} className="text-zinc-400" />
+                      <span>Usuarios</span>
+                    </Link>
+                    <Link
+                      href={localIsAdmin ? "/dashboard/checklists" : "/dashboard/mis-checklists"}
+                      className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
+                        pathname === '/dashboard/checklists' || pathname === '/dashboard/mis-checklists'
+                          ? 'bg-zinc-800 text-white font-bold' 
+                          : 'text-white/80 hover:text-white hover:bg-white/5'
+                      }`}
+                    >
+                      <FileText size={14} className="text-zinc-400" />
+                      <span>Checklists</span>
+                    </Link>
+                    <Link
+                      href={localIsAdmin ? "/dashboard/documentos" : "/dashboard/mis-documentos"}
+                      className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
+                        pathname === '/dashboard/documentos' || pathname === '/dashboard/mis-documentos'
+                          ? 'bg-zinc-800 text-white font-bold' 
+                          : 'text-white/80 hover:text-white hover:bg-white/5'
+                      }`}
+                    >
+                      <FolderOpen size={14} className="text-zinc-400" />
+                      <span>Documentos</span>
+                    </Link>
+                    {localIsAdmin && (
+                      <Link
+                        href="/verificaciones"
+                        className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
+                          pathname === '/verificaciones' 
+                            ? 'bg-zinc-800 text-white font-bold' 
+                            : 'text-white/80 hover:text-white hover:bg-white/5'
+                        }`}
+                      >
+                        <CalendarCheck size={14} className="text-zinc-400" />
+                        <span>Verificaciones</span>
+                      </Link>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Módulos Hover Dropdown */}
             {(localIsAdmin || localUserAreas.length > 0) && (
               <div className="relative group">
@@ -303,7 +482,7 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                     )}
                     {(localIsAdmin || localUserAreas.includes('COMPUTO')) && (
                       <Link
-                        href="/computo/inventario"
+                        href="/computo"
                         className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-white/80 hover:text-white hover:bg-white/5 transition-all"
                       >
                         <Laptop size={14} className="text-[#FF7420]" />
@@ -413,6 +592,153 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
           </div>
 
           <nav className="flex flex-col space-y-3">
+            {type === 'computo' && pathname !== '/computo' && (
+              <>
+                <div className="text-[10px] font-black text-white/30 uppercase tracking-widest pl-2 mb-1">Cómputo TI</div>
+                {localIsAdmin && (
+                  <Link
+                    href="/computo/inventario"
+                    onClick={() => setIsMenuOpen(false)}
+                    className={`border px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold ${
+                      pathname === '/computo/inventario' 
+                        ? 'bg-emerald-600 border-emerald-500 text-white' 
+                        : 'bg-white/5 border-white/5 text-white/90 hover:bg-white/10'
+                    }`}
+                  >
+                    <Laptop size={14} className="text-emerald-400" /> Inventario
+                  </Link>
+                )}
+                <Link
+                  href="/computo/servicios"
+                  onClick={() => setIsMenuOpen(false)}
+                  className={`border px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold ${
+                    pathname === '/computo/servicios' 
+                      ? 'bg-emerald-600 border-emerald-500 text-white' 
+                      : 'bg-white/5 border-white/5 text-white/90 hover:bg-white/10'
+                  }`}
+                >
+                  <Wrench size={14} className="text-emerald-400" /> Soporte TI
+                </Link>
+                {localIsAdmin && (
+                  <Link
+                    href="/computo/documentos"
+                    onClick={() => setIsMenuOpen(false)}
+                    className={`border px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold ${
+                      pathname === '/computo/documentos' 
+                        ? 'bg-emerald-600 border-emerald-500 text-white' 
+                        : 'bg-white/5 border-white/5 text-white/90 hover:bg-white/10'
+                    }`}
+                  >
+                    <FolderOpen size={14} className="text-emerald-400" /> Documentos
+                  </Link>
+                )}
+                {localIsAdmin && (
+                  <Link
+                    href="/computo/empleados"
+                    onClick={() => setIsMenuOpen(false)}
+                    className={`border px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold ${
+                      pathname === '/computo/empleados' 
+                        ? 'bg-emerald-600 border-emerald-500 text-white' 
+                        : 'bg-white/5 border-white/5 text-white/90 hover:bg-white/10'
+                    }`}
+                  >
+                    <User size={14} className="text-emerald-400" /> Personal
+                  </Link>
+                )}
+                <div className="h-px bg-white/5 my-2"></div>
+              </>
+            )}
+
+            {type === 'dashboard' && pathname !== '/dashboard' && (
+              <>
+                <div className="text-[10px] font-black text-white/30 uppercase tracking-widest pl-2 mb-1">Gestión de Flota</div>
+                <Link
+                  href="/dashboard/servicios"
+                  onClick={() => setIsMenuOpen(false)}
+                  className={`border px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold ${
+                    pathname === '/dashboard/servicios' 
+                      ? 'bg-zinc-800 border-zinc-700 text-white' 
+                      : 'bg-white/5 border-white/5 text-white/90 hover:bg-white/10'
+                  }`}
+                >
+                  <Wrench size={14} className="text-zinc-400" /> Servicios
+                </Link>
+                {localIsAdmin && (
+                  <Link
+                    href="/dashboard/inventario"
+                    onClick={() => setIsMenuOpen(false)}
+                    className={`border px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold ${
+                      pathname === '/dashboard/inventario' 
+                        ? 'bg-zinc-800 border-zinc-700 text-white' 
+                        : 'bg-white/5 border-white/5 text-white/90 hover:bg-white/10'
+                    }`}
+                  >
+                    <Car size={14} className="text-zinc-400" /> Flota
+                  </Link>
+                )}
+                {localIsAdmin && (
+                  <Link
+                    href="/dashboard/costos"
+                    onClick={() => setIsMenuOpen(false)}
+                    className={`border px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold ${
+                      pathname === '/dashboard/costos' 
+                        ? 'bg-zinc-800 border-zinc-700 text-white' 
+                        : 'bg-white/5 border-white/5 text-white/90 hover:bg-white/10'
+                    }`}
+                  >
+                    <DollarSign size={14} className="text-zinc-400" /> Costos
+                  </Link>
+                )}
+                <Link
+                  href="/dashboard/usuarios"
+                  onClick={() => setIsMenuOpen(false)}
+                  className={`border px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold ${
+                    pathname === '/dashboard/usuarios' 
+                      ? 'bg-zinc-800 border-zinc-700 text-white' 
+                      : 'bg-white/5 border-white/5 text-white/90 hover:bg-white/10'
+                  }`}
+                >
+                  <User size={14} className="text-zinc-400" /> Usuarios
+                </Link>
+                <Link
+                  href={localIsAdmin ? "/dashboard/checklists" : "/dashboard/mis-checklists"}
+                  onClick={() => setIsMenuOpen(false)}
+                  className={`border px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold ${
+                    pathname === '/dashboard/checklists' || pathname === '/dashboard/mis-checklists'
+                      ? 'bg-zinc-800 border-zinc-700 text-white' 
+                      : 'bg-white/5 border-white/5 text-white/90 hover:bg-white/10'
+                  }`}
+                >
+                  <FileText size={14} className="text-zinc-400" /> Checklists
+                </Link>
+                <Link
+                  href={localIsAdmin ? "/dashboard/documentos" : "/dashboard/mis-documentos"}
+                  onClick={() => setIsMenuOpen(false)}
+                  className={`border px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold ${
+                    pathname === '/dashboard/documentos' || pathname === '/dashboard/mis-documentos'
+                      ? 'bg-zinc-800 border-zinc-700 text-white' 
+                      : 'bg-white/5 border-white/5 text-white/90 hover:bg-white/10'
+                  }`}
+                >
+                  <FolderOpen size={14} className="text-zinc-400" /> Documentos
+                </Link>
+                {localIsAdmin && (
+                  <Link
+                    href="/verificaciones"
+                    onClick={() => setIsMenuOpen(false)}
+                    className={`border px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold ${
+                      pathname === '/verificaciones' 
+                        ? 'bg-zinc-800 border-zinc-700 text-white' 
+                        : 'bg-white/5 border-white/5 text-white/90 hover:bg-white/10'
+                  }`}
+                >
+                  <CalendarCheck size={14} className="text-zinc-400" /> Verificaciones
+                </Link>
+                )}
+                <div className="h-px bg-white/5 my-2"></div>
+              </>
+            )}
+
             {(localIsAdmin || localUserAreas.length > 0) && (
               <>
                 <div className="text-[10px] font-black text-white/30 uppercase tracking-widest pl-2 mb-1">Módulos</div>
@@ -427,7 +753,7 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                 )}
                 {(localIsAdmin || localUserAreas.includes('COMPUTO')) && (
                   <Link
-                    href="/computo/inventario"
+                    href="/computo"
                     onClick={() => setIsMenuOpen(false)}
                     className="bg-white/5 hover:bg-white/10 border border-white/5 text-white/90 px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold"
                   >

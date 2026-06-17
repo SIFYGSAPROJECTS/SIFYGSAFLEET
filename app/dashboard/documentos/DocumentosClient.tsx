@@ -290,48 +290,7 @@ export default function DocumentosPage({ vehiculos = [], isAdmin = false }: Prop
 
   return (
     <div className="min-h-screen bg-transparent">
-      <div className="p-4 sm:p-8 max-w-7xl mx-auto">
-
-        {/* ─── HEADER ─────────────────────────────────────────────────── */}
-        <div className="flex flex-col md:flex-row justify-end items-start md:items-center gap-5 mb-8">
-
-          {/* NAV PILLS */}
-          <div className="w-full md:w-auto overflow-x-auto scrollbar-hide pb-3">
-            <div className="flex w-full justify-start sm:justify-center md:justify-end min-w-max px-1">
-              <div className="inline-flex items-center bg-[var(--bg-floating)] border border-[var(--border-cream)] rounded-full p-1.5 shadow-lg shrink-0 gap-1">
-                {isAdmin && (
-                  <>
-                    <Link href="/dashboard/usuarios" className="px-4 py-1.5 text-xs font-bold rounded-full text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap">
-                      <User size={14} /> Usuarios
-                    </Link>
-                    <Link href="/dashboard/inventario" className="px-4 py-1.5 text-xs font-bold rounded-full text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap">
-                      <Car size={14} /> Flota
-                    </Link>
-                  </>
-                )}
-                <Link href="/dashboard/servicios" className="px-4 py-1.5 text-xs font-bold rounded-full text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap">
-                  <Wrench size={14} /> Servicios
-                </Link>
-                <Link href="/dashboard/checklists" className="px-4 py-1.5 text-xs font-bold rounded-full text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap">
-                  <FileText size={14} /> Checklists
-                </Link>
-                <div className="px-4 py-1.5 text-xs font-bold rounded-full bg-white text-amber-600 cursor-default flex items-center gap-2 shadow-sm border border-amber-200 whitespace-nowrap">
-                  <FolderOpen size={14} /> Documentos
-                </div>
-                {isAdmin && (
-                  <>
-                    <Link href="/dashboard/costos" className="px-4 py-1.5 text-xs font-bold rounded-full text-[var(--text-muted)] hover:text-[#71717a] hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap">
-                      <DollarSign size={14} /> Costos
-                    </Link>
-                    <Link href="/verificaciones" className="px-4 py-1.5 text-xs font-bold rounded-full text-[var(--text-muted)] hover:text-green-600 hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap">
-                      <CalendarCheck size={14} /> Verificaciones
-                    </Link>
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
+      <div className="pt-0 px-4 sm:px-6 pb-8 max-w-7xl mx-auto">
 
         {/* ─── LAYOUT PRINCIPAL: DOS COLUMNAS ─────────────────────────── */}
         <div className="flex flex-col lg:flex-row gap-6 items-start">

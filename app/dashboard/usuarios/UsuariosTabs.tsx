@@ -23,64 +23,7 @@ export default function UsuariosTabs({ isAdmin, empleadosIniciales }: Props) {
   }
 
   return (
-    <div className="space-y-6">
-      
-      <div className="max-w-[95%] mx-auto">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-5 mb-8">
-        
-        {/* TEXTO ALINEADO A LA IZQUIERDA */}
-
-
-        {/*  BARRA DE ACCESOS DIRECTOS RESPONSIVA  */}
-        <div className="w-full md:w-auto overflow-x-auto scrollbar-hide pb-3">
-          {/* Aquí está la magia: justify-start en móvil, y center/end en pantallas grandes */}
-          <div className="flex w-full justify-start sm:justify-center md:justify-end min-w-max px-1">
-            <div className="inline-flex items-center bg-[var(--bg-floating)] border border-[var(--border-cream)] rounded-full p-1.5 shadow-lg shrink-0 gap-1">
-              
-              <div className="px-4 py-1.5 text-xs font-bold rounded-full bg-white text-[var(--text-main)] cursor-default flex items-center gap-2 shadow-sm border border-[var(--border-cream)] whitespace-nowrap">
-                <User size={14} className="text-purple-600" /> Usuarios
-              </div>
-              
-              {isAdmin && (
-                <Link href="/dashboard/inventario" className="px-4 py-1.5 text-xs font-bold rounded-full text-[var(--text-muted)] hover:text-[#71717a] hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap">
-                  <Car size={14} /> Flota
-                </Link>
-              )}
-              
-              <Link href="/dashboard/servicios" className="px-4 py-1.5 text-xs font-bold rounded-full text-[var(--text-muted)] hover:text-[#71717a] hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap">
-                <Wrench size={14} /> Servicios
-              </Link>
-
-              <Link 
-                href={isAdmin ? '/dashboard/checklists' : '/dashboard/mis-checklists'} 
-                className="px-4 py-1.5 text-xs font-bold rounded-full text-[var(--text-muted)] hover:text-cyan-600 hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap"
-              >
-                <FileText size={14} /> Checklists
-              </Link>
-
-              <Link 
-                href={isAdmin ? '/dashboard/documentos' : '/dashboard/mis-documentos'} 
-                className="px-4 py-1.5 text-xs font-bold rounded-full text-[var(--text-muted)] hover:text-orange-500 hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap"
-              >
-                <FolderOpen size={14} /> Documentos
-              </Link>
-
-              {isAdmin && (
-                <>
-                  <Link href="/dashboard/costos" className="px-4 py-1.5 text-xs font-bold rounded-full text-[var(--text-muted)] hover:text-[#71717a] hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap">
-                    <DollarSign size={14} /> Costos
-                  </Link>
-                  <Link href="/verificaciones" className="px-4 py-1.5 text-xs font-bold rounded-full text-[var(--text-muted)] hover:text-green-600 hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap">
-                    <CalendarCheck size={14} /> Verificaciones
-                  </Link>
-                </>
-              )}
-
-            </div>
-          </div>
-        </div>
-      </div>
-      </div>
+    <div className="space-y-2">
 
       <div className="max-w-[95%] mx-auto">
       <div className="w-full overflow-x-auto pb-1 mb-6 scrollbar-hide">

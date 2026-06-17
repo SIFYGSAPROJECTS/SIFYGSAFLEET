@@ -361,40 +361,8 @@ export default function CostosPage() {
 
   return (
     <div className="min-h-screen bg-transparent relative">
-      <div className="pt-2 pb-8 sm:pt-4 sm:pb-8 relative">
+      <div className="pt-0 pb-6 relative">
         <div className="max-w-[95%] mx-auto space-y-8 animate-in fade-in duration-500">
-        
-        {/* ENCABEZADO Y NAVEGACIÓN */}
-        <div className="flex flex-col lg:flex-row justify-between lg:items-center gap-5 mb-2">
-        <div className="transition-all duration-300 overflow-hidden mb-2">
-          <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-end gap-4 w-full lg:w-auto">
-            <div className="w-full sm:w-auto overflow-x-auto scrollbar-hide pb-3">
-              <div className="flex w-full justify-start sm:justify-center lg:justify-end min-w-max px-1">
-                <div className="inline-flex items-center bg-[var(--bg-floating)] border border-[var(--border-cream)] rounded-full p-1.5 shadow-lg shrink-0 gap-1">
-                  <Link href="/dashboard/usuarios" className="px-4 py-1.5 text-xs font-bold rounded-full text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap">
-                    <User size={14} /> Usuarios
-                  </Link>
-                  <Link href="/dashboard/inventario" className="px-4 py-1.5 text-xs font-bold rounded-full text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap">
-                    <Car size={14} /> Flota
-                  </Link>
-                  <Link href="/dashboard/servicios" className="px-4 py-1.5 text-xs font-bold rounded-full text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap">
-                    <Wrench size={14} /> Servicios
-                  </Link>
-                  <Link href="/dashboard/checklists" className="px-4 py-1.5 text-xs font-bold rounded-full text-[var(--text-muted)] hover:text-cyan-600 hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap">
-                    <FileText size={14} /> Checklists
-                  </Link>
-                  <Link href="/dashboard/documentos" className="px-4 py-1.5 text-xs font-bold rounded-full text-[var(--text-muted)] hover:text-orange-500 hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap">
-                    <FolderOpen size={14} /> Documentos
-                  </Link>
-                  <div className="px-4 py-1.5 text-xs font-bold rounded-full bg-white text-[var(--text-main)] cursor-default flex items-center gap-2 shadow-sm border border-[var(--border-cream)] whitespace-nowrap">
-                    <DollarSign size={14} className="text-emerald-500" /> Costos
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        </div>
 
         <div className="flex flex-wrap justify-center sm:justify-end items-center gap-2 sm:gap-3 w-full border-b border-[var(--border-cream)] pb-4 mb-6">
           <input 

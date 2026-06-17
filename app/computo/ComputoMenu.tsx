@@ -178,8 +178,8 @@ export default function ComputoMenu({ userRole, totalEquipos, equiposReparacion 
         {activeTab === '' && (
           <div className="flex flex-col items-center justify-center py-12 text-[var(--text-muted)] animate-in fade-in duration-700">
             <Laptop size={48} className="mb-4 opacity-50 text-emerald-500" />
-            <h3 className="text-xl font-bold text-[var(--text-muted)] font-serif">Módulo de Cómputo</h3>
-            <p className="text-sm mt-2">Selecciona una de las herramientas superiores.</p>
+            <h3 className="text-xl font-bold text-[var(--text-muted)] font-serif">Selecciona una pestaña</h3>
+            <p className="text-sm mt-2">Haz clic en las pestañas superiores para acceder a las herramientas.</p>
           </div>
         )}
 

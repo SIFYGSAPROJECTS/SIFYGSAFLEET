@@ -299,37 +299,8 @@ export default function InventarioMaestroPage() {
 
   return (
     <div className="min-h-screen bg-transparent relative">
-      <div className="pt-2 pb-8 sm:pt-4 sm:pb-8">
+      <div className="pt-0 pb-6">
         <div className="max-w-[95%] mx-auto">
-          <div className={`transition-all duration-300 overflow-hidden ${scrolled ? 'max-h-0 opacity-0 mb-0' : 'max-h-20 opacity-100 mb-2'}`}>
-          <div className="w-full sm:w-auto overflow-x-auto scrollbar-hide pb-3">
-            <div className="flex w-full justify-start sm:justify-center lg:justify-end min-w-max px-1">
-              <div className="inline-flex items-center bg-[var(--bg-floating)] border border-[var(--border-cream)] rounded-full p-1.5 shadow-lg shrink-0 gap-1">
-                <Link href="/dashboard/usuarios" className="px-4 py-1.5 text-xs font-bold rounded-full text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap">
-                  <User size={14} /> Usuarios
-                </Link>
-                <div className="px-4 py-1.5 text-xs font-bold rounded-full bg-white text-[var(--text-main)] cursor-default flex items-center gap-2 shadow-sm border border-[var(--border-cream)] whitespace-nowrap">
-                  <Car size={14} className="text-blue-600" /> Flota
-                </div>
-                <Link href="/dashboard/servicios" className="px-4 py-1.5 text-xs font-bold rounded-full text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap">
-                  <Wrench size={14} /> Servicios
-                </Link>
-                <Link href="/dashboard/checklists" className="px-4 py-1.5 text-xs font-bold rounded-full text-[var(--text-muted)] hover:text-cyan-600 hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap">
-                  <FileText size={14} /> Checklists
-                </Link>
-                <Link href="/dashboard/documentos" className="px-4 py-1.5 text-xs font-bold rounded-full text-[var(--text-muted)] hover:text-orange-500 hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap">
-                  <FolderOpen size={14} /> Documentos
-                </Link>
-                <Link href="/dashboard/costos" className="px-4 py-1.5 text-xs font-bold rounded-full text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap">
-                  <DollarSign size={14} /> Costos
-                </Link>
-                <Link href="/verificaciones" className="px-4 py-1.5 text-xs font-bold rounded-full text-[var(--text-muted)] hover:text-green-600 hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap">
-                  <CalendarCheck size={14} /> Verificaciones
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
         </div>
         {/* ENCABEZADO STICKY DE TABS Y FILTROS */}
         <div id="sticky-header-inventario" className={`sticky top-[72px] z-40 transition duration-300 pt-2 pb-0 ${scrolled ? 'bg-[#f8fafc]' : 'bg-transparent'}`}>

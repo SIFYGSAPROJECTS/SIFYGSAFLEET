@@ -246,13 +246,10 @@ export default function PersonalPage() {
 
   return (
     <div className="min-h-screen bg-transparent relative">
-      <div className="pt-2 pb-8 sm:pt-4 sm:pb-8 relative">
+      <div className="pt-0 pb-6 relative">
         <div className="max-w-[95%] mx-auto">
-        <div className="flex flex-col lg:flex-row justify-between lg:items-center gap-5 mb-8">
+        <div className="flex flex-col lg:flex-row justify-between lg:items-center gap-5 mb-4">
           <div className="flex-1 flex flex-col items-start w-full text-left">
-            <Link href="/computo" className="inline-flex items-center gap-2 text-[var(--text-muted)] hover:text-emerald-500 transition-colors mb-3 font-medium text-sm">
-              <ArrowLeft className="w-4 h-4" /> Volver a inicio
-            </Link>
             <h1 className="text-2xl sm:text-3xl font-black text-[var(--text-main)] flex items-center gap-3 font-serif">
               <UserPlus className="text-emerald-500 shrink-0" size={32} /> Personal TI
             </h1>
@@ -261,7 +258,7 @@ export default function PersonalPage() {
         </div>
 
         {/* BARRA DE BOTONES SUPERIOR */}
-        <div id="sticky-header-computo-empleados" className={`sticky top-[72px] z-40 transition duration-300 pt-2 pb-0 mb-6 px-0 ${scrolled ? 'bg-[#f8fafc]' : 'bg-transparent'}`}>
+        <div id="sticky-header-computo-empleados" className={`sticky top-[72px] z-40 transition duration-300 pt-2 pb-0 mb-4 px-0 ${scrolled ? 'bg-[#f8fafc]' : 'bg-transparent'}`}>
           <div className={`max-w-[95%] mx-auto transition duration-300 ${scrolled ? 'border-b border-stone-300 shadow-xl pb-2 px-0' : 'border-transparent pb-2 px-0 shadow-none'}`}>
           <div className="flex flex-col sm:flex-row justify-between gap-4 border-b border-[var(--border-cream)] pb-4">
             <div className="flex gap-3 overflow-x-auto scrollbar-hide">

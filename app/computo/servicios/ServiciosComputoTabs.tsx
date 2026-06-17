@@ -99,93 +99,64 @@ export default function ServiciosComputoTabs({ tickets, equipos, isAdmin, rol }:
     <div className="space-y-6">
       
       <div className="max-w-[95%] mx-auto">
-      <div className="flex flex-col md:flex-row justify-between md:items-center gap-5 mb-8">
-        
-        <div className="flex-1 flex flex-col items-start w-full text-left">
-          <Link href="/computo" className="inline-flex items-center gap-2 text-slate-400 hover:text-emerald-600 transition-colors mb-3 font-medium text-sm">
-            <ArrowLeft className="w-4 h-4" /> Volver a Central TI
-          </Link>
-          <h1 className="text-2xl sm:text-3xl font-black text-[var(--text-main)] flex items-center gap-3 font-serif">
-            <Wrench className="text-emerald-500" size={32} /> Soporte y Servicios TI
-          </h1>
-          <p className="text-[var(--text-muted)] mt-2 font-medium text-sm sm:text-base">
-            {isAdmin ? 'Gestión de tickets y reparaciones de equipos.' : 'Reporta fallas y solicita soporte técnico.'}
-          </p>
-        </div>
-
-          <div className="w-full md:w-auto overflow-x-auto scrollbar-hide pb-3">
-            <div className="flex w-full justify-start sm:justify-center md:justify-end min-w-max px-1">
-              <div className="inline-flex items-center bg-[var(--bg-floating)] border border-[var(--border-cream)] rounded-full p-1.5 shadow-lg shrink-0 gap-1">
-                {isAdmin && (
-                  <Link href="/computo/inventario" className="px-4 py-1.5 text-xs font-bold rounded-full text-slate-500 hover:text-emerald-600 hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap">
-                    <Laptop size={14} /> Inventario
-                  </Link>
-                )}
-                <div className="px-4 py-1.5 text-xs font-bold rounded-full bg-white text-[var(--text-main)] cursor-default flex items-center gap-2 shadow-sm border border-[var(--border-cream)] whitespace-nowrap">
-                  <Wrench size={14} className="text-emerald-500" /> Soporte TI
-                </div>
-                {isAdmin && (
-                  <Link 
-                    href="/computo/documentos" 
-                    className="px-4 py-1.5 text-xs font-bold rounded-full text-slate-500 hover:text-emerald-600 hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap"
-                  >
-                    <FolderOpen size={14} /> Documentos
-                  </Link>
-                )}
-                {isAdmin && (
-                  <Link href="/computo/empleados" className="px-4 py-1.5 text-xs font-bold rounded-full text-slate-500 hover:text-emerald-600 hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap">
-                    <User size={14} /> Personal
-                  </Link>
-                )}
-              </div>
-            </div>
+        <div className="flex flex-col lg:flex-row justify-between lg:items-end gap-5 mb-8 border-b border-[var(--border-cream)] pb-4">
+          {/* LEFT SIDE: Title and Description */}
+          <div className="flex-grow text-left">
+            <h1 className="text-2xl sm:text-3xl font-black text-[var(--text-main)] flex items-center gap-3 font-serif">
+              <Wrench className="text-emerald-500" size={32} /> Soporte y Servicios TI
+            </h1>
+            <p className="text-[var(--text-muted)] mt-2 font-medium text-sm sm:text-base">
+              {isAdmin ? 'Gestión de tickets y reparaciones de equipos.' : 'Reporta fallas y solicita soporte técnico.'}
+            </p>
           </div>
-      </div>
-      </div>
 
-      <div className="max-w-[95%] mx-auto">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end border-b border-[var(--border-cream)] mb-6 w-full gap-4 sm:gap-0">
-        <div className="flex space-x-1 sm:space-x-4 overflow-x-auto scrollbar-hide w-full sm:w-auto">
-          
-          <button
-            onClick={() => setActiveTab('nueva')}
-            className={`px-4 sm:px-6 py-3.5 font-bold text-sm sm:text-base flex items-center gap-2 border-b-2 transition-all whitespace-nowrap ${
-              activeTab === 'nueva' ? 'border-emerald-600 text-emerald-600' : 'border-transparent text-slate-500 hover:text-slate-700'
-            }`}
-          >
-            <PlusCircle size={20} /> Nuevo Ticket
-          </button>
+          {/* RIGHT SIDE: Tabs and Export Button */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 shrink-0 overflow-x-auto scrollbar-hide">
+            <div className="flex space-x-1 bg-stone-100 p-1 rounded-xl">
+              <button
+                onClick={() => setActiveTab('nueva')}
+                className={`px-4 py-2 font-bold text-xs sm:text-sm flex items-center gap-1.5 rounded-lg transition-all whitespace-nowrap ${
+                  activeTab === 'nueva' 
+                    ? 'bg-white text-emerald-600 shadow-sm border border-[var(--border-cream)]' 
+                    : 'text-slate-500 hover:text-slate-800'
+                }`}
+              >
+                <PlusCircle size={16} /> Nuevo Ticket
+              </button>
 
-          <button
-            onClick={() => setActiveTab('seguimiento')}
-            className={`px-4 sm:px-6 py-3.5 font-bold text-sm sm:text-base flex items-center gap-2 border-b-2 transition-all whitespace-nowrap ${
-              activeTab === 'seguimiento' ? 'border-cyan-600 text-cyan-600' : 'border-transparent text-slate-500 hover:text-slate-700'
-            }`}
-          >
-            <Activity size={20} /> Seguimiento
-            <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${activeTab === 'seguimiento' ? 'bg-cyan-600 text-white' : 'bg-[var(--bg-floating)] text-slate-500'}`}>
-              {activos.length}
-            </span>
-          </button>
+              <button
+                onClick={() => setActiveTab('seguimiento')}
+                className={`px-4 py-2 font-bold text-xs sm:text-sm flex items-center gap-1.5 rounded-lg transition-all whitespace-nowrap ${
+                  activeTab === 'seguimiento' 
+                    ? 'bg-white text-cyan-600 shadow-sm border border-[var(--border-cream)]' 
+                    : 'text-slate-500 hover:text-slate-800'
+                }`}
+              >
+                <Activity size={16} /> Seguimiento
+                <span className={`ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-mono ${activeTab === 'seguimiento' ? 'bg-cyan-600 text-white' : 'bg-stone-200 text-slate-600'}`}>
+                  {activos.length}
+                </span>
+              </button>
 
-          <button
-            onClick={() => setActiveTab('historial')}
-            className={`px-4 sm:px-6 py-3.5 font-bold text-sm sm:text-base flex items-center gap-2 border-b-2 transition-all whitespace-nowrap ${
-              activeTab === 'historial' ? 'border-purple-600 text-purple-600' : 'border-transparent text-slate-500 hover:text-slate-700'
-            }`}
-          >
-            <History size={20} /> Historial
-          </button>
+              <button
+                onClick={() => setActiveTab('historial')}
+                className={`px-4 py-2 font-bold text-xs sm:text-sm flex items-center gap-1.5 rounded-lg transition-all whitespace-nowrap ${
+                  activeTab === 'historial' 
+                    ? 'bg-white text-purple-600 shadow-sm border border-[var(--border-cream)]' 
+                    : 'text-slate-500 hover:text-slate-800'
+                }`}
+              >
+                <History size={16} /> Historial
+              </button>
+            </div>
+
+            {(activeTab === 'seguimiento' || activeTab === 'historial') && isAdmin && (
+              <button onClick={descargarCSV} className="bg-white hover:bg-[var(--bg-hover)] border border-[var(--border-cream)] text-[var(--text-main)] px-4 py-2 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors shadow-sm shrink-0 text-xs sm:text-sm">
+                <Download className="w-3.5 h-3.5" /> Exportar Excel
+              </button>
+            )}
+          </div>
         </div>
-
-        <div className="pb-3 w-full sm:w-auto shrink-0 flex items-center justify-end">
-          {(activeTab === 'seguimiento' || activeTab === 'historial') && isAdmin && (
-            <button onClick={descargarCSV} className="w-full sm:w-auto bg-white hover:bg-[var(--bg-hover)] border border-[var(--border-cream)] text-[var(--text-main)] px-4 py-2.5 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors shadow-sm shrink-0">
-              <Download className="w-4 h-4" /> Exportar Excel
-            </button>
-          )}
-        </div>
-      </div>
       </div>
 
       <div className="">

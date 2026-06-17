@@ -236,14 +236,11 @@ export default function DocumentosComputoClient({ equipos = [], isAdmin = false 
 
   return (
     <div className="min-h-screen bg-transparent">
-      <div className="p-4 sm:p-8 max-w-7xl mx-auto">
+      <div className="pt-0 px-4 sm:px-6 pb-8 max-w-7xl mx-auto">
 
         {/* ─── HEADER ─────────────────────────────────────────────────── */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-5 mb-8">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-5 mb-4">
           <div className="flex-1 flex flex-col items-start w-full text-left">
-            <Link href="/computo" className="inline-flex items-center gap-2 text-[var(--text-muted)] hover:text-emerald-600 transition-colors mb-3 font-medium text-sm">
-              <ArrowLeft className="w-4 h-4" /> Volver a Cómputo TI
-            </Link>
             <h1 className="text-2xl sm:text-3xl font-black text-[var(--text-main)] flex items-center gap-3 font-serif">
               <FolderOpen className="text-emerald-500 shrink-0" size={32} /> Documentos de Equipos
             </h1>

@@ -111,55 +111,8 @@ export default function ServiciosTabs({ tickets, vehiculos, isAdmin, rol }: Prop
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-2">
       
-      <div className="max-w-[95%] mx-auto">
-      <div className="flex flex-col md:flex-row justify-between md:items-center gap-5 mb-8">
-
-        <div className="w-full md:w-auto overflow-x-auto scrollbar-hide pb-3">
-          <div className="flex w-full justify-start sm:justify-center md:justify-end min-w-max px-1">
-            <div className="inline-flex items-center bg-[var(--bg-floating)] border border-[var(--border-cream)] rounded-full p-1.5 shadow-lg shrink-0 gap-1">
-              
-              <Link href="/dashboard/usuarios" className="px-4 py-1.5 text-xs font-bold rounded-full text-slate-500 hover:text-slate-700 hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap">
-                <User size={14} /> Usuarios
-              </Link>
-
-              {isAdmin && (
-                <Link href="/dashboard/inventario" className="px-4 py-1.5 text-xs font-bold rounded-full text-slate-500 hover:text-slate-700 hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap">
-                  <Car size={14} /> Flota
-                </Link>
-              )}
-              
-              <div className="px-4 py-1.5 text-xs font-bold rounded-full bg-white text-[var(--text-main)] cursor-default flex items-center gap-2 shadow-sm border border-[var(--border-cream)] whitespace-nowrap">
-                <Wrench size={14} className="text-red-500" /> Servicios
-              </div>
-
-              <Link 
-                href={isAdmin ? '/dashboard/checklists' : '/dashboard/mis-checklists'} 
-                className="px-4 py-1.5 text-xs font-bold rounded-full text-slate-500 hover:text-cyan-600 hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap"
-              >
-                <FileText size={14} /> Checklists
-              </Link>
-
-              <Link 
-                href={isAdmin ? '/dashboard/documentos' : '/dashboard/mis-documentos'} 
-                className="px-4 py-1.5 text-xs font-bold rounded-full text-slate-500 hover:text-orange-500 hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap"
-              >
-                <FolderOpen size={14} /> Documentos
-              </Link>
-
-              {isAdmin && (
-                <Link href="/dashboard/costos" className="px-4 py-1.5 text-xs font-bold rounded-full text-slate-500 hover:text-[#71717a] hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2 whitespace-nowrap">
-                  <DollarSign size={14} /> Costos
-                </Link>
-              )}
-
-            </div>
-          </div>
-        </div>
-      </div>
-      </div>
-
       <div className="max-w-[95%] mx-auto">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end border-b border-[var(--border-cream)] mb-6 w-full gap-4 sm:gap-0">
         <div className="flex space-x-1 sm:space-x-4 overflow-x-auto scrollbar-hide w-full sm:w-auto">
