@@ -70,7 +70,6 @@ export default function PersonalPage() {
   };
 
   const [scrolled, setScrolled] = useState(false);
-  const [headerHeight, setHeaderHeight] = useState(72);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -84,14 +83,17 @@ export default function PersonalPage() {
     const updateHeaderHeight = () => {
       const header = document.getElementById('sticky-header-dashboard-empleados');
       if (header) {
-        setHeaderHeight(header.offsetHeight + 72);
+        document.documentElement.style.setProperty('--empleados-header-height', `${header.offsetHeight + 72}px`);
       } else {
-        setHeaderHeight(72);
+        document.documentElement.style.setProperty('--empleados-header-height', '136px');
       }
     };
-    updateHeaderHeight();
+    const timer = setTimeout(updateHeaderHeight, 100);
     window.addEventListener('resize', updateHeaderHeight);
-    return () => window.removeEventListener('resize', updateHeaderHeight);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', updateHeaderHeight);
+    };
   }, [filtroTab, scrolled]);
 
   useEffect(() => { 
@@ -279,11 +281,11 @@ export default function PersonalPage() {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-[var(--border-cream)] text-stone-500 text-[11px] uppercase tracking-widest font-black">
-                <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Empleado</th>
-                <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Contacto</th>
-                <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Puesto</th>
-                <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 text-center bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Nivel</th>
-                <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 text-center bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Acciones</th>
+                <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50" style={{ top: 'var(--empleados-header-height, 136px)' }}>Empleado</th>
+                <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50" style={{ top: 'var(--empleados-header-height, 136px)' }}>Contacto</th>
+                <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50" style={{ top: 'var(--empleados-header-height, 136px)' }}>Puesto</th>
+                <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 text-center bg-stone-50" style={{ top: 'var(--empleados-header-height, 136px)' }}>Nivel</th>
+                <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 text-center bg-stone-50" style={{ top: 'var(--empleados-header-height, 136px)' }}>Acciones</th>
               </tr>
             </thead>
             <tbody className="">

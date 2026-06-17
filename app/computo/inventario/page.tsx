@@ -48,6 +48,12 @@ export default function ComputoInventarioPage() {
     Estatus: 'Asignado', CR: 'NO', Fecha_CR: '', Proveedor: ''
   });
 
+  const [limiteEquipos, setLimiteEquipos] = useState(50);
+
+  useEffect(() => {
+    setLimiteEquipos(50);
+  }, [tabPrincipal, filtroEstatus, filtroPrefijo, busquedaTexto]);
+
   const [userRole, setUserRole] = useState<string>('USER');
   const isAdmin = ['ADMIN', 'GERENCIAL'].includes(userRole);
 
@@ -70,7 +76,6 @@ export default function ComputoInventarioPage() {
   };
 
   const [scrolled, setScrolled] = useState(false);
-  const [headerHeight, setHeaderHeight] = useState(72);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -84,15 +89,19 @@ export default function ComputoInventarioPage() {
     const updateHeaderHeight = () => {
       const header = document.getElementById('sticky-header-computo');
       if (header) {
-        setHeaderHeight(header.offsetHeight + 72);
+        document.documentElement.style.setProperty('--computo-header-height', `${header.offsetHeight + 72}px`);
       } else {
-        setHeaderHeight(72);
+        document.documentElement.style.setProperty('--computo-header-height', '210px');
       }
     };
-    updateHeaderHeight();
+    // Ejecutar después de un breve retardo para asegurar que el DOM se haya asentado
+    const timer = setTimeout(updateHeaderHeight, 100);
     window.addEventListener('resize', updateHeaderHeight);
-    return () => window.removeEventListener('resize', updateHeaderHeight);
-  }, [tabPrincipal, scrolled]);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', updateHeaderHeight);
+    };
+  }, [tabPrincipal, scrolled, cargando]);
 
   useEffect(() => {
     cargarEquipos();
@@ -368,20 +377,19 @@ export default function ComputoInventarioPage() {
       <div className="pt-2 pb-8 sm:pt-4 sm:pb-8 relative">
 
         <div className="max-w-[95%] mx-auto">
-        <div className="flex flex-col lg:flex-row justify-between lg:items-center gap-5 mb-8">
-          <div className="flex-1 flex flex-col items-start w-full text-left">
-            <Link href="/computo" className="inline-flex items-center gap-2 text-[var(--text-muted)] hover:text-emerald-500 transition-colors mb-3 font-medium text-sm">
-              <ArrowLeft className="w-4 h-4" /> Volver al Dashboard de Cómputo
-            </Link>
-            <h1 className="text-2xl sm:text-3xl font-black text-[var(--text-main)] flex items-center gap-3 font-serif">
-              <Laptop className="text-emerald-500 shrink-0" size={32} /> Inventario de TI
-            </h1>
+          <div className={`transition-all duration-300 overflow-hidden ${scrolled ? 'max-h-0 opacity-0 mb-0' : 'max-h-40 opacity-100 mb-8'}`}>
+            <div className="flex flex-col lg:flex-row justify-between lg:items-center gap-5 pt-2">
+              <div className="flex-1 flex flex-col items-start w-full text-left">
+                <h1 className="text-2xl sm:text-3xl font-black text-[var(--text-main)] flex items-center gap-3 font-serif">
+                  <Laptop className="text-emerald-500 shrink-0" size={32} /> Inventario de TI
+                </h1>
+              </div>
+            </div>
           </div>
-        </div>
         </div>
 
         {/* ENCABEZADO STICKY DE TABS Y FILTROS */}
-        <div id="sticky-header-computo" className={`sticky top-[72px] z-40 transition duration-300 pt-2 pb-0 mb-4 px-0 ${scrolled ? 'bg-[#f8fafc]' : 'bg-transparent'}`}>
+        <div id="sticky-header-computo" className={`sticky top-[72px] z-40 transition duration-300 pt-2 pb-0 px-0 ${scrolled ? 'bg-[#f8fafc] mb-0' : 'bg-transparent mb-4'}`}>
           <div className={`max-w-[95%] mx-auto transition duration-300 ${scrolled ? 'border-b border-stone-300 shadow-xl pb-2 px-0' : 'border-transparent pb-2 px-0 shadow-none'}`}>
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end border-b border-[var(--border-cream)] mb-4 w-full gap-4 sm:gap-0 pb-2">
             <div className="flex space-x-1 sm:space-x-4 overflow-x-auto scrollbar-hide w-full sm:w-auto">
@@ -463,84 +471,99 @@ export default function ComputoInventarioPage() {
         <div className="max-w-[95%] mx-auto">
         <div className="animate-in fade-in duration-500 w-full mt-4">
           {tabPrincipal === 'bajas' || tabPrincipal === 'revision' ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {cargando ? (
-                <div className="col-span-full p-8 text-center text-[var(--text-muted)] font-bold">Cargando inventario...</div>
-              ) : equiposFiltrados.length === 0 ? (
-                <div className="col-span-full p-8 text-center text-[var(--text-muted)] bg-[var(--bg-floating)] rounded-xl shadow border border-[var(--border-cream)]">No hay equipos que coincidan con los filtros.</div>
-              ) : (
-                equiposFiltrados.map((equipo) => (
-                  <div key={equipo.C_Interno} className={`bg-[var(--bg-floating)] rounded-xl shadow-lg border border-[var(--border-cream)] border-t-4 ${tabPrincipal === 'revision' ? 'border-t-amber-500' : 'border-t-red-500'} overflow-hidden hover:shadow-xl transition-all flex flex-col`}>
-                    <div className="p-5 flex-grow">
-                      <div className="flex justify-between items-start mb-4">
-                        <div>
-                          <h3 className="font-bold text-[var(--text-main)] text-lg font-serif">{equipo.C_Interno}</h3>
-                          <p className="text-xs text-[var(--text-muted)] font-mono mt-0.5">{equipo.Empresa}</p>
+            <div className="flex flex-col gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {cargando ? (
+                  <div className="col-span-full p-8 text-center text-[var(--text-muted)] font-bold">Cargando inventario...</div>
+                ) : equiposFiltrados.length === 0 ? (
+                  <div className="col-span-full p-8 text-center text-[var(--text-muted)] bg-[var(--bg-floating)] rounded-xl shadow border border-[var(--border-cream)]">No hay equipos que coincidan con los filtros.</div>
+                ) : (
+                  equiposFiltrados.slice(0, limiteEquipos).map((equipo) => (
+                    <div key={equipo.C_Interno} className={`bg-[var(--bg-floating)] rounded-xl shadow-lg border border-[var(--border-cream)] border-t-4 ${tabPrincipal === 'revision' ? 'border-t-amber-500' : 'border-t-red-500'} overflow-hidden hover:shadow-xl transition-all flex flex-col`}>
+                      <div className="p-5 flex-grow">
+                        <div className="flex justify-between items-start mb-4">
+                          <div>
+                            <h3 className="font-bold text-[var(--text-main)] text-lg font-serif">{equipo.C_Interno}</h3>
+                            <p className="text-xs text-[var(--text-muted)] font-mono mt-0.5">{equipo.Empresa}</p>
+                          </div>
+                          <span className={`${tabPrincipal === 'revision' ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'} px-2 py-0.5 rounded text-[10px] font-bold uppercase shrink-0 ml-2`}>{equipo.Estatus}</span>
                         </div>
-                        <span className={`${tabPrincipal === 'revision' ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'} px-2 py-0.5 rounded text-[10px] font-bold uppercase shrink-0 ml-2`}>{equipo.Estatus}</span>
+
+                        <div className="space-y-4 mb-2">
+                          <div>
+                            <p className="text-[10px] text-stone-500 uppercase font-bold tracking-wider mb-1">Equipo</p>
+                            <p className="font-medium text-sm text-[var(--text-main)]">{equipo.Tipo} {equipo.Marca}</p>
+                            <p className="text-xs text-[var(--text-muted)]">{equipo.Modelo}</p>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-3">
+                            <div className="bg-[var(--bg-screen)] p-2 rounded-lg border border-[var(--border-cream)]">
+                              <p className="text-[10px] text-stone-500 uppercase font-bold mb-1">Service Tag</p>
+                              <p className="text-xs font-medium text-[var(--text-main)] truncate" title={equipo.Service_Tag || 'N/A'}>{equipo.Service_Tag || 'N/A'}</p>
+                            </div>
+                            <div className="bg-[var(--bg-screen)] p-2 rounded-lg border border-[var(--border-cream)]">
+                              <p className="text-[10px] text-stone-500 uppercase font-bold mb-1">Cargador</p>
+                              <p className="text-xs font-medium text-[var(--text-main)] truncate" title={equipo.Cargador || 'N/A'}>{equipo.Cargador || 'N/A'}</p>
+                            </div>
+                          </div>
+
+                          <div>
+                            <p className="text-[10px] text-stone-500 uppercase font-bold tracking-wider mb-1">Último Asignado</p>
+                            <p className="font-medium text-sm text-[var(--text-main)] truncate" title={equipo.Usuario || 'N/A'}>{equipo.Usuario || <span className="text-stone-400 italic">Sin asignar</span>}</p>
+                            <p className="text-xs text-[var(--text-muted)] truncate" title={equipo.Departamento || ''}>{equipo.Departamento} {equipo.N_EMP ? `(#${equipo.N_EMP})` : ''}</p>
+                          </div>
+
+                          <div className="bg-[var(--bg-screen)] p-2 rounded-lg border border-[var(--border-cream)] mt-1">
+                            <p className="text-[10px] text-stone-500 uppercase font-bold mb-1">Proveedor / Rentadora</p>
+                            <p className="text-xs font-medium text-[var(--text-main)] truncate" title={equipo.Proveedor || 'N/A'}>{equipo.Proveedor || <span className="text-stone-400 italic">N/A</span>}</p>
+                          </div>
+                        </div>
                       </div>
 
-                      <div className="space-y-4 mb-2">
-                        <div>
-                          <p className="text-[10px] text-stone-500 uppercase font-bold tracking-wider mb-1">Equipo</p>
-                          <p className="font-medium text-sm text-[var(--text-main)]">{equipo.Tipo} {equipo.Marca}</p>
-                          <p className="text-xs text-[var(--text-muted)]">{equipo.Modelo}</p>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-3">
-                          <div className="bg-[var(--bg-screen)] p-2 rounded-lg border border-[var(--border-cream)]">
-                            <p className="text-[10px] text-stone-500 uppercase font-bold mb-1">Service Tag</p>
-                            <p className="text-xs font-medium text-[var(--text-main)] truncate" title={equipo.Service_Tag || 'N/A'}>{equipo.Service_Tag || 'N/A'}</p>
-                          </div>
-                          <div className="bg-[var(--bg-screen)] p-2 rounded-lg border border-[var(--border-cream)]">
-                            <p className="text-[10px] text-stone-500 uppercase font-bold mb-1">Cargador</p>
-                            <p className="text-xs font-medium text-[var(--text-main)] truncate" title={equipo.Cargador || 'N/A'}>{equipo.Cargador || 'N/A'}</p>
-                          </div>
-                        </div>
-
-                        <div>
-                          <p className="text-[10px] text-stone-500 uppercase font-bold tracking-wider mb-1">Último Asignado</p>
-                          <p className="font-medium text-sm text-[var(--text-main)] truncate" title={equipo.Usuario || 'N/A'}>{equipo.Usuario || <span className="text-stone-400 italic">Sin asignar</span>}</p>
-                          <p className="text-xs text-[var(--text-muted)] truncate" title={equipo.Departamento || ''}>{equipo.Departamento} {equipo.N_EMP ? `(#${equipo.N_EMP})` : ''}</p>
-                        </div>
-
-                        <div className="bg-[var(--bg-screen)] p-2 rounded-lg border border-[var(--border-cream)] mt-1">
-                          <p className="text-[10px] text-stone-500 uppercase font-bold mb-1">Proveedor / Rentadora</p>
-                          <p className="text-xs font-medium text-[var(--text-main)] truncate" title={equipo.Proveedor || 'N/A'}>{equipo.Proveedor || <span className="text-stone-400 italic">N/A</span>}</p>
+                      <div className="bg-[var(--bg-screen)] border-t border-[var(--border-cream)] p-3 flex justify-between items-center px-5 mt-auto">
+                        <div className="text-xs text-[var(--text-muted)]"><span className="font-bold text-stone-500">CR:</span> {equipo.CR === 'SI' ? '✅ SI' : '❌ NO'}</div>
+                        <div className="flex gap-1">
+                          <button onClick={() => generarCartaResponsiva(equipo as any)} className="p-2 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="Generar Carta Responsiva">
+                            <FileText className="w-4 h-4" />
+                          </button>
+                          <button onClick={() => abrirModalEditar(equipo)} className="p-2 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors" title="Editar Equipo">
+                            <Pencil className="w-4 h-4" />
+                          </button>
                         </div>
                       </div>
                     </div>
-
-                    <div className="bg-[var(--bg-screen)] border-t border-[var(--border-cream)] p-3 flex justify-between items-center px-5 mt-auto">
-                      <div className="text-xs text-[var(--text-muted)]"><span className="font-bold text-stone-500">CR:</span> {equipo.CR === 'SI' ? '✅ SI' : '❌ NO'}</div>
-                      <div className="flex gap-1">
-                        <button onClick={() => generarCartaResponsiva(equipo as any)} className="p-2 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="Generar Carta Responsiva">
-                          <FileText className="w-4 h-4" />
-                        </button>
-                        <button onClick={() => abrirModalEditar(equipo)} className="p-2 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors" title="Editar Equipo">
-                          <Pencil className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))
+                  ))
+                )}
+              </div>
+              {equiposFiltrados.length > limiteEquipos && (
+                <div className="text-center py-4">
+                  <button
+                    onClick={() => setLimiteEquipos(prev => prev + 50)}
+                    className="px-6 py-2.5 bg-[var(--bg-floating)] hover:bg-[var(--bg-hover)] border border-[var(--border-cream)] text-[var(--text-main)] rounded-xl font-bold transition-all shadow-sm text-sm active:scale-95"
+                  >
+                    Mostrar más equipos (+{equiposFiltrados.length - limiteEquipos} restantes)
+                  </button>
+                </div>
               )}
             </div>
           ) : (
             <div className={`bg-[var(--bg-floating)] rounded-xl shadow-xl border border-[var(--border-cream)] border-t-4 ${tabPrincipal === 'activos' ? 'border-t-emerald-500' : 'border-t-amber-500'}`}>
-              <div className="w-full">
+              <div 
+                id="table-scroll-container-ti"
+                className="w-full transition-all duration-300"
+              >
                 <table className="min-w-[1200px] w-full text-left border-collapse">
                   <thead>
                     <tr className="border-b border-[var(--border-cream)] text-stone-500 text-[11px] uppercase tracking-widest font-black">
-                      <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Consecutivo</th>
-                      <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Equipo (Marca / Modelo)</th>
-                      <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Service Tag / Cargador</th>
-                      <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Usuario y Depto.</th>
-                      <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Proyecto Asignado</th>
-                      <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Proveedor</th>
-                      <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 text-center bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Carta</th>
-                      <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 text-center bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Estatus y CR</th>
-                      <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 text-center bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Editar</th>
+                      <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50" style={{ top: 'var(--computo-header-height, 210px)' }}>Consecutivo</th>
+                      <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50" style={{ top: 'var(--computo-header-height, 210px)' }}>Equipo (Marca / Modelo)</th>
+                      <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50" style={{ top: 'var(--computo-header-height, 210px)' }}>Service Tag / Cargador</th>
+                      <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50" style={{ top: 'var(--computo-header-height, 210px)' }}>Usuario y Depto.</th>
+                      <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50" style={{ top: 'var(--computo-header-height, 210px)' }}>Proyecto Asignado</th>
+                      <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50" style={{ top: 'var(--computo-header-height, 210px)' }}>Proveedor</th>
+                      <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 text-center bg-stone-50" style={{ top: 'var(--computo-header-height, 210px)' }}>Carta</th>
+                      <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 text-center bg-stone-50" style={{ top: 'var(--computo-header-height, 210px)' }}>Estatus y CR</th>
+                      <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 text-center bg-stone-50" style={{ top: 'var(--computo-header-height, 210px)' }}>Editar</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -549,7 +572,7 @@ export default function ComputoInventarioPage() {
                     ) : equiposFiltrados.length === 0 ? (
                       <tr><td colSpan={9} className="text-center p-8 text-[var(--text-muted)]">No hay equipos que coincidan con los filtros.</td></tr>
                     ) : (
-                      equiposFiltrados.map((equipo) => (
+                      equiposFiltrados.slice(0, limiteEquipos).map((equipo) => (
                         <tr key={equipo.C_Interno} className="hover:bg-[var(--bg-hover)] even:bg-[var(--bg-screen)] transition-colors border-b border-[var(--border-cream)] last:border-0">
                           <td className="p-4">
                             <div className="font-bold text-[var(--text-main)] text-base font-serif">{equipo.C_Interno}</div>
@@ -593,6 +616,16 @@ export default function ComputoInventarioPage() {
                   </tbody>
                 </table>
               </div>
+              {equiposFiltrados.length > limiteEquipos && (
+                <div className="p-4 border-t border-[var(--border-cream)] text-center bg-stone-50/50 rounded-b-xl">
+                  <button
+                    onClick={() => setLimiteEquipos(prev => prev + 50)}
+                    className="px-6 py-2.5 bg-white hover:bg-[var(--bg-hover)] border border-[var(--border-cream)] text-[var(--text-main)] rounded-xl font-bold transition-all shadow-sm text-sm active:scale-95"
+                  >
+                    Mostrar más equipos (+{equiposFiltrados.length - limiteEquipos} restantes)
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>

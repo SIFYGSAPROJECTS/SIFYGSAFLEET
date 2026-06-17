@@ -209,6 +209,8 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
 
   // --- DASHBOARD & COMPUTO HEADER LAYOUT ---
   const getPageTitle = () => {
+    if (type === 'computo') return 'Cómputo TI';
+    if (type === 'programa') return 'Programa Anual';
     if (pathname.includes('/inventario')) return 'Gestión de Flota';
     if (pathname.includes('/servicios')) return 'Central de Servicios';
     if (pathname.includes('/empleados') || pathname.includes('/usuarios')) return 'Gestión de Personal';
@@ -216,8 +218,6 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
     if (pathname.includes('/checklists')) return 'Control de Checklists';
     if (pathname.includes('/documentos')) return 'Centro de Documentos';
     if (pathname.includes('/verificaciones')) return 'Verificaciones';
-    if (type === 'computo') return 'Cómputo TI';
-    if (type === 'programa') return 'Programa Anual';
     return 'Panel de Control';
   };
 

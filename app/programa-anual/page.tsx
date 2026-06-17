@@ -25,25 +25,7 @@ export default function ProgramaAnualPage() {
   const [saving, setSaving] = useState(false);
   const [mensaje, setMensaje] = useState<string | null>(null);
 
-  const [scrolled, setScrolled] = useState(false);
-  const [headerHeight, setHeaderHeight] = useState(72);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 30);
-    };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  useEffect(() => {
-    const updateHeaderHeight = () => {
-      setHeaderHeight(72);
-    };
-    updateHeaderHeight();
-    window.addEventListener('resize', updateHeaderHeight);
-    return () => window.removeEventListener('resize', updateHeaderHeight);
-  }, [scrolled]);
 
   useEffect(() => {
     cargarDatos();
@@ -214,23 +196,23 @@ export default function ProgramaAnualPage() {
               <thead>
                 <tr className="border-b border-[var(--border-cream)] text-stone-500 text-[11px] uppercase tracking-widest font-black">
                   {/* Seccion 1: Info */}
-                  <th className="sticky z-30 p-4 font-bold w-[180px] border-b border-stone-200/50 bg-stone-50/90 backdrop-blur-md shadow-sm" style={{ top: `${headerHeight}px` }}>DESCRIPCIÓN</th>
-                  <th className="sticky z-30 p-4 font-bold w-[130px] border-b border-stone-200/50 bg-stone-50/90 backdrop-blur-md shadow-sm" style={{ top: `${headerHeight}px` }}>EJECUTA</th>
+                  <th className="sticky z-30 p-4 font-bold w-[180px] border-b border-stone-200/50 bg-stone-50 shadow-sm" style={{ top: '72px' }}>DESCRIPCIÓN</th>
+                  <th className="sticky z-30 p-4 font-bold w-[130px] border-b border-stone-200/50 bg-stone-50 shadow-sm" style={{ top: '72px' }}>EJECUTA</th>
                   
                   {/* Spacer 1 */}
                   <th className="w-2 min-w-[8px] p-0 bg-transparent border-none"></th>
 
                   {/* Seccion 2: Calendario */}
-                  <th className="sticky z-30 p-0 border-b border-l border-r border-[var(--border-cream)] border-stone-200/50 w-8 text-center bg-stone-50/90 backdrop-blur-md shadow-sm" style={{ top: `${headerHeight}px` }}></th>
+                  <th className="sticky z-30 p-0 border-b border-l border-r border-[var(--border-cream)] border-stone-200/50 w-8 text-center bg-stone-50 shadow-sm" style={{ top: '72px' }}></th>
                   {mesesNombres.map((mes, i) => (
-                    <th key={mes} className={`sticky z-30 p-2 border-b border-r border-[var(--border-cream)] border-stone-200/50 text-center font-mono text-[10px] sm:text-xs min-w-[44px] bg-stone-50/90 backdrop-blur-md shadow-sm`} style={{ top: `${headerHeight}px` }}>{mes}</th>
+                    <th key={mes} className={`sticky z-30 p-2 border-b border-r border-[var(--border-cream)] border-stone-200/50 text-center font-mono text-[10px] sm:text-xs min-w-[44px] bg-stone-50 shadow-sm`} style={{ top: '72px' }}>{mes}</th>
                   ))}
 
                   {/* Spacer 2 */}
                   <th className="w-2 min-w-[8px] p-0 bg-transparent border-none"></th>
 
                   {/* Seccion 3: Observaciones */}
-                  <th className="sticky z-30 p-4 font-bold w-[200px] border-b border-stone-200/50 bg-stone-50/90 backdrop-blur-md shadow-sm" style={{ top: `${headerHeight}px` }}>OBSERVACIONES</th>
+                  <th className="sticky z-30 p-4 font-bold w-[200px] border-b border-stone-200/50 bg-stone-50 shadow-sm" style={{ top: '72px' }}>OBSERVACIONES</th>
                 </tr>
               </thead>
               <tbody>

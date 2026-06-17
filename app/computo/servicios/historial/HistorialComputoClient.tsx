@@ -8,8 +8,6 @@ export default function HistorialComputoClient({ historial, rol }: { historial: 
   const isAdmin = ['ADMIN', 'GERENCIAL'].includes(rol || '');
 
   const [scrolled, setScrolled] = useState(false);
-  const [headerHeight, setHeaderHeight] = useState(72);
-
 
   useEffect(() => {
     const handleScroll = () => {
@@ -23,14 +21,17 @@ export default function HistorialComputoClient({ historial, rol }: { historial: 
     const updateHeaderHeight = () => {
       const header = document.getElementById('sticky-header-historial-computo');
       if (header) {
-        setHeaderHeight(header.offsetHeight + 72);
+        document.documentElement.style.setProperty('--historial-computo-header-height', `${header.offsetHeight + 72}px`);
       } else {
-        setHeaderHeight(72);
+        document.documentElement.style.setProperty('--historial-computo-header-height', '136px');
       }
     };
-    updateHeaderHeight();
+    const timer = setTimeout(updateHeaderHeight, 100);
     window.addEventListener('resize', updateHeaderHeight);
-    return () => window.removeEventListener('resize', updateHeaderHeight);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', updateHeaderHeight);
+    };
   }, [scrolled]);
 
   const ticketsFiltrados = historial.filter(ticket => 
@@ -81,11 +82,11 @@ export default function HistorialComputoClient({ historial, rol }: { historial: 
           <table className="w-full text-sm text-left">
             <thead>
               <tr className="border-b border-[var(--border-cream)] text-stone-500 text-[11px] uppercase tracking-widest font-black">
-                <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Folio / Fecha</th>
-                <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Equipo</th>
-                <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Solicitante</th>
-                <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Servicio Realizado</th>
-                <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Estatus</th>
+                <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50" style={{ top: 'var(--historial-computo-header-height, 136px)' }}>Folio / Fecha</th>
+                <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50" style={{ top: 'var(--historial-computo-header-height, 136px)' }}>Equipo</th>
+                <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50" style={{ top: 'var(--historial-computo-header-height, 136px)' }}>Solicitante</th>
+                <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50" style={{ top: 'var(--historial-computo-header-height, 136px)' }}>Servicio Realizado</th>
+                <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50" style={{ top: 'var(--historial-computo-header-height, 136px)' }}>Estatus</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[var(--border-cream)]">

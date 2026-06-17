@@ -58,7 +58,6 @@ export default function InventarioMaestroPage() {
   const isAdmin = ['ADMIN', 'GERENCIAL'].includes(userRole);
 
   const [scrolled, setScrolled] = useState(false);
-  const [headerHeight, setHeaderHeight] = useState(210);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -72,12 +71,18 @@ export default function InventarioMaestroPage() {
     const updateHeaderHeight = () => {
       const header = document.getElementById('sticky-header-inventario');
       if (header) {
-        setHeaderHeight(header.offsetHeight + 72); // 72px for the floating black Navbar (top-2 + h-16)
+        document.documentElement.style.setProperty('--fleet-header-height', `${header.offsetHeight + 72}px`);
+      } else {
+        document.documentElement.style.setProperty('--fleet-header-height', '282px');
       }
     };
-    updateHeaderHeight();
+    // Ejecutar después de un breve retardo para asegurar que el DOM se haya asentado
+    const timer = setTimeout(updateHeaderHeight, 100);
     window.addEventListener('resize', updateHeaderHeight);
-    return () => window.removeEventListener('resize', updateHeaderHeight);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', updateHeaderHeight);
+    };
   }, [tabPrincipal, scrolled]);
 
   const cargarVehiculos = async () => {
@@ -427,12 +432,12 @@ export default function InventarioMaestroPage() {
                 <table className="min-w-[1000px] w-full text-left border-collapse">
                   <thead>
                     <tr className="border-b border-[var(--border-cream)] text-stone-500 text-[11px] uppercase tracking-widest font-black">
-                      <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Unidad</th>
-                      <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Vehículo</th>
-                      <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Detalles Operativos</th>
-                      <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 text-center bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Kilometraje</th>
-                      <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Asignación</th>
-                      <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 text-center bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Editar</th>
+                      <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50" style={{ top: 'var(--fleet-header-height, 282px)' }}>Unidad</th>
+                      <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50" style={{ top: 'var(--fleet-header-height, 282px)' }}>Vehículo</th>
+                      <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50" style={{ top: 'var(--fleet-header-height, 282px)' }}>Detalles Operativos</th>
+                      <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 text-center bg-stone-50" style={{ top: 'var(--fleet-header-height, 282px)' }}>Kilometraje</th>
+                      <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50" style={{ top: 'var(--fleet-header-height, 282px)' }}>Asignación</th>
+                      <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 text-center bg-stone-50" style={{ top: 'var(--fleet-header-height, 282px)' }}>Editar</th>
                     </tr>
                   </thead>
                   <tbody className="">
@@ -496,7 +501,7 @@ export default function InventarioMaestroPage() {
           <div className="animate-in fade-in slide-in-from-right-8 duration-500">
             <div 
               className={`sticky z-50 pt-2 pb-0 px-0 transition duration-300 ${scrolled ? 'bg-[#f8fafc]' : 'bg-transparent'}`}
-              style={{ top: `${headerHeight}px` }}
+              style={{ top: 'var(--fleet-header-height, 282px)' }}
             >
               <div className={`max-w-[95%] mx-auto transition duration-300 ${scrolled ? 'border-b-2 border-stone-300 shadow-2xl shadow-stone-200/50 pb-2 px-0' : 'border-transparent pb-2 px-0 shadow-none'}`}>
               {/* BARRA DE FILTROS REDISEÑADA (Sutil y minimalista) */}

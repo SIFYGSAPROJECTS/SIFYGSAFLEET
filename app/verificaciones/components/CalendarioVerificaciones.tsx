@@ -41,8 +41,6 @@ export default function CalendarioVerificaciones({
   const [filtroColor, setFiltroColor] = useState<string>('Todos');
 
   const [scrolled, setScrolled] = useState(false);
-  const [headerHeight, setHeaderHeight] = useState(72);
-
 
   useEffect(() => {
     const handleScroll = () => {
@@ -56,14 +54,17 @@ export default function CalendarioVerificaciones({
     const updateHeaderHeight = () => {
       const header = document.getElementById('sticky-header-verificaciones');
       if (header) {
-        setHeaderHeight(header.offsetHeight + 72);
+        document.documentElement.style.setProperty('--verif-header-height', `${header.offsetHeight + 72}px`);
       } else {
-        setHeaderHeight(72);
+        document.documentElement.style.setProperty('--verif-header-height', '136px');
       }
     };
-    updateHeaderHeight();
+    const timer = setTimeout(updateHeaderHeight, 100);
     window.addEventListener('resize', updateHeaderHeight);
-    return () => window.removeEventListener('resize', updateHeaderHeight);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', updateHeaderHeight);
+    };
   }, [scrolled]);
 
   const meses = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
@@ -257,15 +258,15 @@ export default function CalendarioVerificaciones({
         <table className="w-full text-sm text-left">
           <thead className="border-b border-[var(--border-cream)] text-stone-500 text-[11px] uppercase tracking-widest font-black">
             <tr>
-              <th className="sticky z-30 p-5 font-bold w-28 text-left border-r border-[var(--border-cream)] border-b border-stone-200/50 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Consecutivo</th>
-              <th className="sticky z-30 p-5 font-bold w-48 border-r border-[var(--border-cream)] border-b border-stone-200/50 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Vehículo</th>
+              <th className="sticky z-30 p-5 font-bold w-28 text-left border-r border-[var(--border-cream)] border-b border-stone-200/50 bg-stone-50" style={{ top: 'var(--verif-header-height, 136px)' }}>Consecutivo</th>
+              <th className="sticky z-30 p-5 font-bold w-48 border-r border-[var(--border-cream)] border-b border-stone-200/50 bg-stone-50" style={{ top: 'var(--verif-header-height, 136px)' }}>Vehículo</th>
               {meses.map((m, i) => (
                 <th 
                   key={i} 
-                  className={`sticky z-30 p-5 text-center font-bold border-b border-stone-200/50 w-16 bg-stone-50/90 backdrop-blur-md ${
+                  className={`sticky z-30 p-5 text-center font-bold border-b border-stone-200/50 w-16 bg-stone-50 ${
                     i === 6 ? 'border-l-2 border-l-stone-400' : 'border-l border-l-[var(--border-cream)]'
                   }`}
-                  style={{ top: `${headerHeight}px` }}
+                  style={{ top: 'var(--verif-header-height, 136px)' }}
                 >
                   {m}
                 </th>

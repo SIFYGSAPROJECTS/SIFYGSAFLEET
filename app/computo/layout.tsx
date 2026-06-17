@@ -32,7 +32,7 @@ export default async function ComputoLayout({
         {/* HEADER GLOBAL DEL MÓDULO */}
         <Navbar type="computo" userName={userName} userRole={userRole} isAdmin={isAdmin} maxWidth="max-w-[95%]" />
 
-        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-emerald-50/10 pt-24">
+        <main className="flex-1 w-full bg-emerald-50/10 pt-24">
           {children}
         </main>
       </div>

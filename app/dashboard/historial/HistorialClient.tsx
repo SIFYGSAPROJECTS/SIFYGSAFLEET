@@ -209,13 +209,13 @@ export default function HistorialClient({ historial, rol }: Props) {
           <table className="min-w-[1000px] w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-[var(--border-cream)] text-stone-500 text-[11px] uppercase tracking-widest font-black">
-                <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Folio</th>
-                <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Fecha</th>
-                <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Vehículo</th>
-                <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Solicitante</th>
-                <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 text-center bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Tipo Servicio</th>
-                <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 text-center w-64 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Factura</th>
-                <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 text-center bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Acción</th>
+                <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50" style={{ top: `${headerHeight}px` }}>Folio</th>
+                <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50" style={{ top: `${headerHeight}px` }}>Fecha</th>
+                <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50" style={{ top: `${headerHeight}px` }}>Vehículo</th>
+                <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50" style={{ top: `${headerHeight}px` }}>Solicitante</th>
+                <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 text-center bg-stone-50" style={{ top: `${headerHeight}px` }}>Tipo Servicio</th>
+                <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 text-center w-64 bg-stone-50" style={{ top: `${headerHeight}px` }}>Factura</th>
+                <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 text-center bg-stone-50" style={{ top: `${headerHeight}px` }}>Acción</th>
               </tr>
             </thead>
             <tbody className="">
