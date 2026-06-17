@@ -398,7 +398,7 @@ export default function InventarioMaestroPage() {
             <div className={`bg-[var(--bg-floating)] rounded-xl shadow-xl border border-[var(--border-cream)] border-t-4 transition-colors duration-500 ${colorBordeTabla}`}>
               <div 
                 id="table-scroll-container"
-                className="w-full transition-all duration-300" 
+                className="w-full overflow-x-auto md:overflow-x-visible transition-all duration-300" 
               >
                 <table className="min-w-[1000px] w-full text-left border-collapse">
                   <thead>

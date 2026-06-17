@@ -550,7 +550,7 @@ export default function ComputoInventarioPage() {
             <div className={`bg-[var(--bg-floating)] rounded-xl shadow-xl border border-[var(--border-cream)] border-t-4 ${tabPrincipal === 'activos' ? 'border-t-emerald-500' : 'border-t-amber-500'}`}>
               <div 
                 id="table-scroll-container-ti"
-                className="w-full transition-all duration-300"
+                className="w-full overflow-x-auto md:overflow-x-visible transition-all duration-300"
               >
                 <table className="min-w-[1200px] w-full text-left border-collapse">
                   <thead>

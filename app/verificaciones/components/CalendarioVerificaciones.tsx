@@ -254,8 +254,8 @@ export default function CalendarioVerificaciones({
         </div>
         </div>
       </div>
-      <div className="w-full">
-        <table className="w-full text-sm text-left">
+      <div className="w-full overflow-x-auto md:overflow-x-visible">
+        <table className="min-w-[1200px] w-full text-sm text-left">
           <thead className="border-b border-[var(--border-cream)] text-stone-500 text-[11px] uppercase tracking-widest font-black">
             <tr>
               <th className="sticky z-30 p-5 font-bold w-28 text-left border-r border-[var(--border-cream)] border-b border-stone-200/50 bg-stone-50" style={{ top: 'var(--verif-header-height, 136px)' }}>Consecutivo</th>

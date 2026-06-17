@@ -78,8 +78,8 @@ export default function HistorialComputoClient({ historial, rol }: { historial: 
       {/* TABLA DE HISTORIAL */}
       <div className="max-w-[95%] mx-auto">
       <div className="bg-[var(--bg-floating)] rounded-xl shadow-xl border border-[var(--border-cream)] border-t-4 transition-all duration-500 border-t-purple-500">
-        <div className="w-full">
-          <table className="w-full text-sm text-left">
+        <div className="w-full overflow-x-auto md:overflow-x-visible">
+          <table className="min-w-[1000px] w-full text-sm text-left">
             <thead>
               <tr className="border-b border-[var(--border-cream)] text-stone-500 text-[11px] uppercase tracking-widest font-black">
                 <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50" style={{ top: 'var(--historial-computo-header-height, 136px)' }}>Folio / Fecha</th>

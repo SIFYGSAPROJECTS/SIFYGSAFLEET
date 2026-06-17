@@ -205,7 +205,7 @@ export default function HistorialClient({ historial, rol }: Props) {
       {/* TABLA DE HISTORIAL */}
       <div className="max-w-[95%] mx-auto">
       <div className="bg-[var(--bg-floating)] rounded-xl shadow-xl border border-[var(--border-cream)] border-t-4 border-t-[#71717a]">
-        <div className="w-full">
+        <div className="w-full overflow-x-auto md:overflow-x-visible">
           <table className="min-w-[1000px] w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-[var(--border-cream)] text-stone-500 text-[11px] uppercase tracking-widest font-black">

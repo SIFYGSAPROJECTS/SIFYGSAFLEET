@@ -274,8 +274,8 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
           </div>
 
           {/* CENTER: Page Title */}
-          <div className="hidden md:flex flex-1 justify-center items-center">
-            <h1 className="text-white font-bold text-lg tracking-wide flex items-center gap-2">
+          <div className="flex flex-1 justify-center items-center px-2">
+            <h1 className="text-white font-bold text-xs sm:text-sm md:text-lg tracking-wide flex items-center gap-2 text-center line-clamp-1 whitespace-nowrap">
               {getPageTitle()}
             </h1>
           </div>
