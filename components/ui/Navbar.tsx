@@ -508,6 +508,15 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                         <span>Programa Anual</span>
                       </Link>
                     )}
+                    {localIsAdmin && (
+                      <Link
+                        href="/gastos"
+                        className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-white/80 hover:text-white hover:bg-white/5 transition-all"
+                      >
+                        <Wallet size={14} className="text-[#FF7420]" />
+                        <span>Gastos Generales</span>
+                      </Link>
+                    )}
                   </div>
                 </div>
               </div>
@@ -777,6 +786,15 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                     className="bg-white/5 hover:bg-white/10 border border-white/5 text-white/90 px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold"
                   >
                     <CalendarDays size={14} className="text-[#FF7420]" /> Programa Anual
+                  </Link>
+                )}
+                {localIsAdmin && (
+                  <Link
+                    href="/gastos"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="bg-white/5 hover:bg-white/10 border border-white/5 text-white/90 px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold"
+                  >
+                    <Wallet size={14} className="text-[#FF7420]" /> Gastos Generales
                   </Link>
                 )}
 
