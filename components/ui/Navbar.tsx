@@ -218,12 +218,7 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
     if (pathname.includes('/checklists')) return 'Control de Checklists';
     if (pathname.includes('/documentos')) return 'Centro de Documentos';
     if (pathname.includes('/verificaciones')) return 'Verificaciones';
-<<<<<<< HEAD
-=======
-    if (type === 'computo') return 'Cómputo TI';
-    if (type === 'programa') return 'Programa Anual';
     if (type === 'gastos') return 'Gastos Generales';
->>>>>>> 51e5f86 (Auto-commit: guardando cambios locales)
     return 'Panel de Control';
   };
 
