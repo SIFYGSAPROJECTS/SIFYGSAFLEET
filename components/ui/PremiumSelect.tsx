@@ -19,10 +19,12 @@ interface PremiumSelectProps {
   className?: string;
   /** Compact mode for inline/table usage */
   compact?: boolean;
-  /** Color accent: 'indigo' | 'purple' | 'cyan' | 'zinc' | 'red' | 'amber' */
-  accent?: 'indigo' | 'purple' | 'cyan' | 'zinc' | 'red' | 'amber';
+  /** Color accent: 'indigo' | 'purple' | 'cyan' | 'zinc' | 'red' | 'amber' | 'orange' */
+  accent?: 'indigo' | 'purple' | 'cyan' | 'zinc' | 'red' | 'amber' | 'orange';
   /** Open direction: 'down' (default) or 'up' */
   direction?: 'down' | 'up';
+  /** Dark mode style */
+  dark?: boolean;
 }
 
 const accentMap = {
@@ -32,9 +34,22 @@ const accentMap = {
   zinc:    { ring: 'border-zinc-500/50', bg: 'bg-zinc-500/10', text: 'text-zinc-600', hover: 'hover:bg-zinc-500/10', activeBg: 'bg-zinc-500/15', shadow: 'shadow-[0_10px_40px_-10px_rgba(113,113,122,0.2)]' },
   red:     { ring: 'border-red-500/50', bg: 'bg-red-500/10', text: 'text-red-600', hover: 'hover:bg-red-500/10', activeBg: 'bg-red-500/15', shadow: 'shadow-[0_10px_40px_-10px_rgba(239,68,68,0.2)]' },
   amber:   { ring: 'border-amber-500/50', bg: 'bg-amber-500/10', text: 'text-amber-600', hover: 'hover:bg-amber-500/10', activeBg: 'bg-amber-500/15', shadow: 'shadow-[0_10px_40px_-10px_rgba(245,158,11,0.2)]' },
+  orange:  { ring: 'border-[#FF7420]/50', bg: 'bg-[#FF7420]/10', text: 'text-[#FF7420]', hover: 'hover:bg-[#FF7420]/10', activeBg: 'bg-[#FF7420]/15', shadow: 'shadow-[0_10px_40px_-10px_rgba(255,116,32,0.2)]' },
 };
 
-export default function PremiumSelect({ options, value, onChange, placeholder = 'Seleccionar...', required = false, disabled = false, className = '', compact = false, accent = 'indigo', direction = 'down' }: PremiumSelectProps) {
+export default function PremiumSelect({
+  options,
+  value,
+  onChange,
+  placeholder = 'Seleccionar...',
+  required = false,
+  disabled = false,
+  className = '',
+  compact = false,
+  accent = 'indigo',
+  direction = 'down',
+  dark = false
+}: PremiumSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const colors = accentMap[accent];
@@ -51,7 +66,6 @@ export default function PremiumSelect({ options, value, onChange, placeholder = 
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Hidden native select for form validation
   return (
     <div className={`relative ${className}`} ref={containerRef}>
       {/* Hidden native select for HTML5 form validation */}
@@ -73,9 +87,17 @@ export default function PremiumSelect({ options, value, onChange, placeholder = 
       {/* Custom trigger */}
       <div
         onClick={() => { if (!disabled) setIsOpen(!isOpen); }}
-        className={`w-full ${compact ? 'px-2.5 py-1.5 text-xs' : 'p-3 text-sm'} bg-[var(--bg-screen)] border ${isOpen ? colors.ring : 'border-[var(--border-cream)]'} ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-[#71717a]'} rounded-lg font-bold flex justify-between items-center gap-2 transition-all duration-200 group shadow-sm`}
+        className={`w-full ${compact ? 'px-2.5 py-1.5 text-xs' : 'p-3 text-sm'} 
+          ${dark ? 'bg-[#161616]' : 'bg-[var(--bg-screen)]'} 
+          border 
+          ${isOpen 
+            ? colors.ring 
+            : (dark ? 'border-white/10' : 'border-[var(--border-cream)]')
+          } 
+          ${disabled ? 'opacity-50 cursor-not-allowed' : `cursor-pointer ${dark ? 'hover:border-white/30' : 'hover:border-[#71717a]'}`} 
+          rounded-lg font-bold flex justify-between items-center gap-2 transition-all duration-200 group shadow-sm`}
       >
-        <span className={selectedOption ? 'text-[var(--text-main)]' : 'text-stone-400'}>
+        <span className={selectedOption ? (dark ? 'text-white/90' : 'text-[var(--text-main)]') : 'text-stone-400'}>
           {selectedOption ? selectedOption.label : placeholder}
         </span>
         <ChevronDown 
@@ -87,22 +109,29 @@ export default function PremiumSelect({ options, value, onChange, placeholder = 
       {/* Dropdown menu */}
       {isOpen && !disabled && (
         <div 
-          className={`absolute z-30 w-full ${direction === 'up' ? 'bottom-full mb-2' : 'mt-2'} bg-[var(--bg-floating)] border border-[var(--border-cream)] rounded-xl ${colors.shadow} max-h-56 overflow-y-auto scrollbar-thin animate-in fade-in ${direction === 'up' ? 'slide-in-from-bottom-2' : 'slide-in-from-top-2'} duration-200`}
+          className={`absolute z-30 w-full ${direction === 'up' ? 'bottom-full mb-2' : 'mt-2'} 
+            ${dark ? 'bg-[#0f0f0f] border border-white/10' : 'bg-[var(--bg-floating)] border border-[var(--border-cream)]'} 
+            rounded-xl ${colors.shadow} max-h-56 overflow-y-auto scrollbar-thin animate-in fade-in 
+            ${direction === 'up' ? 'slide-in-from-bottom-2' : 'slide-in-from-top-2'} duration-200`}
         >
-          <div className="p-2 border-b border-[var(--border-cream)] bg-[var(--bg-screen)] sticky top-0 z-10">
+          <div className={`p-2 border-b ${dark ? 'border-white/5 bg-[#161616]' : 'border-b border-[var(--border-cream)] bg-[var(--bg-screen)]'} sticky top-0 z-10`}>
             <span className="text-[10px] uppercase font-black text-stone-400 tracking-wider">{placeholder}</span>
           </div>
           {options.map(opt => (
             <div
               key={opt.value}
-              className={`px-4 ${compact ? 'py-2' : 'py-2.5'} text-xs font-semibold cursor-pointer transition-all duration-300 border-b border-[var(--border-cream)]/30 last:border-none 
+              className={`px-4 ${compact ? 'py-2' : 'py-2.5'} text-xs font-semibold cursor-pointer transition-all duration-300 border-b 
+                ${dark ? 'border-white/5' : 'border-[var(--border-cream)]/30'} last:border-none 
                 ${opt.disabled 
                   ? 'opacity-30 cursor-not-allowed' 
-                  : `hover:bg-[var(--bg-hover)] hover:pl-6 hover:text-[var(--text-main)]`
+                  : (dark 
+                      ? 'hover:bg-white/5 hover:pl-6 hover:text-white' 
+                      : 'hover:bg-[var(--bg-hover)] hover:pl-6 hover:text-[var(--text-main)]'
+                    )
                 } 
                 ${value === opt.value 
                   ? `${colors.activeBg} ${colors.text} border-l-4 border-l-current pl-3` 
-                  : 'text-[var(--text-main)] pl-4'
+                  : (dark ? 'text-white/80 pl-4' : 'text-[var(--text-main)] pl-4')
                 }`}
               onClick={() => {
                 if (!opt.disabled) {

@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import Navbar from '@/components/ui/Navbar';
+import ScrollToTop from '@/components/ui/ScrollToTop';
 
 export default async function AuditoriaLayout({
   children,
@@ -32,6 +33,7 @@ export default async function AuditoriaLayout({
         <main className="flex-1 w-full pt-24 max-w-[95%] mx-auto pb-12">
           {children}
         </main>
+        <ScrollToTop />
       </div>
     </>
   );

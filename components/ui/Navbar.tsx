@@ -326,7 +326,7 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                   href="/computo"
                   className="hover:bg-white/10 text-white px-4 py-2 rounded-xl text-xs flex items-center gap-2 transition-all font-bold"
                 >
-                  <Laptop size={14} className="text-emerald-400" /> Accesos TI
+                  <Laptop size={14} className="text-emerald-400 transition-transform duration-300 ease-in-out group-hover:scale-110" /> Menú
                 </Link>
 
                 {/* Dropdown with pt-2 to bridge hover gap */}
@@ -336,55 +336,39 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                 >
                   <div className="bg-zinc-950/95 border border-white/10 rounded-xl shadow-2xl p-1.5 backdrop-blur-md text-left">
                     <div className="px-3 py-1.5 text-[9px] font-black text-white/40 tracking-wider uppercase border-b border-white/5 mb-1">
-                      Accesos TI
+                      Menú TI
                     </div>
                     {localIsAdmin && (
                       <Link
                         href="/computo/inventario"
-                        className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
-                          pathname === '/computo/inventario' 
-                            ? 'bg-emerald-600/20 text-emerald-400 font-bold' 
-                            : 'text-white/80 hover:text-white hover:bg-white/5'
-                        }`}
+                        className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all text-white/80 hover:text-white hover:bg-white/5 group/item"
                       >
-                        <Laptop size={14} className="text-emerald-400" />
+                        <Laptop size={14} className="text-emerald-400 transition-transform duration-300 ease-in-out group-hover/item:scale-110" />
                         <span>Inventario</span>
                       </Link>
                     )}
                     <Link
                       href="/computo/servicios"
-                      className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
-                        pathname === '/computo/servicios' 
-                          ? 'bg-emerald-600/20 text-emerald-400 font-bold' 
-                          : 'text-white/80 hover:text-white hover:bg-white/5'
-                      }`}
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all text-white/80 hover:text-white hover:bg-white/5 group/item"
                     >
-                      <Wrench size={14} className="text-emerald-400" />
+                      <Wrench size={14} className="text-emerald-400 transition-transform duration-300 ease-in-out group-hover/item:rotate-12" />
                       <span>Soporte TI</span>
                     </Link>
                     {localIsAdmin && (
                       <Link
                         href="/computo/documentos"
-                        className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
-                          pathname === '/computo/documentos' 
-                            ? 'bg-emerald-600/20 text-emerald-400 font-bold' 
-                            : 'text-white/80 hover:text-white hover:bg-white/5'
-                        }`}
+                        className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all text-white/80 hover:text-white hover:bg-white/5 group/item"
                       >
-                        <FolderOpen size={14} className="text-emerald-400" />
+                        <FolderOpen size={14} className="text-emerald-400 transition-transform duration-300 ease-in-out group-hover/item:scale-110" />
                         <span>Documentos</span>
                       </Link>
                     )}
                     {localIsAdmin && (
                       <Link
                         href="/computo/empleados"
-                        className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
-                          pathname === '/computo/empleados' 
-                            ? 'bg-emerald-600/20 text-emerald-400 font-bold' 
-                            : 'text-white/80 hover:text-white hover:bg-white/5'
-                        }`}
+                        className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all text-white/80 hover:text-white hover:bg-white/5 group/item"
                       >
-                        <User size={14} className="text-emerald-400" />
+                        <User size={14} className="text-emerald-400 transition-transform duration-300 ease-in-out group-hover/item:-translate-y-0.5" />
                         <span>Personal</span>
                       </Link>
                     )}
@@ -398,7 +382,7 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                 <button
                   className="hover:bg-white/10 text-white px-4 py-2 rounded-xl text-xs flex items-center gap-2 transition-all font-bold"
                 >
-                  <Car size={14} className="text-zinc-400" /> Accesos Flota
+                  <Car size={14} className="text-[#FF7420] transition-transform duration-300 ease-in-out group-hover:translate-x-1" /> Menú
                 </button>
 
                 {/* Dropdown with pt-2 to bridge hover gap */}
@@ -407,89 +391,61 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                   style={{ transform: 'translateX(-50%)' }}
                 >
                   <div className="bg-zinc-950/95 border border-white/10 rounded-xl shadow-2xl p-1.5 backdrop-blur-md text-left">
-                    <div className="px-3 py-1.5 text-[9px] font-black text-white/40 tracking-wider uppercase border-b border-white/5 mb-1">
-                      Accesos Flota
+                    <div className="px-3 py-1.5 text-[9px] font-black text-[#FF7420]/60 tracking-wider uppercase border-b border-white/5 mb-1">
+                      Menú Flota
                     </div>
                     <Link
                       href="/dashboard/servicios"
-                      className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
-                        pathname === '/dashboard/servicios' 
-                          ? 'bg-zinc-800 text-white font-bold' 
-                          : 'text-white/80 hover:text-white hover:bg-white/5'
-                      }`}
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all text-white/80 hover:text-white hover:bg-white/5 group/item"
                     >
-                      <Wrench size={14} className="text-zinc-400" />
+                      <Wrench size={14} className="text-[#FF7420] transition-transform duration-300 ease-in-out group-hover/item:rotate-12" />
                       <span>Servicios</span>
                     </Link>
                     {localIsAdmin && (
                       <Link
                         href="/dashboard/inventario"
-                        className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
-                          pathname === '/dashboard/inventario' 
-                            ? 'bg-zinc-800 text-white font-bold' 
-                            : 'text-white/80 hover:text-white hover:bg-white/5'
-                        }`}
+                        className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all text-white/80 hover:text-white hover:bg-white/5 group/item"
                       >
-                        <Car size={14} className="text-zinc-400" />
+                        <Car size={14} className="text-[#FF7420] transition-transform duration-300 ease-in-out group-hover/item:translate-x-1" />
                         <span>Flota</span>
                       </Link>
                     )}
                     {localIsAdmin && (
                       <Link
                         href="/dashboard/costos"
-                        className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
-                          pathname === '/dashboard/costos' 
-                            ? 'bg-zinc-800 text-white font-bold' 
-                            : 'text-white/80 hover:text-white hover:bg-white/5'
-                        }`}
+                        className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all text-white/80 hover:text-white hover:bg-white/5 group/item"
                       >
-                        <DollarSign size={14} className="text-zinc-400" />
+                        <DollarSign size={14} className="text-[#FF7420] transition-transform duration-300 ease-in-out group-hover/item:scale-110" />
                         <span>Costos</span>
                       </Link>
                     )}
                     <Link
                       href="/dashboard/usuarios"
-                      className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
-                        pathname === '/dashboard/usuarios' 
-                          ? 'bg-zinc-800 text-white font-bold' 
-                          : 'text-white/80 hover:text-white hover:bg-white/5'
-                      }`}
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all text-white/80 hover:text-white hover:bg-white/5 group/item"
                     >
-                      <User size={14} className="text-zinc-400" />
+                      <User size={14} className="text-[#FF7420] transition-transform duration-300 ease-in-out group-hover/item:-translate-y-0.5" />
                       <span>Usuarios</span>
                     </Link>
                     <Link
                       href={localIsAdmin ? "/dashboard/checklists" : "/dashboard/mis-checklists"}
-                      className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
-                        pathname === '/dashboard/checklists' || pathname === '/dashboard/mis-checklists'
-                          ? 'bg-zinc-800 text-white font-bold' 
-                          : 'text-white/80 hover:text-white hover:bg-white/5'
-                      }`}
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all text-white/80 hover:text-white hover:bg-white/5 group/item"
                     >
-                      <FileText size={14} className="text-zinc-400" />
+                      <FileText size={14} className="text-[#FF7420] transition-transform duration-300 ease-in-out group-hover/item:scale-110" />
                       <span>Checklists</span>
                     </Link>
                     <Link
                       href={localIsAdmin ? "/dashboard/documentos" : "/dashboard/mis-documentos"}
-                      className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
-                        pathname === '/dashboard/documentos' || pathname === '/dashboard/mis-documentos'
-                          ? 'bg-zinc-800 text-white font-bold' 
-                          : 'text-white/80 hover:text-white hover:bg-white/5'
-                      }`}
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all text-white/80 hover:text-white hover:bg-white/5 group/item"
                     >
-                      <FolderOpen size={14} className="text-zinc-400" />
+                      <FolderOpen size={14} className="text-[#FF7420] transition-transform duration-300 ease-in-out group-hover/item:scale-110" />
                       <span>Documentos</span>
                     </Link>
                     {localIsAdmin && (
                       <Link
                         href="/verificaciones"
-                        className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
-                          pathname === '/verificaciones' 
-                            ? 'bg-zinc-800 text-white font-bold' 
-                            : 'text-white/80 hover:text-white hover:bg-white/5'
-                        }`}
+                        className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all text-white/80 hover:text-white hover:bg-white/5 group/item"
                       >
-                        <CalendarCheck size={14} className="text-zinc-400" />
+                        <CalendarCheck size={14} className="text-[#FF7420] transition-transform duration-300 ease-in-out group-hover/item:scale-110" />
                         <span>Verificaciones</span>
                       </Link>
                     )}
@@ -505,7 +461,7 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                   href="/portal"
                   className="hover:bg-white/10 text-white px-4 py-2 rounded-xl text-xs flex items-center gap-2 transition-all font-bold"
                 >
-                  <LayoutGrid size={14} className="text-[#FF7420]" /> Módulos
+                  <LayoutGrid size={14} className="text-[#FF7420] transition-transform duration-300 ease-in-out group-hover:scale-110 group-hover:rotate-12" /> Módulos
                 </a>
 
                 {/* Modules Dropdown with pt-2 to bridge hover gap */}
@@ -520,36 +476,36 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                     {(localIsAdmin || localUserAreas.includes('AUTOS')) && (
                       <Link
                         href="/dashboard"
-                        className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-white/80 hover:text-white hover:bg-white/5 transition-all"
+                        className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-white/80 hover:text-white hover:bg-white/5 transition-all group/item"
                       >
-                        <Car size={14} className="text-[#FF7420]" />
+                        <Car size={14} className="text-[#FF7420] transition-transform duration-300 ease-in-out group-hover/item:translate-x-1" />
                         <span>Control Vehicular</span>
                       </Link>
                     )}
                     {(localIsAdmin || localUserAreas.includes('COMPUTO')) && (
                       <Link
                         href="/computo"
-                        className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-white/80 hover:text-white hover:bg-white/5 transition-all"
+                        className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-white/80 hover:text-white hover:bg-white/5 transition-all group/item"
                       >
-                        <Laptop size={14} className="text-[#FF7420]" />
+                        <Laptop size={14} className="text-[#FF7420] transition-transform duration-300 ease-in-out group-hover/item:scale-110" />
                         <span>Activos TI</span>
                       </Link>
                     )}
                     {localIsAdmin && (
                       <Link
                         href="/programa-anual"
-                        className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-white/80 hover:text-white hover:bg-white/5 transition-all"
+                        className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-white/80 hover:text-white hover:bg-white/5 transition-all group/item"
                       >
-                        <CalendarDays size={14} className="text-[#FF7420]" />
+                        <CalendarDays size={14} className="text-[#FF7420] transition-transform duration-300 ease-in-out group-hover/item:scale-110" />
                         <span>Programa Anual</span>
                       </Link>
                     )}
                     {localIsAdmin && (
                       <Link
                         href="/gastos"
-                        className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-white/80 hover:text-white hover:bg-white/5 transition-all"
+                        className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-white/80 hover:text-white hover:bg-white/5 transition-all group/item"
                       >
-                        <Wallet size={14} className="text-[#FF7420]" />
+                        <Wallet size={14} className="text-[#FF7420] transition-transform duration-300 ease-in-out group-hover/item:scale-110 group-hover/item:rotate-12" />
                         <span>Gastos Generales</span>
                       </Link>
                     )}
