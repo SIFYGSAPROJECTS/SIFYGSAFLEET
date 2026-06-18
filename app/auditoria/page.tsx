@@ -45,7 +45,7 @@ export default async function AuditoriaPage() {
                 registros.map((reg) => (
                   <tr key={reg.Id_Auditoria} className="hover:bg-white/[0.02] transition-colors group">
                     <td className="px-6 py-4 text-white/50 text-xs">
-                      {reg.Fecha.toLocaleString('es-MX')}
+                      {reg.Fecha.toLocaleString('es-MX', { timeZone: 'America/Mexico_City' })}
                     </td>
                     <td className="px-6 py-4">
                       <span className="font-semibold text-white/90 group-hover:text-white transition-colors">{reg.Usuario}</span>
