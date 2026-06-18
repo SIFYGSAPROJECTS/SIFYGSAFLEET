@@ -252,7 +252,7 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
   return (
     <>
       {/* Backdrop Blocker - Prevents content from peeking around the floating Navbar when scrolled */}
-      <div className={`fixed top-0 left-0 right-0 h-[72px] bg-[#f8fafc] z-[90] transition-opacity duration-300 pointer-events-none ${scrolled ? 'opacity-100' : 'opacity-0'}`} />
+      <div className={`fixed top-0 left-0 right-0 h-[72px] ${type === 'auditoria' ? 'bg-[#0a0a0a]' : 'bg-[var(--bg-screen)]'} z-[90] transition-opacity duration-300 pointer-events-none ${scrolled ? 'opacity-100' : 'opacity-0'}`} />
       
       {/* Header Container - Floating Unified Black Ribbon */}
       <header className={`fixed top-2 left-4 right-4 z-[100] mx-auto transition-all duration-300 ${resolvedMaxWidth}`}>
