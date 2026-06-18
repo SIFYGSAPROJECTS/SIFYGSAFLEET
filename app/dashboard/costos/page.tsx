@@ -535,8 +535,8 @@ export default function CostosPage() {
       {/* Tabla de Datos */}
       <div className="max-w-[95%] mx-auto">
       <div className="bg-[var(--bg-floating)] border border-[var(--border-cream)] rounded-xl shadow-sm">
-        <div className="w-full">
-          <table className="w-full text-left border-collapse">
+        <div className="w-full overflow-x-auto md:overflow-x-visible">
+          <table className="min-w-[1000px] w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-[var(--border-cream)] text-stone-500 text-[11px] uppercase tracking-widest font-black">
                 <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Fecha</th>
