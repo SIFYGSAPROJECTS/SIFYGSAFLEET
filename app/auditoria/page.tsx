@@ -51,16 +51,27 @@ export default async function AuditoriaPage() {
                       <span className="font-semibold text-white/90 group-hover:text-white transition-colors">{reg.Usuario}</span>
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${
-                        reg.Accion.includes('LOGIN_SUCCESS') ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' :
-                        reg.Accion.includes('LOGIN_FAILED') ? 'bg-red-500/10 text-red-400 border border-red-500/20' :
-                        reg.Accion.includes('INSERT') ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
-                        reg.Accion.includes('UPDATE') ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' :
-                        reg.Accion.includes('DELETE') ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' :
-                        'bg-zinc-500/10 text-zinc-400 border border-zinc-500/20'
-                      }`}>
-                        {reg.Accion}
-                      </span>
+                      {(() => {
+                        const actionUpper = reg.Accion.toUpperCase();
+                        const isSuccess = actionUpper.includes('SUCCESS');
+                        const isFail = actionUpper.includes('FAIL');
+                        const isAlta = actionUpper.includes('ALTA') || actionUpper.includes('NUEVO') || actionUpper.includes('CREAR') || actionUpper.includes('SUBIDA') || actionUpper.includes('INSERT');
+                        const isEdicion = actionUpper.includes('EDICION') || actionUpper.includes('ASIGNACION') || actionUpper.includes('ACTUALIZACION') || actionUpper.includes('ESTADO') || actionUpper.includes('REEMPLAZO') || actionUpper.includes('SOLICITUD') || actionUpper.includes('UPDATE');
+                        const isBaja = actionUpper.includes('BAJA') || actionUpper.includes('ELIMINACION') || actionUpper.includes('DELETE');
+
+                        const actionColor = isSuccess ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
+                          isFail ? 'bg-red-500/10 text-red-400 border-red-500/20' :
+                          isAlta ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
+                          isEdicion ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
+                          isBaja ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' :
+                          'bg-zinc-500/10 text-zinc-400 border-zinc-500/20';
+
+                        return (
+                          <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider border ${actionColor}`}>
+                            {reg.Accion}
+                          </span>
+                        );
+                      })()}
                     </td>
                     <td className="px-6 py-4 text-white/60 font-mono text-xs">
                       {reg.Modulo}

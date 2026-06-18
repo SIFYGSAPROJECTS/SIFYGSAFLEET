@@ -121,7 +121,7 @@ export async function POST(request: Request) {
       // No detenemos el flujo, ya que el ticket sí se creó
     }
 
-    await logAuditoria(userEmail, 'INSERT', 'TICKETS_TI', `Apertura de ticket de soporte TI (${folioGenerado}) para equipo ${c_interno}`);
+    await logAuditoria(userEmail, 'NUEVO_TICKET_TI', 'TICKETS_TI', `Apertura de ticket de soporte TI (${folioGenerado}) para equipo ${c_interno}`);
 
     return NextResponse.json({ success: true, data: nuevoTicket });
 

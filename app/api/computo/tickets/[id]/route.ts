@@ -27,7 +27,7 @@ export async function PUT(
     });
 
     const userEmail = cookieStore.get('user_email')?.value || 'Sistema';
-    await logAuditoria(userEmail, 'UPDATE', 'TICKETS_TI', `Cambio de estado a ${Estado} para ticket TI ${id}`);
+    await logAuditoria(userEmail, 'ESTADO_TICKET_TI', 'TICKETS_TI', `Cambio de estado a ${Estado} para ticket TI ${id}`);
 
     return NextResponse.json({ success: true, data: ticketActualizado });
   } catch (error: any) {

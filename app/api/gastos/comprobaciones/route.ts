@@ -59,7 +59,7 @@ export async function PUT(request: Request) {
 
     const cookieStore = await cookies();
     const userEmail = cookieStore.get('user_email')?.value || 'Sistema';
-    await logAuditoria(userEmail, 'UPDATE', 'GASTOS_COMPROBANTES', `Actualización de Comprobaciones (S${semana}/${anio}) para ${email}`);
+    await logAuditoria(userEmail, 'ACTUALIZACION_COMPROBACIONES', 'GASTOS_COMPROBANTES', `Actualización de Comprobaciones (S${semana}/${anio}) para ${email}`);
 
     return NextResponse.json({ success: true });
   } catch (error) {

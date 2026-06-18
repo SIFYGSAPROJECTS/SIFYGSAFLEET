@@ -63,7 +63,7 @@ export async function POST(request: Request) {
       })
     });
 
-    await logAuditoria(email.toLowerCase(), 'UPDATE', 'SEGURIDAD', `Solicitud de PIN temporal para restablecimiento de contraseña`);
+    await logAuditoria(email.toLowerCase(), 'SOLICITUD_PIN', 'SEGURIDAD', `Solicitud de PIN temporal para restablecimiento de contraseña`);
 
     return NextResponse.json({ success: true });
 

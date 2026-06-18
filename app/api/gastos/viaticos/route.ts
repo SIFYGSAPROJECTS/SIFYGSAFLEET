@@ -61,7 +61,7 @@ export async function PUT(request: Request) {
 
     const cookieStore = await cookies();
     const userEmail = cookieStore.get('user_email')?.value || 'Sistema';
-    await logAuditoria(userEmail, 'UPDATE', 'GASTOS_VIATICOS', `Actualización de Viáticos (S${semana}/${anio}) para ${email}`);
+    await logAuditoria(userEmail, 'ACTUALIZACION_VIATICOS', 'GASTOS_VIATICOS', `Actualización de Viáticos (S${semana}/${anio}) para ${email}`);
 
     return NextResponse.json({ success: true });
   } catch (error) {

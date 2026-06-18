@@ -135,7 +135,7 @@ export async function POST(request: Request) {
       })
     });
 
-    await logAuditoria(userEmail, 'INSERT', 'TICKETS_FLOTA', `Creación de ticket de servicio (${tipoServicioCapitalizado}) para vehículo ${consecutivo}`);
+    await logAuditoria(userEmail, 'NUEVO_TICKET_FLOTA', 'TICKETS_FLOTA', `Creación de ticket de servicio (${tipoServicioCapitalizado}) para vehículo ${consecutivo}`);
 
     return NextResponse.json({ success: true, data: nuevoMantenimiento });
 

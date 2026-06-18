@@ -81,7 +81,7 @@ export async function PUT(request: Request) {
 
     const cookieStore = await cookies();
     const userEmail = cookieStore.get('user_email')?.value || 'Sistema';
-    await logAuditoria(userEmail, 'UPDATE', 'TICKETS_FLOTA', `Cambio de estado a ${estado} para ticket ${folio}`);
+    await logAuditoria(userEmail, 'ESTADO_TICKET_FLOTA', 'TICKETS_FLOTA', `Cambio de estado a ${estado} para ticket ${folio}`);
 
     return NextResponse.json({ success: true, data: ticketActualizado });
 

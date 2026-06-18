@@ -75,7 +75,7 @@ export async function POST(request: Request) {
 
     const cookieStore = await cookies();
     const userEmail = cookieStore.get('user_email')?.value || 'Sistema';
-    await logAuditoria(userEmail, 'INSERT', 'AUTOS', `Alta de vehículo ${vehiculo.Consecutivo} - Placa: ${vehiculo.Placa}`);
+    await logAuditoria(userEmail, 'ALTA_VEHICULO', 'AUTOS', `Alta de vehículo ${vehiculo.Consecutivo} - Placa: ${vehiculo.Placa}`);
 
     return NextResponse.json({ success: true, data: vehiculo });
   } catch (error: any) {
@@ -86,6 +86,10 @@ export async function POST(request: Request) {
 export async function PUT(request: Request) {
   try {
     const body = await request.json();
+    const vehiculoViejo = await prisma.inventario_Automoviles.findUnique({
+      where: { Consecutivo: body.Consecutivo }
+    });
+
     const vehiculo = await prisma.inventario_Automoviles.update({
       where: { Consecutivo: body.Consecutivo },
       data: {
@@ -112,9 +116,24 @@ export async function PUT(request: Request) {
       await recalcularPlazosVehiculo(vehiculo.Consecutivo, vehiculo.Placa, new Date().getFullYear());
     }
 
+    let actionName = 'EDICION_VEHICULO';
+    let detailMsg = `Edición de vehículo ${vehiculo.Consecutivo} - Placa: ${vehiculo.Placa}`;
+
+    if (vehiculoViejo) {
+      if (vehiculoViejo.Estado_Unidad !== body.Estado_Unidad && body.Estado_Unidad === false) {
+        actionName = 'BAJA_VEHICULO';
+        detailMsg = `Vehículo ${vehiculo.Consecutivo} dado de baja de la flotilla.`;
+      } else if (vehiculoViejo.Email_encargado !== body.Email_encargado) {
+        actionName = 'ASIGNACION_VEHICULO';
+        detailMsg = body.Email_encargado 
+          ? `Vehículo ${vehiculo.Consecutivo} asignado al empleado ${body.Email_encargado}`
+          : `Vehículo ${vehiculo.Consecutivo} desasignado, regresó a flotilla general.`;
+      }
+    }
+
     const cookieStore = await cookies();
     const userEmail = cookieStore.get('user_email')?.value || 'Sistema';
-    await logAuditoria(userEmail, 'UPDATE', 'AUTOS', `Edición de vehículo ${vehiculo.Consecutivo} - Placa: ${vehiculo.Placa}`);
+    await logAuditoria(userEmail, actionName, 'AUTOS', detailMsg);
 
     return NextResponse.json({ success: true, data: vehiculo });
   } catch (error) {

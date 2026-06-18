@@ -25,7 +25,8 @@ export default async function AuditoriaLayout({
 
   return (
     <>
-      <div className="min-h-screen bg-[#0a0a0a]">
+      <style dangerouslySetInnerHTML={{__html: `body { background-color: #0a0a0a !important; }`}} />
+      <div className="min-h-screen bg-[#0a0a0a] flex flex-col">
         {/* Utilizamos la vista de auditoria para habilitar el estilo de navegación */}
         <Navbar type="auditoria" userName={userName} userRole={userRole} isAdmin={isAdmin} maxWidth="max-w-[95%]" />
         <main className="flex-1 w-full pt-24 px-6 md:px-8 max-w-[95%] mx-auto pb-12">

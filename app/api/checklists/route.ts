@@ -108,7 +108,7 @@ export async function POST(request: Request) {
 
     const cookieStore = await cookies();
     const userEmail = cookieStore.get('user_email')?.value || 'Sistema';
-    await logAuditoria(userEmail, 'INSERT', 'CHECKLISTS', `Subida de checklist (${tituloAuto}) para vehículo ${consecutivo}`);
+    await logAuditoria(userEmail, 'SUBIDA_CHECKLIST', 'CHECKLISTS', `Subida de checklist (${tituloAuto}) para vehículo ${consecutivo}`);
 
     return NextResponse.json({ mensaje: 'Guardado correctamente' });
 
@@ -144,7 +144,7 @@ export async function DELETE(request: Request) {
 
     const cookieStore = await cookies();
     const userEmail = cookieStore.get('user_email')?.value || 'Sistema';
-    await logAuditoria(userEmail, 'DELETE', 'CHECKLISTS', `Eliminación de checklist (ID: ${id}) para vehículo ${checklist.Consecutivo}`);
+    await logAuditoria(userEmail, 'ELIMINACION_CHECKLIST', 'CHECKLISTS', `Eliminación de checklist (ID: ${id}) para vehículo ${checklist.Consecutivo}`);
 
     return NextResponse.json({ success: true, mensaje: 'Checklist eliminado' });
   } catch (error) {
@@ -196,7 +196,7 @@ export async function PUT(request: Request) {
 
     const cookieStore = await cookies();
     const userEmail = cookieStore.get('user_email')?.value || 'Sistema';
-    await logAuditoria(userEmail, 'UPDATE', 'CHECKLISTS', `Actualización de documento PDF para checklist (ID: ${id}) del vehículo ${checklistViejo.Consecutivo}`);
+    await logAuditoria(userEmail, 'REEMPLAZO_CHECKLIST', 'CHECKLISTS', `Actualización de documento PDF para checklist (ID: ${id}) del vehículo ${checklistViejo.Consecutivo}`);
 
     return NextResponse.json({ success: true, mensaje: 'Checklist actualizado correctamente' });
 

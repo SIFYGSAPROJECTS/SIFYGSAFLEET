@@ -64,7 +64,7 @@ export async function POST(request: Request) {
       // Retornamos éxito indicando que ya existía (no enviamos correo)
       const cookieStore = await cookies();
       const userEmail = cookieStore.get('user_email')?.value || 'Sistema';
-      await logAuditoria(userEmail, 'UPDATE', 'EMPLEADOS', `Actualización de accesos y roles del empleado ${emailLower}`);
+      await logAuditoria(userEmail, 'ACTUALIZACION_ROLES', 'EMPLEADOS', `Actualización de accesos y roles del empleado ${emailLower}`);
 
       return NextResponse.json({ success: true, data: nuevoEmpleado, message: 'El usuario ya existía, se han actualizado sus accesos y asignaciones sin enviar correo.' });
     } else {
@@ -112,7 +112,7 @@ export async function POST(request: Request) {
 
       const cookieStore = await cookies();
       const userEmail = cookieStore.get('user_email')?.value || 'Sistema';
-      await logAuditoria(userEmail, 'INSERT', 'EMPLEADOS', `Alta de nuevo empleado ${emailLower}`);
+      await logAuditoria(userEmail, 'ALTA_EMPLEADO', 'EMPLEADOS', `Alta de nuevo empleado ${emailLower}`);
 
       return NextResponse.json({ success: true, data: nuevoEmpleado, message: 'Usuario creado y correo enviado.' });
     }
@@ -131,6 +131,10 @@ export async function PUT(request: Request) {
   try {
     const body = await request.json();
     const { Email, Nombre_Empleado, A_Paterno, A_Materno, Cargo, Departamento, Rol, Estatus_Acceso, Consecutivo_Vehiculo, C_Interno_Computo } = body;
+
+    const empleadoViejo = await prisma.empleados.findUnique({
+      where: { Email }
+    });
 
     const empleadoActualizado = await prisma.$transaction(async (tx) => {
       
@@ -181,9 +185,22 @@ export async function PUT(request: Request) {
       return emp;
     });
 
+    let actionName = 'EDICION_EMPLEADO';
+    let detailMsg = `Edición de datos del empleado ${Email}`;
+
+    if (empleadoViejo) {
+      if (empleadoViejo.Estatus_Acceso !== Estatus_Acceso && Estatus_Acceso === 'Inactivo') {
+        actionName = 'BAJA_EMPLEADO';
+        detailMsg = `Empleado ${Email} dado de baja (Acceso Revocado).`;
+      } else if (empleadoViejo.Rol !== Rol) {
+        actionName = 'ACTUALIZACION_ROLES';
+        detailMsg = `Cambio de Rol para ${Email}: de ${empleadoViejo.Rol} a ${Rol}.`;
+      }
+    }
+
     const cookieStore = await cookies();
     const userEmail = cookieStore.get('user_email')?.value || 'Sistema';
-    await logAuditoria(userEmail, 'UPDATE', 'EMPLEADOS', `Edición de datos del empleado ${Email}`);
+    await logAuditoria(userEmail, actionName, 'EMPLEADOS', detailMsg);
 
     return NextResponse.json({ success: true, data: empleadoActualizado });
   } catch (error) {

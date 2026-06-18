@@ -73,7 +73,7 @@ export async function POST(request: Request) {
 
     const cookieStore = await cookies();
     const userEmail = cookieStore.get('user_email')?.value || 'Sistema';
-    await logAuditoria(userEmail, 'INSERT', 'COMPUTO', `Alta de equipo de cómputo ${nuevoEquipo.C_Interno}`);
+    await logAuditoria(userEmail, 'ALTA_EQUIPO', 'COMPUTO', `Alta de equipo de cómputo ${nuevoEquipo.C_Interno}`);
 
     return NextResponse.json({ message: 'Equipo de cómputo registrado con éxito.', equipo: nuevoEquipo }, { status: 201 });
   } catch (error) {
@@ -89,6 +89,10 @@ export async function PUT(request: Request) {
       C_Interno, Empresa, Tipo, Marca, Modelo, Service_Tag, Cargador, 
       Usuario, Departamento, Puesto_Proyecto, N_EMP, Estatus, CR, Fecha_CR, Proveedor
     } = body;
+
+    const equipoViejo = await prisma.inventario_Computo.findUnique({
+      where: { C_Interno }
+    });
 
     const equipoActualizado = await prisma.inventario_Computo.update({
       where: { C_Interno },
@@ -118,9 +122,22 @@ export async function PUT(request: Request) {
       }
     });
 
+    let actionName = 'EDICION_EQUIPO';
+    let detailMsg = `Actualización de equipo de cómputo ${equipoActualizado.C_Interno}`;
+
+    if (equipoViejo) {
+      if (equipoViejo.Estatus !== Estatus && (Estatus === 'Baja' || Estatus === 'Inactivo' || Estatus === 'Desechado')) {
+        actionName = 'BAJA_EQUIPO';
+        detailMsg = `Equipo de cómputo ${equipoActualizado.C_Interno} dado de baja.`;
+      } else if (equipoViejo.Usuario !== Usuario && Usuario) {
+        actionName = 'ASIGNACION_EQUIPO';
+        detailMsg = `Equipo de cómputo ${equipoActualizado.C_Interno} asignado al usuario ${Usuario}.`;
+      }
+    }
+
     const cookieStore = await cookies();
     const userEmail = cookieStore.get('user_email')?.value || 'Sistema';
-    await logAuditoria(userEmail, 'UPDATE', 'COMPUTO', `Actualización de equipo de cómputo ${equipoActualizado.C_Interno}`);
+    await logAuditoria(userEmail, actionName, 'COMPUTO', detailMsg);
 
     return NextResponse.json({ message: 'Equipo de cómputo actualizado con éxito.', equipo: equipoActualizado });
   } catch (error) {
