@@ -3,6 +3,8 @@ import { prisma } from '@/lib/db';
 import bcrypt from 'bcryptjs';
 import { enviarCorreo } from '@/lib/email';
 import { WelcomeEmail } from '@/components/emails/WelcomeEmail';
+import { cookies } from 'next/headers';
+import { logAuditoria } from '@/lib/utils/audit';
 
 // Obtiene la lista completa de empleados ordenados alfabéticamente
 export async function GET() {
@@ -60,6 +62,10 @@ export async function POST(request: Request) {
       });
 
       // Retornamos éxito indicando que ya existía (no enviamos correo)
+      const cookieStore = await cookies();
+      const userEmail = cookieStore.get('user_email')?.value || 'Sistema';
+      await logAuditoria(userEmail, 'UPDATE', 'EMPLEADOS', `Actualización de accesos y roles del empleado ${emailLower}`);
+
       return NextResponse.json({ success: true, data: nuevoEmpleado, message: 'El usuario ya existía, se han actualizado sus accesos y asignaciones sin enviar correo.' });
     } else {
       // SI NO EXISTE: Flujo normal de creación (generamos contraseña y enviamos correo)
@@ -103,6 +109,10 @@ export async function POST(request: Request) {
           rol: Rol || 'USER'
         })
       });
+
+      const cookieStore = await cookies();
+      const userEmail = cookieStore.get('user_email')?.value || 'Sistema';
+      await logAuditoria(userEmail, 'INSERT', 'EMPLEADOS', `Alta de nuevo empleado ${emailLower}`);
 
       return NextResponse.json({ success: true, data: nuevoEmpleado, message: 'Usuario creado y correo enviado.' });
     }
@@ -170,6 +180,10 @@ export async function PUT(request: Request) {
 
       return emp;
     });
+
+    const cookieStore = await cookies();
+    const userEmail = cookieStore.get('user_email')?.value || 'Sistema';
+    await logAuditoria(userEmail, 'UPDATE', 'EMPLEADOS', `Edición de datos del empleado ${Email}`);
 
     return NextResponse.json({ success: true, data: empleadoActualizado });
   } catch (error) {

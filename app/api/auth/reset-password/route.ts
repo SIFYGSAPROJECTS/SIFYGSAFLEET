@@ -3,6 +3,7 @@ import { prisma } from '@/lib/db';
 import bcrypt from 'bcryptjs';
 import { enviarCorreo } from '@/lib/email';
 import { ResetPasswordEmail } from '@/components/emails/ResetPasswordEmail';
+import { logAuditoria } from '@/lib/utils/audit';
 
 export async function POST(request: Request) {
   try {
@@ -61,6 +62,9 @@ export async function POST(request: Request) {
         pinTemporal: pinTemporal
       })
     });
+
+    await logAuditoria(email.toLowerCase(), 'UPDATE', 'SEGURIDAD', `Solicitud de PIN temporal para restablecimiento de contraseña`);
+
     return NextResponse.json({ success: true });
 
   } catch (error) {

@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { cookies } from 'next/headers';
+import { logAuditoria } from '@/lib/utils/audit';
 
 export async function GET(request: Request) {
   try {
@@ -56,6 +58,10 @@ export async function PUT(request: Request) {
         });
       }
     });
+
+    const cookieStore = await cookies();
+    const userEmail = cookieStore.get('user_email')?.value || 'Sistema';
+    await logAuditoria(userEmail, 'UPDATE', 'GASTOS_VIATICOS', `Actualización de Viáticos (S${semana}/${anio}) para ${email}`);
 
     return NextResponse.json({ success: true });
   } catch (error) {

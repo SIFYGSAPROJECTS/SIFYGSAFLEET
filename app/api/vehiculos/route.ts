@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { recalcularPlazosVehiculo } from '@/app/actions/verificaciones';
+import { cookies } from 'next/headers';
+import { logAuditoria } from '@/lib/utils/audit';
 
 export async function GET() {
   try {
@@ -71,6 +73,10 @@ export async function POST(request: Request) {
       await recalcularPlazosVehiculo(vehiculo.Consecutivo, vehiculo.Placa, new Date().getFullYear());
     }
 
+    const cookieStore = await cookies();
+    const userEmail = cookieStore.get('user_email')?.value || 'Sistema';
+    await logAuditoria(userEmail, 'INSERT', 'AUTOS', `Alta de vehículo ${vehiculo.Consecutivo} - Placa: ${vehiculo.Placa}`);
+
     return NextResponse.json({ success: true, data: vehiculo });
   } catch (error: any) {
     return NextResponse.json({ error: 'Error al registrar el vehículo. Verifica que la placa o consecutivo no estén repetidos.' }, { status: 400 });
@@ -105,6 +111,10 @@ export async function PUT(request: Request) {
     if (vehiculo.Placa) {
       await recalcularPlazosVehiculo(vehiculo.Consecutivo, vehiculo.Placa, new Date().getFullYear());
     }
+
+    const cookieStore = await cookies();
+    const userEmail = cookieStore.get('user_email')?.value || 'Sistema';
+    await logAuditoria(userEmail, 'UPDATE', 'AUTOS', `Edición de vehículo ${vehiculo.Consecutivo} - Placa: ${vehiculo.Placa}`);
 
     return NextResponse.json({ success: true, data: vehiculo });
   } catch (error) {

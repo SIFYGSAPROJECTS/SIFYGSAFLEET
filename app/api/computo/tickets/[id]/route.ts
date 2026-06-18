@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { cookies } from 'next/headers';
+import { logAuditoria } from '@/lib/utils/audit';
 
 // Actualiza un ticket de Computo existente
 export async function PUT(
@@ -24,6 +25,9 @@ export async function PUT(
       where: { Pk_folio_ticket: id },
       data: { Estado: Estado }
     });
+
+    const userEmail = cookieStore.get('user_email')?.value || 'Sistema';
+    await logAuditoria(userEmail, 'UPDATE', 'TICKETS_TI', `Cambio de estado a ${Estado} para ticket TI ${id}`);
 
     return NextResponse.json({ success: true, data: ticketActualizado });
   } catch (error: any) {

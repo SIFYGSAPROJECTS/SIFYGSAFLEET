@@ -407,3 +407,16 @@ model Comprobacion_Gastos {
 
   Fecha_Registro  DateTime @default(now())
 }
+
+// ==========================================
+// MÓDULO DE AUDITORÍA (BITÁCORA)
+// ==========================================
+
+model Bitacora_Auditoria {
+  Id_Auditoria Int      @id @default(autoincrement())
+  Usuario      String   @db.VarChar(100)
+  Accion       String   @db.VarChar(50)
+  Modulo       String   @db.VarChar(50)
+  Detalle      String   @db.Text
+  Fecha        DateTime @default(now())
+}

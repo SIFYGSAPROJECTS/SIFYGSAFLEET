@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { minioClient } from '@/lib/minio';
 import { prisma } from '@/lib/db';
+import { cookies } from 'next/headers';
+import { logAuditoria } from '@/lib/utils/audit';
 
 // --- 1. BUSCADOR DE UNIDAD Y KILOMETRAJE ---
 export async function GET(request: Request) {
@@ -104,6 +106,10 @@ export async function POST(request: Request) {
       }
     });
 
+    const cookieStore = await cookies();
+    const userEmail = cookieStore.get('user_email')?.value || 'Sistema';
+    await logAuditoria(userEmail, 'INSERT', 'CHECKLISTS', `Subida de checklist (${tituloAuto}) para vehículo ${consecutivo}`);
+
     return NextResponse.json({ mensaje: 'Guardado correctamente' });
 
   } catch (error) {
@@ -135,6 +141,10 @@ export async function DELETE(request: Request) {
 
     // 4. Lo borramos de la base de datos de Prisma
     await prisma.checklist.delete({ where: { id: Number(id) } });
+
+    const cookieStore = await cookies();
+    const userEmail = cookieStore.get('user_email')?.value || 'Sistema';
+    await logAuditoria(userEmail, 'DELETE', 'CHECKLISTS', `Eliminación de checklist (ID: ${id}) para vehículo ${checklist.Consecutivo}`);
 
     return NextResponse.json({ success: true, mensaje: 'Checklist eliminado' });
   } catch (error) {
@@ -183,6 +193,10 @@ export async function PUT(request: Request) {
       where: { id: Number(id) },
       data: { Ruta_PDF: publicUrl }
     });
+
+    const cookieStore = await cookies();
+    const userEmail = cookieStore.get('user_email')?.value || 'Sistema';
+    await logAuditoria(userEmail, 'UPDATE', 'CHECKLISTS', `Actualización de documento PDF para checklist (ID: ${id}) del vehículo ${checklistViejo.Consecutivo}`);
 
     return NextResponse.json({ success: true, mensaje: 'Checklist actualizado correctamente' });
 

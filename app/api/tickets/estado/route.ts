@@ -4,6 +4,8 @@ import { enviarCorreo } from '@/lib/email';
 import { TicketCitaEmail } from '@/components/emails/TicketCitaEmail';
 import { TicketEnTallerEmail } from '@/components/emails/TicketEnTallerEmail';
 import { TicketListoEmail } from '@/components/emails/TicketListoEmail';
+import { cookies } from 'next/headers';
+import { logAuditoria } from '@/lib/utils/audit';
 
 // Actualiza el estado de un ticket y envía notificaciones automáticas por correo
 export async function PUT(request: Request) {
@@ -76,6 +78,10 @@ export async function PUT(request: Request) {
         });
       }
     }
+
+    const cookieStore = await cookies();
+    const userEmail = cookieStore.get('user_email')?.value || 'Sistema';
+    await logAuditoria(userEmail, 'UPDATE', 'TICKETS_FLOTA', `Cambio de estado a ${estado} para ticket ${folio}`);
 
     return NextResponse.json({ success: true, data: ticketActualizado });
 

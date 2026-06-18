@@ -3,6 +3,7 @@ import { prisma } from '@/lib/db';
 import { cookies } from 'next/headers';
 import { enviarCorreo } from '@/lib/email';
 import { TicketCreatedEmail } from '@/components/emails/TicketCreatedEmail';
+import { logAuditoria } from '@/lib/utils/audit';
 
 // Registra una nueva solicitud de servicio y notifica a los involucrados
 export async function POST(request: Request) {
@@ -133,6 +134,8 @@ export async function POST(request: Request) {
         tieneEvidencia: tieneEvidencia
       })
     });
+
+    await logAuditoria(userEmail, 'INSERT', 'TICKETS_FLOTA', `Creación de ticket de servicio (${tipoServicioCapitalizado}) para vehículo ${consecutivo}`);
 
     return NextResponse.json({ success: true, data: nuevoMantenimiento });
 

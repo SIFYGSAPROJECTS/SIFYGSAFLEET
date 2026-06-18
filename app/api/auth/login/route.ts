@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { cookies } from 'next/headers'; 
 import bcrypt from 'bcryptjs';
+import { logAuditoria } from '@/lib/utils/audit';
 
 //  MAPA GLOBAL: Ahora rastreamos por CORREO, no por IP
 const rateLimitMap = new Map<string, { intentos: number; bloqueoHasta: number }>();
@@ -37,6 +38,7 @@ export async function POST(request: Request) {
     // 2. SI EL USUARIO NO EXISTE
     if (!usuario) {
       registrarFallo(identifier); // Registramos el fallo para ese correo inexistente
+      await logAuditoria(identifier, 'LOGIN_FAILED', 'AUTH', 'Intento de acceso con correo inexistente');
       return NextResponse.json({ error: 'Credenciales inválidas' }, { status: 401 });
     }
 
@@ -74,6 +76,7 @@ export async function POST(request: Request) {
     // 3. SI FALLÓ EL ACCESO (Password o PIN incorrectos)
     if (!accesoConcedido) {
       registrarFallo(identifier); 
+      await logAuditoria(identifier, 'LOGIN_FAILED', 'AUTH', 'Credenciales inválidas o PIN expirado');
       return NextResponse.json({ error: 'Credenciales inválidas o PIN expirado' }, { status: 401 });
     }
 
@@ -114,6 +117,8 @@ export async function POST(request: Request) {
     cookieStore.set('user_name', usuario.Nombre_Empleado);
     cookieStore.set('user_email', usuario.Email);
     cookieStore.set('user_areas', JSON.stringify(areas));
+
+    await logAuditoria(identifier, 'LOGIN_SUCCESS', 'AUTH', 'Inicio de sesión exitoso');
 
     return NextResponse.json({
       success: true,

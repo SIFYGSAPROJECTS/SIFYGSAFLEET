@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+import { cookies } from 'next/headers';
+import { logAuditoria } from '@/lib/utils/audit';
 
 const prisma = new PrismaClient();
 
@@ -69,6 +71,10 @@ export async function POST(request: Request) {
       }
     });
 
+    const cookieStore = await cookies();
+    const userEmail = cookieStore.get('user_email')?.value || 'Sistema';
+    await logAuditoria(userEmail, 'INSERT', 'COMPUTO', `Alta de equipo de cómputo ${nuevoEquipo.C_Interno}`);
+
     return NextResponse.json({ message: 'Equipo de cómputo registrado con éxito.', equipo: nuevoEquipo }, { status: 201 });
   } catch (error) {
     console.error('Error creating equipo:', error);
@@ -111,6 +117,10 @@ export async function PUT(request: Request) {
         Detalle: 'Actualización de datos / estatus del equipo',
       }
     });
+
+    const cookieStore = await cookies();
+    const userEmail = cookieStore.get('user_email')?.value || 'Sistema';
+    await logAuditoria(userEmail, 'UPDATE', 'COMPUTO', `Actualización de equipo de cómputo ${equipoActualizado.C_Interno}`);
 
     return NextResponse.json({ message: 'Equipo de cómputo actualizado con éxito.', equipo: equipoActualizado });
   } catch (error) {

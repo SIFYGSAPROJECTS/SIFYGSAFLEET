@@ -4,6 +4,7 @@ import { cookies } from 'next/headers';
 import { enviarCorreo } from '@/lib/email';
 import { TicketComputoEmail } from '@/components/emails/TicketComputoEmail';
 import { TicketComputoAdminEmail } from '@/components/emails/TicketComputoAdminEmail';
+import { logAuditoria } from '@/lib/utils/audit';
 
 // Registra una nueva solicitud de servicio de Cómputo
 export async function POST(request: Request) {
@@ -119,6 +120,8 @@ export async function POST(request: Request) {
       console.error('Error al enviar correo de TicketComputo:', emailError);
       // No detenemos el flujo, ya que el ticket sí se creó
     }
+
+    await logAuditoria(userEmail, 'INSERT', 'TICKETS_TI', `Apertura de ticket de soporte TI (${folioGenerado}) para equipo ${c_interno}`);
 
     return NextResponse.json({ success: true, data: nuevoTicket });
 

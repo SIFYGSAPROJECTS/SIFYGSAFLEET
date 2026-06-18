@@ -4,11 +4,11 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import Image from 'next/image';
-import { Menu, X, Car, Server, LayoutGrid, LogOut, CalendarDays, Laptop, Wrench, FolderOpen, User, DollarSign, CalendarCheck, FileText, Wallet } from 'lucide-react';
+import { Menu, X, Car, Server, LayoutGrid, LogOut, CalendarDays, Laptop, Wrench, FolderOpen, User, DollarSign, CalendarCheck, FileText, Wallet, Settings } from 'lucide-react';
 import LogoutButton from '@/app/dashboard/LogoutButton';
 
 interface NavbarProps {
-  type: 'portal' | 'dashboard' | 'computo' | 'programa' | 'gastos';
+  type: 'portal' | 'dashboard' | 'computo' | 'programa' | 'gastos' | 'auditoria';
   userName?: string;
   userRole?: string;
   isAdmin?: boolean;
@@ -92,20 +92,20 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
         <div className="max-w-7xl mx-auto px-6 md:px-8 flex items-center justify-between h-20">
           
           {/* LEFT SIDE: Brand Logo / Title */}
-          <div className="flex items-center gap-4">
+          <Link href="/portal" className="flex items-center gap-4 cursor-pointer group">
             <Image
               src="/logo.png"
               alt="Logo SIFYGSA"
               width={120}
               height={50}
-              className="object-contain"
+              className="object-contain transition-transform group-hover:scale-105"
               priority
             />
             <div className="h-8 w-px bg-white/10 hidden sm:block"></div>
-            <h2 className="hidden sm:block text-sm font-medium text-white/60 tracking-wider font-sans">
+            <h2 className="hidden sm:block text-sm font-medium text-white/60 tracking-wider font-sans group-hover:text-white/80 transition-colors">
               GESTIÓN DE INFRAESTRUCTURA
             </h2>
-          </div>
+          </Link>
 
           {/* RIGHT SIDE: Action Buttons (Desktop Only) - User Profile Capsule for Portal (No Portal menu) */}
           <div className="hidden md:flex items-center bg-white/5 border border-white/5 rounded-xl p-0.5 shadow-inner backdrop-blur-md">
@@ -134,6 +134,32 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                 </div>
               </div>
             </div>
+
+            {/* Separador */}
+            <div className="h-6 w-px bg-white/10 mx-1"></div>
+
+            {/* Menú de Settings (Auditoría) */}
+            {localIsAdmin && (
+              <div className="relative group">
+                <button className="p-2 mx-1 text-white/50 hover:text-white hover:bg-white/10 rounded-xl transition-all flex items-center justify-center">
+                  <Settings size={18} className="group-hover:rotate-90 transition-transform duration-300" />
+                </button>
+                <div className="absolute top-full right-0 pt-2 w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[120]">
+                  <div className="bg-[#0a0a0a]/95 border border-white/5 rounded-xl shadow-2xl p-1.5 backdrop-blur-md text-left">
+                    <div className="px-3 py-1.5 text-[9px] font-black text-white/40 tracking-wider uppercase border-b border-white/5 mb-1">
+                      Sistema
+                    </div>
+                    <Link
+                      href="/auditoria"
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-white/80 hover:text-white hover:bg-white/5 transition-all"
+                    >
+                      <FileText size={14} className="text-[#FF7420]" />
+                      <span>Bitácora / Auditoría</span>
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            )}
 
           </div>
 
@@ -219,6 +245,7 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
     if (pathname.includes('/documentos')) return 'Centro de Documentos';
     if (pathname.includes('/verificaciones')) return 'Verificaciones';
     if (type === 'gastos') return 'Gastos Generales';
+    if (type === 'auditoria') return 'Auditoría Global';
     return 'Panel de Control';
   };
 
@@ -259,6 +286,15 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                 </div>
                 <span className="hidden sm:block font-serif font-medium text-lg tracking-wide text-white transition-colors group-hover:text-teal-400">
                   SIFYGSA <span className="text-teal-400 font-serif">Gastos</span>
+                </span>
+              </Link>
+            ) : type === 'auditoria' ? (
+              <Link href="/portal" className={`flex items-center space-x-3 group px-2 transition-all`}>
+                <div className="bg-[#FF7420] p-1.5 rounded-lg shadow-lg shadow-[#FF7420]/20 group-hover:scale-105 transition-transform duration-300">
+                  <FileText className="text-white h-4 w-4" />
+                </div>
+                <span className="hidden sm:block font-serif font-medium text-lg tracking-wide text-white transition-colors group-hover:text-[#FF7420]">
+                  SIFYGSA <span className="text-[#FF7420] font-serif">Audit</span>
                 </span>
               </Link>
             ) : (
@@ -552,6 +588,29 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                 </div>
               </div>
             </div>
+
+            {/* Menú de Settings (Auditoría) */}
+            {localIsAdmin && (
+              <div className="relative group ml-2">
+                <button className="p-2 text-white/50 hover:text-white hover:bg-white/10 rounded-xl transition-all flex items-center justify-center">
+                  <Settings size={18} className="group-hover:rotate-90 transition-transform duration-300" />
+                </button>
+                <div className="absolute top-full right-0 pt-2 w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[120]">
+                  <div className="bg-zinc-950/95 border border-white/10 rounded-xl shadow-2xl p-1.5 backdrop-blur-md text-left">
+                    <div className="px-3 py-1.5 text-[9px] font-black text-white/40 tracking-wider uppercase border-b border-white/5 mb-1">
+                      Sistema
+                    </div>
+                    <Link
+                      href="/auditoria"
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-white/80 hover:text-white hover:bg-white/5 transition-all"
+                    >
+                      <FileText size={14} className="text-zinc-400" />
+                      <span>Bitácora / Auditoría</span>
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            )}
 
           </div>
 
