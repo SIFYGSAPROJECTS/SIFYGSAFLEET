@@ -187,20 +187,33 @@ export async function PUT(request: Request) {
 
     let actionName = 'EDICION_EMPLEADO';
     let detailMsg = `Edición de datos del empleado ${Email}`;
+    let changes: any = {};
 
     if (empleadoViejo) {
+      // Computar diferencias
+      const fields = ['Nombre_Empleado', 'A_Paterno', 'A_Materno', 'Cargo', 'Departamento', 'Rol', 'Estatus_Acceso'];
+      const bodyData: any = { Nombre_Empleado, A_Paterno, A_Materno, Cargo, Departamento, Rol, Estatus_Acceso };
+      
+      fields.forEach(f => {
+        if (empleadoViejo[f as keyof typeof empleadoViejo] !== bodyData[f]) {
+          changes[f] = { from: empleadoViejo[f as keyof typeof empleadoViejo], to: bodyData[f] };
+        }
+      });
+
       if (empleadoViejo.Estatus_Acceso !== Estatus_Acceso && Estatus_Acceso === 'Inactivo') {
         actionName = 'BAJA_EMPLEADO';
         detailMsg = `Empleado ${Email} dado de baja (Acceso Revocado).`;
       } else if (empleadoViejo.Rol !== Rol) {
         actionName = 'ACTUALIZACION_ROLES';
-        detailMsg = `Cambio de Rol para ${Email}: de ${empleadoViejo.Rol} a ${Rol}.`;
+        detailMsg = `Cambio de Rol para ${Email}.`;
       }
     }
 
+    const payloadDetail = JSON.stringify({ message: detailMsg, changes });
+
     const cookieStore = await cookies();
     const userEmail = cookieStore.get('user_email')?.value || 'Sistema';
-    await logAuditoria(userEmail, actionName, 'EMPLEADOS', detailMsg);
+    await logAuditoria(userEmail, actionName, 'EMPLEADOS', payloadDetail);
 
     return NextResponse.json({ success: true, data: empleadoActualizado });
   } catch (error) {

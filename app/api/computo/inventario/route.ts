@@ -124,8 +124,19 @@ export async function PUT(request: Request) {
 
     let actionName = 'EDICION_EQUIPO';
     let detailMsg = `Actualización de equipo de cómputo ${equipoActualizado.C_Interno}`;
+    let changes: any = {};
 
     if (equipoViejo) {
+      const fields = ['Empresa', 'Tipo', 'Marca', 'Modelo', 'Service_Tag', 'Cargador', 'Usuario', 'Departamento', 'Puesto_Proyecto', 'N_EMP', 'Estatus', 'CR', 'Fecha_CR', 'Proveedor'];
+      
+      fields.forEach(f => {
+        const oldVal = equipoViejo[f as keyof typeof equipoViejo];
+        const newVal = equipoActualizado[f as keyof typeof equipoActualizado];
+        if (String(oldVal) !== String(newVal)) {
+          changes[f] = { from: oldVal, to: newVal };
+        }
+      });
+
       if (equipoViejo.Estatus !== Estatus && (Estatus === 'Baja' || Estatus === 'Inactivo' || Estatus === 'Desechado')) {
         actionName = 'BAJA_EQUIPO';
         detailMsg = `Equipo de cómputo ${equipoActualizado.C_Interno} dado de baja.`;
@@ -135,9 +146,11 @@ export async function PUT(request: Request) {
       }
     }
 
+    const payloadDetail = JSON.stringify({ message: detailMsg, changes });
+
     const cookieStore = await cookies();
     const userEmail = cookieStore.get('user_email')?.value || 'Sistema';
-    await logAuditoria(userEmail, actionName, 'COMPUTO', detailMsg);
+    await logAuditoria(userEmail, actionName, 'COMPUTO', payloadDetail);
 
     return NextResponse.json({ message: 'Equipo de cómputo actualizado con éxito.', equipo: equipoActualizado });
   } catch (error) {

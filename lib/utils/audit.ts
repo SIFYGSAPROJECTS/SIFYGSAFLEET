@@ -1,7 +1,9 @@
 import { prisma } from '@/lib/db';
+import { openClawAuditor } from '@/lib/ai/openclaw';
 
 /**
  * Registra una acción en la bitácora de auditoría global del sistema.
+ * Ahora redirige la información a OpenClaw para su análisis inteligente antes de guardar.
  * 
  * @param usuario Correo electrónico o identificador del usuario que realizó la acción.
  * @param accion Tipo de acción (ej. 'LOGIN', 'INSERT', 'UPDATE', 'DELETE', 'VIEW').
@@ -16,17 +18,13 @@ export async function logAuditoria(usuario: string, accion: string, modulo: stri
       return;
     }
 
-    await prisma.bitacora_Auditoria.create({
-      data: {
-        Usuario: usuario,
-        Accion: accion,
-        Modulo: modulo,
-        Detalle: detalle,
-      }
-    });
+    // Delegamos a OpenClaw la responsabilidad de analizar y guardar el evento
+    // en la tabla Bitacora_Auditoria
+    await openClawAuditor(usuario, accion, modulo, detalle);
+    
   } catch (error) {
     // Capturamos el error para no interrumpir el flujo principal de la aplicación,
     // pero lo registramos en consola para depuración.
-    console.error('Error al registrar en Bitácora de Auditoría:', error);
+    console.error('Error al registrar en Bitácora de Auditoría (OpenClaw):', error);
   }
 }

@@ -118,8 +118,17 @@ export async function PUT(request: Request) {
 
     let actionName = 'EDICION_VEHICULO';
     let detailMsg = `Edición de vehículo ${vehiculo.Consecutivo} - Placa: ${vehiculo.Placa}`;
+    let changes: any = {};
 
     if (vehiculoViejo) {
+      const fields = ['Placa', 'Marca', 'Modelo', 'Color', 'Linea', 'Email_encargado', 'Estado_Unidad', 'Numero_Serie', 'Poliza_Seguro', 'Departamento', 'Contrato', 'Ubicacion', 'Percance', 'Estatus_Operativo', 'Kilometraje'];
+      
+      fields.forEach(f => {
+        if (vehiculoViejo[f as keyof typeof vehiculoViejo] !== vehiculo[f as keyof typeof vehiculo]) {
+          changes[f] = { from: vehiculoViejo[f as keyof typeof vehiculoViejo], to: vehiculo[f as keyof typeof vehiculo] };
+        }
+      });
+
       if (vehiculoViejo.Estado_Unidad !== body.Estado_Unidad && body.Estado_Unidad === false) {
         actionName = 'BAJA_VEHICULO';
         detailMsg = `Vehículo ${vehiculo.Consecutivo} dado de baja de la flotilla.`;
@@ -131,9 +140,11 @@ export async function PUT(request: Request) {
       }
     }
 
+    const payloadDetail = JSON.stringify({ message: detailMsg, changes });
+
     const cookieStore = await cookies();
     const userEmail = cookieStore.get('user_email')?.value || 'Sistema';
-    await logAuditoria(userEmail, actionName, 'AUTOS', detailMsg);
+    await logAuditoria(userEmail, actionName, 'AUTOS', payloadDetail);
 
     return NextResponse.json({ success: true, data: vehiculo });
   } catch (error) {
