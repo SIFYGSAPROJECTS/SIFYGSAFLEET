@@ -7,7 +7,11 @@ import {
   predict_upcoming_services,
   audit_checklist_compliance,
   get_pending_services,
-  get_my_unit
+  get_my_unit,
+  get_employee_directory,
+  get_employee_stats,
+  get_computo_inventory,
+  get_caja_chica_records
 } from "@/lib/ai/ai-actions";
 import { generateExcelBase64 } from "@/lib/ai/excel-generator";
 
@@ -40,6 +44,9 @@ Responde de forma estructurada que puedes ayudar con:
 3. **Análisis de Costos**: Obtener reportes de gastos de mantenimiento de la flota o por empresa.
 4. **Predicción de Servicios**: Analizar kilometraje para predecir qué vehículos necesitarán servicio pronto.
 5. **Auditoría de Checklists**: Revisar qué vehículos activos no han entregado su checklist en el último mes.
+6. **Directorio de Empleados**: Consultar lista y estado de los empleados registrados.
+7. **Equipos de Cómputo**: Ver inventario de equipos tecnológicos (laptops, celulares) asignados.
+8. **Gastos (Caja Chica)**: Consultar registros de caja chica de los empleados.
 IMPORTANTE: No puedes alterar datos ni modificar tickets, solo eres una herramienta de consulta analítica y gerencial.
 
 PERSONALIDAD: Breve, directo y profesional.
@@ -134,6 +141,38 @@ const TOOLS_ADMIN = [
       description: "Revisa qué vehículos activos no han subido su revisión de checklist en los últimos 30 días.",
       parameters: { type: "object", properties: {} }
     }
+  },
+  {
+    type: "function",
+    function: {
+      name: "get_employee_directory",
+      description: "Obtener el directorio o lista de empleados registrados.",
+      parameters: { type: "object", properties: { departamento: { type: "string" }, cargo: { type: "string" }, nombre: { type: "string" } } }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "get_employee_stats",
+      description: "Obtener conteo rápido de empleados (totales y activos).",
+      parameters: { type: "object", properties: {} }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "get_computo_inventory",
+      description: "Ver inventario de equipos de cómputo y celulares. Ideal para Excel.",
+      parameters: { type: "object", properties: { estatus: { type: "string" }, empresa: { type: "string" } } }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "get_caja_chica_records",
+      description: "Obtener los gastos y abonos de caja chica de los empleados.",
+      parameters: { type: "object", properties: { email: { type: "string" }, semana: { type: "number" }, anio: { type: "number" } } }
+    }
   }
 ];
 
@@ -173,14 +212,14 @@ async function callGroq(messages: any[], tools?: any[], temp = 0) {
   });
 
   if (!response.ok) throw new Error(`Groq API Error: ${response.status}`);
-  return response.json();
+  return await response.json();
 }
 
 // ─── Handler Principal ───────────────────────────────────────────────────────
 
 export async function POST(req: Request) {
   try {
-    const { messages } = await req.json();
+    const { messages, contextPath } = await req.json();
     const lastMessage = messages[messages.length - 1].content.toLowerCase();
 
     if (!GROQ_API_KEY) return NextResponse.json({ text: "Error: API Key no configurada." }, { status: 200 });
@@ -194,17 +233,41 @@ export async function POST(req: Request) {
     const isAdmin = ['admin', 'gerencial'].includes(userRole.toLowerCase());
 
     // Seleccionar prompt y herramientas según rol
-    const systemPrompt = isAdmin ? SYSTEM_PROMPT_ADMIN : buildUserPrompt(userName);
-    const tools = isAdmin ? TOOLS_ADMIN : TOOLS_USER;
+    let systemPrompt = isAdmin ? SYSTEM_PROMPT_ADMIN : buildUserPrompt(userName);
+    let tools = isAdmin ? TOOLS_ADMIN : TOOLS_USER;
 
-    // Construir historial para Groq
-    let groqMessages: any[] = [{ role: "system", content: systemPrompt }];
-    const recentMessages = messages.slice(-5);
-    for (const msg of recentMessages) {
-      groqMessages.push({ role: msg.role === "model" ? "assistant" : "user", content: msg.content || "" });
+    // Routing Semántico: Restringir herramientas si no estamos en el dashboard principal
+    if (isAdmin && contextPath && contextPath !== '/' && contextPath !== '/dashboard') {
+      // 1. Control Vehicular (Flota, Servicios, Tickets, Costos de Mantenimiento)
+      if (contextPath.includes('/vehiculos') || contextPath.includes('/tickets') || contextPath.includes('/servicios') || contextPath.includes('/flota') || contextPath.includes('/costos')) {
+        tools = TOOLS_ADMIN.filter(t => ["get_fleet_report", "get_pending_services", "get_fleet_status_summary", "get_unit_details", "audit_checklist_compliance", "predict_upcoming_services", "get_fleet_costs"].includes(t.function.name));
+        systemPrompt = systemPrompt.replace(/6\. \*\*Directorio de Empleados.*|7\. \*\*Equipos de Cómputo.*|8\. \*\*Gastos \(Caja Chica\).*/g, '');
+      
+      // 2. Personal / Empleados (Programa Anual, Usuarios)
+      } else if (contextPath.includes('/empleados') || contextPath.includes('/usuarios') || contextPath.includes('/programa')) {
+        tools = TOOLS_ADMIN.filter(t => ["get_employee_directory", "get_employee_stats"].includes(t.function.name));
+        systemPrompt = systemPrompt.replace(/1\. \*\*Inventario y Estado de Flota.*|2\. \*\*Rastreo de Tickets.*|3\. \*\*Análisis de Costos.*|4\. \*\*Predicción de Servicios.*|5\. \*\*Auditoría de Checklists.*|7\. \*\*Equipos de Cómputo.*|8\. \*\*Gastos \(Caja Chica\).*/g, '');
+      
+      // 3. Activos TI
+      } else if (contextPath.includes('/computo') || contextPath.includes('/ti')) {
+        tools = TOOLS_ADMIN.filter(t => ["get_computo_inventory"].includes(t.function.name));
+        systemPrompt = systemPrompt.replace(/1\. \*\*Inventario y Estado de Flota.*|2\. \*\*Rastreo de Tickets.*|3\. \*\*Análisis de Costos.*|4\. \*\*Predicción de Servicios.*|5\. \*\*Auditoría de Checklists.*|6\. \*\*Directorio de Empleados.*|8\. \*\*Gastos \(Caja Chica\).*/g, '');
+      
+      // 4. Gastos Generales (Caja Chica)
+      } else if (contextPath.includes('/gastos') || contextPath.includes('/caja-chica')) {
+        tools = TOOLS_ADMIN.filter(t => ["get_caja_chica_records"].includes(t.function.name));
+        systemPrompt = systemPrompt.replace(/1\. \*\*Inventario y Estado de Flota.*|2\. \*\*Rastreo de Tickets.*|3\. \*\*Análisis de Costos.*|4\. \*\*Predicción de Servicios.*|5\. \*\*Auditoría de Checklists.*|6\. \*\*Directorio de Empleados.*|7\. \*\*Equipos de Cómputo.*/g, '');
+      }
     }
 
-    const completion = await callGroq(groqMessages, tools, 0);
+    // Construir historial para Groq
+    let aiMessages: any[] = [{ role: "system", content: systemPrompt }];
+    const recentMessages = messages.slice(-5);
+    for (const msg of recentMessages) {
+      aiMessages.push({ role: msg.role === "model" ? "assistant" : "user", content: msg.content || "" });
+    }
+
+    const completion = await callGroq(aiMessages, tools, 0);
     const messageResponse = completion.choices[0].message;
 
     let text = messageResponse.content || "";
@@ -269,6 +332,18 @@ export async function POST(req: Request) {
             case "audit_checklist_compliance":
               functionResult = await audit_checklist_compliance();
               break;
+            case "get_employee_directory":
+              functionResult = await get_employee_directory({ departamento: args.departamento, cargo: args.cargo, nombre: args.nombre });
+              break;
+            case "get_employee_stats":
+              functionResult = await get_employee_stats();
+              break;
+            case "get_computo_inventory":
+              functionResult = await get_computo_inventory({ estatus: args.estatus, empresa: args.empresa });
+              break;
+            case "get_caja_chica_records":
+              functionResult = await get_caja_chica_records(args.email, args.semana, args.anio);
+              break;
           }
         } catch (err) {
           console.error("Tool execution error:", err);
@@ -311,15 +386,15 @@ export async function POST(req: Request) {
         };
       }
 
-      groqMessages.push(messageResponse);
-      groqMessages.push({
+      aiMessages.push(messageResponse);
+      aiMessages.push({
         role: "tool",
         tool_call_id: toolCall.id,
         name: functionName,
         content: typeof aiResponseData === "string" ? aiResponseData : JSON.stringify(aiResponseData)
       });
 
-      const finalCompletion = await callGroq(groqMessages, undefined, 0.4);
+      const finalCompletion = await callGroq(aiMessages, undefined, 0.4);
       text = finalCompletion.choices[0].message.content || "He procesado los datos.";
     }
 

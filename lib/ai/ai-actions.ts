@@ -453,3 +453,30 @@ export async function audit_checklist_compliance() {
     vehiculosSinChecklist: incumplidos 
   };
 }
+
+// ─── MÓDULO DE CÓMPUTO ───────────────────────────────────────────────────
+export async function get_computo_inventory(filtros?: { estatus?: string, empresa?: string }) {
+  const whereClause: any = {};
+  if (filtros?.estatus) whereClause.Estatus = { contains: filtros.estatus, mode: 'insensitive' };
+  if (filtros?.empresa) whereClause.Empresa = { contains: filtros.empresa, mode: 'insensitive' };
+  
+  return await prisma.inventario_Computo.findMany({
+    where: whereClause,
+    include: {
+      empleado: { select: { Nombre_Empleado: true, A_Paterno: true } }
+    }
+  });
+}
+
+// ─── MÓDULO DE GASTOS (CAJA CHICA) ───────────────────────────────────────
+export async function get_caja_chica_records(email?: string, semana?: number, anio?: number) {
+  const whereClause: any = {};
+  if (email) whereClause.Email_Empleado = { contains: email, mode: 'insensitive' };
+  if (semana) whereClause.Semana = semana;
+  if (anio) whereClause.Anio = anio;
+
+  return await prisma.caja_Chica.findMany({
+    where: whereClause,
+    orderBy: { Fecha: 'desc' }
+  });
+}

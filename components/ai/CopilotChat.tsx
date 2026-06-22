@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Bot, X, Send, Download, Loader2 } from 'lucide-react';
 import { saveAs } from 'file-saver';
+import { usePathname } from 'next/navigation';
 
 interface Message {
   role: 'user' | 'model';
@@ -23,6 +24,7 @@ function getCookie(name: string): string {
 
 export default function CopilotChat() {
   const [isOpen, setIsOpen] = useState(false);
+  const pathname = usePathname();
 
   // Construir saludo personalizado según el rol de sesión
   const buildWelcomeMessage = (): string => {
@@ -70,7 +72,7 @@ export default function CopilotChat() {
       const response = await fetch('/api/ai/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: newMessages })
+        body: JSON.stringify({ messages: newMessages, contextPath: pathname })
       });
 
       const data = await response.json();
