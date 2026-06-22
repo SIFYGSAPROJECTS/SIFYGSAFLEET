@@ -5,8 +5,10 @@ export default async function PortalPage() {
   const cookieStore = await cookies();
   const roleCookie = cookieStore.get('user_role')?.value;
   const areasCookie = cookieStore.get('user_areas')?.value;
+  const nameCookie = cookieStore.get('user_name')?.value;
 
   const isAdmin = ['ADMIN', 'GERENCIAL'].includes(roleCookie || '');
+  const userName = nameCookie ? decodeURIComponent(nameCookie) : 'Usuario';
   let userAreas: string[] = [];
   
   if (areasCookie) {
@@ -15,5 +17,5 @@ export default async function PortalPage() {
     } catch (e) {}
   }
 
-  return <PortalClient isAdmin={isAdmin} userAreas={userAreas} />;
+  return <PortalClient isAdmin={isAdmin} userAreas={userAreas} userName={userName} />;
 }

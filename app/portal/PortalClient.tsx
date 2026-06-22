@@ -17,7 +17,7 @@ const modules = [
   { id: 'gastos', name: 'Gastos Generales', icon: Wallet, route: '/gastos', color: 'text-teal-400', bg: 'bg-teal-400/10' },
 ];
 
-export default function PortalClient({ isAdmin, userAreas }: { isAdmin: boolean, userAreas: string[] }) {
+export default function PortalClient({ isAdmin, userAreas, userName }: { isAdmin: boolean, userAreas: string[], userName: string }) {
   const router = useRouter();
   const [activeMessage, setActiveMessage] = useState<string | null>(null);
 
@@ -89,7 +89,7 @@ export default function PortalClient({ isAdmin, userAreas }: { isAdmin: boolean,
       </div>
 
       {/* HEADER */}
-      <Navbar type="portal" />
+      <Navbar type="portal" isAdmin={isAdmin} userName={userName} />
 
       {/* MAIN CONTENT */}
       <main className="relative z-10 flex-1 flex flex-col items-center justify-center p-6 sm:p-12 pt-32 sm:pt-32">

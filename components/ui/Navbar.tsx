@@ -18,9 +18,8 @@ interface NavbarProps {
 // Helper client-side helper to read cookies
 const getCookie = (name: string): string => {
   if (typeof window === 'undefined') return '';
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return decodeURIComponent(parts.pop()?.split(';').shift() || '');
+  const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+  if (match) return decodeURIComponent(match[2]);
   return '';
 };
 
@@ -29,6 +28,19 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+
+  const toggleDropdown = (name: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setOpenDropdown(openDropdown === name ? null : name);
+  };
+
+  useEffect(() => {
+    const closeAllDropdowns = () => setOpenDropdown(null);
+    window.addEventListener('click', closeAllDropdowns);
+    return () => window.removeEventListener('click', closeAllDropdowns);
+  }, []);
 
   // Dynamic maxWidth based on pathname to align properly with custom page grids
   let resolvedMaxWidth = maxWidth || 'max-w-7xl';
@@ -54,6 +66,7 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
 
   useEffect(() => {
     setIsMenuOpen(false);
+    setOpenDropdown(null);
   }, [pathname]);
 
   useEffect(() => {
@@ -112,7 +125,10 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
             
             {/* User Dropdown for Logout */}
             <div className="relative group">
-              <div className="px-4 py-2 flex items-center gap-3 cursor-pointer hover:bg-white/5 rounded-xl transition-all">
+              <div 
+                onClick={(e) => toggleDropdown('user-portal', e)}
+                className="px-4 py-2 flex items-center gap-3 cursor-pointer hover:bg-white/5 rounded-xl transition-all"
+              >
                 <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-[10px] font-bold text-[#FF7420] shrink-0">
                   {localUserName.charAt(0).toUpperCase()}
                 </div>
@@ -126,7 +142,11 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
 
               {/* Hover Logout dropdown centered with pt-2 to bridge hover gap */}
               <div 
-                className="absolute top-full left-1/2 pt-2 w-max opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[120]"
+                className={`absolute top-full left-1/2 pt-2 w-max transition-all duration-200 z-[120] ${
+                  openDropdown === 'user-portal'
+                    ? 'opacity-100 visible pointer-events-auto'
+                    : 'opacity-0 invisible pointer-events-none group-hover:opacity-100 group-hover:visible group-hover:pointer-events-auto'
+                }`}
                 style={{ transform: 'translateX(-50%)' }}
               >
                 <div className="bg-[#0a0a0a]/95 border border-white/5 rounded-xl shadow-2xl p-1 backdrop-blur-md flex justify-center items-center">
@@ -141,10 +161,19 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
             {/* Menú de Settings (Auditoría) */}
             {localIsAdmin && (
               <div className="relative group">
-                <button className="p-2 mx-1 text-white/50 hover:text-white hover:bg-white/10 rounded-xl transition-all flex items-center justify-center">
+                <button 
+                  onClick={(e) => toggleDropdown('settings-portal', e)}
+                  className="p-2 mx-1 text-white/50 hover:text-white hover:bg-white/10 rounded-xl transition-all flex items-center justify-center cursor-pointer"
+                >
                   <Settings size={18} className="group-hover:rotate-90 transition-transform duration-300" />
                 </button>
-                <div className="absolute top-full right-0 pt-2 w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[120]">
+                <div 
+                  className={`absolute top-full right-0 pt-2 w-48 transition-all duration-200 z-[120] ${
+                    openDropdown === 'settings-portal'
+                      ? 'opacity-100 visible pointer-events-auto'
+                      : 'opacity-0 invisible pointer-events-none group-hover:opacity-100 group-hover:visible group-hover:pointer-events-auto'
+                  }`}
+                >
                   <div className="bg-[#0a0a0a]/95 border border-white/5 rounded-xl shadow-2xl p-1.5 backdrop-blur-md text-left">
                     <div className="px-3 py-1.5 text-[9px] font-black text-white/40 tracking-wider uppercase border-b border-white/5 mb-1">
                       Sistema
@@ -163,26 +192,37 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
 
           </div>
 
-          {/* Burger Menu Button (Mobile Only) */}
-          <button
-            className="md:hidden relative z-[110] w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-colors"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            aria-label="Toggle menu"
-          >
-            <span className={`absolute transition-all duration-200 ${isMenuOpen ? 'opacity-100 rotate-0' : 'opacity-0 rotate-90'}`}>
-              <X size={18} />
-            </span>
-            <span className={`absolute transition-all duration-200 ${isMenuOpen ? 'opacity-0 -rotate-90' : 'opacity-100 rotate-0'}`}>
-              <Menu size={18} />
-            </span>
-          </button>
+          {/* Actions & Burger Menu (Mobile Only) */}
+          <div className="md:hidden flex items-center gap-2 relative z-[110]">
+            {localIsAdmin && (
+              <Link
+                href="/auditoria"
+                className="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-white/70 hover:text-white hover:bg-white/10 transition-all cursor-pointer"
+                title="Bitácora / Auditoría"
+              >
+                <Settings size={18} />
+              </Link>
+            )}
+            <button
+              className="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-colors"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              aria-label="Toggle menu"
+            >
+              <span className={`absolute transition-all duration-200 ${isMenuOpen ? 'opacity-100 rotate-0' : 'opacity-0 rotate-90'}`}>
+                <X size={18} />
+              </span>
+              <span className={`absolute transition-all duration-200 ${isMenuOpen ? 'opacity-0 -rotate-90' : 'opacity-100 rotate-0'}`}>
+                <Menu size={18} />
+              </span>
+            </button>
+          </div>
 
         </div>
         
         {/* Mobile Drawer Panel for Portal */}
         {isMenuOpen && (
           <div className="fixed inset-0 z-[80] bg-black/60 backdrop-blur-sm md:hidden" onClick={() => setIsMenuOpen(false)}>
-            <div className="fixed top-20 left-4 right-4 bg-[#0a0a0a]/95 border border-white/5 p-6 flex flex-col space-y-4 shadow-2xl rounded-2xl" onClick={e => e.stopPropagation()}>
+            <div className="fixed top-20 left-4 right-4 max-h-[calc(100vh-100px)] overflow-y-auto bg-[#0a0a0a]/95 border border-white/5 p-6 flex flex-col space-y-4 shadow-2xl rounded-2xl" onClick={e => e.stopPropagation()}>
               
               <div className="text-[10px] font-black text-white/30 uppercase tracking-widest pl-2 mb-1">Módulos</div>
               <Link
@@ -206,6 +246,7 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
               >
                 <CalendarDays size={14} className="text-[#FF7420]" /> Programa Anual
               </Link>
+
 
               <div className="h-px bg-white/5 my-2"></div>
               
@@ -322,16 +363,20 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
             {/* Cómputo TI Sub-navigation (Dropdown similar to Módulos) */}
             {type === 'computo' && pathname !== '/computo' && (
               <div className="relative group">
-                <Link
-                  href="/computo"
-                  className="hover:bg-white/10 text-white px-4 py-2 rounded-xl text-xs flex items-center gap-2 transition-all font-bold"
+                <button
+                  onClick={(e) => toggleDropdown('menu-ti', e)}
+                  className="hover:bg-white/10 text-white px-4 py-2 rounded-xl text-xs flex items-center gap-2 transition-all font-bold cursor-pointer"
                 >
                   <Laptop size={14} className="text-emerald-400 transition-transform duration-300 ease-in-out group-hover:scale-110" /> Menú
-                </Link>
+                </button>
 
                 {/* Dropdown with pt-2 to bridge hover gap */}
                 <div 
-                  className="absolute top-full left-1/2 pt-2 w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[120]"
+                  className={`absolute top-full left-1/2 pt-2 w-48 transition-all duration-200 z-[120] ${
+                    openDropdown === 'menu-ti'
+                      ? 'opacity-100 visible pointer-events-auto'
+                      : 'opacity-0 invisible pointer-events-none group-hover:opacity-100 group-hover:visible group-hover:pointer-events-auto'
+                  }`}
                   style={{ transform: 'translateX(-50%)' }}
                 >
                   <div className="bg-zinc-950/95 border border-white/10 rounded-xl shadow-2xl p-1.5 backdrop-blur-md text-left">
@@ -380,14 +425,19 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
             {type === 'dashboard' && pathname !== '/dashboard' && (
               <div className="relative group">
                 <button
-                  className="hover:bg-white/10 text-white px-4 py-2 rounded-xl text-xs flex items-center gap-2 transition-all font-bold"
+                  onClick={(e) => toggleDropdown('menu-fleet', e)}
+                  className="hover:bg-white/10 text-white px-4 py-2 rounded-xl text-xs flex items-center gap-2 transition-all font-bold cursor-pointer"
                 >
                   <Car size={14} className="text-[#FF7420] transition-transform duration-300 ease-in-out group-hover:translate-x-1" /> Menú
                 </button>
 
                 {/* Dropdown with pt-2 to bridge hover gap */}
                 <div 
-                  className="absolute top-full left-1/2 pt-2 w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[120]"
+                  className={`absolute top-full left-1/2 pt-2 w-48 transition-all duration-200 z-[120] ${
+                    openDropdown === 'menu-fleet'
+                      ? 'opacity-100 visible pointer-events-auto'
+                      : 'opacity-0 invisible pointer-events-none group-hover:opacity-100 group-hover:visible group-hover:pointer-events-auto'
+                  }`}
                   style={{ transform: 'translateX(-50%)' }}
                 >
                   <div className="bg-zinc-950/95 border border-white/10 rounded-xl shadow-2xl p-1.5 backdrop-blur-md text-left">
@@ -457,16 +507,20 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
             {/* Módulos Hover Dropdown */}
             {(localIsAdmin || localUserAreas.length > 0) && (
               <div className="relative group">
-                <a
-                  href="/portal"
-                  className="hover:bg-white/10 text-white px-4 py-2 rounded-xl text-xs flex items-center gap-2 transition-all font-bold"
+                <button
+                  onClick={(e) => toggleDropdown('modules', e)}
+                  className="hover:bg-white/10 text-white px-4 py-2 rounded-xl text-xs flex items-center gap-2 transition-all font-bold cursor-pointer"
                 >
                   <LayoutGrid size={14} className="text-[#FF7420] transition-transform duration-300 ease-in-out group-hover:scale-110 group-hover:rotate-12" /> Módulos
-                </a>
+                </button>
 
                 {/* Modules Dropdown with pt-2 to bridge hover gap */}
                 <div 
-                  className="absolute top-full left-1/2 pt-2 w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[120]"
+                  className={`absolute top-full left-1/2 pt-2 w-48 transition-all duration-200 z-[120] ${
+                    openDropdown === 'modules'
+                      ? 'opacity-100 visible pointer-events-auto'
+                      : 'opacity-0 invisible pointer-events-none group-hover:opacity-100 group-hover:visible group-hover:pointer-events-auto'
+                  }`}
                   style={{ transform: 'translateX(-50%)' }}
                 >
                   <div className="bg-zinc-950/95 border border-white/10 rounded-xl shadow-2xl p-1.5 backdrop-blur-md">
@@ -516,7 +570,10 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
 
             {/* User Dropdown for Logout */}
             <div className={`relative group`}>
-              <div className={`px-4 py-2 flex items-center gap-3 cursor-pointer hover:bg-white/10 transition-all rounded-xl`}>
+              <div 
+                onClick={(e) => toggleDropdown('user-dashboard', e)}
+                className={`px-4 py-2 flex items-center gap-3 cursor-pointer hover:bg-white/10 transition-all rounded-xl`}
+              >
                 <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-[10px] font-bold text-[#FF7420] shrink-0">
                   {localUserName.charAt(0).toUpperCase()}
                 </div>
@@ -536,7 +593,11 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
 
               {/* Hover Logout dropdown centered with pt-2 to bridge hover gap */}
               <div 
-                className="absolute top-full left-1/2 pt-2 w-max opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[120]"
+                className={`absolute top-full left-1/2 pt-2 w-max transition-all duration-200 z-[120] ${
+                  openDropdown === 'user-dashboard'
+                    ? 'opacity-100 visible pointer-events-auto'
+                    : 'opacity-0 invisible pointer-events-none group-hover:opacity-100 group-hover:visible group-hover:pointer-events-auto'
+                }`}
                 style={{ transform: 'translateX(-50%)' }}
               >
                 <div className="bg-[#0a0a0a]/95 border border-white/5 rounded-xl shadow-2xl p-1 backdrop-blur-md flex justify-center items-center">
@@ -548,10 +609,19 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
             {/* Menú de Settings (Auditoría) */}
             {localIsAdmin && (
               <div className="relative group ml-2">
-                <button className="p-2 text-white/50 hover:text-white hover:bg-white/10 rounded-xl transition-all flex items-center justify-center">
+                <button 
+                  onClick={(e) => toggleDropdown('settings-dashboard', e)}
+                  className="p-2 text-white/50 hover:text-white hover:bg-white/10 rounded-xl transition-all flex items-center justify-center cursor-pointer"
+                >
                   <Settings size={18} className="group-hover:rotate-90 transition-transform duration-300" />
                 </button>
-                <div className="absolute top-full right-0 pt-2 w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[120]">
+                <div 
+                  className={`absolute top-full right-0 pt-2 w-48 transition-all duration-200 z-[120] ${
+                    openDropdown === 'settings-dashboard'
+                      ? 'opacity-100 visible pointer-events-auto'
+                      : 'opacity-0 invisible pointer-events-none group-hover:opacity-100 group-hover:visible group-hover:pointer-events-auto'
+                  }`}
+                >
                   <div className="bg-zinc-950/95 border border-white/10 rounded-xl shadow-2xl p-1.5 backdrop-blur-md text-left">
                     <div className="px-3 py-1.5 text-[9px] font-black text-white/40 tracking-wider uppercase border-b border-white/5 mb-1">
                       Sistema
@@ -570,10 +640,19 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
 
           </div>
 
-          {/* Burger Menu Button (Mobile Only) */}
-          <div className="flex-1 flex md:hidden justify-end items-center">
+          {/* Actions & Burger Menu (Mobile Only) */}
+          <div className="flex-1 flex md:hidden justify-end items-center gap-2 relative z-[110]">
+            {localIsAdmin && (
+              <Link
+                href="/auditoria"
+                className="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-white/70 hover:text-white hover:bg-white/10 transition-all cursor-pointer"
+                title="Bitácora / Auditoría"
+              >
+                <Settings size={18} />
+              </Link>
+            )}
             <button
-              className="relative z-[110] w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-colors"
+              className="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-colors"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               aria-label="Toggle menu"
             >
@@ -599,7 +678,7 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
 
       {/* Mobile Drawer Panel - Floating Glass Card */}
       <div
-        className={`fixed top-24 left-4 right-4 z-[95] bg-[#0b0b0b]/95 border border-white/10 backdrop-blur-lg rounded-2xl transition-all duration-300 ease-in-out md:hidden shadow-2xl ${
+        className={`fixed top-24 left-4 right-4 max-h-[calc(100vh-120px)] overflow-y-auto z-[95] bg-[#0b0b0b]/95 border border-white/10 backdrop-blur-lg rounded-2xl transition-all duration-300 ease-in-out md:hidden shadow-2xl ${
           isMenuOpen ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 -translate-y-4 pointer-events-none'
         }`}
       >
@@ -812,6 +891,7 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                     <Wallet size={14} className="text-[#FF7420]" /> Gastos Generales
                   </Link>
                 )}
+
 
                 <div className="h-px bg-white/5 my-2"></div>
                 
