@@ -468,7 +468,7 @@ export default function PersonalPage() {
                     <PremiumSelect
                       accent="indigo"
                       placeholder="Seleccionar Rol"
-                      value={formData.Rol}
+                      value={formData.Rol || ''}
                       onChange={(val) => setFormData({ ...formData, Rol: val })}
                       options={[
                         { value: 'USER', label: 'EMPLEADO (USER)' },
@@ -566,7 +566,7 @@ export default function PersonalPage() {
                       <PremiumSelect
                         accent="zinc"
                         placeholder="Seleccionar Estado"
-                        value={formData.Estatus_Acceso}
+                        value={formData.Estatus_Acceso || ''}
                         onChange={(val) => setFormData({ ...formData, Estatus_Acceso: val })}
                         options={[
                           { value: 'Activo', label: 'ACCESO PERMITIDO' },
