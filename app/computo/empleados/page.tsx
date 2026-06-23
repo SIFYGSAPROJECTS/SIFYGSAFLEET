@@ -461,7 +461,7 @@ export default function PersonalPage() {
                   </div>
                   <div>
                     <label className="block text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-2">Apellido Materno</label>
-                    <input type="text" value={formData.A_Materno} onChange={e => setFormData({ ...formData, A_Materno: e.target.value })} className="w-full bg-white border border-[var(--border-cream)] text-[var(--text-main)] rounded-xl p-3.5 focus:ring-2 focus:ring-[#71717a] outline-none text-sm" />
+                    <input type="text" value={formData.A_Materno || ''} onChange={e => setFormData({ ...formData, A_Materno: e.target.value })} className="w-full bg-white border border-[var(--border-cream)] text-[var(--text-main)] rounded-xl p-3.5 focus:ring-2 focus:ring-[#71717a] outline-none text-sm" />
                   </div>
                   <div>
                     <label className="block text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-2">Rol de Sistema *</label>
@@ -479,11 +479,11 @@ export default function PersonalPage() {
                   </div>
                   <div>
                     <label className="block text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-2">Cargo</label>
-                    <input type="text" value={formData.Cargo} onChange={e => setFormData({ ...formData, Cargo: e.target.value })} className="w-full bg-white border border-[var(--border-cream)] text-[var(--text-main)] rounded-xl p-3.5 focus:ring-2 focus:ring-[#71717a] outline-none text-sm" placeholder="Ej. Chofer" />
+                    <input type="text" value={formData.Cargo || ''} onChange={e => setFormData({ ...formData, Cargo: e.target.value })} className="w-full bg-white border border-[var(--border-cream)] text-[var(--text-main)] rounded-xl p-3.5 focus:ring-2 focus:ring-[#71717a] outline-none text-sm" placeholder="Ej. Chofer" />
                   </div>
                   <div>
                     <label className="block text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-2">Departamento</label>
-                    <input type="text" value={formData.Departamento} onChange={e => setFormData({ ...formData, Departamento: e.target.value })} className="w-full bg-white border border-[var(--border-cream)] text-[var(--text-main)] rounded-xl p-3.5 focus:ring-2 focus:ring-[#71717a] outline-none text-sm" placeholder="Ej. Operaciones" />
+                    <input type="text" value={formData.Departamento || ''} onChange={e => setFormData({ ...formData, Departamento: e.target.value })} className="w-full bg-white border border-[var(--border-cream)] text-[var(--text-main)] rounded-xl p-3.5 focus:ring-2 focus:ring-[#71717a] outline-none text-sm" placeholder="Ej. Operaciones" />
                   </div>
                   
                   <div className="sm:col-span-2">
