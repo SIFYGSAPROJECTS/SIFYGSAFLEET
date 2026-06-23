@@ -117,12 +117,13 @@ export async function POST(request: Request) {
     cookieStore.set('user_name', usuario.Nombre_Empleado);
     cookieStore.set('user_email', usuario.Email);
     cookieStore.set('user_areas', JSON.stringify(areas));
+    cookieStore.set('user_admin_ti', String(usuario.Admin_TI || false));
 
     await logAuditoria(identifier, 'LOGIN_SUCCESS', 'AUTH', 'Inicio de sesión exitoso');
 
     return NextResponse.json({
       success: true,
-      user: { nombre: usuario.Nombre_Empleado, rol: usuario.Rol, areas }
+      user: { nombre: usuario.Nombre_Empleado, rol: usuario.Rol, admin_ti: usuario.Admin_TI || false, areas }
     });
 
   } catch (error) {

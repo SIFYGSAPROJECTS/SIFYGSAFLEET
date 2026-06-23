@@ -55,7 +55,8 @@ export default function ComputoInventarioPage() {
   }, [tabPrincipal, filtroEstatus, filtroPrefijo, busquedaTexto]);
 
   const [userRole, setUserRole] = useState<string>('USER');
-  const isAdmin = ['ADMIN', 'GERENCIAL'].includes(userRole);
+  const [userAdminTi, setUserAdminTi] = useState<boolean>(false);
+  const isAdmin = ['ADMIN', 'GERENCIAL'].includes(userRole) || userAdminTi === true;
 
   const cargarEquipos = async () => {
     setCargando(true);
@@ -108,6 +109,10 @@ export default function ComputoInventarioPage() {
     const match = document.cookie.match(new RegExp('(^| )user_role=([^;]+)'));
     if (match) {
       setUserRole(match[2]);
+    }
+    const matchTi = document.cookie.match(new RegExp('(^| )user_admin_ti=([^;]+)'));
+    if (matchTi && matchTi[2] === 'true') {
+      setUserAdminTi(true);
     }
   }, []);
 

@@ -9,7 +9,7 @@ export async function GET(request: Request) {
 
     const programas = await prisma.programa_Anual.findMany({
       where: { Anio: anio },
-      include: { meses: true },
+      include: { meses: true, encargado: true },
       orderBy: { Id_Programa: 'asc' }
     });
 
@@ -23,7 +23,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { Anio, Categoria, Ejecuta, Observaciones, Meses } = body;
+    const { Anio, Categoria, Ejecuta, Observaciones, Meses, Email_Encargado } = body;
 
     let programa = await prisma.programa_Anual.findUnique({
       where: {
@@ -40,7 +40,8 @@ export async function POST(request: Request) {
           Anio,
           Categoria,
           Ejecuta,
-          Observaciones
+          Observaciones,
+          Email_Encargado
         }
       });
     } else {
@@ -48,7 +49,8 @@ export async function POST(request: Request) {
         where: { Id_Programa: programa.Id_Programa },
         data: {
           Ejecuta,
-          Observaciones
+          Observaciones,
+          Email_Encargado
         }
       });
     }

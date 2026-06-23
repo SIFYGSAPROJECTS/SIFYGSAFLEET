@@ -20,7 +20,8 @@ export default async function ComputoLayout({
 
   const userRole = cookieStore.get('user_role')?.value || 'USER';
   const userName = cookieStore.get('user_name')?.value || 'Usuario';
-  const isAdmin = ['ADMIN', 'GERENCIAL'].includes(userRole);
+  const userAdminTi = cookieStore.get('user_admin_ti')?.value === 'true';
+  const isAdmin = ['ADMIN', 'GERENCIAL'].includes(userRole) || userAdminTi;
 
   return (
     <>

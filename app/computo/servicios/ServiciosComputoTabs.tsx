@@ -14,9 +14,10 @@ interface Props {
   equipos: any[];
   isAdmin: boolean;
   rol: string | undefined;
+  empleados?: any[];
 }
 
-export default function ServiciosComputoTabs({ tickets, equipos, isAdmin, rol }: Props) {
+export default function ServiciosComputoTabs({ tickets, equipos, isAdmin, rol, empleados = [] }: Props) {
   const searchParams = useSearchParams();
   const tabParam = searchParams.get('tab');
 
@@ -178,7 +179,7 @@ export default function ServiciosComputoTabs({ tickets, equipos, isAdmin, rol }:
         {activeTab === 'seguimiento' && (
           <div className="max-w-[95%] mx-auto">
           <div className="bg-[var(--bg-floating)]/50 p-1 rounded-xl">
-            <SeguimientoComputoClient ticketsIniciales={ticketsSeguimiento} isAdmin={isAdmin} />
+            <SeguimientoComputoClient ticketsIniciales={ticketsSeguimiento} isAdmin={isAdmin} empleados={empleados} />
           </div>
           </div>
         )}

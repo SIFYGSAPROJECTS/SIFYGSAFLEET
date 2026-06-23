@@ -23,7 +23,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { Email, Nombre_Empleado, A_Paterno, A_Materno, Cargo, Departamento, Rol, Estatus_Acceso, Consecutivo_Vehiculo, C_Interno_Computo } = body;
+    const { Email, Nombre_Empleado, A_Paterno, A_Materno, Cargo, Departamento, Rol, Estatus_Acceso, Consecutivo_Vehiculo, C_Interno_Computo, Admin_TI } = body;
     const emailLower = Email.toLowerCase();
 
     // Verificamos si el empleado ya existe
@@ -41,6 +41,7 @@ export async function POST(request: Request) {
           data: {
             Nombre_Empleado, A_Paterno, A_Materno, Cargo, Departamento,
             Rol: Rol || empleadoExistente.Rol,
+            Admin_TI: Admin_TI !== undefined ? Admin_TI : empleadoExistente.Admin_TI,
             Estatus_Acceso: Estatus_Acceso || empleadoExistente.Estatus_Acceso
           }
         });
@@ -77,6 +78,7 @@ export async function POST(request: Request) {
           data: {
             Email: emailLower, Nombre_Empleado, A_Paterno, A_Materno, Cargo, Departamento,
             Rol: Rol || 'USER', Estatus_Acceso: Estatus_Acceso || 'Activo',
+            Admin_TI: Admin_TI || false,
             Password: hashedPassword, 
           }
         });
@@ -130,7 +132,7 @@ export async function POST(request: Request) {
 export async function PUT(request: Request) {
   try {
     const body = await request.json();
-    const { Email, Nombre_Empleado, A_Paterno, A_Materno, Cargo, Departamento, Rol, Estatus_Acceso, Consecutivo_Vehiculo, C_Interno_Computo } = body;
+    const { Email, Nombre_Empleado, A_Paterno, A_Materno, Cargo, Departamento, Rol, Estatus_Acceso, Consecutivo_Vehiculo, C_Interno_Computo, Admin_TI } = body;
 
     const empleadoViejo = await prisma.empleados.findUnique({
       where: { Email }
@@ -178,6 +180,7 @@ export async function PUT(request: Request) {
           Cargo,
           Departamento,
           Rol,
+          Admin_TI,
           Estatus_Acceso, 
         }
       });
@@ -191,8 +194,8 @@ export async function PUT(request: Request) {
 
     if (empleadoViejo) {
       // Computar diferencias
-      const fields = ['Nombre_Empleado', 'A_Paterno', 'A_Materno', 'Cargo', 'Departamento', 'Rol', 'Estatus_Acceso'];
-      const bodyData: any = { Nombre_Empleado, A_Paterno, A_Materno, Cargo, Departamento, Rol, Estatus_Acceso };
+      const fields = ['Nombre_Empleado', 'A_Paterno', 'A_Materno', 'Cargo', 'Departamento', 'Rol', 'Estatus_Acceso', 'Admin_TI'];
+      const bodyData: any = { Nombre_Empleado, A_Paterno, A_Materno, Cargo, Departamento, Rol, Estatus_Acceso, Admin_TI };
       
       fields.forEach(f => {
         if (empleadoViejo[f as keyof typeof empleadoViejo] !== bodyData[f]) {

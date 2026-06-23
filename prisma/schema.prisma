@@ -24,6 +24,7 @@ model Empleados {
   Cargo                  String?   @db.VarChar(60)
   Departamento           String?   @db.VarChar(80)
   Rol                    String    @default("USER")
+  Admin_TI               Boolean   @default(false)
 
   // Relaciones
   telefonos                 Telefono[]
@@ -38,6 +39,7 @@ model Empleados {
   cajaChica                 Caja_Chica[]
   viaticos                  Viaticos[]
   comprobacionGastos        Comprobacion_Gastos[]
+  programas_anuales         Programa_Anual[]
 }
 
 // 2. INVENTARIO DE UNIDADES [cite: 2]
@@ -236,8 +238,10 @@ model Programa_Anual {
   Categoria     String
   Ejecuta       String
   Observaciones String? @db.Text
+  Email_Encargado String? @db.VarChar(50)
 
   meses Programa_Mes[]
+  encargado Empleados? @relation(fields: [Email_Encargado], references: [Email])
 
   @@unique([Anio, Categoria])
 }

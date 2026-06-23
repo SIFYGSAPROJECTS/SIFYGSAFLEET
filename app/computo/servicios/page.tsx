@@ -18,7 +18,7 @@ export default async function CentralSoporteTIPage() {
 
   // 1. Obtener Rol
   const usuario = await prisma.empleados.findUnique({ where: { Email: userEmail } });
-  const isAdmin = ['ADMIN', 'GERENCIAL'].includes(usuario?.Rol || '');
+  const isAdmin = ['ADMIN', 'GERENCIAL'].includes(usuario?.Rol || '') || usuario?.Admin_TI === true;
 
   // 2. Traer Tickets (Sirve para el Historial y el Seguimiento)
   const condicionTickets = isAdmin ? {} : {
@@ -41,6 +41,12 @@ export default async function CentralSoporteTIPage() {
     orderBy: { C_Interno: 'asc' }
   });
 
+  // 4. Traer Empleados para asignar Asesor (SOLO los que tienen el switch de Admin TI encendido)
+  const empleados = isAdmin ? await prisma.empleados.findMany({
+    where: { Admin_TI: true },
+    orderBy: { Nombre_Empleado: 'asc' }
+  }) : [];
+
   return (
     <div className="min-h-screen bg-transparent">
       <div className="pt-2 pb-8 sm:pt-4 sm:pb-8 relative">
@@ -49,6 +55,7 @@ export default async function CentralSoporteTIPage() {
           equipos={equipos} 
           isAdmin={isAdmin} 
           rol={usuario?.Rol} 
+          empleados={empleados}
         />
       </div>
     </div>

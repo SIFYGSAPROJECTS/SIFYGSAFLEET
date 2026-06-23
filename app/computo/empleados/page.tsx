@@ -14,6 +14,7 @@ interface Empleado {
   Cargo: string | null;
   Departamento: string | null;
   Rol: string;
+  Admin_TI: boolean;
   Estatus_Acceso: string;
 }
 
@@ -43,8 +44,8 @@ export default function PersonalPage() {
   const [mostrarSugerencias, setMostrarSugerencias] = useState(false);
   const [equipoSeleccionado, setEquipoSeleccionado] = useState<Computo | null>(null);
 
-  const [formData, setFormData] = useState({
-    Email: '', Nombre_Empleado: '', A_Paterno: '', A_Materno: '', Cargo: '', Departamento: '', Rol: 'USER', Estatus_Acceso: 'Activo'
+  const [formData, setFormData] = useState<Partial<Empleado>>({
+    Email: '', Nombre_Empleado: '', A_Paterno: '', A_Materno: '', Cargo: '', Departamento: '', Rol: 'USER', Admin_TI: false, Estatus_Acceso: 'Activo'
   });
 
   const cargarEmpleados = async () => {
@@ -108,7 +109,7 @@ export default function PersonalPage() {
     setModoEdicion(false);
     setBusquedaEquipo(''); // Limpiamos el buscador
     setEquipoSeleccionado(null);
-    setFormData({ Email: '', Nombre_Empleado: '', A_Paterno: '', A_Materno: '', Cargo: '', Departamento: '', Rol: 'USER', Estatus_Acceso: 'Activo' });
+    setFormData({ Email: '', Nombre_Empleado: '', A_Paterno: '', A_Materno: '', Cargo: '', Departamento: '', Rol: 'USER', Admin_TI: false, Estatus_Acceso: 'Activo' });
     setModalAbierto(true);
   };
 
@@ -122,7 +123,7 @@ export default function PersonalPage() {
 
     setFormData({
       Email: emp.Email, Nombre_Empleado: emp.Nombre_Empleado, A_Paterno: emp.A_Paterno, A_Materno: emp.A_Materno || '',
-      Cargo: emp.Cargo || '', Departamento: emp.Departamento || '', Rol: emp.Rol, Estatus_Acceso: emp.Estatus_Acceso || 'Activo'
+      Cargo: emp.Cargo || '', Departamento: emp.Departamento || '', Rol: emp.Rol, Admin_TI: emp.Admin_TI || false, Estatus_Acceso: emp.Estatus_Acceso || 'Activo'
     });
     setModalAbierto(true);
   };
@@ -341,6 +342,11 @@ export default function PersonalPage() {
                         <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-black tracking-widest border ${['ADMIN', 'GERENCIAL'].includes(emp.Rol) ? 'bg-blue-50 text-blue-600 border-blue-200' : 'bg-stone-50 text-[var(--text-muted)] border-[var(--border-cream)]'}`}>
                           {emp.Rol}
                         </span>
+                        {emp.Admin_TI && !['ADMIN', 'GERENCIAL'].includes(emp.Rol) && (
+                          <span className="inline-flex items-center gap-1 px-3 py-1 mt-1 rounded-full text-[10px] font-black tracking-widest border bg-emerald-50 text-emerald-600 border-emerald-200 ml-1">
+                            ADMIN TI
+                          </span>
+                        )}
                       </td>
                       <td className="p-4 text-center flex justify-center gap-2">
                         <button onClick={() => abrirModalEditar(emp)} className="p-2 text-[var(--text-muted)] hover:text-[#71717a] hover:bg-[var(--bg-hover)] rounded-lg transition-colors" title="Editar">
@@ -385,7 +391,12 @@ export default function PersonalPage() {
                     </div>
                     <div className="flex flex-col gap-1 border-l border-[var(--border-cream)] pl-3">
                       <span className="text-[9px] text-[var(--text-muted)] font-black uppercase tracking-widest">Rol</span>
-                      <span className={`text-[10px] font-black tracking-widest uppercase ${['ADMIN', 'GERENCIAL'].includes(emp.Rol) ? 'text-blue-600' : 'text-stone-500'}`}>{emp.Rol}</span>
+                      <div>
+                        <span className={`text-[10px] font-black tracking-widest uppercase ${['ADMIN', 'GERENCIAL'].includes(emp.Rol) ? 'text-blue-600' : 'text-stone-500'}`}>{emp.Rol}</span>
+                        {emp.Admin_TI && !['ADMIN', 'GERENCIAL'].includes(emp.Rol) && (
+                          <span className="block mt-1 text-[9px] font-black tracking-widest uppercase text-emerald-600">ADMIN TI</span>
+                        )}
+                      </div>
                     </div>
                   </div>
 
@@ -473,6 +484,19 @@ export default function PersonalPage() {
                   <div>
                     <label className="block text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-2">Departamento</label>
                     <input type="text" value={formData.Departamento} onChange={e => setFormData({ ...formData, Departamento: e.target.value })} className="w-full bg-white border border-[var(--border-cream)] text-[var(--text-main)] rounded-xl p-3.5 focus:ring-2 focus:ring-[#71717a] outline-none text-sm" placeholder="Ej. Operaciones" />
+                  </div>
+                  
+                  <div className="sm:col-span-2">
+                    <label className="block text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-2">Permisos Extra (Solo en TI)</label>
+                    <label className="flex items-center gap-3 p-3.5 bg-white border border-[var(--border-cream)] rounded-xl cursor-pointer hover:bg-stone-50 transition-colors">
+                      <input 
+                        type="checkbox" 
+                        checked={formData.Admin_TI || false}
+                        onChange={e => setFormData({...formData, Admin_TI: e.target.checked})}
+                        className="w-5 h-5 text-emerald-600 rounded border-gray-300 focus:ring-emerald-500 cursor-pointer"
+                      />
+                      <span className="text-sm font-bold text-[var(--text-main)]">Otorgar privilegios de Administrador de TI</span>
+                    </label>
                   </div>
 
                   {/*  BUSCADOR INTELIGENTE  */}

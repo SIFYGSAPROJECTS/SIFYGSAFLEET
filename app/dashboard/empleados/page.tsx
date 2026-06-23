@@ -13,6 +13,7 @@ interface Empleado {
   Cargo: string | null;
   Departamento: string | null;
   Rol: string;
+  Admin_TI: boolean;
   Estatus_Acceso: string; 
 }
 
@@ -42,8 +43,8 @@ export default function PersonalPage() {
   const [mostrarSugerencias, setMostrarSugerencias] = useState(false);
   const [vehiculoSeleccionado, setVehiculoSeleccionado] = useState<Vehiculo | null>(null);
 
-  const [formData, setFormData] = useState({
-    Email: '', Nombre_Empleado: '', A_Paterno: '', A_Materno: '', Cargo: '', Departamento: '', Rol: 'USER', Estatus_Acceso: 'Activo'
+  const [formData, setFormData] = useState<Partial<Empleado>>({
+    Email: '', Nombre_Empleado: '', A_Paterno: '', A_Materno: '', Cargo: '', Departamento: '', Rol: 'USER', Admin_TI: false, Estatus_Acceso: 'Activo'
   });
 
   const cargarEmpleados = async () => {
@@ -109,7 +110,7 @@ export default function PersonalPage() {
     setModoEdicion(false);
     setBusquedaVehiculo(''); // Limpiamos el buscador
     setVehiculoSeleccionado(null);
-    setFormData({ Email: '', Nombre_Empleado: '', A_Paterno: '', A_Materno: '', Cargo: '', Departamento: '', Rol: 'USER', Estatus_Acceso: 'Activo' });
+    setFormData({ Email: '', Nombre_Empleado: '', A_Paterno: '', A_Materno: '', Cargo: '', Departamento: '', Rol: 'USER', Admin_TI: false, Estatus_Acceso: 'Activo' });
     setModalAbierto(true);
   };
 
@@ -123,7 +124,7 @@ export default function PersonalPage() {
 
     setFormData({
       Email: emp.Email, Nombre_Empleado: emp.Nombre_Empleado, A_Paterno: emp.A_Paterno, A_Materno: emp.A_Materno || '',
-      Cargo: emp.Cargo || '', Departamento: emp.Departamento || '', Rol: emp.Rol, Estatus_Acceso: emp.Estatus_Acceso || 'Activo'
+      Cargo: emp.Cargo || '', Departamento: emp.Departamento || '', Rol: emp.Rol, Admin_TI: emp.Admin_TI || false, Estatus_Acceso: emp.Estatus_Acceso || 'Activo'
     });
     setModalAbierto(true);
   };
@@ -429,6 +430,7 @@ export default function PersonalPage() {
                     ]}
                   />
                 </div>
+                
                 <div>
                   <label className="block text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-2">Cargo</label>
                   <input type="text" value={formData.Cargo} onChange={e => setFormData({...formData, Cargo: e.target.value})} className="w-full bg-white border border-[var(--border-cream)] text-[var(--text-main)] rounded-xl p-3.5 focus:ring-2 focus:ring-[#71717a] outline-none text-sm" placeholder="Ej. Chofer" />

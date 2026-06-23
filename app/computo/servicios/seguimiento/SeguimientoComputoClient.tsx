@@ -3,10 +3,17 @@
 import { useState } from 'react';
 import { Clock, Laptop, User, CheckCircle2, Wrench, Calendar, Info } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import PremiumSelect from '@/components/ui/PremiumSelect';
+import SystemModal from '@/components/ui/SystemModal';
 
-export default function SeguimientoComputoClient({ ticketsIniciales, isAdmin }: { ticketsIniciales: any[], isAdmin: boolean }) {
+export default function SeguimientoComputoClient({ ticketsIniciales, isAdmin, empleados = [] }: { ticketsIniciales: any[], isAdmin: boolean, empleados?: any[] }) {
   const router = useRouter();
   const [tickets, setTickets] = useState(ticketsIniciales);
+
+  // Estados para el Modal de Confirmación
+  const [modalAbierto, setModalAbierto] = useState(false);
+  const [accionPendiente, setAccionPendiente] = useState<{ tipo: 'ESTATUS' | 'ASESOR', ticketId: string, valor: string } | null>(null);
+  const [procesando, setProcesando] = useState(false);
 
   const getStatusColor = (estado: string) => {
     switch (estado) {
@@ -48,6 +55,27 @@ export default function SeguimientoComputoClient({ ticketsIniciales, isAdmin }: 
     }
   };
 
+  const handleUpdateAsesor = async (ticketId: string, nuevoAsesor: string) => {
+    if (!isAdmin) return;
+
+    try {
+      const res = await fetch(`/api/computo/tickets/${ticketId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ Asesor: nuevoAsesor })
+      });
+
+      if (res.ok) {
+        setTickets(tickets.map(t => t.Pk_folio_ticket === ticketId ? { ...t, Asesor: nuevoAsesor } : t));
+        router.refresh();
+      } else {
+        alert('Error al actualizar el asesor.');
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   if (tickets.length === 0) {
     return (
       <div className="bg-white rounded-2xl shadow-sm p-12 text-center border border-[var(--border-cream)]">
@@ -71,17 +99,47 @@ export default function SeguimientoComputoClient({ ticketsIniciales, isAdmin }: 
                 {ticket.Estado}
               </div>
             </div>
-            {isAdmin && ticket.Estado !== 'TERMINADO' && (
-              <select
-                value={ticket.Estado}
-                onChange={(e) => handleUpdateStatus(ticket.Pk_folio_ticket, e.target.value)}
-                className="text-xs border border-slate-200 rounded p-1 outline-none focus:border-emerald-500"
-              >
-                <option value="PENDIENTE">PENDIENTE</option>
-                <option value="EN PROCESO">EN PROCESO</option>
-                <option value="TERMINADO">TERMINADO</option>
-              </select>
-            )}
+            <div className="flex flex-col gap-2 items-end">
+              {isAdmin && ticket.Estado !== 'TERMINADO' && (
+                <div className="w-32 z-20">
+                  <PremiumSelect
+                    value={ticket.Estado}
+                    onChange={(val) => {
+                      setAccionPendiente({ tipo: 'ESTATUS', ticketId: ticket.Pk_folio_ticket, valor: val });
+                      setModalAbierto(true);
+                    }}
+                    options={[
+                      { value: "PENDIENTE", label: "PENDIENTE" },
+                      { value: "EN PROCESO", label: "EN PROCESO" },
+                      { value: "TERMINADO", label: "TERMINADO" }
+                    ]}
+                    compact
+                    accent="indigo"
+                  />
+                </div>
+              )}
+              {isAdmin && ticket.Estado !== 'TERMINADO' && (
+                <div className="w-40 z-10">
+                  <PremiumSelect
+                    value={ticket.Asesor || ''}
+                    onChange={(val) => {
+                      setAccionPendiente({ tipo: 'ASESOR', ticketId: ticket.Pk_folio_ticket, valor: val });
+                      setModalAbierto(true);
+                    }}
+                    placeholder="Sin Asesor"
+                    options={[
+                      { value: '', label: 'Sin Asesor' },
+                      ...empleados.map(emp => {
+                        const nombreCompleto = `${emp.Nombre_Empleado} ${emp.A_Paterno}`.trim();
+                        return { value: nombreCompleto, label: nombreCompleto };
+                      })
+                    ]}
+                    compact
+                    accent="indigo"
+                  />
+                </div>
+              )}
+            </div>
           </div>
 
           <h3 className="font-bold text-[var(--text-main)] mb-1">{ticket.Tipo_Servicio || 'Servicio General'}</h3>
@@ -97,8 +155,15 @@ export default function SeguimientoComputoClient({ ticketsIniciales, isAdmin }: 
             
             <div className="flex items-center gap-2 text-sm text-slate-600">
               <User size={14} className="text-slate-400 shrink-0" />
-              <span className="truncate">{ticket.empleado?.Nombre_Empleado} {ticket.empleado?.A_Paterno}</span>
+              <span className="truncate">Sol: {ticket.empleado?.Nombre_Empleado} {ticket.empleado?.A_Paterno}</span>
             </div>
+
+            {ticket.Asesor && (
+              <div className="flex items-center gap-2 text-sm text-slate-600">
+                <Wrench size={14} className="text-emerald-500 shrink-0" />
+                <span className="truncate">Asesor: {ticket.Asesor}</span>
+              </div>
+            )}
 
             <div className="flex items-center gap-2 text-sm text-slate-600">
               <Calendar size={14} className="text-slate-400 shrink-0" />
@@ -108,6 +173,36 @@ export default function SeguimientoComputoClient({ ticketsIniciales, isAdmin }: 
           
         </div>
       ))}
+
+      {/* Modal de confirmación general */}
+      <SystemModal
+        isOpen={modalAbierto}
+        type="info"
+        title={accionPendiente?.tipo === 'ESTATUS' ? '¿Actualizar Estatus?' : '¿Asignar Asesor?'}
+        message={
+          <>
+            ¿Estás seguro de cambiar el {accionPendiente?.tipo === 'ESTATUS' ? 'estatus' : 'asesor'} a <strong className="text-white">{accionPendiente?.valor || 'Ninguno (Sin Asesor)'}</strong> para este ticket?
+          </>
+        }
+        onCancel={() => {
+          setModalAbierto(false);
+          setAccionPendiente(null);
+        }}
+        onConfirm={async () => {
+          if (!accionPendiente) return;
+          setProcesando(true);
+          if (accionPendiente.tipo === 'ESTATUS') {
+            await handleUpdateStatus(accionPendiente.ticketId, accionPendiente.valor);
+          } else {
+            await handleUpdateAsesor(accionPendiente.ticketId, accionPendiente.valor);
+          }
+          setProcesando(false);
+          setModalAbierto(false);
+          setAccionPendiente(null);
+        }}
+        isProcessing={procesando}
+        confirmText="Sí, Actualizar"
+      />
     </div>
   );
 }

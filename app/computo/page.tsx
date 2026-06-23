@@ -10,7 +10,8 @@ export default async function ComputoDashboardPage() {
   const cookieStore = await cookies();
   const userRole = cookieStore.get('user_role')?.value || 'USER';
   const userName = cookieStore.get('user_name')?.value || 'Usuario';
-  const isAdmin = ['ADMIN', 'GERENCIAL'].includes(userRole);
+  const userAdminTi = cookieStore.get('user_admin_ti')?.value === 'true';
+  const isAdmin = ['ADMIN', 'GERENCIAL'].includes(userRole) || userAdminTi;
 
   // Obtener conteos para los KPIs (solo si es Admin, o lo ignoramos si es usuario normal pero el componente Menu ya se encarga)
   const totalEquipos = isAdmin ? await prisma.inventario_Computo.count() : 0;
