@@ -37,6 +37,18 @@ async function analizarConLLM(usuario: string, accion: string, modulo: string, d
     analisisInteligente = `✏️ MODIFICACIÓN: El usuario ${usuario} alteró un registro de Caja Chica existente. Razón aparente: ${detalleRaw || 'No especificada'}. Se recomienda revisar el comprobante adjunto.`;
   } else if (modulo === 'VEHICULOS' && accion === 'CREATE') {
     analisisInteligente = `🚗 ALTA: El usuario ${usuario} registró un nuevo vehículo en la flotilla. Datos base: ${payload?.message || detalleRaw}.`;
+  } else if (modulo === 'COMPUTO' && accion.includes('ALTA')) {
+    analisisInteligente = `🖥️ ALTA INVENTARIO TI: El usuario ${usuario} registró un nuevo equipo de cómputo en el inventario. Detalle base: ${payload?.message || detalleRaw}.`;
+  } else if (modulo === 'COMPUTO' && accion.includes('UPDATE')) {
+    analisisInteligente = `⚙️ MODIFICACIÓN INVENTARIO TI: El usuario ${usuario} actualizó o reasignó un equipo de cómputo. Detalle de cambios: ${payload?.message || detalleRaw}.`;
+  } else if (modulo === 'COMPUTO') {
+    analisisInteligente = `💻 MOVIMIENTO INVENTARIO TI: El usuario ${usuario} realizó un movimiento de equipo (${accion}). Detalle: ${payload?.message || detalleRaw}.`;
+  } else if (modulo === 'TICKETS_TI' && accion.includes('NUEVO')) {
+    analisisInteligente = `🎫 NUEVO TICKET TI: El usuario ${usuario} levantó un nuevo ticket de soporte técnico. Detalle: ${payload?.message || detalleRaw}.`;
+  } else if (modulo === 'TICKETS_TI') {
+    analisisInteligente = `🔧 ACTUALIZACIÓN TICKET TI: El usuario ${usuario} modificó el estado o la asignación de un ticket de soporte. Detalle: ${payload?.message || detalleRaw}.`;
+  } else if (modulo === 'EMPLEADOS' && (payload?.changes?.Admin_TI || detalleRaw.includes('Admin_TI'))) {
+    analisisInteligente = `🔐 PRIVILEGIOS TI: El usuario ${usuario} alteró los permisos de Administrador de TI. Esto es un cambio crítico de seguridad. Detalle: ${payload?.message || detalleRaw}.`;
   } else if (accion === 'DELETE') {
     analisisInteligente = `🗑️ ELIMINACIÓN CRÍTICA: El usuario ${usuario} borró información del sistema. Detalle de lo borrado: ${payload?.message || detalleRaw}.`;
   } else {
