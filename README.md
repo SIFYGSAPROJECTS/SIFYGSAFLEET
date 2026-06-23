@@ -42,7 +42,9 @@ La plataforma fue diseñada bajo una arquitectura moderna híbrida (SSR / CSR) g
 *   **Tailwind CSS v4:** Manejo de diseño a través de variables CSS globales, logrando dos temas corporativos:
     *   **Tema Midnight (Login):** Fondos `slate-900`, blobs animados de colores y estilo "Glassmorphism" con desenfoques.
     *   **Tema Cream (Dashboard):** Entorno de trabajo profesional (`#FDFBF7`) de alta legibilidad.
+*   **Diseño Premium (UI/UX):** Implementación de componentes de alta gama (ej. `PremiumSelect`, modales inteligentes con micro-animaciones, sombras dinámicas) que elevan la experiencia del usuario y compiten con software de nivel Enterprise.
 *   **Iconografía y Visuales:** **Lucide React** y efectos cinemáticos de carga (`animate-entrance-overlay`).
+*   **Comunicaciones Dinámicas:** **React Email + Resend** para el renderizado de correos con plantillas HTML estéticas que garantizan fidelidad en clientes como Outlook y Gmail.
 *   **PDFs:** Integración de `@react-pdf/renderer` y `html2canvas` para generación de documentos.
 
 ---
@@ -59,12 +61,23 @@ La plataforma adapta su interfaz en base al nivel de autorización (`ADMIN` / `U
 | **💵 Control de Costos** | (Admin) Auditoría financiera de mantenimientos, desglosando Mano de Obra, Refacciones y Proveedores. |
 | **📋 Checklists PDF** | Expedientes digitales. Se adjuntan archivos PDF al historial específico de cada unidad. |
 | **🤖 SIFY Copilot** | Asistente de IA residente en el dashboard capaz de analizar el estado operativo global y exportar reportes. |
+| **💻 Módulo de TI** | Gestión independiente del inventario de Cómputo, sistema de tickets de soporte técnico (Mesa de Ayuda), control de privilegios (Admin TI) y notificaciones automáticas por correo. |
 
 ---
 
 ## 🆕 Actualizaciones Recientes (v2.0)
 
-*   **Seguridad de Concurrencia en Correos:** Se implementó un guardia de concurrencia (\`useRef\`) en la Central de Servicios para bloquear peticiones múltiples ocasionadas por "doble clic" accidental. Esto previene eficazmente el envío de correos electrónicos duplicados al actualizar el estado de las unidades.
+### 💻 Módulo Integral de Tecnologías de la Información (TI)
+Hemos desplegado un entorno de gestión paralelo y especializado para el departamento de Sistemas:
+*   **Control de Inventario de Cómputo:** Administración detallada de hardware (Laptops, PCs, Celulares, Tablets, Periféricos). Incluye control de número de serie, MAC Address, procesador, RAM, almacenamiento y asignación responsable.
+*   **Mesa de Ayuda (Ticketing TI):** Sistema de reportes de fallas tecnológicas donde los usuarios generan tickets. Los técnicos (Asesores) actualizan el estado (ABIERTO, EN PROCESO, RESUELTO, CERRADO) mediante paneles Kanban/Listas interactivos.
+*   **Gestión de Accesos Especializados (Admin TI):** Implementación de la bandera `Admin_TI` (RBAC) que delega privilegios de administración exclusivos para el módulo de TI, manteniendo aislada la gestión de la flotilla vehicular.
+
+### 🧠 Inteligencia y Automatizaciones
+*   **Auditoría Inteligente (OpenClaw) Mejorada:** El motor de IA "OpenClaw" fue re-entrenado con reglas avanzadas para vigilar de forma silenciosa todas las altas de inventario TI, asignaciones de tickets, cierres y alteraciones a los privilegios de TI.
+*   **Notificaciones Transaccionales (React Email):** Infraestructura de comunicación por correo electrónico para alertar en tiempo real a los colaboradores cuando su ticket es asignado a un asesor tecnológico o cuando cambia su estado.
+*   **Seguridad de Concurrencia (Anti-Doble Clic):** Se implementó un guardia estricto en la base de datos y la UI para bloquear operaciones y envíos de correos duplicados ocasionados por lentitud de red o clics dobles accidentales.
+*   **Filtros Inteligentes Premium:** Renovación de los componentes de selección visuales (`PremiumSelect`) aportando interfaces limpias para filtrar los estados, roles y técnicos en pantalla.
 
 ---
 
