@@ -196,23 +196,23 @@ export default function ProgramaAnualPage() {
               <thead>
                 <tr className="border-b border-[var(--border-cream)] text-stone-500 text-[11px] uppercase tracking-widest font-black">
                   {/* Seccion 1: Info */}
-                  <th className="sticky z-30 p-4 font-bold w-[180px] border-b border-stone-200/50 bg-stone-50 shadow-sm" style={{ top: '72px' }}>DESCRIPCIÓN</th>
-                  <th className="sticky z-30 p-4 font-bold w-[130px] border-b border-stone-200/50 bg-stone-50 shadow-sm" style={{ top: '72px' }}>EJECUTA</th>
+                  <th className="sticky top-0 z-40 p-4 font-bold w-[180px] border-b border-stone-200/50 bg-stone-50 shadow-sm">DESCRIPCIÓN</th>
+                  <th className="sticky top-0 z-40 p-4 font-bold w-[130px] border-b border-stone-200/50 bg-stone-50 shadow-sm">EJECUTA</th>
                   
                   {/* Spacer 1 */}
-                  <th className="w-2 min-w-[8px] p-0 bg-transparent border-none"></th>
+                  <th className="sticky top-0 z-40 w-2 min-w-[8px] p-0 bg-stone-50 border-b border-stone-200/50"></th>
 
                   {/* Seccion 2: Calendario */}
-                  <th className="sticky z-30 p-0 border-b border-l border-r border-[var(--border-cream)] border-stone-200/50 w-8 text-center bg-stone-50 shadow-sm" style={{ top: '72px' }}></th>
+                  <th className="sticky top-0 z-40 p-0 border-b border-l border-r border-[var(--border-cream)] border-stone-200/50 w-8 text-center bg-stone-50 shadow-sm"></th>
                   {mesesNombres.map((mes, i) => (
-                    <th key={mes} className={`sticky z-30 p-2 border-b border-r border-[var(--border-cream)] border-stone-200/50 text-center font-mono text-[10px] sm:text-xs min-w-[44px] bg-stone-50 shadow-sm`} style={{ top: '72px' }}>{mes}</th>
+                    <th key={mes} className={`sticky top-0 z-40 p-2 border-b border-r border-[var(--border-cream)] border-stone-200/50 text-center font-mono text-[10px] sm:text-xs min-w-[44px] bg-stone-50 shadow-sm`}>{mes}</th>
                   ))}
 
                   {/* Spacer 2 */}
-                  <th className="w-2 min-w-[8px] p-0 bg-transparent border-none"></th>
+                  <th className="sticky top-0 z-40 w-2 min-w-[8px] p-0 bg-stone-50 border-b border-stone-200/50"></th>
 
                   {/* Seccion 3: Observaciones */}
-                  <th className="sticky z-30 p-4 font-bold w-[200px] border-b border-stone-200/50 bg-stone-50 shadow-sm" style={{ top: '72px' }}>OBSERVACIONES</th>
+                  <th className="sticky top-0 z-40 p-4 font-bold w-[200px] border-b border-stone-200/50 bg-stone-50 shadow-sm">OBSERVACIONES</th>
                 </tr>
               </thead>
               <tbody>
