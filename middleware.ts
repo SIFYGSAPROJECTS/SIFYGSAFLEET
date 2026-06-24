@@ -34,7 +34,7 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Rutas que requieren autenticación
-  const protectedPaths = ['/portal', '/dashboard', '/computo', '/programa-anual', '/verificaciones'];
+  const protectedPaths = ['/portal', '/dashboard', '/computo', '/programa-anual', '/verificaciones', '/auditoria', '/gastos'];
   const isProtectedPath = protectedPaths.some(path => pathname === path || pathname.startsWith(path + '/'));
 
   if (isProtectedPath) {
@@ -55,7 +55,7 @@ export function middleware(request: NextRequest) {
     const userAreas = userAreasCookie?.value ? JSON.parse(userAreasCookie.value) : [];
 
     // Módulos raíz o páginas completas exclusivas para administrador
-    const adminOnlyPaths = ['/programa-anual', '/verificaciones'];
+    const adminOnlyPaths = ['/programa-anual', '/verificaciones', '/auditoria'];
     const isAdminOnlyPath = adminOnlyPaths.some(path => pathname === path || pathname.startsWith(path + '/'));
 
     // Sub-rutas de /dashboard exclusivas para administrador

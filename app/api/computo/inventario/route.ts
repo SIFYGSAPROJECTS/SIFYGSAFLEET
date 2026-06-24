@@ -1,9 +1,7 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/db';
 import { cookies } from 'next/headers';
 import { logAuditoria } from '@/lib/utils/audit';
-
-const prisma = new PrismaClient();
 
 export async function GET() {
   try {

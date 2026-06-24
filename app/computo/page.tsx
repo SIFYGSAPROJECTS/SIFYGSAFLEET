@@ -1,10 +1,8 @@
 import { cookies } from 'next/headers';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/db';
 import Link from 'next/link';
 import { PlusCircle } from 'lucide-react';
 import ComputoMenu from './ComputoMenu';
-
-const prisma = new PrismaClient();
 
 export default async function ComputoDashboardPage() {
   const cookieStore = await cookies();
