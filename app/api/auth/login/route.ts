@@ -12,6 +12,11 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { email, password } = body;
 
+    // Obtener IP por seguridad
+    let ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'IP Desconocida';
+    if (ip === '::1') ip = '127.0.0.1 (Localhost)'; // Parseo de IPv6 local para que sea legible
+
+
     // Validación básica inicial
     if (!email) {
       return NextResponse.json({ error: 'El correo es requerido' }, { status: 400 });
@@ -38,7 +43,7 @@ export async function POST(request: Request) {
     // 2. SI EL USUARIO NO EXISTE
     if (!usuario) {
       registrarFallo(identifier); // Registramos el fallo para ese correo inexistente
-      await logAuditoria(identifier, 'LOGIN_FAILED', 'AUTH', 'Intento de acceso con correo inexistente');
+      await logAuditoria(identifier, 'LOGIN_FAILED', 'AUTH', `Intento de acceso con correo inexistente. IP: ${ip}`);
       return NextResponse.json({ error: 'Credenciales inválidas' }, { status: 401 });
     }
 
@@ -76,7 +81,7 @@ export async function POST(request: Request) {
     // 3. SI FALLÓ EL ACCESO (Password o PIN incorrectos)
     if (!accesoConcedido) {
       registrarFallo(identifier); 
-      await logAuditoria(identifier, 'LOGIN_FAILED', 'AUTH', 'Credenciales inválidas o PIN expirado');
+      await logAuditoria(identifier, 'LOGIN_FAILED', 'AUTH', `Credenciales inválidas o PIN expirado. IP: ${ip}`);
       return NextResponse.json({ error: 'Credenciales inválidas o PIN expirado' }, { status: 401 });
     }
 
@@ -119,7 +124,7 @@ export async function POST(request: Request) {
     cookieStore.set('user_areas', JSON.stringify(areas));
     cookieStore.set('user_admin_ti', String(usuario.Admin_TI || false));
 
-    await logAuditoria(identifier, 'LOGIN_SUCCESS', 'AUTH', 'Inicio de sesión exitoso');
+    await logAuditoria(identifier, 'LOGIN_SUCCESS', 'AUTH', `Inicio de sesión exitoso. IP: ${ip}`);
 
     return NextResponse.json({
       success: true,
