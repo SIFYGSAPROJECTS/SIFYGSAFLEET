@@ -4,11 +4,11 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import Image from 'next/image';
-import { Menu, X, Car, Server, LayoutGrid, LogOut, CalendarDays, Laptop, Wrench, FolderOpen, User, DollarSign, CalendarCheck, FileText, Wallet, Settings } from 'lucide-react';
+import { Menu, X, Car, Server, LayoutGrid, LogOut, CalendarDays, Laptop, Wrench, FolderOpen, User, DollarSign, CalendarCheck, FileText, Wallet, Settings, CalendarClock, Building } from 'lucide-react';
 import LogoutButton from '@/app/dashboard/LogoutButton';
 
 interface NavbarProps {
-  type: 'portal' | 'dashboard' | 'computo' | 'programa' | 'gastos' | 'auditoria';
+  type: 'portal' | 'dashboard' | 'computo' | 'programa' | 'gastos' | 'auditoria' | 'edificios';
   userName?: string;
   userRole?: string;
   isAdmin?: boolean;
@@ -246,6 +246,13 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
               >
                 <CalendarDays size={14} className="text-[#FF7420]" /> Programa Anual
               </Link>
+              <Link
+                href="/edificios"
+                onClick={() => setIsMenuOpen(false)}
+                className="bg-white/5 hover:bg-white/10 border border-white/5 text-white/90 px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold"
+              >
+                <Building size={14} className="text-[#FF7420]" /> Edificios (Infraestructura)
+              </Link>
 
 
               <div className="h-px bg-white/5 my-2"></div>
@@ -287,6 +294,7 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
     if (pathname.includes('/verificaciones')) return 'Verificaciones';
     if (type === 'gastos') return 'Gastos Generales';
     if (type === 'auditoria') return 'Auditoría Global';
+    if (type === 'edificios') return 'Mantenimiento de Edificios';
     return 'Panel de Control';
   };
 
@@ -336,6 +344,15 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                 </div>
                 <span className="hidden sm:block font-serif font-medium text-lg tracking-wide text-white transition-colors group-hover:text-[#FF7420]">
                   SIFYGSA <span className="text-[#FF7420] font-serif">Audit</span>
+                </span>
+              </Link>
+            ) : type === 'edificios' ? (
+              <Link href="/edificios" className={`flex items-center space-x-3 group px-2 transition-all`}>
+                <div className="bg-amber-500 p-1.5 rounded-lg shadow-lg shadow-amber-500/20 group-hover:scale-105 transition-transform duration-300">
+                  <Building className="text-white h-4 w-4" />
+                </div>
+                <span className="hidden sm:block font-serif font-medium text-lg tracking-wide text-white transition-colors group-hover:text-amber-400">
+                  SIFYGSA <span className="text-amber-400 font-serif">Infra</span>
                 </span>
               </Link>
             ) : (
@@ -398,6 +415,13 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                     >
                       <Wrench size={14} className="text-emerald-400 transition-transform duration-300 ease-in-out group-hover/item:rotate-12" />
                       <span>Soporte TI</span>
+                    </Link>
+                    <Link
+                      href="/computo/mantenimientos"
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all text-white/80 hover:text-white hover:bg-white/5 group/item"
+                    >
+                      <CalendarClock size={14} className="text-emerald-400 transition-transform duration-300 ease-in-out group-hover/item:scale-110" />
+                      <span>Mantenimientos</span>
                     </Link>
                     {localIsAdmin && (
                       <Link
@@ -561,6 +585,15 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                       >
                         <Wallet size={14} className="text-[#FF7420] transition-transform duration-300 ease-in-out group-hover/item:scale-110 group-hover/item:rotate-12" />
                         <span>Gastos Generales</span>
+                      </Link>
+                    )}
+                    {localIsAdmin && (
+                      <Link
+                        href="/edificios"
+                        className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-white/80 hover:text-white hover:bg-white/5 transition-all group/item"
+                      >
+                        <Building size={14} className="text-[#FF7420] transition-transform duration-300 ease-in-out group-hover/item:scale-110" />
+                        <span>Edificios</span>
                       </Link>
                     )}
                   </div>
@@ -732,6 +765,17 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                 >
                   <Wrench size={14} className="text-emerald-400" /> Soporte TI
                 </Link>
+                <Link
+                  href="/computo/mantenimientos"
+                  onClick={() => setIsMenuOpen(false)}
+                  className={`border px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold ${
+                    pathname === '/computo/mantenimientos' 
+                      ? 'bg-emerald-600 border-emerald-500 text-white' 
+                      : 'bg-white/5 border-white/5 text-white/90 hover:bg-white/10'
+                  }`}
+                >
+                  <CalendarClock size={14} className="text-emerald-400" /> Mantenimientos
+                </Link>
                 {localIsAdmin && (
                   <Link
                     href="/computo/documentos"
@@ -889,6 +933,15 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                     className="bg-white/5 hover:bg-white/10 border border-white/5 text-white/90 px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold"
                   >
                     <Wallet size={14} className="text-[#FF7420]" /> Gastos Generales
+                  </Link>
+                )}
+                {localIsAdmin && (
+                  <Link
+                    href="/edificios"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="bg-white/5 hover:bg-white/10 border border-white/5 text-white/90 px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold"
+                  >
+                    <Building size={14} className="text-[#FF7420]" /> Edificios
                   </Link>
                 )}
 

@@ -25,6 +25,8 @@ interface PremiumSelectProps {
   direction?: 'down' | 'up';
   /** Dark mode style */
   dark?: boolean;
+  /** Whether the dropdown should have a search filter */
+  searchable?: boolean;
 }
 
 const accentMap = {
@@ -48,13 +50,25 @@ export default function PremiumSelect({
   compact = false,
   accent = 'indigo',
   direction = 'down',
-  dark = false
+  dark = false,
+  searchable = false
 }: PremiumSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const containerRef = useRef<HTMLDivElement>(null);
   const colors = accentMap[accent];
 
   const selectedOption = options.find(opt => opt.value === value);
+
+  // Filter options if searchable
+  const filteredOptions = searchable && searchQuery.trim() !== ''
+    ? options.filter(opt => opt.label.toLowerCase().includes(searchQuery.toLowerCase()))
+    : options;
+
+  // Clear search query when menu closes
+  useEffect(() => {
+    if (!isOpen) setSearchQuery('');
+  }, [isOpen]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -114,10 +128,25 @@ export default function PremiumSelect({
             rounded-xl ${colors.shadow} max-h-56 overflow-y-auto scrollbar-thin animate-in fade-in 
             ${direction === 'up' ? 'slide-in-from-bottom-2' : 'slide-in-from-top-2'} duration-200`}
         >
-          <div className={`p-2 border-b ${dark ? 'border-white/5 bg-[#161616]' : 'border-b border-[var(--border-cream)] bg-[var(--bg-screen)]'} sticky top-0 z-10`}>
-            <span className="text-[10px] uppercase font-black text-stone-400 tracking-wider">{placeholder}</span>
+          <div className={`p-2 border-b ${dark ? 'border-white/5 bg-[#161616]' : 'border-b border-[var(--border-cream)] bg-[var(--bg-screen)]'} sticky top-0 z-10 flex items-center`}>
+            {searchable ? (
+              <input 
+                type="text" 
+                className={`w-full bg-transparent text-xs font-semibold outline-none px-2 py-1 ${dark ? 'text-white' : 'text-[var(--text-main)] placeholder:text-stone-400'}`}
+                placeholder="Buscar..."
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                onClick={e => e.stopPropagation()}
+                autoFocus
+              />
+            ) : (
+              <span className="text-[10px] uppercase font-black text-stone-400 tracking-wider px-2">{placeholder}</span>
+            )}
           </div>
-          {options.map(opt => (
+          {filteredOptions.length === 0 ? (
+            <div className="py-4 text-center text-xs text-stone-400 font-semibold">No hay resultados</div>
+          ) : (
+            filteredOptions.map(opt => (
             <div
               key={opt.value}
               className={`px-4 ${compact ? 'py-2' : 'py-2.5'} text-xs font-semibold cursor-pointer transition-all duration-300 border-b 
@@ -142,7 +171,7 @@ export default function PremiumSelect({
             >
               {opt.label}
             </div>
-          ))}
+          )))}
         </div>
       )}
     </div>

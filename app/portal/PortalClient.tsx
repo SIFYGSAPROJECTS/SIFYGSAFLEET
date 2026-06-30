@@ -11,7 +11,7 @@ const modules = [
   { id: 'telefonia', name: 'Telefonía', icon: Phone, route: null, color: 'text-purple-400', bg: 'bg-purple-400/10' },
   { id: 'video', name: 'Video y vigilancia', icon: Cctv, route: null, color: 'text-rose-400', bg: 'bg-rose-400/10' },
   { id: 'clima', name: 'Aires acondicionados', icon: Wind, route: null, color: 'text-cyan-400', bg: 'bg-cyan-400/10' },
-  { id: 'edificios', name: 'Edificios', icon: Building, route: null, color: 'text-amber-400', bg: 'bg-amber-400/10' },
+  { id: 'edificios', name: 'Edificios', icon: Building, route: '/edificios', color: 'text-amber-400', bg: 'bg-amber-400/10' },
   { id: 'mobiliario', name: 'Mobiliario', icon: Package, route: null, color: 'text-orange-400', bg: 'bg-orange-400/10' },
   { id: 'programa', name: 'Programa Anual', icon: CalendarDays, route: '/programa-anual', color: 'text-indigo-400', bg: 'bg-indigo-400/10' },
   { id: 'gastos', name: 'Gastos Generales', icon: Wallet, route: '/gastos', color: 'text-teal-400', bg: 'bg-teal-400/10' },
@@ -40,6 +40,7 @@ export default function PortalClient({ isAdmin, userAreas, userName }: { isAdmin
     if (moduleId === 'transporte') return userAreas.includes('AUTOS');
     if (moduleId === 'computo') return userAreas.includes('COMPUTO');
     if (moduleId === 'gastos') return userAreas.includes('GASTOS');
+    if (moduleId === 'edificios') return false; // Only admins can see this module
     return false;
   };
 

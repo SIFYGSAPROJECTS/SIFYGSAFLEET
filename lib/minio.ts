@@ -39,11 +39,25 @@ export const setupMinioBuckets = async () => {
           ],
         };
         await minioClient.setBucketPolicy(bucketName, JSON.stringify(policy));
-        // Bucket policy definition omitted for brevity or integrated
         console.info(`Bucket policy applied for: ${bucketName}`);
       }
     } catch (err) {
       console.error(`Error configurando el bucket ${bucketName}:`, err);
     }
   }
+};
+
+export const uploadToMinio = async (objectName: string, buffer: Buffer, contentType: string) => {
+  const bucketName = 'documentos';
+  const exists = await minioClient.bucketExists(bucketName);
+  if (!exists) {
+    await minioClient.makeBucket(bucketName, 'us-east-1');
+  }
+
+  await minioClient.putObject(bucketName, objectName, buffer, undefined, {
+    'Content-Type': contentType,
+  });
+
+  const protocol = process.env.MINIO_USE_SSL === 'true' || minioPort === 443 ? 'https' : 'http';
+  return `${protocol}://${minioEndpoint}:${minioPort}/${bucketName}/${objectName}`;
 };

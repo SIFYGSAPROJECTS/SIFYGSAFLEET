@@ -3,7 +3,7 @@
 import { usePathname } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Laptop, Wrench, User, FileText, FolderOpen, ArrowLeft } from 'lucide-react';
+import { Laptop, Wrench, User, FileText, FolderOpen, ArrowLeft, CalendarClock } from 'lucide-react';
 
 function AnimatedCounter({ value, duration = 1500 }: { value: number, duration?: number }) {
   const [count, setCount] = useState(0);
@@ -33,19 +33,21 @@ function AnimatedCounter({ value, duration = 1500 }: { value: number, duration?:
   return <>{count}</>;
 }
 
-interface Props {
+interface ComputoMenuProps {
   userRole: string;
-  totalEquipos: number;
-  equiposReparacion: number;
+  totalEquipos?: number;
+  equiposReparacion?: number;
+  hideKPIs?: boolean;
 }
 
-export default function ComputoMenu({ userRole, totalEquipos, equiposReparacion }: Props) {
+export default function ComputoMenu({ userRole, totalEquipos = 0, equiposReparacion = 0, hideKPIs = false }: ComputoMenuProps) {
   const pathname = usePathname();
   const isAdmin = ['ADMIN', 'GERENCIAL'].includes(userRole);
   
   const getActiveTab = (): string => {
     if (pathname.includes('/inventario')) return 'inventario';
     if (pathname.includes('/servicios') || pathname.includes('/tickets')) return 'servicios';
+    if (pathname.includes('/mantenimientos')) return 'mantenimientos';
     if (pathname.includes('/documentos')) return 'documentos';
     if (pathname.includes('/empleados')) return 'personal';
     return '';
@@ -123,6 +125,17 @@ export default function ComputoMenu({ userRole, totalEquipos, equiposReparacion 
             <Wrench size={18} /> <span className="hidden sm:inline">Soporte TI</span>
           </Link>
 
+          <Link
+            href="/computo/mantenimientos"
+            className={`flex-1 flex justify-center px-6 py-2.5 font-bold text-sm items-center gap-2 rounded-lg transition-all whitespace-nowrap ${
+              activeTab === 'mantenimientos' 
+                ? 'bg-white text-[var(--text-main)] shadow-md' 
+                : 'text-[var(--text-muted)] hover:text-emerald-600 hover:bg-[var(--bg-screen)]/50'
+            }`}
+          >
+            <CalendarClock size={18} /> <span className="hidden sm:inline">Mantenimientos</span>
+          </Link>
+
           {isAdmin && (
             <Link
               href="/computo/documentos"
@@ -152,7 +165,7 @@ export default function ComputoMenu({ userRole, totalEquipos, equiposReparacion 
         </div>
       </div>
 
-      {isAdmin && (
+      {isAdmin && !hideKPIs && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Link href="/computo/inventario" className="bg-[var(--bg-floating)] p-5 rounded-xl shadow-lg border border-[var(--border-cream)] border-t-4 border-t-emerald-500 hover:bg-[var(--bg-hover)] hover:scale-[1.02] transition-all cursor-pointer group">
             <div className="flex justify-between items-start mb-2">
