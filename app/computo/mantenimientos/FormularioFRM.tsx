@@ -3,7 +3,7 @@ import { X, Save, FileText, FileDown, Plus, Trash2, UploadCloud, AlertCircle, Ch
 
 export default function FormularioFRM({ reporte, onClose, onSave, onRefresh, isAdmin }: any) {
   // Parse Datos_Formato
-  let initialDatos = {};
+  let initialDatos: any = {};
   if (reporte.Datos_Formato) {
     try {
       initialDatos = JSON.parse(reporte.Datos_Formato);
