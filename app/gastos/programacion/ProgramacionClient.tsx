@@ -173,7 +173,7 @@ export default function ProgramacionClient() {
       
       <SystemModal
         isOpen={sysModal.isOpen}
-        onClose={() => setSysModal(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={() => setSysModal(prev => ({ ...prev, isOpen: false }))}
         type={sysModal.type}
         title={sysModal.title}
         message={sysModal.message}
