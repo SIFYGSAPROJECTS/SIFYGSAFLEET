@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { FileText, Wallet, Plane } from 'lucide-react';
+import { FileText, Wallet, Plane, CalendarDays } from 'lucide-react';
 
 export default function GastosMenu() {
   const pathname = usePathname();
@@ -31,6 +31,14 @@ export default function GastosMenu() {
       href: '/gastos/viaticos',
       color: 'text-sky-600',
       activeColor: 'bg-sky-600 text-white shadow-md'
+    },
+    {
+      id: 'programacion',
+      name: 'Programación Semanal',
+      icon: CalendarDays,
+      href: '/gastos/programacion',
+      color: 'text-orange-600',
+      activeColor: 'bg-orange-600 text-white shadow-md'
     }
   ];
 

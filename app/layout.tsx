@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist_Mono, Inter, Newsreader } from "next/font/google";
 import "./globals.css";
 // 1. IMPORTAMOS LOS HEADERS
@@ -25,6 +25,13 @@ const newsreader = Newsreader({
 export const metadata: Metadata = {
   title: "Infraestructura BPMS",
   description: "Diseñado para SIFYGSA S.A DE C.V",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default async function RootLayout({

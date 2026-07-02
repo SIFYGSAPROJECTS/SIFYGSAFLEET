@@ -468,3 +468,20 @@ model Reporte_Mantenimiento {
   equipo             Inventario_Computo @relation(fields: [C_Interno], references: [C_Interno], onDelete: Cascade)
   plan               Plan_Mantenimiento @relation(fields: [Id_Plan], references: [Id_Plan], onDelete: Cascade)
 }
+
+model Programacion_Semanal {
+  Id                   Int       @id @default(autoincrement())
+  Fecha_Sol            DateTime  @db.Date
+  Partida              Int
+  Servicio_Producto    String
+  Monto                Float
+  Proveedor            String
+  Empresa              String
+  Fecha_Pago           DateTime? @db.Date
+  Factura_Comprobacion String?   @unique
+  Usuario              String
+  Estatus              String    @default("Pendiente")
+  Monto_Pagado         Float?    @default(0)
+  Fecha_Registro       DateTime  @default(now())
+}
+

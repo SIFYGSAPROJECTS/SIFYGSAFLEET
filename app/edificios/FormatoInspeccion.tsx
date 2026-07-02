@@ -28,6 +28,7 @@ interface AreaInspeccion {
   observacion: string;
   categoriasActivas?: string[];
   respuestas?: Record<string, RespuestaDetalle>; 
+  fotos?: { url: string, descripcion: string }[];
 }
 
 export default function FormatoInspeccion({ datosBase, onClose, onSuccess }: any) {
@@ -47,20 +48,20 @@ export default function FormatoInspeccion({ datosBase, onClose, onSuccess }: any
               }
             });
           }
-          return { ...a, respuestas: newRespuestas, categoriasActivas: a.categoriasActivas || [] };
+          return { ...a, respuestas: newRespuestas, categoriasActivas: a.categoriasActivas || [], fotos: a.fotos || [] };
         });
       }
     } catch (e) {}
   }
 
   const [areas, setAreas] = useState<AreaInspeccion[]>(parsed.areas.length > 0 ? parsed.areas : [
-    { id: Date.now().toString(), nombre: 'Recepción', puertas: 1, luminarias: 2, estado: '', observacion: '', categoriasActivas: [], respuestas: {} }
+    { id: Date.now().toString(), nombre: 'Recepción', puertas: 1, luminarias: 2, estado: '', observacion: '', categoriasActivas: [], respuestas: {}, fotos: [] }
   ]);
   const [observacionesGenerales, setObservacionesGenerales] = useState(datosBase.Observaciones || '');
-  const [fotos, setFotos] = useState<any[]>(datosBase.fotos || []);
+  const [fotosGenerales, setFotosGenerales] = useState<any[]>(datosBase.fotos || []);
   const [isSaving, setIsSaving] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
-  const [activeTab, setActiveTab] = useState<'areas' | 'fotos' | 'resumen'>('areas');
+  const [isUploading, setIsUploading] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'areas' | 'resumen'>('areas');
   const [pickingSectionFor, setPickingSectionFor] = useState<string | null>(null);
 
   const addArea = () => {
@@ -72,7 +73,8 @@ export default function FormatoInspeccion({ datosBase, onClose, onSuccess }: any
       estado: '',
       observacion: '',
       categoriasActivas: [],
-      respuestas: {}
+      respuestas: {},
+      fotos: []
     }]);
   };
 
@@ -145,11 +147,11 @@ export default function FormatoInspeccion({ datosBase, onClose, onSuccess }: any
     }));
   };
 
-  const handleUploadFoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleUploadFoto = async (e: React.ChangeEvent<HTMLInputElement>, areaId?: string) => {
     if (!e.target.files || e.target.files.length === 0) return;
     const file = e.target.files[0];
     
-    setIsUploading(true);
+    setIsUploading(areaId || 'general');
     try {
       const formDataUpload = new FormData();
       formDataUpload.append('file', file);
@@ -163,25 +165,34 @@ export default function FormatoInspeccion({ datosBase, onClose, onSuccess }: any
       if (!response.ok) throw new Error('Error al subir');
       const { url } = await response.json();
       
-      setFotos(prev => [...prev, { url, descripcion: '' }]);
+      if (areaId) {
+        setAreas(areas.map(a => a.id === areaId ? { ...a, fotos: [...(a.fotos || []), { url, descripcion: '' }] } : a));
+      } else {
+        setFotosGenerales(prev => [...prev, { url, descripcion: '' }]);
+      }
     } catch (error) {
       console.error(error);
       alert('Error subiendo fotografía');
     } finally {
-      setIsUploading(false);
+      setIsUploading(null);
     }
   };
 
   const handleSave = async (completar: boolean = false) => {
     setIsSaving(true);
     try {
+      const fotosDeAreas = areas.flatMap(a => 
+        (a.fotos || []).map(f => ({ url: f.url, descripcion: f.descripcion ? `${a.nombre}: ${f.descripcion}` : `Evidencia de ${a.nombre}` }))
+      );
+      const todasLasFotos = [...fotosGenerales, ...fotosDeAreas];
+
       const payload = {
         Id_Inspeccion: datosBase.Id_Inspeccion,
         Id_Edificio: datosBase.Id_Edificio,
         Estado: completar ? 'COMPLETADO' : 'PENDIENTE',
         Datos_Formato: JSON.stringify({ areas }),
         Observaciones: observacionesGenerales,
-        Fotos: fotos
+        Fotos: todasLasFotos
       };
 
       const res = await fetch('/api/edificios/inspecciones', {
@@ -239,9 +250,6 @@ export default function FormatoInspeccion({ datosBase, onClose, onSuccess }: any
           <div className="flex bg-[var(--bg-screen)] rounded-xl border border-[var(--border-cream)] p-1 gap-1">
             <button onClick={() => setActiveTab('areas')} className={`flex-1 flex items-center justify-center gap-2 py-2 text-xs font-bold rounded-lg transition-all ${activeTab === 'areas' ? 'bg-amber-500 text-[#0F1115] shadow-md' : 'text-[var(--text-muted)] hover:bg-[var(--bg-hover)]'}`}>
               <FileText size={16} /> Deptos
-            </button>
-            <button onClick={() => setActiveTab('fotos')} className={`flex-1 flex items-center justify-center gap-2 py-2 text-xs font-bold rounded-lg transition-all ${activeTab === 'fotos' ? 'bg-amber-500 text-[#0F1115] shadow-md' : 'text-[var(--text-muted)] hover:bg-[var(--bg-hover)]'}`}>
-              <Camera size={16} /> Fotos <span className="bg-black/20 px-1.5 py-0.5 rounded text-[10px]">{fotos.length}</span>
             </button>
             <button onClick={() => setActiveTab('resumen')} className={`flex-1 flex items-center justify-center gap-2 py-2 text-xs font-bold rounded-lg transition-all ${activeTab === 'resumen' ? 'bg-amber-500 text-[#0F1115] shadow-md' : 'text-[var(--text-muted)] hover:bg-[var(--bg-hover)]'}`}>
               <AlertCircle size={16} /> Resumen
@@ -436,65 +444,110 @@ export default function FormatoInspeccion({ datosBase, onClose, onSuccess }: any
                       )}
                     </div>
 
+                    {/* Fotos del Departamento */}
+                    <div className="border-t border-[var(--border-cream)] p-4 bg-[var(--bg-screen)]/30">
+                      <div className="flex justify-between items-center mb-3 pl-2">
+                        <label className="text-[10px] font-bold text-[var(--text-muted)] uppercase">Evidencia Fotográfica ({area.fotos?.length || 0})</label>
+                        <label className={`px-4 py-2 text-xs font-bold rounded-lg flex items-center gap-2 transition-all cursor-pointer ${isUploading === area.id ? 'bg-zinc-500/20 text-zinc-400' : 'bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 active:scale-95'}`}>
+                          <Camera size={16} /> {isUploading === area.id ? 'Subiendo...' : '+ Añadir'}
+                          <input type="file" className="hidden" accept="image/*" onChange={(e) => handleUploadFoto(e, area.id)} disabled={isUploading === area.id} />
+                        </label>
+                      </div>
+
+                      {(area.fotos && area.fotos.length > 0) && (
+                        <div className="flex gap-3 overflow-x-auto custom-scrollbar pb-3 pt-1 pl-2">
+                          {area.fotos.map((foto, idx) => (
+                            <div key={idx} className="shrink-0 w-36 bg-[var(--bg-floating)] border border-[var(--border-cream)] rounded-xl overflow-hidden group relative shadow-sm">
+                              <div className="h-28 bg-black relative">
+                                <img src={foto.url} alt="Evidencia" className="w-full h-full object-cover" />
+                                <button 
+                                  onClick={() => setAreas(areas.map(a => a.id === area.id ? { ...a, fotos: a.fotos?.filter((_, i) => i !== idx) } : a))}
+                                  className="absolute top-1.5 right-1.5 p-1.5 bg-red-500/90 text-white rounded-lg shadow-sm active:scale-90 transition-transform"
+                                >
+                                  <Trash2 size={14} />
+                                </button>
+                              </div>
+                              <div className="p-2 bg-[var(--bg-screen)]">
+                                <input 
+                                  type="text" 
+                                  placeholder="Nota..." 
+                                  value={foto.descripcion}
+                                  onChange={(e) => {
+                                    setAreas(areas.map(a => {
+                                      if (a.id === area.id && a.fotos) {
+                                        const nf = [...a.fotos];
+                                        nf[idx].descripcion = e.target.value;
+                                        return { ...a, fotos: nf };
+                                      }
+                                      return a;
+                                    }));
+                                  }}
+                                  className="w-full bg-transparent text-[10px] text-[var(--text-main)] outline-none border-b border-transparent focus:border-amber-500 transition-colors"
+                                />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
                   </div>
 
                 </div>
               )})}
 
               {areas.length > 0 && (
-                <div className="bg-[var(--bg-floating)] border border-[var(--border-cream)] rounded-2xl p-4 mt-4 mb-4">
-                  <label className="text-[10px] font-bold text-[var(--text-muted)] uppercase mb-2 block">Observaciones Generales de todo el Edificio</label>
-                  <textarea
-                    value={observacionesGenerales}
-                    onChange={(e) => setObservacionesGenerales(e.target.value)}
-                    placeholder="Algo que aplique para todo el edificio en general..."
-                    className="w-full bg-[var(--bg-screen)] border border-[var(--border-cream)] rounded-xl p-3 text-sm text-[var(--text-main)] focus:border-amber-500 outline-none min-h-[80px] resize-y custom-scrollbar"
-                  />
-                </div>
-              )}
-            </div>
-          )}
+                <div className="bg-[var(--bg-floating)] border border-[var(--border-cream)] rounded-2xl p-4 mt-4 mb-4 flex flex-col gap-4">
+                  <div>
+                    <label className="text-[10px] font-bold text-[var(--text-muted)] uppercase mb-2 block">Observaciones Generales de todo el Edificio</label>
+                    <textarea
+                      value={observacionesGenerales}
+                      onChange={(e) => setObservacionesGenerales(e.target.value)}
+                      placeholder="Algo que aplique para todo el edificio en general..."
+                      className="w-full bg-[var(--bg-screen)] border border-[var(--border-cream)] rounded-xl p-3 text-sm text-[var(--text-main)] focus:border-amber-500 outline-none min-h-[60px] resize-y custom-scrollbar"
+                    />
+                  </div>
 
-          {activeTab === 'fotos' && (
-            <div className="flex flex-col gap-4 h-full">
-              <label className={`w-full py-4 border-2 border-dashed rounded-xl font-bold flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer ${isUploading ? 'border-zinc-500/30 text-zinc-400 bg-zinc-500/10' : 'border-blue-500/30 text-blue-400 bg-blue-500/10 hover:bg-blue-500/20'}`}>
-                <UploadCloud size={20} /> {isUploading ? 'Subiendo Fotografía...' : 'TOMAR / SUBIR FOTOGRAFÍA'}
-                <input type="file" className="hidden" accept="image/*" onChange={handleUploadFoto} disabled={isUploading} />
-              </label>
-
-              {fotos.length === 0 ? (
-                <div className="flex-1 flex flex-col items-center justify-center text-[var(--text-muted)] opacity-50 p-6 text-center mt-10">
-                  <Camera size={48} className="mb-4" />
-                  <p>Aún no has agregado fotografías.</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-10">
-                  {fotos.map((foto, idx) => (
-                    <div key={idx} className="bg-[var(--bg-floating)] border border-[var(--border-cream)] rounded-xl overflow-hidden group">
-                      <div className="h-48 bg-black relative">
-                        <img src={foto.url} alt="Evidencia" className="w-full h-full object-cover" />
-                        <button 
-                          onClick={() => setFotos(fotos.filter((_, i) => i !== idx))}
-                          className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-lg opacity-90 hover:opacity-100 transition-opacity active:scale-90 shadow-lg"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                      <div className="p-3 bg-[var(--bg-screen)]">
-                        <input 
-                          type="text" 
-                          placeholder="Añadir descripción..." 
-                          value={foto.descripcion}
-                          onChange={(e) => {
-                            const nf = [...fotos];
-                            nf[idx].descripcion = e.target.value;
-                            setFotos(nf);
-                          }}
-                          className="w-full bg-transparent border-b border-[var(--border-cream)] py-1.5 text-sm text-[var(--text-main)] outline-none focus:border-blue-500 transition-colors"
-                        />
-                      </div>
+                  <div>
+                    <div className="flex justify-between items-center mb-3">
+                      <label className="text-[10px] font-bold text-[var(--text-muted)] uppercase">Fotos Generales del Edificio</label>
+                      <label className={`px-4 py-2 text-xs font-bold rounded-lg flex items-center gap-2 transition-all cursor-pointer ${isUploading === 'general' ? 'bg-zinc-500/20 text-zinc-400' : 'bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 active:scale-95'}`}>
+                        <Camera size={16} /> {isUploading === 'general' ? 'Subiendo...' : '+ Añadir General'}
+                        <input type="file" className="hidden" accept="image/*" onChange={(e) => handleUploadFoto(e)} disabled={isUploading === 'general'} />
+                      </label>
                     </div>
-                  ))}
+
+                    {(fotosGenerales && fotosGenerales.length > 0) && (
+                      <div className="flex gap-3 overflow-x-auto custom-scrollbar pb-3 pt-1">
+                        {fotosGenerales.map((foto, idx) => (
+                          <div key={idx} className="shrink-0 w-36 bg-[var(--bg-screen)] border border-[var(--border-cream)] rounded-xl overflow-hidden group relative shadow-sm">
+                            <div className="h-28 bg-black relative">
+                              <img src={foto.url} alt="Evidencia" className="w-full h-full object-cover" />
+                              <button 
+                                onClick={() => setFotosGenerales(fotosGenerales.filter((_, i) => i !== idx))}
+                                className="absolute top-1.5 right-1.5 p-1.5 bg-red-500/90 text-white rounded-lg shadow-sm active:scale-90 transition-transform"
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            </div>
+                            <div className="p-2 bg-[var(--bg-hover)]">
+                              <input 
+                                type="text" 
+                                placeholder="Nota general..." 
+                                value={foto.descripcion}
+                                onChange={(e) => {
+                                  const nf = [...fotosGenerales];
+                                  nf[idx].descripcion = e.target.value;
+                                  setFotosGenerales(nf);
+                                }}
+                                className="w-full bg-transparent text-[10px] text-[var(--text-main)] outline-none border-b border-transparent focus:border-amber-500 transition-colors"
+                              />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
