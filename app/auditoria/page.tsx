@@ -6,8 +6,7 @@ export const dynamic = 'force-dynamic';
 
 export default async function AuditoriaPage() {
   const registrosRaw = await prisma.bitacora_Auditoria.findMany({
-    orderBy: { Fecha: 'desc' },
-    take: 200 // Límite aumentado a 200 para permitir mejor provecho de los filtros
+    orderBy: { Fecha: 'desc' }
   });
 
   // Convertir Fecha a string (ISO) para evitar problemas de serialización en NextJS Client Component
