@@ -497,3 +497,23 @@ model Inventario_Aires_Acondicionados {
   Estatus      String?  @default("Activo") @db.VarChar(100)
   Fecha_Alta   DateTime @default(now())
 }
+
+model Inventario_Telefonia {
+  N_Interno   String   @id @db.VarChar(100)
+  Empresa     String?  @db.VarChar(100)
+  Cliente     String?  @db.VarChar(100)
+  Marca       String?  @db.VarChar(100)
+  Modelo      String?  @db.VarChar(100)
+  Usuario     String?  @db.VarChar(150)
+  Departamento String? @db.VarChar(100)
+  Ubicacion    String? @db.VarChar(100)
+  IMEI        String?  @db.VarChar(100)
+  ICCID       String?  @db.VarChar(100)
+  Region_SIM  String?  @db.VarChar(50)
+  Cuenta      String?  @db.VarChar(100)
+  Numero      String?  @db.VarChar(50)
+  Plan        String?  @db.VarChar(150)
+  PZO         Int?     @default(0)
+  Estatus     String?  @default("Activo") @db.VarChar(100)
+  Fecha_Alta  DateTime @default(now())
+}

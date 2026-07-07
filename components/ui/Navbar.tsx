@@ -4,11 +4,11 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import Image from 'next/image';
-import { Menu, X, Car, Server, LayoutGrid, LogOut, CalendarDays, Laptop, Wrench, FolderOpen, User, DollarSign, CalendarCheck, FileText, Wallet, Settings, CalendarClock, Building, Wind, Home } from 'lucide-react';
+import { Menu, X, Car, Server, LayoutGrid, LogOut, CalendarDays, Laptop, Wrench, FolderOpen, User, DollarSign, CalendarCheck, FileText, Wallet, Settings, CalendarClock, Building, Wind, Home, Phone } from 'lucide-react';
 import LogoutButton from '@/app/dashboard/LogoutButton';
 
 interface NavbarProps {
-  type: 'portal' | 'dashboard' | 'computo' | 'programa' | 'gastos' | 'auditoria' | 'edificios' | 'clima';
+  type: 'portal' | 'dashboard' | 'computo' | 'programa' | 'gastos' | 'auditoria' | 'edificios' | 'clima' | 'telefonia';
   userName?: string;
   userRole?: string;
   isAdmin?: boolean;
@@ -270,6 +270,15 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                   <Wind size={14} className="text-cyan-400" /> Aires Acondicionados
                 </Link>
               )}
+              {(localIsAdmin || localUserAreas.includes('TELEFONIA')) && (
+                <Link
+                  href="/telefonia/inventario"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="bg-white/5 hover:bg-white/10 border border-white/5 text-white/90 px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold"
+                >
+                  <Phone size={14} className="text-purple-400" /> Telefonía Celular
+                </Link>
+              )}
 
 
               <div className="h-px bg-white/5 my-2"></div>
@@ -303,6 +312,7 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
     if (type === 'computo') return 'Cómputo TI';
     if (type === 'programa') return 'Programa Anual';
     if (type === 'clima') return 'Aires Acondicionados';
+    if (type === 'telefonia') return 'Telefonía Celular';
     if (pathname.includes('/inventario')) return 'Gestión de Flota';
     if (pathname.includes('/servicios')) return 'Central de Servicios';
     if (pathname.includes('/empleados') || pathname.includes('/usuarios')) return 'Gestión de Personal';
@@ -380,6 +390,15 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                 </div>
                 <span className="hidden sm:block font-serif font-medium text-lg tracking-wide text-white transition-colors group-hover:text-cyan-400">
                   SIFYGSA <span className="text-cyan-400 font-serif">Clima</span>
+                </span>
+              </Link>
+            ) : type === 'telefonia' ? (
+              <Link href="/telefonia/inventario" className={`flex items-center space-x-3 group px-2 transition-all`}>
+                <div className="bg-purple-500 p-1.5 rounded-lg shadow-lg shadow-purple-500/20 group-hover:scale-105 transition-transform duration-300">
+                  <Phone className="text-white h-4 w-4" />
+                </div>
+                <span className="hidden sm:block font-serif font-medium text-lg tracking-wide text-white transition-colors group-hover:text-purple-400">
+                  SIFYGSA <span className="text-purple-400 font-serif">Tel</span>
                 </span>
               </Link>
             ) : (
@@ -637,6 +656,15 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                       >
                         <Wind size={14} className="text-cyan-400 transition-transform duration-300 ease-in-out group-hover/item:scale-110 group-hover/item:rotate-12" />
                         <span>Aires Acond.</span>
+                      </Link>
+                    )}
+                    {(localIsAdmin || localUserAreas.includes('TELEFONIA')) && (
+                      <Link
+                        href="/telefonia/inventario"
+                        className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-white/80 hover:text-white hover:bg-white/5 transition-all group/item"
+                      >
+                        <Phone size={14} className="text-purple-400 transition-transform duration-300 ease-in-out group-hover/item:scale-110 group-hover/item:-rotate-12" />
+                        <span>Telefonía</span>
                       </Link>
                     )}
                   </div>
