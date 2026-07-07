@@ -587,7 +587,7 @@ export default function AiresInventarioPage() {
         </div>
       )}
 
-      <SystemModal isOpen={sysModal.isOpen} type={sysModal.type} title={sysModal.title} message={sysModal.message} onClose={() => setSysModal({ ...sysModal, isOpen: false })} />
+      <SystemModal isOpen={sysModal.isOpen} type={sysModal.type} title={sysModal.title} message={sysModal.message} onConfirm={() => setSysModal({ ...sysModal, isOpen: false })} />
     </div>
   );
 }
