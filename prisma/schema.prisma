@@ -485,3 +485,15 @@ model Programacion_Semanal {
   Fecha_Registro       DateTime  @default(now())
 }
 
+model Inventario_Aires_Acondicionados {
+  N_Interno    String   @id @db.VarChar(100)
+  Empresa      String?  @db.VarChar(100)
+  Tipo         String?  @db.VarChar(100)
+  Descripcion  String?
+  Modelo       String?  @db.VarChar(100)
+  Departamento String?  @db.VarChar(100)
+  Ubicacion    String?  @db.VarChar(100)
+  Proveedor    String?  @db.VarChar(100)
+  Estatus      String?  @default("Activo") @db.VarChar(100)
+  Fecha_Alta   DateTime @default(now())
+}
