@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import Image from 'next/image';
-import { Menu, X, Car, Server, LayoutGrid, LogOut, CalendarDays, Laptop, Wrench, FolderOpen, User, DollarSign, CalendarCheck, FileText, Wallet, Settings, CalendarClock, Building } from 'lucide-react';
+import { Menu, X, Car, Server, LayoutGrid, LogOut, CalendarDays, Laptop, Wrench, FolderOpen, User, DollarSign, CalendarCheck, FileText, Wallet, Settings, CalendarClock, Building, Wind, Home } from 'lucide-react';
 import LogoutButton from '@/app/dashboard/LogoutButton';
 
 interface NavbarProps {
@@ -226,6 +226,14 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
               
               <div className="text-[10px] font-black text-white/30 uppercase tracking-widest pl-2 mb-1">Módulos</div>
               <Link
+                href="/portal"
+                onClick={() => setIsMenuOpen(false)}
+                className="bg-white/5 hover:bg-white/10 border border-white/5 text-white/90 px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold"
+              >
+                <Home size={14} className="text-white" /> Volver al Portal
+              </Link>
+              <div className="h-px bg-white/5 my-1"></div>
+              <Link
                 href="/dashboard"
                 onClick={() => setIsMenuOpen(false)}
                 className="bg-white/5 hover:bg-white/10 border border-white/5 text-white/90 px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold"
@@ -253,6 +261,15 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
               >
                 <Building size={14} className="text-[#FF7420]" /> Edificios (Infraestructura)
               </Link>
+              {(localIsAdmin || localUserAreas.includes('CLIMA')) && (
+                <Link
+                  href="/clima/inventario"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="bg-white/5 hover:bg-white/10 border border-white/5 text-white/90 px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold"
+                >
+                  <Wind size={14} className="text-cyan-400" /> Aires Acondicionados
+                </Link>
+              )}
 
 
               <div className="h-px bg-white/5 my-2"></div>
@@ -285,6 +302,7 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
   const getPageTitle = () => {
     if (type === 'computo') return 'Cómputo TI';
     if (type === 'programa') return 'Programa Anual';
+    if (type === 'clima') return 'Aires Acondicionados';
     if (pathname.includes('/inventario')) return 'Gestión de Flota';
     if (pathname.includes('/servicios')) return 'Central de Servicios';
     if (pathname.includes('/empleados') || pathname.includes('/usuarios')) return 'Gestión de Personal';
@@ -353,6 +371,15 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                 </div>
                 <span className="hidden sm:block font-serif font-medium text-lg tracking-wide text-white transition-colors group-hover:text-amber-400">
                   SIFYGSA <span className="text-amber-400 font-serif">Infra</span>
+                </span>
+              </Link>
+            ) : type === 'clima' ? (
+              <Link href="/clima/inventario" className={`flex items-center space-x-3 group px-2 transition-all`}>
+                <div className="bg-cyan-500 p-1.5 rounded-lg shadow-lg shadow-cyan-500/20 group-hover:scale-105 transition-transform duration-300">
+                  <Wind className="text-white h-4 w-4" />
+                </div>
+                <span className="hidden sm:block font-serif font-medium text-lg tracking-wide text-white transition-colors group-hover:text-cyan-400">
+                  SIFYGSA <span className="text-cyan-400 font-serif">Clima</span>
                 </span>
               </Link>
             ) : (
@@ -551,6 +578,13 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                     <div className="px-3 py-1.5 text-[9px] font-black text-white/40 tracking-wider uppercase border-b border-white/5 mb-1">
                       Módulos Disponibles
                     </div>
+                    <Link
+                      href="/portal"
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-white hover:bg-white/10 transition-all group/item bg-white/5 mb-1"
+                    >
+                      <Home size={14} className="text-white transition-transform duration-300 ease-in-out group-hover/item:scale-110" />
+                      <span>Volver al Portal</span>
+                    </Link>
                     {(localIsAdmin || localUserAreas.includes('AUTOS')) && (
                       <Link
                         href="/dashboard"
@@ -594,6 +628,15 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                       >
                         <Building size={14} className="text-[#FF7420] transition-transform duration-300 ease-in-out group-hover/item:scale-110" />
                         <span>Edificios</span>
+                      </Link>
+                    )}
+                    {(localIsAdmin || localUserAreas.includes('CLIMA')) && (
+                      <Link
+                        href="/clima/inventario"
+                        className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-white/80 hover:text-white hover:bg-white/5 transition-all group/item"
+                      >
+                        <Wind size={14} className="text-cyan-400 transition-transform duration-300 ease-in-out group-hover/item:scale-110 group-hover/item:rotate-12" />
+                        <span>Aires Acond.</span>
                       </Link>
                     )}
                   </div>
