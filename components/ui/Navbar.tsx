@@ -8,7 +8,7 @@ import { Menu, X, Car, Server, LayoutGrid, LogOut, CalendarDays, Laptop, Wrench,
 import LogoutButton from '@/app/dashboard/LogoutButton';
 
 interface NavbarProps {
-  type: 'portal' | 'dashboard' | 'computo' | 'programa' | 'gastos' | 'auditoria' | 'edificios';
+  type: 'portal' | 'dashboard' | 'computo' | 'programa' | 'gastos' | 'auditoria' | 'edificios' | 'clima';
   userName?: string;
   userRole?: string;
   isAdmin?: boolean;
