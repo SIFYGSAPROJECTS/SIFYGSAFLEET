@@ -7,6 +7,7 @@ import {
   CheckCircle2, Info, FilePlus2, Building
 } from 'lucide-react';
 import SystemModal, { ModalType } from '@/components/ui/SystemModal';
+import DynamicMobilePDFViewer from '@/components/ui/DynamicMobilePDFViewer';
 
 interface Props {
   equipos?: any[];
@@ -618,12 +619,29 @@ export default function DocumentosComputoClient({ equipos = [], isAdmin = false 
                 </button>
               </div>
             </div>
-            <div className="flex-1 max-w-6xl mx-auto w-full bg-[#1A1A1A] rounded-2xl overflow-hidden shadow-2xl border border-white/10">
+            <div className="flex-1 max-w-6xl mx-auto w-full bg-[#1A1A1A] rounded-2xl overflow-hidden shadow-2xl border border-white/10 flex flex-col">
               <iframe
                 src={`${pdfUrl}#toolbar=0`}
-                className="w-full h-full"
+                className="hidden md:block w-full h-full"
                 title="Visor PDF"
               />
+              <div className="md:hidden flex-1 flex flex-col w-full h-full bg-[#1A1A1A] overflow-hidden">
+                <div className="flex-1 overflow-hidden relative">
+                  <DynamicMobilePDFViewer url={pdfUrl!} />
+                </div>
+                <div className="p-3 bg-[#262626] flex flex-col items-center gap-2 border-t border-white/10 shrink-0">
+                  <p className="text-[10px] text-stone-400 text-center font-medium leading-tight">
+                    ¿No carga la vista previa?
+                  </p>
+                  <button
+                    onClick={() => window.open(pdfUrl!, '_blank')}
+                    className="bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2.5 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors shadow-md text-xs w-full sm:w-auto"
+                  >
+                    <Download size={16} />
+                    Descargar / Abrir Directamente
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         )}

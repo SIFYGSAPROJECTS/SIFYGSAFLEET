@@ -10,6 +10,7 @@ import {
 import { useRouter } from 'next/navigation';
 import SystemModal, { ModalType } from '@/components/ui/SystemModal';
 import PremiumSelect from '@/components/ui/PremiumSelect';
+import DynamicMobilePDFViewer from '@/components/ui/DynamicMobilePDFViewer';
 
 interface Props {
   historial: any[];
@@ -339,7 +340,26 @@ export default function HistorialClient({ historial, rol }: Props) {
           <div className="max-w-6xl mx-auto w-full flex-1 bg-white rounded-xl overflow-hidden shadow-2xl border border-[#3B3A38] flex items-center justify-center relative">
             {evidenciaUrl && (
               evidenciaUrl.toLowerCase().endsWith('.pdf') ? (
-                <iframe src={`${evidenciaUrl}#toolbar=0`} className="w-full h-full border-none" />
+                <>
+                  <iframe src={`${evidenciaUrl}#toolbar=0`} className="hidden md:block w-full h-full border-none" />
+                  <div className="md:hidden flex-1 flex flex-col w-full h-full bg-stone-50 overflow-hidden">
+                    <div className="flex-1 overflow-hidden relative">
+                      <DynamicMobilePDFViewer url={evidenciaUrl} />
+                    </div>
+                    <div className="p-3 bg-white flex flex-col items-center gap-2 border-t border-[var(--border-cream)] shrink-0">
+                      <p className="text-[10px] text-stone-500 text-center font-medium leading-tight">
+                        ¿No carga la vista previa?
+                      </p>
+                      <button
+                        onClick={() => window.open(evidenciaUrl, '_blank')}
+                        className="bg-[#71717a] hover:bg-[#52525b] text-white px-5 py-2.5 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors shadow-md text-xs w-full sm:w-auto"
+                      >
+                        <ExternalLink size={16} />
+                        Descargar / Abrir Directamente
+                      </button>
+                    </div>
+                  </div>
+                </>
               ) : (
                 <img src={evidenciaUrl} alt="Factura de Servicio" className="max-w-full max-h-full object-contain rounded-lg p-2" />
               )
