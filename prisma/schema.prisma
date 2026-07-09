@@ -62,6 +62,8 @@ model Inventario_Automoviles {
   encargado         Empleados?                     @relation("EncargadoAuto", fields: [Email_encargado], references: [Email])
   solicitudes       Solicitud[]
   verificaciones    Verificacion_Vehicular[]
+  costos_gasolina   Costos_Gasolina[]
+  costos_peajes     Costos_Peajes[]
 }
 
 model Telefono {
@@ -516,4 +518,33 @@ model Inventario_Telefonia {
   PZO         Int?     @default(0)
   Estatus     String?  @default("Activo") @db.VarChar(100)
   Fecha_Alta  DateTime @default(now())
+}
+
+model Costos_Gasolina {
+  Id_Gasto      Int                    @id @default(autoincrement())
+  Fecha_Hora    DateTime
+  Consecutivo   String                 @db.VarChar(10)
+  Estacion      String
+  Combustible   String
+  Litros        Float
+  Precio        Float
+  Total         Float
+  Fecha_Registro DateTime              @default(now())
+  auto          Inventario_Automoviles @relation(fields: [Consecutivo], references: [Consecutivo], onDelete: Cascade)
+}
+
+model Costos_Peajes {
+  Id_Peaje         Int                    @id @default(autoincrement())
+  Tag              String
+  Consecutivo      String                 @db.VarChar(10)
+  Fecha_Hora       DateTime
+  Caseta           String
+  Carril           String
+  Clase            String
+  Importe          Float
+  Fecha_Aplicacion String?
+  Hora_Aplicacion  String?
+  Consecar         String?
+  Fecha_Registro   DateTime               @default(now())
+  auto             Inventario_Automoviles @relation(fields: [Consecutivo], references: [Consecutivo], onDelete: Cascade)
 }
