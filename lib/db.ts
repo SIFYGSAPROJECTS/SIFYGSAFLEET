@@ -31,7 +31,7 @@ const createPrismaClient = () => {
                 // Creamos un payload JSON crudo para que OpenClaw lo analice
                 const rawPayload = JSON.stringify({
                   message: `Operación ${operation.toUpperCase()} a nivel de base de datos en tabla ${model}`,
-                  changes: args?.data || args, 
+                  changes: (args as any)?.data || args, 
                 });
 
                 await openClawAuditor(
