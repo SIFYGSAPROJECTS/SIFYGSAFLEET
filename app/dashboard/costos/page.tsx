@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import Link from 'next/link';
-import { DollarSign, Search, Filter, Plus, Calendar, Wrench, Building2, Car, TrendingUp, TrendingDown, Receipt, UploadCloud, ArrowLeft, User, FileText, Download, FolderOpen, CalendarCheck, Fuel, Map } from 'lucide-react';
+import { DollarSign, Search, Filter, Plus, Calendar, Wrench, Building2, Car, TrendingUp, TrendingDown, Receipt, UploadCloud, ArrowLeft, User, FileText, Download, FolderOpen, CalendarCheck, Fuel, Map, Activity } from 'lucide-react';
 
 import * as ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
@@ -66,7 +66,7 @@ interface CostoPeaje {
 }
 
 export default function CostosPage() {
-  const [activeTab, setActiveTab] = useState<'mantenimiento' | 'gasolina' | 'peajes'>('mantenimiento');
+  const [activeTab, setActiveTab] = useState<'kpis' | 'mantenimiento' | 'gasolina' | 'peajes'>('kpis');
   const [costos, setCostos] = useState<Costo[]>([]);
   const [gasolinas, setGasolinas] = useState<CostoGasolina[]>([]);
   const [peajes, setPeajes] = useState<CostoPeaje[]>([]);
@@ -359,7 +359,7 @@ export default function CostosPage() {
     setIsExporting(true);
     try {
       const workbook = new ExcelJS.Workbook();
-      const title = activeTab === 'mantenimiento' ? 'Reporte de Mantenimiento' : activeTab === 'gasolina' ? 'Reporte de Gasolina' : 'Reporte de Peajes';
+      const title = activeTab === 'mantenimiento' ? 'Reporte de Mantenimiento' : activeTab === 'gasolina' ? 'Reporte de Gasolina' : activeTab === 'peajes' ? 'Reporte de Peajes' : 'Reporte Global';
       const worksheet = workbook.addWorksheet(title);
 
       worksheet.addRow([title]);
@@ -412,7 +412,7 @@ export default function CostosPage() {
         worksheet.getColumn(7).numFmt = '"$"#,##0.00';
         worksheet.addRow([]); 
         worksheet.addRow(['', '', '', 'TOTALES:', totalLitros, '', totalGasolina]).getCell(7).numFmt = '"$"#,##0.00';
-      } else {
+      } else if (activeTab === 'peajes') {
         const headerRow = worksheet.addRow(['Tag', 'Fecha y Hora', 'Unidad', 'Caseta', 'Carril', 'Clase', 'Importe', 'Fecha Aplicación', 'Hora Aplicación', 'Consecar']);
         headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } };
         headerRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF27272A' } };
@@ -484,6 +484,8 @@ export default function CostosPage() {
   const totalLitros = useMemo(() => filteredGasolinas.reduce((acc, curr) => acc + curr.Litros, 0), [filteredGasolinas]);
 
   const totalPeajes = useMemo(() => filteredPeajes.reduce((acc, curr) => acc + curr.Importe, 0), [filteredPeajes]);
+  
+  const granTotalGlobal = totalGasto + totalGasolina + totalPeajes;
 
   const empresasMaestras = Array.from(new Set(vehiculos.map(v => v.Consecutivo?.split('-')[0]))).filter(Boolean).sort() as string[];
   const unidadesMaestras = useMemo(() => {
@@ -493,7 +495,7 @@ export default function CostosPage() {
       .sort();
   }, [vehiculos, empresaFiltro]);
 
-  // Gráficas
+  // Gráficas Mtto
   const datosPorEmpresaMtto = useMemo(() => {
     const agrupado = empresasMaestras.reduce((acc, emp) => { acc[emp] = 0; return acc; }, {} as Record<string, number>);
     filteredCostos.forEach((curr) => {
@@ -537,6 +539,69 @@ export default function CostosPage() {
     return Object.entries(agrupado).map(([mes, Importe]) => ({ mes, Importe })).sort((a, b) => a.mes.localeCompare(b.mes));
   }, [filteredPeajes]);
 
+  // --- Lógica KPIs Globales ---
+  const kpisTopUnidades = useMemo(() => {
+    const agrupado = {} as Record<string, number>;
+    filteredCostos.forEach(c => agrupado[c.Consecutivo] = (agrupado[c.Consecutivo] || 0) + c.Total);
+    filteredGasolinas.forEach(g => agrupado[g.Consecutivo] = (agrupado[g.Consecutivo] || 0) + g.Total);
+    filteredPeajes.forEach(p => agrupado[p.Consecutivo] = (agrupado[p.Consecutivo] || 0) + p.Importe);
+    
+    return Object.entries(agrupado)
+      .map(([unidad, total]) => ({ unidad, total }))
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 10);
+  }, [filteredCostos, filteredGasolinas, filteredPeajes]);
+
+  const kpisDatosGlobalesEmpresa = useMemo(() => {
+    const agrupado = empresasMaestras.reduce((acc, emp) => { acc[emp] = 0; return acc; }, {} as Record<string, number>);
+    
+    const procesar = (items: {Consecutivo: string, Total?: number, Importe?: number}[]) => {
+      items.forEach(curr => {
+        const prefijo = curr.Consecutivo?.split('-')[0] || 'Otros';
+        const valor = curr.Total ?? curr.Importe ?? 0;
+        if (empresasMaestras.includes(prefijo)) {
+          agrupado[prefijo] += valor;
+        } else {
+          agrupado[prefijo] = (agrupado[prefijo] || 0) + valor;
+        }
+      });
+    };
+
+    procesar(filteredCostos);
+    procesar(filteredGasolinas);
+    procesar(filteredPeajes);
+
+    return Object.entries(agrupado).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
+  }, [filteredCostos, filteredGasolinas, filteredPeajes, empresasMaestras]);
+
+  const kpisTendenciaGlobal = useMemo(() => {
+    const agrupado = {} as Record<string, { mes: string, Mantenimiento: number, Gasolina: number, Peajes: number }>;
+    
+    filteredCostos.forEach(c => {
+      const fecha = new Date(c.Fecha);
+      const mes = `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, '0')}`;
+      if(!agrupado[mes]) agrupado[mes] = { mes, Mantenimiento: 0, Gasolina: 0, Peajes: 0 };
+      agrupado[mes].Mantenimiento += c.Total;
+    });
+
+    filteredGasolinas.forEach(g => {
+      const fecha = new Date(g.Fecha_Hora);
+      const mes = `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, '0')}`;
+      if(!agrupado[mes]) agrupado[mes] = { mes, Mantenimiento: 0, Gasolina: 0, Peajes: 0 };
+      agrupado[mes].Gasolina += g.Total;
+    });
+
+    filteredPeajes.forEach(p => {
+      const fecha = new Date(p.Fecha_Hora);
+      const mes = `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, '0')}`;
+      if(!agrupado[mes]) agrupado[mes] = { mes, Mantenimiento: 0, Gasolina: 0, Peajes: 0 };
+      agrupado[mes].Peajes += p.Importe;
+    });
+
+    return Object.values(agrupado).sort((a, b) => a.mes.localeCompare(b.mes));
+  }, [filteredCostos, filteredGasolinas, filteredPeajes]);
+  // -----------------------------
+
   const formatoMoneda = (valor: number) => {
     return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(valor);
   };
@@ -549,10 +614,18 @@ export default function CostosPage() {
         <div className="flex flex-wrap justify-between items-center gap-2 sm:gap-3 w-full border-b border-[var(--border-cream)] pb-4 mb-6">
           
           {/* TABS */}
-          <div className="flex bg-[var(--bg-floating)] p-1 rounded-full border border-[var(--border-cream)] shadow-sm">
+          <div className="flex bg-[var(--bg-floating)] p-1 rounded-full border border-[var(--border-cream)] shadow-sm overflow-x-auto custom-scrollbar">
+            <button
+              onClick={() => setActiveTab('kpis')}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-bold text-sm transition-all whitespace-nowrap ${
+                activeTab === 'kpis' ? 'bg-[#27272a] text-white shadow-md' : 'text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-hover)]'
+              }`}
+            >
+              <Activity size={16} /> KPIs Globales
+            </button>
             <button
               onClick={() => setActiveTab('mantenimiento')}
-              className={`flex items-center gap-2 px-6 py-2.5 rounded-full font-bold text-sm transition-all ${
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-bold text-sm transition-all whitespace-nowrap ${
                 activeTab === 'mantenimiento' ? 'bg-[#27272a] text-white shadow-md' : 'text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-hover)]'
               }`}
             >
@@ -560,7 +633,7 @@ export default function CostosPage() {
             </button>
             <button
               onClick={() => setActiveTab('gasolina')}
-              className={`flex items-center gap-2 px-6 py-2.5 rounded-full font-bold text-sm transition-all ${
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-bold text-sm transition-all whitespace-nowrap ${
                 activeTab === 'gasolina' ? 'bg-[#27272a] text-white shadow-md' : 'text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-hover)]'
               }`}
             >
@@ -568,7 +641,7 @@ export default function CostosPage() {
             </button>
             <button
               onClick={() => setActiveTab('peajes')}
-              className={`flex items-center gap-2 px-6 py-2.5 rounded-full font-bold text-sm transition-all ${
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-bold text-sm transition-all whitespace-nowrap ${
                 activeTab === 'peajes' ? 'bg-[#27272a] text-white shadow-md' : 'text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-hover)]'
               }`}
             >
@@ -584,7 +657,7 @@ export default function CostosPage() {
               ref={fileInputRef}
               onChange={handleFileUpload}
             />
-            {isAdmin && (
+            {isAdmin && activeTab !== 'kpis' && (
               <>
                 <button 
                   onClick={handleExportExcel}
@@ -604,22 +677,155 @@ export default function CostosPage() {
                 </button>
               </>
             )}
-            <button 
-              onClick={() => setIsModalOpen(true)}
-              className="bg-[#27272a] hover:bg-black text-white px-5 sm:px-6 py-2.5 rounded-full font-bold shadow-md hover:shadow-xl transition-all flex items-center justify-center gap-2 text-sm whitespace-nowrap"
-            >
-              <Plus size={16} />
-              Registrar {activeTab === 'gasolina' ? 'Gasolina' : activeTab === 'peajes' ? 'Peaje' : 'Gasto'}
-            </button>
+            {activeTab !== 'kpis' && (
+              <button 
+                onClick={() => setIsModalOpen(true)}
+                className="bg-[#27272a] hover:bg-black text-white px-5 sm:px-6 py-2.5 rounded-full font-bold shadow-md hover:shadow-xl transition-all flex items-center justify-center gap-2 text-sm whitespace-nowrap"
+              >
+                <Plus size={16} />
+                Registrar {activeTab === 'gasolina' ? 'Gasolina' : activeTab === 'peajes' ? 'Peaje' : 'Gasto'}
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Filtros Globales o por Pestaña */}
+        <div id="sticky-header-dashboard-costos" className={`sticky top-[72px] z-40 transition duration-300 pt-2 pb-0 mb-6 px-0 ${scrolled ? 'bg-[#f8fafc]' : 'bg-transparent'}`}>
+          <div className={`max-w-[95%] mx-auto transition duration-300 ${scrolled ? 'border-b border-stone-300 shadow-xl pb-2 px-0' : 'border-transparent pb-2 px-0 shadow-none'}`}>
+            <div className="bg-[var(--bg-floating)] border border-[var(--border-cream)] p-3 px-5 rounded-xl flex flex-col md:flex-row gap-4 items-center relative shadow-sm">
+              <div className="flex items-center gap-2 text-[var(--text-muted)] w-full md:w-auto mr-auto">
+                <Filter size={18} />
+                <span className="font-bold text-sm">Filtros:</span>
+              </div>
+              <div className="w-full md:w-56 z-20">
+                <PremiumSelect
+                  accent="indigo"
+                  placeholder="Todas las Empresas"
+                  value={empresaFiltro || 'Todas'}
+                  onChange={(val) => { setEmpresaFiltro(val === 'Todas' ? '' : val); setUnidadFiltro(''); }}
+                  options={[{ value: 'Todas', label: 'Todas las Empresas' }, ...empresasMaestras.map(emp => ({ value: emp, label: `Flota: ${emp}` }))]}
+                  direction="down"
+                  compact
+                />
+              </div>
+              <div className="w-full md:w-56 z-10">
+                <PremiumSelect
+                  accent="indigo"
+                  placeholder="Todas las Unidades"
+                  value={unidadFiltro || 'Todas'}
+                  onChange={(val) => setUnidadFiltro(val === 'Todas' ? '' : val)}
+                  options={[{ value: 'Todas', label: 'Todas las Unidades' }, ...unidadesMaestras.map(un => ({ value: un, label: un }))]}
+                  direction="down"
+                  disabled={unidadesMaestras.length === 0}
+                  compact
+                />
+              </div>
+            </div>
           </div>
         </div>
 
         {/* KPIs */}
+        {activeTab === 'kpis' && (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="bg-gradient-to-br from-indigo-900 to-indigo-700 p-5 rounded-xl shadow-lg text-white relative overflow-hidden group col-span-1 lg:col-span-2">
+                <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity"><DollarSign size={80} /></div>
+                <p className="text-xs font-bold text-indigo-200 uppercase tracking-widest mb-1 relative z-10">Gasto Total Flotilla (Unificado)</p>
+                <h3 className="text-4xl md:text-5xl font-black font-serif relative z-10 mb-1">{formatoMoneda(granTotalGlobal)}</h3>
+                <p className="text-xs font-medium text-indigo-200 mt-2 relative z-10">Suma total de mantenimientos, gasolina y peajes.</p>
+              </div>
+              <div className="bg-[var(--bg-floating)] border border-[var(--border-cream)] p-5 rounded-xl shadow-md relative overflow-hidden group">
+                <div className="absolute top-0 right-0 p-3 opacity-5 group-hover:opacity-10 transition-opacity"><Wrench size={50} /></div>
+                <p className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest mb-1">Total Mantenimiento</p>
+                <h3 className="text-2xl font-black text-[var(--text-main)] font-serif mb-1">{formatoMoneda(totalGasto)}</h3>
+                <p className="text-xs font-medium text-[var(--text-muted)]">{granTotalGlobal > 0 ? ((totalGasto/granTotalGlobal)*100).toFixed(1) : 0}% del global</p>
+              </div>
+              <div className="bg-[var(--bg-floating)] border border-[var(--border-cream)] p-5 rounded-xl shadow-md relative overflow-hidden group flex flex-col justify-between">
+                <div>
+                  <p className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest mb-1 flex justify-between">Total Gasolina <Fuel size={14} className="text-indigo-500" /></p>
+                  <h3 className="text-xl font-black text-[var(--text-main)] font-serif">{formatoMoneda(totalGasolina)}</h3>
+                </div>
+                <div className="mt-3 pt-3 border-t border-[var(--border-cream)]">
+                  <p className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest mb-1 flex justify-between">Total Peajes <Map size={14} className="text-teal-600" /></p>
+                  <h3 className="text-xl font-black text-[var(--text-main)] font-serif">{formatoMoneda(totalPeajes)}</h3>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2 bg-[var(--bg-floating)] border border-[var(--border-cream)] p-5 rounded-xl shadow-sm">
+                <h3 className="font-bold font-serif text-[var(--text-main)] mb-4 flex items-center gap-2">
+                  <TrendingUp size={18} className="text-[var(--text-muted)]" /> Tendencia de Gasto Global
+                </h3>
+                <div className="h-[300px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={kpisTendenciaGlobal} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                      <XAxis dataKey="mes" fontSize={12} />
+                      <YAxis tickFormatter={(value) => `$${value/1000}k`} fontSize={12} />
+                      <Tooltip formatter={(value: any) => formatoMoneda(Number(value))} />
+                      <Legend />
+                      <Bar dataKey="Mantenimiento" stackId="a" fill="#3f3f46" />
+                      <Bar dataKey="Gasolina" stackId="a" fill="#4f46e5" />
+                      <Bar dataKey="Peajes" stackId="a" fill="#0d9488" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+              <div className="bg-[var(--bg-floating)] border border-[var(--border-cream)] p-5 rounded-xl shadow-sm">
+                <h3 className="font-bold font-serif text-[var(--text-main)] mb-4 flex items-center gap-2">
+                  <Car size={18} className="text-[var(--text-muted)]" /> Top 10 Unidades (Gasto)
+                </h3>
+                <div className="overflow-y-auto max-h-[300px] custom-scrollbar pr-2">
+                  <table className="w-full text-left text-sm">
+                    <thead>
+                      <tr className="border-b border-[var(--border-cream)] text-stone-500 text-[10px] uppercase tracking-widest font-black sticky top-0 bg-[var(--bg-floating)]">
+                        <th className="py-2">#</th>
+                        <th className="py-2">Unidad</th>
+                        <th className="py-2 text-right">Gasto Global</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {kpisTopUnidades.map((item, idx) => (
+                        <tr key={item.unidad} className="border-b border-[var(--border-cream)] last:border-0 hover:bg-[var(--bg-hover)]">
+                          <td className="py-2 font-bold text-[var(--text-muted)]">{idx + 1}</td>
+                          <td className="py-2"><span className="bg-gray-100 text-gray-800 px-2 py-0.5 rounded text-xs font-bold">{item.unidad}</span></td>
+                          <td className="py-2 text-right font-bold text-[var(--text-main)]">{formatoMoneda(item.total)}</td>
+                        </tr>
+                      ))}
+                      {kpisTopUnidades.length === 0 && (
+                        <tr><td colSpan={3} className="py-4 text-center text-stone-500">No hay datos</td></tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-[var(--bg-floating)] border border-[var(--border-cream)] p-5 rounded-xl shadow-sm">
+              <h3 className="font-bold font-serif text-[var(--text-main)] mb-4 flex items-center gap-2">
+                <Building2 size={18} className="text-[var(--text-muted)]" /> Gasto Global por Flota / Empresa
+              </h3>
+              <div className="h-[300px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={kpisDatosGlobalesEmpresa} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                    <XAxis dataKey="name" fontSize={12} fontWeight="bold" />
+                    <YAxis tickFormatter={(value) => `$${value/1000}k`} fontSize={12} />
+                    <Tooltip formatter={(value: any) => formatoMoneda(Number(value))} cursor={{fill: 'transparent'}} />
+                    <Bar dataKey="value" fill="#27272a" radius={[4, 4, 0, 0]} barSize={40} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </>
+        )}
+
         {activeTab === 'mantenimiento' && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="bg-gradient-to-br from-[#18181b] to-[#27272a] p-5 rounded-xl shadow-lg text-white relative overflow-hidden group">
               <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity"><DollarSign size={50} /></div>
-              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1 relative z-10">Gasto Total General</p>
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1 relative z-10">Gasto Total Mantenimiento</p>
               <h3 className="text-2xl font-black font-serif relative z-10 mb-1">{formatoMoneda(totalGasto)}</h3>
             </div>
             <div className="bg-[var(--bg-floating)] border border-[var(--border-cream)] p-5 rounded-xl shadow-md relative overflow-hidden group">
@@ -678,12 +884,12 @@ export default function CostosPage() {
           </div>
         )}
 
-        {/* GRÁFICAS */}
+        {/* GRÁFICAS (solo tabs específicas) */}
         {activeTab === 'mantenimiento' && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="bg-[var(--bg-floating)] border border-[var(--border-cream)] p-5 rounded-xl shadow-sm" ref={chartEmpresaRef}>
               <h3 className="font-bold font-serif text-[var(--text-main)] mb-4 flex items-center gap-2">
-                <Building2 size={18} className="text-[var(--text-muted)]" /> Costos por Empresa
+                <Building2 size={18} className="text-[var(--text-muted)]" /> Costos por Empresa (Mtto)
               </h3>
               <div className="h-[250px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
@@ -760,147 +966,144 @@ export default function CostosPage() {
 
         </div>
 
-        {/* Filtros */}
-        <div id="sticky-header-dashboard-costos" className={`sticky top-[72px] z-40 transition duration-300 pt-2 pb-0 mb-6 px-0 ${scrolled ? 'bg-[#f8fafc]' : 'bg-transparent'}`}>
-          <div className={`max-w-[95%] mx-auto transition duration-300 ${scrolled ? 'border-b border-stone-300 shadow-xl pb-2 px-0' : 'border-transparent pb-2 px-0 shadow-none'}`}>
-            <div className="bg-[var(--bg-floating)] border border-[var(--border-cream)] p-3 px-5 rounded-xl flex flex-col md:flex-row gap-4 items-center relative shadow-sm">
-              <div className="flex items-center gap-2 text-[var(--text-muted)] w-full md:w-auto mr-auto">
-                <Filter size={18} />
-                <span className="font-bold text-sm">Filtros:</span>
-              </div>
-              <div className="w-full md:w-56 z-20">
-                <PremiumSelect
-                  accent="indigo"
-                  placeholder="Todas las Empresas"
-                  value={empresaFiltro || 'Todas'}
-                  onChange={(val) => { setEmpresaFiltro(val === 'Todas' ? '' : val); setUnidadFiltro(''); }}
-                  options={[{ value: 'Todas', label: 'Todas las Empresas' }, ...empresasMaestras.map(emp => ({ value: emp, label: `Flota: ${emp}` }))]}
-                  direction="down"
-                  compact
-                />
-              </div>
-              <div className="w-full md:w-56 z-10">
-                <PremiumSelect
-                  accent="indigo"
-                  placeholder="Todas las Unidades"
-                  value={unidadFiltro || 'Todas'}
-                  onChange={(val) => setUnidadFiltro(val === 'Todas' ? '' : val)}
-                  options={[{ value: 'Todas', label: 'Todas las Unidades' }, ...unidadesMaestras.map(un => ({ value: un, label: un }))]}
-                  direction="down"
-                  disabled={unidadesMaestras.length === 0}
-                  compact
-                />
+        {/* Tabla de Datos (Solo para tabs de desglose) */}
+        {activeTab !== 'kpis' && (
+          <div className="max-w-[95%] mx-auto">
+            <div className="bg-[var(--bg-floating)] border border-[var(--border-cream)] rounded-xl shadow-sm overflow-hidden">
+              <div className="w-full overflow-x-auto md:overflow-x-visible">
+                <table className="min-w-[1000px] w-full text-left border-collapse">
+                  <thead>
+                    {activeTab === 'mantenimiento' ? (
+                      <tr className="border-b border-[var(--border-cream)] text-stone-500 text-[11px] uppercase tracking-widest font-black">
+                        <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Fecha</th>
+                        <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Servicio</th>
+                        <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Unidad</th>
+                        <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Costo MO</th>
+                        <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Costo Ref.</th>
+                        <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Total</th>
+                        <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Empresa</th>
+                        <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Proveedor</th>
+                      </tr>
+                    ) : activeTab === 'gasolina' ? (
+                      <tr className="border-b border-[var(--border-cream)] text-stone-500 text-[11px] uppercase tracking-widest font-black">
+                        <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Fecha y Hora</th>
+                        <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Unidad</th>
+                        <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Estación</th>
+                        <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Combustible</th>
+                        <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Litros</th>
+                        <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Precio</th>
+                        <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Total</th>
+                      </tr>
+                    ) : (
+                      <tr className="border-b border-[var(--border-cream)] text-stone-500 text-[11px] uppercase tracking-widest font-black">
+                        <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Tag</th>
+                        <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Fecha y Hora</th>
+                        <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Unidad</th>
+                        <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Caseta</th>
+                        <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Carril</th>
+                        <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Clase</th>
+                        <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Importe</th>
+                        <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Fecha Apl.</th>
+                        <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Hora Apl.</th>
+                        <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Consecar</th>
+                      </tr>
+                    )}
+                  </thead>
+                  <tbody>
+                    {loading ? (
+                      <tr><td colSpan={10} className="p-8 text-center text-[var(--text-muted)]">Cargando datos...</td></tr>
+                    ) : activeTab === 'mantenimiento' ? (
+                      filteredCostos.length === 0 ? (
+                        <tr><td colSpan={8} className="p-8 text-center text-[var(--text-muted)]">No se encontraron registros.</td></tr>
+                      ) : (
+                        filteredCostos.map((costo) => (
+                          <tr key={costo.Id_Costo} className="border-b border-[var(--border-cream)] hover:bg-[var(--bg-hover)] even:bg-[var(--bg-screen)] transition-colors">
+                            <td className="p-4 text-sm">{new Date(costo.Fecha).toLocaleDateString()}</td>
+                            <td className="p-4 text-sm font-medium max-w-xs truncate" title={costo.Servicio}>{costo.Servicio}</td>
+                            <td className="p-4 text-sm whitespace-nowrap"><span className="bg-gray-200 text-gray-800 px-2 py-1 rounded text-xs font-bold whitespace-nowrap">{costo.Consecutivo}</span></td>
+                            <td className="p-4 text-sm text-[var(--text-muted)]">{formatoMoneda(costo.Costo_MO)}</td>
+                            <td className="p-4 text-sm text-[var(--text-muted)]">{formatoMoneda(costo.Costo_Refacciones)}</td>
+                            <td className="p-4 text-sm font-bold text-[var(--text-main)]">{formatoMoneda(costo.Total)}</td>
+                            <td className="p-4 text-sm">{costo.Empresa}</td>
+                            <td className="p-4 text-sm text-[var(--text-muted)]">{costo.Proveedor}</td>
+                          </tr>
+                        ))
+                      )
+                    ) : activeTab === 'gasolina' ? (
+                      filteredGasolinas.length === 0 ? (
+                        <tr><td colSpan={7} className="p-8 text-center text-[var(--text-muted)]">No se encontraron registros de gasolina.</td></tr>
+                      ) : (
+                        filteredGasolinas.map((gas) => (
+                          <tr key={gas.Id_Gasto} className="border-b border-[var(--border-cream)] hover:bg-[var(--bg-hover)] even:bg-[var(--bg-screen)] transition-colors">
+                            <td className="p-4 text-sm">{new Date(gas.Fecha_Hora).toLocaleString()}</td>
+                            <td className="p-4 text-sm whitespace-nowrap"><span className="bg-gray-200 text-gray-800 px-2 py-1 rounded text-xs font-bold whitespace-nowrap">{gas.Consecutivo}</span></td>
+                            <td className="p-4 text-sm font-medium truncate" title={gas.Estacion}>{gas.Estacion}</td>
+                            <td className="p-4 text-sm">{gas.Combustible}</td>
+                            <td className="p-4 text-sm text-[var(--text-muted)]">{gas.Litros.toFixed(2)}</td>
+                            <td className="p-4 text-sm text-[var(--text-muted)]">{formatoMoneda(gas.Precio)}</td>
+                            <td className="p-4 text-sm font-bold text-[var(--text-main)]">{formatoMoneda(gas.Total)}</td>
+                          </tr>
+                        ))
+                      )
+                    ) : (
+                      filteredPeajes.length === 0 ? (
+                        <tr><td colSpan={10} className="p-8 text-center text-[var(--text-muted)]">No se encontraron registros de peajes.</td></tr>
+                      ) : (
+                        filteredPeajes.map((peaje) => (
+                          <tr key={peaje.Id_Peaje} className="border-b border-[var(--border-cream)] hover:bg-[var(--bg-hover)] even:bg-[var(--bg-screen)] transition-colors">
+                            <td className="p-4 text-sm text-[var(--text-muted)]">{peaje.Tag}</td>
+                            <td className="p-4 text-sm">{new Date(peaje.Fecha_Hora).toLocaleString()}</td>
+                            <td className="p-4 text-sm whitespace-nowrap"><span className="bg-gray-200 text-gray-800 px-2 py-1 rounded text-xs font-bold whitespace-nowrap">{peaje.Consecutivo}</span></td>
+                            <td className="p-4 text-sm font-medium truncate" title={peaje.Caseta}>{peaje.Caseta}</td>
+                            <td className="p-4 text-sm">{peaje.Carril}</td>
+                            <td className="p-4 text-sm">{peaje.Clase}</td>
+                            <td className="p-4 text-sm font-bold text-[var(--text-main)]">{formatoMoneda(peaje.Importe)}</td>
+                            <td className="p-4 text-sm text-[var(--text-muted)]">{peaje.Fecha_Aplicacion || '-'}</td>
+                            <td className="p-4 text-sm text-[var(--text-muted)]">{peaje.Hora_Aplicacion || '-'}</td>
+                            <td className="p-4 text-sm text-[var(--text-muted)]">{peaje.Consecar || '-'}</td>
+                          </tr>
+                        ))
+                      )
+                    )}
+                  </tbody>
+                  
+                  {/* FOOTER TOTALES */}
+                  {!loading && (
+                    <tfoot className="bg-[var(--bg-floating)] border-t-2 border-[var(--border-cream)] sticky bottom-0 z-20 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+                      {activeTab === 'mantenimiento' && filteredCostos.length > 0 && (
+                        <tr>
+                          <td colSpan={3} className="p-4 text-right font-black text-sm uppercase tracking-widest text-[var(--text-muted)]">Totales en Pantalla:</td>
+                          <td className="p-4 font-bold text-[var(--text-main)]">{formatoMoneda(totalMO)}</td>
+                          <td className="p-4 font-bold text-[var(--text-main)]">{formatoMoneda(totalRefacciones)}</td>
+                          <td className="p-4 font-black text-[var(--text-main)] text-base">{formatoMoneda(totalGasto)}</td>
+                          <td colSpan={2}></td>
+                        </tr>
+                      )}
+                      {activeTab === 'gasolina' && filteredGasolinas.length > 0 && (
+                        <tr>
+                          <td colSpan={4} className="p-4 text-right font-black text-sm uppercase tracking-widest text-[var(--text-muted)]">Totales en Pantalla:</td>
+                          <td className="p-4 font-bold text-[var(--text-main)]">{totalLitros.toFixed(2)} L</td>
+                          <td></td>
+                          <td className="p-4 font-black text-[var(--text-main)] text-base">{formatoMoneda(totalGasolina)}</td>
+                        </tr>
+                      )}
+                      {activeTab === 'peajes' && filteredPeajes.length > 0 && (
+                        <tr>
+                          <td colSpan={6} className="p-4 text-right font-black text-sm uppercase tracking-widest text-[var(--text-muted)]">Totales en Pantalla:</td>
+                          <td className="p-4 font-black text-[var(--text-main)] text-base">{formatoMoneda(totalPeajes)}</td>
+                          <td colSpan={3}></td>
+                        </tr>
+                      )}
+                    </tfoot>
+                  )}
+                </table>
               </div>
             </div>
           </div>
-        </div>
-
-        {/* Tabla de Datos */}
-        <div className="max-w-[95%] mx-auto">
-          <div className="bg-[var(--bg-floating)] border border-[var(--border-cream)] rounded-xl shadow-sm">
-            <div className="w-full overflow-x-auto md:overflow-x-visible">
-              <table className="min-w-[1000px] w-full text-left border-collapse">
-                <thead>
-                  {activeTab === 'mantenimiento' ? (
-                    <tr className="border-b border-[var(--border-cream)] text-stone-500 text-[11px] uppercase tracking-widest font-black">
-                      <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Fecha</th>
-                      <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Servicio</th>
-                      <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Unidad</th>
-                      <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Costo MO</th>
-                      <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Costo Ref.</th>
-                      <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Total</th>
-                      <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Empresa</th>
-                      <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Proveedor</th>
-                    </tr>
-                  ) : activeTab === 'gasolina' ? (
-                    <tr className="border-b border-[var(--border-cream)] text-stone-500 text-[11px] uppercase tracking-widest font-black">
-                      <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Fecha y Hora</th>
-                      <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Unidad</th>
-                      <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Estación</th>
-                      <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Combustible</th>
-                      <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Litros</th>
-                      <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Precio</th>
-                      <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Total</th>
-                    </tr>
-                  ) : (
-                    <tr className="border-b border-[var(--border-cream)] text-stone-500 text-[11px] uppercase tracking-widest font-black">
-                      <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Tag</th>
-                      <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Fecha y Hora</th>
-                      <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Unidad</th>
-                      <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Caseta</th>
-                      <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Carril</th>
-                      <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Clase</th>
-                      <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Importe</th>
-                      <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Fecha Apl.</th>
-                      <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Hora Apl.</th>
-                      <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Consecar</th>
-                    </tr>
-                  )}
-                </thead>
-                <tbody>
-                  {loading ? (
-                    <tr><td colSpan={8} className="p-8 text-center text-[var(--text-muted)]">Cargando datos...</td></tr>
-                  ) : activeTab === 'mantenimiento' ? (
-                    filteredCostos.length === 0 ? (
-                      <tr><td colSpan={8} className="p-8 text-center text-[var(--text-muted)]">No se encontraron registros.</td></tr>
-                    ) : (
-                      filteredCostos.map((costo) => (
-                        <tr key={costo.Id_Costo} className="border-b border-[var(--border-cream)] hover:bg-[var(--bg-hover)] even:bg-[var(--bg-screen)] transition-colors">
-                          <td className="p-4 text-sm">{new Date(costo.Fecha).toLocaleDateString()}</td>
-                          <td className="p-4 text-sm font-medium max-w-xs truncate" title={costo.Servicio}>{costo.Servicio}</td>
-                          <td className="p-4 text-sm whitespace-nowrap"><span className="bg-gray-200 text-gray-800 px-2 py-1 rounded text-xs font-bold whitespace-nowrap">{costo.Consecutivo}</span></td>
-                          <td className="p-4 text-sm text-[var(--text-muted)]">{formatoMoneda(costo.Costo_MO)}</td>
-                          <td className="p-4 text-sm text-[var(--text-muted)]">{formatoMoneda(costo.Costo_Refacciones)}</td>
-                          <td className="p-4 text-sm font-bold text-[var(--text-main)]">{formatoMoneda(costo.Total)}</td>
-                          <td className="p-4 text-sm">{costo.Empresa}</td>
-                          <td className="p-4 text-sm text-[var(--text-muted)]">{costo.Proveedor}</td>
-                        </tr>
-                      ))
-                    )
-                  ) : activeTab === 'gasolina' ? (
-                    filteredGasolinas.length === 0 ? (
-                      <tr><td colSpan={7} className="p-8 text-center text-[var(--text-muted)]">No se encontraron registros de gasolina.</td></tr>
-                    ) : (
-                      filteredGasolinas.map((gas) => (
-                        <tr key={gas.Id_Gasto} className="border-b border-[var(--border-cream)] hover:bg-[var(--bg-hover)] even:bg-[var(--bg-screen)] transition-colors">
-                          <td className="p-4 text-sm">{new Date(gas.Fecha_Hora).toLocaleString()}</td>
-                          <td className="p-4 text-sm whitespace-nowrap"><span className="bg-gray-200 text-gray-800 px-2 py-1 rounded text-xs font-bold whitespace-nowrap">{gas.Consecutivo}</span></td>
-                          <td className="p-4 text-sm font-medium truncate" title={gas.Estacion}>{gas.Estacion}</td>
-                          <td className="p-4 text-sm">{gas.Combustible}</td>
-                          <td className="p-4 text-sm text-[var(--text-muted)]">{gas.Litros.toFixed(2)}</td>
-                          <td className="p-4 text-sm text-[var(--text-muted)]">{formatoMoneda(gas.Precio)}</td>
-                          <td className="p-4 text-sm font-bold text-[var(--text-main)]">{formatoMoneda(gas.Total)}</td>
-                        </tr>
-                      ))
-                    )
-                  ) : (
-                    filteredPeajes.length === 0 ? (
-                      <tr><td colSpan={10} className="p-8 text-center text-[var(--text-muted)]">No se encontraron registros de peajes.</td></tr>
-                    ) : (
-                      filteredPeajes.map((peaje) => (
-                        <tr key={peaje.Id_Peaje} className="border-b border-[var(--border-cream)] hover:bg-[var(--bg-hover)] even:bg-[var(--bg-screen)] transition-colors">
-                          <td className="p-4 text-sm text-[var(--text-muted)]">{peaje.Tag}</td>
-                          <td className="p-4 text-sm">{new Date(peaje.Fecha_Hora).toLocaleString()}</td>
-                          <td className="p-4 text-sm whitespace-nowrap"><span className="bg-gray-200 text-gray-800 px-2 py-1 rounded text-xs font-bold whitespace-nowrap">{peaje.Consecutivo}</span></td>
-                          <td className="p-4 text-sm font-medium truncate" title={peaje.Caseta}>{peaje.Caseta}</td>
-                          <td className="p-4 text-sm">{peaje.Carril}</td>
-                          <td className="p-4 text-sm">{peaje.Clase}</td>
-                          <td className="p-4 text-sm font-bold text-[var(--text-main)]">{formatoMoneda(peaje.Importe)}</td>
-                          <td className="p-4 text-sm text-[var(--text-muted)]">{peaje.Fecha_Aplicacion || '-'}</td>
-                          <td className="p-4 text-sm text-[var(--text-muted)]">{peaje.Hora_Aplicacion || '-'}</td>
-                          <td className="p-4 text-sm text-[var(--text-muted)]">{peaje.Consecar || '-'}</td>
-                        </tr>
-                      ))
-                    )
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
+        )}
 
         {/* Modal Registrar */}
-        {isModalOpen && (
+        {isModalOpen && activeTab !== 'kpis' && (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div className="bg-[var(--bg-floating)] rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl border border-[var(--border-cream)] animate-in zoom-in-95 duration-200">
               <div className="p-6 border-b border-[var(--border-cream)] flex justify-between items-center bg-[var(--bg-screen)]">
