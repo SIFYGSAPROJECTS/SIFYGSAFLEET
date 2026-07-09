@@ -135,7 +135,11 @@ export async function PUT(request: Request) {
     const { Email, Nombre_Empleado, A_Paterno, A_Materno, Cargo, Departamento, Rol, Estatus_Acceso, Consecutivo_Vehiculo, C_Interno_Computo, Admin_TI } = body;
 
     const empleadoViejo = await prisma.empleados.findUnique({
-      where: { Email }
+      where: { Email },
+      include: {
+        autos_encargados: { select: { Consecutivo: true } },
+        inventarioComputos: { select: { C_Interno: true } }
+      }
     });
 
     const empleadoActualizado = await prisma.$transaction(async (tx) => {
@@ -193,7 +197,7 @@ export async function PUT(request: Request) {
     let changes: any = {};
 
     if (empleadoViejo) {
-      // Computar diferencias
+      // Computar diferencias campos normales
       const fields = ['Nombre_Empleado', 'A_Paterno', 'A_Materno', 'Cargo', 'Departamento', 'Rol', 'Estatus_Acceso', 'Admin_TI'];
       const bodyData: any = { Nombre_Empleado, A_Paterno, A_Materno, Cargo, Departamento, Rol, Estatus_Acceso, Admin_TI };
       
@@ -202,6 +206,23 @@ export async function PUT(request: Request) {
           changes[f] = { from: empleadoViejo[f as keyof typeof empleadoViejo], to: bodyData[f] };
         }
       });
+
+      // Computar diferencias de unidades asignadas
+      if (Consecutivo_Vehiculo !== undefined) {
+        const oldVehiculos = empleadoViejo.autos_encargados.map((v: any) => v.Consecutivo).join(', ') || 'Ninguno';
+        const newVehiculo = Consecutivo_Vehiculo || 'Ninguno';
+        if (oldVehiculos !== newVehiculo) {
+          changes['Vehículo Asignado'] = { from: oldVehiculos, to: newVehiculo };
+        }
+      }
+
+      if (C_Interno_Computo !== undefined) {
+        const oldComputos = empleadoViejo.inventarioComputos.map((c: any) => c.C_Interno).join(', ') || 'Ninguno';
+        const newComputo = C_Interno_Computo || 'Ninguno';
+        if (oldComputos !== newComputo) {
+          changes['Cómputo Asignado'] = { from: oldComputos, to: newComputo };
+        }
+      }
 
       if (empleadoViejo.Estatus_Acceso !== Estatus_Acceso && Estatus_Acceso === 'Inactivo') {
         actionName = 'BAJA_EMPLEADO';

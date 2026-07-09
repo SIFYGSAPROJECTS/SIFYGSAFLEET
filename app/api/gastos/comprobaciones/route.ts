@@ -35,7 +35,11 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: 'Email requerido para guardar' }, { status: 400 });
     }
 
-    await prisma.$transaction(async (tx) => {
+    const registrosAnteriores = await prisma.$transaction(async (tx) => {
+      const recordsAnteriores = await tx.comprobacion_Gastos.findMany({
+        where: { Email_Empleado: email, Semana: semana, Anio: anio }
+      });
+
       await tx.comprobacion_Gastos.deleteMany({
         where: { Email_Empleado: email, Semana: semana, Anio: anio }
       });
@@ -55,11 +59,20 @@ export async function PUT(request: Request) {
           }))
         });
       }
+      return recordsAnteriores;
+    });
+
+    const diffJson = JSON.stringify({
+      message: `Actualización de Comprobaciones (S${semana}/${anio}) para ${email}`,
+      changes: {
+        total_anterior: { from: 0, to: registrosAnteriores.length },
+        total_nuevo: { from: 0, to: registros ? registros.length : 0 }
+      }
     });
 
     const cookieStore = await cookies();
     const userEmail = cookieStore.get('user_email')?.value || 'Sistema';
-    await logAuditoria(userEmail, 'ACTUALIZACION_COMPROBACIONES', 'GASTOS_COMPROBANTES', `Actualización de Comprobaciones (S${semana}/${anio}) para ${email}`);
+    await logAuditoria(userEmail, 'ACTUALIZACION_COMPROBACIONES', 'GASTOS_COMPROBANTES', diffJson);
 
     return NextResponse.json({ success: true });
   } catch (error) {
