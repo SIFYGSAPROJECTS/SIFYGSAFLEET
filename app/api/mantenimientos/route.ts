@@ -20,6 +20,9 @@ export async function GET(request: Request) {
             Modelo: true,
             Service_Tag: true,
             Usuario: true,
+            Tipo: true,
+            Cargador: true,
+            Departamento: true,
           }
         },
         reportes: {

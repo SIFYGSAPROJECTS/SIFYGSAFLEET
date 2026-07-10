@@ -24,6 +24,9 @@ export async function GET(request: Request) {
             Service_Tag: true,
             Usuario: true,
             Email_Empleado: true,
+            Tipo: true,
+            Cargador: true,
+            Departamento: true,
           }
         },
         partes_cambiadas: true
