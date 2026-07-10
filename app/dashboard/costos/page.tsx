@@ -1063,7 +1063,7 @@ export default function CostosPage() {
                       <Tooltip 
                         cursor={{fill: 'rgba(0,0,0,0.05)'}} 
                         contentStyle={{borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)'}} 
-                        formatter={(value: number) => [`${value.toFixed(2)} Ton`, 'Emisiones']}
+                        formatter={(value: any) => [`${Number(value).toFixed(2)} Ton`, 'Emisiones']}
                       />
                       <Bar dataKey="value" fill="#0ea5e9" radius={[4, 4, 0, 0]} barSize={40} />
                     </BarChart>
@@ -1080,7 +1080,7 @@ export default function CostosPage() {
                       <YAxis axisLine={false} tickLine={false} tick={{fill: '#888', fontSize: 12}} />
                       <Tooltip 
                         contentStyle={{borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)'}} 
-                        formatter={(value: number) => [`${value.toFixed(2)} Ton`, 'Emisiones']}
+                        formatter={(value: any) => [`${Number(value).toFixed(2)} Ton`, 'Emisiones']}
                       />
                       <Line type="monotone" dataKey="value" stroke="#0ea5e9" strokeWidth={3} dot={{r: 4, fill: '#0ea5e9', strokeWidth: 0}} activeDot={{r: 6}} />
                     </LineChart>
