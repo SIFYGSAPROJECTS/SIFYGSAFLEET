@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import Link from 'next/link';
-import { DollarSign, Search, Filter, Plus, Calendar, Wrench, Building2, Car, TrendingUp, TrendingDown, Receipt, UploadCloud, ArrowLeft, User, FileText, Download, FolderOpen, CalendarCheck, Fuel, Map, Activity } from 'lucide-react';
+import { DollarSign, Search, Filter, Plus, Calendar, Wrench, Building2, Car, TrendingUp, TrendingDown, Receipt, UploadCloud, ArrowLeft, User, FileText, Download, FolderOpen, CalendarCheck, Fuel, Map, Activity, Cloud } from 'lucide-react';
 
 import * as ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
@@ -108,6 +108,7 @@ export default function CostosPage() {
   // Filtros
   const [empresaFiltro, setEmpresaFiltro] = useState('');
   const [unidadFiltro, setUnidadFiltro] = useState('');
+  const [mesFiltro, setMesFiltro] = useState('');
   
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -453,27 +454,33 @@ export default function CostosPage() {
     return costos.filter(c => {
       const matchEmpresa = empresaFiltro ? (c.Empresa.toLowerCase().includes(empresaFiltro.toLowerCase()) || c.Consecutivo.toLowerCase().startsWith(empresaFiltro.toLowerCase() + '-')) : true;
       const matchUnidad = unidadFiltro ? c.Consecutivo.toLowerCase() === unidadFiltro.toLowerCase() : true;
-      return matchEmpresa && matchUnidad;
+      const mesStr = c.Fecha ? `${new Date(c.Fecha).getFullYear()}-${String(new Date(c.Fecha).getMonth() + 1).padStart(2, '0')}` : '';
+      const matchMes = mesFiltro ? mesStr === mesFiltro : true;
+      return matchEmpresa && matchUnidad && matchMes;
     });
-  }, [costos, empresaFiltro, unidadFiltro]);
+  }, [costos, empresaFiltro, unidadFiltro, mesFiltro]);
 
   // Filtrado Gasolina
   const filteredGasolinas = useMemo(() => {
     return gasolinas.filter(g => {
       const matchEmpresa = empresaFiltro ? g.Consecutivo.toLowerCase().startsWith(empresaFiltro.toLowerCase() + '-') : true;
       const matchUnidad = unidadFiltro ? g.Consecutivo.toLowerCase() === unidadFiltro.toLowerCase() : true;
-      return matchEmpresa && matchUnidad;
+      const mesStr = g.Fecha_Hora ? `${new Date(g.Fecha_Hora).getFullYear()}-${String(new Date(g.Fecha_Hora).getMonth() + 1).padStart(2, '0')}` : '';
+      const matchMes = mesFiltro ? mesStr === mesFiltro : true;
+      return matchEmpresa && matchUnidad && matchMes;
     });
-  }, [gasolinas, empresaFiltro, unidadFiltro]);
+  }, [gasolinas, empresaFiltro, unidadFiltro, mesFiltro]);
 
   // Filtrado Peajes
   const filteredPeajes = useMemo(() => {
     return peajes.filter(p => {
       const matchEmpresa = empresaFiltro ? p.Consecutivo.toLowerCase().startsWith(empresaFiltro.toLowerCase() + '-') : true;
       const matchUnidad = unidadFiltro ? p.Consecutivo.toLowerCase() === unidadFiltro.toLowerCase() : true;
-      return matchEmpresa && matchUnidad;
+      const mesStr = p.Fecha_Hora ? `${new Date(p.Fecha_Hora).getFullYear()}-${String(new Date(p.Fecha_Hora).getMonth() + 1).padStart(2, '0')}` : '';
+      const matchMes = mesFiltro ? mesStr === mesFiltro : true;
+      return matchEmpresa && matchUnidad && matchMes;
     });
-  }, [peajes, empresaFiltro, unidadFiltro]);
+  }, [peajes, empresaFiltro, unidadFiltro, mesFiltro]);
 
   // Totales
   const totalGasto = useMemo(() => filteredCostos.reduce((acc, curr) => acc + curr.Total, 0), [filteredCostos]);
@@ -486,6 +493,14 @@ export default function CostosPage() {
   const totalPeajes = useMemo(() => filteredPeajes.reduce((acc, curr) => acc + curr.Importe, 0), [filteredPeajes]);
   
   const granTotalGlobal = totalGasto + totalGasolina + totalPeajes;
+
+  const mesesMaestros = useMemo(() => {
+    const meses = new Set<string>();
+    costos.forEach(c => c.Fecha && meses.add(`${new Date(c.Fecha).getFullYear()}-${String(new Date(c.Fecha).getMonth() + 1).padStart(2, '0')}`));
+    gasolinas.forEach(g => g.Fecha_Hora && meses.add(`${new Date(g.Fecha_Hora).getFullYear()}-${String(new Date(g.Fecha_Hora).getMonth() + 1).padStart(2, '0')}`));
+    peajes.forEach(p => p.Fecha_Hora && meses.add(`${new Date(p.Fecha_Hora).getFullYear()}-${String(new Date(p.Fecha_Hora).getMonth() + 1).padStart(2, '0')}`));
+    return Array.from(meses).sort().reverse();
+  }, [costos, gasolinas, peajes]);
 
   const empresasMaestras = Array.from(new Set(vehiculos.map(v => v.Consecutivo?.split('-')[0]))).filter(Boolean).sort() as string[];
   const unidadesMaestras = useMemo(() => {
@@ -600,6 +615,45 @@ export default function CostosPage() {
 
     return Object.values(agrupado).sort((a, b) => a.mes.localeCompare(b.mes));
   }, [filteredCostos, filteredGasolinas, filteredPeajes]);
+
+  const emisionesData = useMemo(() => {
+    let total = 0;
+    let mesActual = 0;
+    let anioActual = 0;
+    const today = new Date();
+    const actualMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+    const actualYear = today.getFullYear();
+    
+    const porEmpresa: Record<string, number> = {};
+    const porMes: Record<string, number> = {};
+
+    filteredGasolinas.forEach(g => {
+      const c = g.Combustible?.toUpperCase() || '';
+      // Según calculadora RENE (SEMARNAT): ~2.515 kg CO2e por litro de gasolina, y ~2.75 para Diesel.
+      const factor = (c.includes('DIESEL') || c.includes('DISEL')) ? 2.75 : 2.515;
+      const emisionesTon = (g.Litros * factor) / 1000;
+
+      total += emisionesTon;
+
+      const fecha = new Date(g.Fecha_Hora);
+      const mesStr = `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, '0')}`;
+      
+      if (mesStr === actualMonth) mesActual += emisionesTon;
+      if (fecha.getFullYear() === actualYear) anioActual += emisionesTon;
+
+      const prefijo = g.Consecutivo?.split('-')[0] || 'Otros';
+      porEmpresa[prefijo] = (porEmpresa[prefijo] || 0) + emisionesTon;
+      porMes[mesStr] = (porMes[mesStr] || 0) + emisionesTon;
+    });
+
+    return {
+      total,
+      mesActual,
+      anioActual,
+      graficaEmpresa: Object.entries(porEmpresa).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value),
+      graficaMes: Object.entries(porMes).map(([mes, value]) => ({ mes, value })).sort((a, b) => a.mes.localeCompare(b.mes))
+    };
+  }, [filteredGasolinas]);
   // -----------------------------
 
   const formatoMoneda = (valor: number) => {
@@ -611,44 +665,7 @@ export default function CostosPage() {
       <div className="pt-0 pb-6 relative">
         <div className="max-w-[95%] mx-auto space-y-8 animate-in fade-in duration-500">
 
-        <div className="flex flex-wrap justify-between items-center gap-2 sm:gap-3 w-full border-b border-[var(--border-cream)] pb-4 mb-6">
-          
-          {/* TABS */}
-          <div className="flex bg-[var(--bg-floating)] p-1 rounded-full border border-[var(--border-cream)] shadow-sm overflow-x-auto custom-scrollbar">
-            <button
-              onClick={() => setActiveTab('kpis')}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-bold text-sm transition-all whitespace-nowrap ${
-                activeTab === 'kpis' ? 'bg-[#27272a] text-white shadow-md' : 'text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-hover)]'
-              }`}
-            >
-              <Activity size={16} /> KPIs Globales
-            </button>
-            <button
-              onClick={() => setActiveTab('mantenimiento')}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-bold text-sm transition-all whitespace-nowrap ${
-                activeTab === 'mantenimiento' ? 'bg-[#27272a] text-white shadow-md' : 'text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-hover)]'
-              }`}
-            >
-              <Wrench size={16} /> Mantenimientos
-            </button>
-            <button
-              onClick={() => setActiveTab('gasolina')}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-bold text-sm transition-all whitespace-nowrap ${
-                activeTab === 'gasolina' ? 'bg-[#27272a] text-white shadow-md' : 'text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-hover)]'
-              }`}
-            >
-              <Fuel size={16} /> Gasolina
-            </button>
-            <button
-              onClick={() => setActiveTab('peajes')}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-bold text-sm transition-all whitespace-nowrap ${
-                activeTab === 'peajes' ? 'bg-[#27272a] text-white shadow-md' : 'text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-hover)]'
-              }`}
-            >
-              <Map size={16} /> Peajes
-            </button>
-          </div>
-
+        <div className="flex flex-wrap justify-end items-center gap-2 sm:gap-3 w-full border-b border-[var(--border-cream)] pb-4 mb-4">
           <div className="flex items-center gap-2">
             <input 
               type="file" 
@@ -691,34 +708,91 @@ export default function CostosPage() {
 
         {/* Filtros Globales o por Pestaña */}
         <div id="sticky-header-dashboard-costos" className={`sticky top-[72px] z-40 transition duration-300 pt-2 pb-0 mb-6 px-0 ${scrolled ? 'bg-[#f8fafc]' : 'bg-transparent'}`}>
-          <div className={`max-w-[95%] mx-auto transition duration-300 ${scrolled ? 'border-b border-stone-300 shadow-xl pb-2 px-0' : 'border-transparent pb-2 px-0 shadow-none'}`}>
-            <div className="bg-[var(--bg-floating)] border border-[var(--border-cream)] p-3 px-5 rounded-xl flex flex-col md:flex-row gap-4 items-center relative shadow-sm">
-              <div className="flex items-center gap-2 text-[var(--text-muted)] w-full md:w-auto mr-auto">
-                <Filter size={18} />
-                <span className="font-bold text-sm">Filtros:</span>
+          <div className={`w-full transition duration-300 ${scrolled ? 'border-b border-stone-300 shadow-xl pb-2 px-0' : 'border-transparent pb-2 px-0 shadow-none'}`}>
+            <div className="bg-[var(--bg-floating)] p-2 sm:p-3 px-3 sm:px-5 rounded-xl flex flex-col xl:flex-row gap-4 items-center relative shadow-sm">
+              
+              {/* TABS */}
+              <div className="flex bg-[var(--bg-screen)] p-1 rounded-full border border-[var(--border-cream)] shadow-inner overflow-x-auto custom-scrollbar w-full xl:w-auto">
+                <button
+                  onClick={() => setActiveTab('kpis')}
+                  className={`flex items-center justify-center gap-2 px-4 py-2 sm:py-2.5 rounded-full font-bold text-xs sm:text-sm transition-all whitespace-nowrap flex-1 xl:flex-none ${
+                    activeTab === 'kpis' ? 'bg-[#27272a] text-white shadow-md' : 'text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-white'
+                  }`}
+                >
+                  <Activity size={16} /> KPIs
+                </button>
+                <button
+                  onClick={() => setActiveTab('mantenimiento')}
+                  className={`flex items-center justify-center gap-2 px-4 py-2 sm:py-2.5 rounded-full font-bold text-xs sm:text-sm transition-all whitespace-nowrap flex-1 xl:flex-none ${
+                    activeTab === 'mantenimiento' ? 'bg-[#27272a] text-white shadow-md' : 'text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-white'
+                  }`}
+                >
+                  <Wrench size={16} /> Mtto
+                </button>
+                <button
+                  onClick={() => setActiveTab('gasolina')}
+                  className={`flex items-center justify-center gap-2 px-4 py-2 sm:py-2.5 rounded-full font-bold text-xs sm:text-sm transition-all whitespace-nowrap flex-1 xl:flex-none ${
+                    activeTab === 'gasolina' ? 'bg-[#27272a] text-white shadow-md' : 'text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-white'
+                  }`}
+                >
+                  <Fuel size={16} /> Gasolina
+                </button>
+                <button
+                  onClick={() => setActiveTab('peajes')}
+                  className={`flex items-center justify-center gap-2 px-4 py-2 sm:py-2.5 rounded-full font-bold text-xs sm:text-sm transition-all whitespace-nowrap flex-1 xl:flex-none ${
+                    activeTab === 'peajes' ? 'bg-[#27272a] text-white shadow-md' : 'text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-white'
+                  }`}
+                >
+                  <Map size={16} /> Peajes
+                </button>
               </div>
-              <div className="w-full md:w-56 z-20">
-                <PremiumSelect
-                  accent="indigo"
-                  placeholder="Todas las Empresas"
-                  value={empresaFiltro || 'Todas'}
-                  onChange={(val) => { setEmpresaFiltro(val === 'Todas' ? '' : val); setUnidadFiltro(''); }}
-                  options={[{ value: 'Todas', label: 'Todas las Empresas' }, ...empresasMaestras.map(emp => ({ value: emp, label: `Flota: ${emp}` }))]}
-                  direction="down"
-                  compact
-                />
-              </div>
-              <div className="w-full md:w-56 z-10">
-                <PremiumSelect
-                  accent="indigo"
-                  placeholder="Todas las Unidades"
-                  value={unidadFiltro || 'Todas'}
-                  onChange={(val) => setUnidadFiltro(val === 'Todas' ? '' : val)}
-                  options={[{ value: 'Todas', label: 'Todas las Unidades' }, ...unidadesMaestras.map(un => ({ value: un, label: un }))]}
-                  direction="down"
-                  disabled={unidadesMaestras.length === 0}
-                  compact
-                />
+
+              <div className="h-8 w-px bg-[var(--border-cream)] hidden xl:block mx-1"></div>
+
+              <div className="flex flex-col md:flex-row items-center gap-4 w-full xl:w-auto ml-0 xl:ml-auto">
+                <div className="flex items-center justify-between w-full md:w-auto text-[var(--text-muted)]">
+                  <span className="font-bold text-sm flex items-center gap-2"><Filter size={18} /> Filtros:</span>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                  <div className="w-full sm:w-40 z-30">
+                    <PremiumSelect
+                      accent="indigo"
+                      placeholder="Mes"
+                      value={mesFiltro || 'Todos'}
+                      onChange={(val) => setMesFiltro(val === 'Todos' ? '' : val)}
+                      options={[{ value: 'Todos', label: 'Todos los Meses' }, ...mesesMaestros.map(m => {
+                        const [y, mo] = m.split('-');
+                        const monthName = new Date(Number(y), Number(mo)-1, 1).toLocaleString('es-ES', { month: 'long' });
+                        return { value: m, label: `${monthName.charAt(0).toUpperCase() + monthName.slice(1)} ${y}` };
+                      })]}
+                      direction="down"
+                      compact
+                    />
+                  </div>
+                  <div className="w-full sm:w-48 z-20">
+                    <PremiumSelect
+                      accent="indigo"
+                      placeholder="Empresas"
+                      value={empresaFiltro || 'Todas'}
+                      onChange={(val) => { setEmpresaFiltro(val === 'Todas' ? '' : val); setUnidadFiltro(''); }}
+                      options={[{ value: 'Todas', label: 'Todas las Empresas' }, ...empresasMaestras.map(emp => ({ value: emp, label: `Flota: ${emp}` }))]}
+                      direction="down"
+                      compact
+                    />
+                  </div>
+                  <div className="w-full sm:w-48 z-10">
+                    <PremiumSelect
+                      accent="indigo"
+                      placeholder="Unidades"
+                      value={unidadFiltro || 'Todas'}
+                      onChange={(val) => setUnidadFiltro(val === 'Todas' ? '' : val)}
+                      options={[{ value: 'Todas', label: 'Todas las Unidades' }, ...unidadesMaestras.map(un => ({ value: un, label: un }))]}
+                      direction="down"
+                      disabled={unidadesMaestras.length === 0}
+                      compact
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -866,6 +940,13 @@ export default function CostosPage() {
               <p className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest mb-1">Cargas Registradas</p>
               <h3 className="text-xl font-black text-[var(--text-main)] font-serif mb-1">{filteredGasolinas.length}</h3>
             </div>
+            <div className="bg-[var(--bg-floating)] border border-[var(--border-cream)] p-5 rounded-xl shadow-md relative overflow-hidden group">
+              <div className="absolute top-0 right-0 p-3 opacity-5 group-hover:opacity-10 transition-opacity"><Cloud size={50} /></div>
+              <p className="text-xs font-bold text-sky-600 uppercase tracking-widest mb-1">Proceso Anual Emisión</p>
+              <h3 className="text-xl font-black text-[var(--text-main)] font-serif mb-1">
+                {emisionesData.anioActual.toLocaleString('es-MX', {maximumFractionDigits: 2})} <span className="text-sm font-normal text-[var(--text-muted)]">Ton CO₂</span>
+              </h3>
+            </div>
           </div>
         )}
 
@@ -922,29 +1003,96 @@ export default function CostosPage() {
           </div>
         )}
 
+        {/* DASHBOARD DE GASOLINA Y EMISIONES */}
         {activeTab === 'gasolina' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-[var(--bg-floating)] border border-[var(--border-cream)] p-5 rounded-xl shadow-sm">
-              <h3 className="font-bold font-serif text-[var(--text-main)] mb-4 flex items-center gap-2">
-                <TrendingUp size={18} className="text-[var(--text-muted)]" /> Tendencia Gasolina
-              </h3>
-              <div className="h-[250px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={datosPorMesGasolina} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                    <XAxis dataKey="mes" fontSize={12} />
-                    <YAxis tickFormatter={(value) => `$${value/1000}k`} fontSize={12} />
-                    <Tooltip formatter={(value: any) => formatoMoneda(Number(value))} />
-                    <Line type="monotone" dataKey="Total" stroke="#4f46e5" strokeWidth={3} dot={{r: 4, fill: '#312e81'}} activeDot={{r: 6}} />
-                  </LineChart>
-                </ResponsiveContainer>
+          <div className="space-y-6 animate-in fade-in zoom-in-95 duration-500 mb-8">
+            
+            {/* Fila Superior: Tendencia (Izquierda) + KPIs Emisiones (Derecha) */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="bg-[var(--bg-floating)] border border-[var(--border-cream)] p-5 rounded-xl shadow-sm flex flex-col">
+                <h3 className="font-bold font-serif text-[var(--text-main)] mb-4 flex items-center gap-2">
+                  <TrendingUp size={18} className="text-[var(--text-muted)]" /> Tendencia Gasolina
+                </h3>
+                <div className="h-[250px] w-full flex-1">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={datosPorMesGasolina} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                      <XAxis dataKey="mes" fontSize={12} />
+                      <YAxis tickFormatter={(value) => `$${value/1000}k`} fontSize={12} />
+                      <Tooltip formatter={(value: any) => formatoMoneda(Number(value))} />
+                      <Line type="monotone" dataKey="Total" stroke="#4f46e5" strokeWidth={3} dot={{r: 4, fill: '#312e81'}} activeDot={{r: 6}} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-4">
+                <h3 className="font-bold font-serif text-[var(--text-main)] flex items-center gap-2">
+                  <Cloud className="text-sky-500" /> Monitoreo de Emisiones (CO₂)
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-1">
+                  <div className="bg-gradient-to-br from-sky-900 to-sky-700 p-5 rounded-xl shadow-lg text-white relative overflow-hidden group flex flex-col justify-center">
+                    <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity"><Cloud size={80} /></div>
+                    <p className="text-xs font-bold text-sky-200 uppercase tracking-widest mb-1 relative z-10">Total Emisiones CO₂</p>
+                    <h3 className="text-3xl xl:text-4xl font-black font-serif relative z-10 mb-1">
+                      {emisionesData.total.toLocaleString('es-MX', {maximumFractionDigits: 2})} <span className="text-lg">Ton</span>
+                    </h3>
+                    <p className="text-xs font-medium text-sky-200 mt-1 relative z-10">Impacto ambiental total registrado.</p>
+                  </div>
+                  <div className="bg-[var(--bg-floating)] border border-[var(--border-cream)] p-5 rounded-xl shadow-md relative overflow-hidden group flex flex-col justify-center">
+                    <div className="absolute top-0 right-0 p-3 opacity-5 group-hover:opacity-10 transition-opacity"><Cloud size={50} /></div>
+                    <p className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest mb-1">Mes Actual</p>
+                    <h3 className="text-2xl xl:text-3xl font-black text-[var(--text-main)] font-serif mb-1">
+                      {emisionesData.mesActual.toLocaleString('es-MX', {maximumFractionDigits: 2})} Ton
+                    </h3>
+                    <p className="text-xs font-medium text-[var(--text-muted)] mt-1">Generadas en el periodo en curso.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="bg-[var(--bg-floating)] border border-[var(--border-cream)] p-5 rounded-xl shadow-sm">
+                <h3 className="font-bold text-sm text-[var(--text-muted)] uppercase tracking-widest mb-6 text-center">Emisiones por Flota (Ton CO₂)</h3>
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={emisionesData.graficaEmpresa}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border-cream)" />
+                      <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#888', fontSize: 12}} />
+                      <YAxis axisLine={false} tickLine={false} tick={{fill: '#888', fontSize: 12}} />
+                      <Tooltip 
+                        cursor={{fill: 'rgba(0,0,0,0.05)'}} 
+                        contentStyle={{borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)'}} 
+                        formatter={(value: number) => [`${value.toFixed(2)} Ton`, 'Emisiones']}
+                      />
+                      <Bar dataKey="value" fill="#0ea5e9" radius={[4, 4, 0, 0]} barSize={40} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+              <div className="bg-[var(--bg-floating)] border border-[var(--border-cream)] p-5 rounded-xl shadow-sm">
+                <h3 className="font-bold text-sm text-[var(--text-muted)] uppercase tracking-widest mb-6 text-center">Tendencia Mensual (Ton CO₂)</h3>
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={emisionesData.graficaMes}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border-cream)" />
+                      <XAxis dataKey="mes" axisLine={false} tickLine={false} tick={{fill: '#888', fontSize: 12}} />
+                      <YAxis axisLine={false} tickLine={false} tick={{fill: '#888', fontSize: 12}} />
+                      <Tooltip 
+                        contentStyle={{borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)'}} 
+                        formatter={(value: number) => [`${value.toFixed(2)} Ton`, 'Emisiones']}
+                      />
+                      <Line type="monotone" dataKey="value" stroke="#0ea5e9" strokeWidth={3} dot={{r: 4, fill: '#0ea5e9', strokeWidth: 0}} activeDot={{r: 6}} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
               </div>
             </div>
           </div>
         )}
 
         {activeTab === 'peajes' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 animate-in fade-in zoom-in-95 duration-500">
             <div className="bg-[var(--bg-floating)] border border-[var(--border-cream)] p-5 rounded-xl shadow-sm">
               <h3 className="font-bold font-serif text-[var(--text-main)] mb-4 flex items-center gap-2">
                 <TrendingUp size={18} className="text-[var(--text-muted)]" /> Tendencia Peajes
@@ -970,42 +1118,38 @@ export default function CostosPage() {
         {activeTab !== 'kpis' && (
           <div className="max-w-[95%] mx-auto">
             <div className="bg-[var(--bg-floating)] border border-[var(--border-cream)] rounded-xl shadow-sm overflow-hidden">
-              <div className="w-full overflow-x-auto md:overflow-x-visible">
+              <div className="w-full overflow-auto max-h-[600px] custom-scrollbar">
                 <table className="min-w-[1000px] w-full text-left border-collapse">
                   <thead>
                     {activeTab === 'mantenimiento' ? (
                       <tr className="border-b border-[var(--border-cream)] text-stone-500 text-[11px] uppercase tracking-widest font-black">
-                        <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Fecha</th>
-                        <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Servicio</th>
-                        <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Unidad</th>
-                        <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Costo MO</th>
-                        <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Costo Ref.</th>
-                        <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Total</th>
-                        <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Empresa</th>
-                        <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Proveedor</th>
+                        <th className="sticky top-0 z-30 p-5 bg-[var(--bg-floating)]/90 backdrop-blur-md">Fecha</th>
+                        <th className="sticky top-0 z-30 p-5 bg-[var(--bg-floating)]/90 backdrop-blur-md">Servicio</th>
+                        <th className="sticky top-0 z-30 p-5 bg-[var(--bg-floating)]/90 backdrop-blur-md">Unidad</th>
+                        <th className="sticky top-0 z-30 p-5 bg-[var(--bg-floating)]/90 backdrop-blur-md">Costo MO</th>
+                        <th className="sticky top-0 z-30 p-5 bg-[var(--bg-floating)]/90 backdrop-blur-md">Costo Ref.</th>
+                        <th className="sticky top-0 z-30 p-5 bg-[var(--bg-floating)]/90 backdrop-blur-md">Total</th>
+                        <th className="sticky top-0 z-30 p-5 bg-[var(--bg-floating)]/90 backdrop-blur-md">Empresa</th>
+                        <th className="sticky top-0 z-30 p-5 bg-[var(--bg-floating)]/90 backdrop-blur-md">Proveedor</th>
                       </tr>
                     ) : activeTab === 'gasolina' ? (
                       <tr className="border-b border-[var(--border-cream)] text-stone-500 text-[11px] uppercase tracking-widest font-black">
-                        <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Fecha y Hora</th>
-                        <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Unidad</th>
-                        <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Estación</th>
-                        <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Combustible</th>
-                        <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Litros</th>
-                        <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Precio</th>
-                        <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Total</th>
+                        <th className="sticky top-0 z-30 p-5 bg-[var(--bg-floating)]/90 backdrop-blur-md">Fecha y Hora</th>
+                        <th className="sticky top-0 z-30 p-5 bg-[var(--bg-floating)]/90 backdrop-blur-md">Unidad</th>
+                        <th className="sticky top-0 z-30 p-5 bg-[var(--bg-floating)]/90 backdrop-blur-md">Estación</th>
+                        <th className="sticky top-0 z-30 p-5 bg-[var(--bg-floating)]/90 backdrop-blur-md">Combustible</th>
+                        <th className="sticky top-0 z-30 p-5 bg-[var(--bg-floating)]/90 backdrop-blur-md">Litros</th>
+                        <th className="sticky top-0 z-30 p-5 bg-[var(--bg-floating)]/90 backdrop-blur-md">Precio</th>
+                        <th className="sticky top-0 z-30 p-5 bg-[var(--bg-floating)]/90 backdrop-blur-md">Total</th>
                       </tr>
                     ) : (
                       <tr className="border-b border-[var(--border-cream)] text-stone-500 text-[11px] uppercase tracking-widest font-black">
-                        <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Tag</th>
-                        <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Fecha y Hora</th>
-                        <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Unidad</th>
-                        <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Caseta</th>
-                        <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Carril</th>
-                        <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Clase</th>
-                        <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Importe</th>
-                        <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Fecha Apl.</th>
-                        <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Hora Apl.</th>
-                        <th className="sticky z-30 p-5 bg-stone-50/90 backdrop-blur-md" style={{ top: `${headerHeight}px` }}>Consecar</th>
+                        <th className="sticky top-0 z-30 p-5 bg-[var(--bg-floating)]/90 backdrop-blur-md">Tag</th>
+                        <th className="sticky top-0 z-30 p-5 bg-[var(--bg-floating)]/90 backdrop-blur-md">Fecha y Hora</th>
+                        <th className="sticky top-0 z-30 p-5 bg-[var(--bg-floating)]/90 backdrop-blur-md">Unidad</th>
+                        <th className="sticky top-0 z-30 p-5 bg-[var(--bg-floating)]/90 backdrop-blur-md">Caseta</th>
+                        <th className="sticky top-0 z-30 p-5 bg-[var(--bg-floating)]/90 backdrop-blur-md">Clase</th>
+                        <th className="sticky top-0 z-30 p-5 bg-[var(--bg-floating)]/90 backdrop-blur-md">Importe</th>
                       </tr>
                     )}
                   </thead>
@@ -1047,7 +1191,7 @@ export default function CostosPage() {
                       )
                     ) : (
                       filteredPeajes.length === 0 ? (
-                        <tr><td colSpan={10} className="p-8 text-center text-[var(--text-muted)]">No se encontraron registros de peajes.</td></tr>
+                        <tr><td colSpan={6} className="p-8 text-center text-[var(--text-muted)]">No se encontraron registros de peajes.</td></tr>
                       ) : (
                         filteredPeajes.map((peaje) => (
                           <tr key={peaje.Id_Peaje} className="border-b border-[var(--border-cream)] hover:bg-[var(--bg-hover)] even:bg-[var(--bg-screen)] transition-colors">
@@ -1055,12 +1199,8 @@ export default function CostosPage() {
                             <td className="p-4 text-sm">{new Date(peaje.Fecha_Hora).toLocaleString()}</td>
                             <td className="p-4 text-sm whitespace-nowrap"><span className="bg-gray-200 text-gray-800 px-2 py-1 rounded text-xs font-bold whitespace-nowrap">{peaje.Consecutivo}</span></td>
                             <td className="p-4 text-sm font-medium truncate" title={peaje.Caseta}>{peaje.Caseta}</td>
-                            <td className="p-4 text-sm">{peaje.Carril}</td>
                             <td className="p-4 text-sm">{peaje.Clase}</td>
                             <td className="p-4 text-sm font-bold text-[var(--text-main)]">{formatoMoneda(peaje.Importe)}</td>
-                            <td className="p-4 text-sm text-[var(--text-muted)]">{peaje.Fecha_Aplicacion || '-'}</td>
-                            <td className="p-4 text-sm text-[var(--text-muted)]">{peaje.Hora_Aplicacion || '-'}</td>
-                            <td className="p-4 text-sm text-[var(--text-muted)]">{peaje.Consecar || '-'}</td>
                           </tr>
                         ))
                       )
@@ -1089,9 +1229,8 @@ export default function CostosPage() {
                       )}
                       {activeTab === 'peajes' && filteredPeajes.length > 0 && (
                         <tr>
-                          <td colSpan={6} className="p-4 text-right font-black text-sm uppercase tracking-widest text-[var(--text-muted)]">Totales en Pantalla:</td>
+                          <td colSpan={5} className="p-4 text-right font-black text-sm uppercase tracking-widest text-[var(--text-muted)]">Totales en Pantalla:</td>
                           <td className="p-4 font-black text-[var(--text-main)] text-base">{formatoMoneda(totalPeajes)}</td>
-                          <td colSpan={3}></td>
                         </tr>
                       )}
                     </tfoot>
