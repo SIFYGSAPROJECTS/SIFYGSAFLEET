@@ -82,7 +82,7 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
     if (cookieAreas) {
       try {
         setLocalUserAreas(JSON.parse(cookieAreas));
-      } catch (e) {}
+      } catch (e) { }
     }
   }, [userName, userRole]);
 
@@ -103,7 +103,7 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
         className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-300 bg-[#0a0a0a]/95 backdrop-blur-md shadow-[0_4px_30px_rgba(0,0,0,0.4)] border-b border-white/5`}
       >
         <div className="max-w-7xl mx-auto px-6 md:px-8 flex items-center justify-between h-20">
-          
+
           {/* LEFT SIDE: Brand Logo / Title */}
           <Link href="/portal" className="flex items-center gap-4 cursor-pointer group">
             <Image
@@ -122,10 +122,10 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
 
           {/* RIGHT SIDE: Action Buttons (Desktop Only) - User Profile Capsule for Portal (No Portal menu) */}
           <div className="hidden md:flex items-center bg-white/5 border border-white/5 rounded-xl p-0.5 shadow-inner backdrop-blur-md">
-            
+
             {/* User Dropdown for Logout */}
             <div className="relative group">
-              <div 
+              <div
                 onClick={(e) => toggleDropdown('user-portal', e)}
                 className="px-4 py-2 flex items-center gap-3 cursor-pointer hover:bg-white/5 rounded-xl transition-all"
               >
@@ -141,12 +141,11 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
               </div>
 
               {/* Hover Logout dropdown centered with pt-2 to bridge hover gap */}
-              <div 
-                className={`absolute top-full left-1/2 pt-2 w-max transition-all duration-200 z-[120] ${
-                  openDropdown === 'user-portal'
-                    ? 'opacity-100 visible pointer-events-auto'
-                    : 'opacity-0 invisible pointer-events-none group-hover:opacity-100 group-hover:visible group-hover:pointer-events-auto'
-                }`}
+              <div
+                className={`absolute top-full left-1/2 pt-2 w-max transition-all duration-200 z-[120] ${openDropdown === 'user-portal'
+                  ? 'opacity-100 visible pointer-events-auto'
+                  : 'opacity-0 invisible pointer-events-none group-hover:opacity-100 group-hover:visible group-hover:pointer-events-auto'
+                  }`}
                 style={{ transform: 'translateX(-50%)' }}
               >
                 <div className="bg-[#0a0a0a]/95 border border-white/5 rounded-xl shadow-2xl p-1 backdrop-blur-md flex justify-center items-center">
@@ -161,18 +160,17 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
             {/* Menú de Settings (Auditoría) */}
             {localIsAdmin && (
               <div className="relative group">
-                <button 
+                <button
                   onClick={(e) => toggleDropdown('settings-portal', e)}
                   className="p-2 mx-1 text-white/50 hover:text-white hover:bg-white/10 rounded-xl transition-all flex items-center justify-center cursor-pointer"
                 >
                   <Settings size={18} className="group-hover:rotate-90 transition-transform duration-300" />
                 </button>
-                <div 
-                  className={`absolute top-full right-0 pt-2 w-48 transition-all duration-200 z-[120] ${
-                    openDropdown === 'settings-portal'
-                      ? 'opacity-100 visible pointer-events-auto'
-                      : 'opacity-0 invisible pointer-events-none group-hover:opacity-100 group-hover:visible group-hover:pointer-events-auto'
-                  }`}
+                <div
+                  className={`absolute top-full right-0 pt-2 w-48 transition-all duration-200 z-[120] ${openDropdown === 'settings-portal'
+                    ? 'opacity-100 visible pointer-events-auto'
+                    : 'opacity-0 invisible pointer-events-none group-hover:opacity-100 group-hover:visible group-hover:pointer-events-auto'
+                    }`}
                 >
                   <div className="bg-[#0a0a0a]/95 border border-white/5 rounded-xl shadow-2xl p-1.5 backdrop-blur-md text-left">
                     <div className="px-3 py-1.5 text-[9px] font-black text-white/40 tracking-wider uppercase border-b border-white/5 mb-1">
@@ -218,12 +216,12 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
           </div>
 
         </div>
-        
+
         {/* Mobile Drawer Panel for Portal */}
         {isMenuOpen && (
           <div className="fixed inset-0 z-[80] bg-black/60 backdrop-blur-sm md:hidden" onClick={() => setIsMenuOpen(false)}>
             <div className="fixed top-20 left-4 right-4 max-h-[calc(100vh-100px)] overflow-y-auto bg-[#0a0a0a]/95 border border-white/5 p-6 flex flex-col space-y-4 shadow-2xl rounded-2xl" onClick={e => e.stopPropagation()}>
-              
+
               <div className="text-[10px] font-black text-white/30 uppercase tracking-widest pl-2 mb-1">Módulos</div>
               <Link
                 href="/portal"
@@ -282,7 +280,7 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
 
 
               <div className="h-px bg-white/5 my-2"></div>
-              
+
               <div className="flex items-center space-x-4 border-b border-white/5 pb-4">
                 <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center font-bold text-sm text-[#FF7420]">
                   {localUserName.charAt(0).toUpperCase()}
@@ -330,12 +328,12 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
     <>
       {/* Backdrop Blocker - Prevents content from peeking around the floating Navbar when scrolled */}
       <div className={`fixed top-0 left-0 right-0 h-[72px] ${type === 'auditoria' ? 'bg-[#0a0a0a]' : 'bg-[var(--bg-screen)]'} z-[90] transition-opacity duration-300 pointer-events-none ${scrolled ? 'opacity-100' : 'opacity-0'}`} />
-      
+
       {/* Header Container - Floating Unified Black Ribbon */}
       <header className={`fixed top-2 left-4 right-4 z-[100] mx-auto transition-all duration-300 ${resolvedMaxWidth}`}>
         <div className={`absolute inset-0 -z-10 rounded-2xl transition-all duration-700 ease-in-out bg-[#0a0a0a] border border-white/10 shadow-lg shadow-black/40`} />
         <div className="px-6 flex items-center justify-between h-16">
-          
+
           {/* LEFT SIDE: Brand Logo / Title */}
           <div className="flex-1 flex justify-start">
             {type === 'computo' ? (
@@ -422,7 +420,7 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
 
           {/* RIGHT SIDE: Action Buttons (Desktop Only) - Hover Dropdowns */}
           <div className="flex-1 hidden md:flex justify-end items-center gap-2">
-            
+
             {/* Cómputo TI Sub-navigation (Dropdown similar to Módulos) */}
             {type === 'computo' && pathname !== '/computo' && (
               <div className="relative group">
@@ -434,12 +432,11 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                 </button>
 
                 {/* Dropdown with pt-2 to bridge hover gap */}
-                <div 
-                  className={`absolute top-full left-1/2 pt-2 w-48 transition-all duration-200 z-[120] ${
-                    openDropdown === 'menu-ti'
-                      ? 'opacity-100 visible pointer-events-auto'
-                      : 'opacity-0 invisible pointer-events-none group-hover:opacity-100 group-hover:visible group-hover:pointer-events-auto'
-                  }`}
+                <div
+                  className={`absolute top-full left-1/2 pt-2 w-48 transition-all duration-200 z-[120] ${openDropdown === 'menu-ti'
+                    ? 'opacity-100 visible pointer-events-auto'
+                    : 'opacity-0 invisible pointer-events-none group-hover:opacity-100 group-hover:visible group-hover:pointer-events-auto'
+                    }`}
                   style={{ transform: 'translateX(-50%)' }}
                 >
                   <div className="bg-zinc-950/95 border border-white/10 rounded-xl shadow-2xl p-1.5 backdrop-blur-md text-left">
@@ -502,12 +499,11 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                 </button>
 
                 {/* Dropdown with pt-2 to bridge hover gap */}
-                <div 
-                  className={`absolute top-full left-1/2 pt-2 w-48 transition-all duration-200 z-[120] ${
-                    openDropdown === 'menu-fleet'
-                      ? 'opacity-100 visible pointer-events-auto'
-                      : 'opacity-0 invisible pointer-events-none group-hover:opacity-100 group-hover:visible group-hover:pointer-events-auto'
-                  }`}
+                <div
+                  className={`absolute top-full left-1/2 pt-2 w-48 transition-all duration-200 z-[120] ${openDropdown === 'menu-fleet'
+                    ? 'opacity-100 visible pointer-events-auto'
+                    : 'opacity-0 invisible pointer-events-none group-hover:opacity-100 group-hover:visible group-hover:pointer-events-auto'
+                    }`}
                   style={{ transform: 'translateX(-50%)' }}
                 >
                   <div className="bg-zinc-950/95 border border-white/10 rounded-xl shadow-2xl p-1.5 backdrop-blur-md text-left">
@@ -585,12 +581,11 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                 </button>
 
                 {/* Modules Dropdown with pt-2 to bridge hover gap */}
-                <div 
-                  className={`absolute top-full left-1/2 pt-2 w-48 transition-all duration-200 z-[120] ${
-                    openDropdown === 'modules'
-                      ? 'opacity-100 visible pointer-events-auto'
-                      : 'opacity-0 invisible pointer-events-none group-hover:opacity-100 group-hover:visible group-hover:pointer-events-auto'
-                  }`}
+                <div
+                  className={`absolute top-full left-1/2 pt-2 w-48 transition-all duration-200 z-[120] ${openDropdown === 'modules'
+                    ? 'opacity-100 visible pointer-events-auto'
+                    : 'opacity-0 invisible pointer-events-none group-hover:opacity-100 group-hover:visible group-hover:pointer-events-auto'
+                    }`}
                   style={{ transform: 'translateX(-50%)' }}
                 >
                   <div className="bg-zinc-950/95 border border-white/10 rounded-xl shadow-2xl p-1.5 backdrop-blur-md">
@@ -655,7 +650,7 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                         className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-white/80 hover:text-white hover:bg-white/5 transition-all group/item"
                       >
                         <Wind size={14} className="text-cyan-400 transition-transform duration-300 ease-in-out group-hover/item:scale-110 group-hover/item:rotate-12" />
-                        <span>Aires Acond.</span>
+                        <span>Aires Ac</span>
                       </Link>
                     )}
                     {(localIsAdmin || localUserAreas.includes('TELEFONIA')) && (
@@ -674,7 +669,7 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
 
             {/* User Dropdown for Logout */}
             <div className={`relative group`}>
-              <div 
+              <div
                 onClick={(e) => toggleDropdown('user-dashboard', e)}
                 className={`px-4 py-2 flex items-center gap-3 cursor-pointer hover:bg-white/10 transition-all rounded-xl`}
               >
@@ -683,25 +678,23 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                 </div>
                 <div className="flex flex-col justify-center text-left shrink-0">
                   <p className="text-xs font-semibold text-white leading-tight">{localUserName}</p>
-                  <span className={`text-[7.5px] font-black tracking-wider uppercase block leading-tight ${
-                    type === 'computo'
-                      ? (localIsAdmin ? 'text-emerald-400' : 'text-white/50')
-                      : type === 'programa'
-                        ? (localIsAdmin ? 'text-indigo-400' : 'text-white/50')
-                        : (localIsAdmin ? 'text-stone-300' : 'text-white/50')
-                  }`}>
+                  <span className={`text-[7.5px] font-black tracking-wider uppercase block leading-tight ${type === 'computo'
+                    ? (localIsAdmin ? 'text-emerald-400' : 'text-white/50')
+                    : type === 'programa'
+                      ? (localIsAdmin ? 'text-indigo-400' : 'text-white/50')
+                      : (localIsAdmin ? 'text-stone-300' : 'text-white/50')
+                    }`}>
                     {localIsAdmin ? 'ADMINISTRADOR' : 'EMPLEADO'}
                   </span>
                 </div>
               </div>
 
               {/* Hover Logout dropdown centered with pt-2 to bridge hover gap */}
-              <div 
-                className={`absolute top-full left-1/2 pt-2 w-max transition-all duration-200 z-[120] ${
-                  openDropdown === 'user-dashboard'
-                    ? 'opacity-100 visible pointer-events-auto'
-                    : 'opacity-0 invisible pointer-events-none group-hover:opacity-100 group-hover:visible group-hover:pointer-events-auto'
-                }`}
+              <div
+                className={`absolute top-full left-1/2 pt-2 w-max transition-all duration-200 z-[120] ${openDropdown === 'user-dashboard'
+                  ? 'opacity-100 visible pointer-events-auto'
+                  : 'opacity-0 invisible pointer-events-none group-hover:opacity-100 group-hover:visible group-hover:pointer-events-auto'
+                  }`}
                 style={{ transform: 'translateX(-50%)' }}
               >
                 <div className="bg-[#0a0a0a]/95 border border-white/5 rounded-xl shadow-2xl p-1 backdrop-blur-md flex justify-center items-center">
@@ -713,18 +706,17 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
             {/* Menú de Settings (Auditoría) */}
             {localIsAdmin && (
               <div className="relative group ml-2">
-                <button 
+                <button
                   onClick={(e) => toggleDropdown('settings-dashboard', e)}
                   className="p-2 text-white/50 hover:text-white hover:bg-white/10 rounded-xl transition-all flex items-center justify-center cursor-pointer"
                 >
                   <Settings size={18} className="group-hover:rotate-90 transition-transform duration-300" />
                 </button>
-                <div 
-                  className={`absolute top-full right-0 pt-2 w-48 transition-all duration-200 z-[120] ${
-                    openDropdown === 'settings-dashboard'
-                      ? 'opacity-100 visible pointer-events-auto'
-                      : 'opacity-0 invisible pointer-events-none group-hover:opacity-100 group-hover:visible group-hover:pointer-events-auto'
-                  }`}
+                <div
+                  className={`absolute top-full right-0 pt-2 w-48 transition-all duration-200 z-[120] ${openDropdown === 'settings-dashboard'
+                    ? 'opacity-100 visible pointer-events-auto'
+                    : 'opacity-0 invisible pointer-events-none group-hover:opacity-100 group-hover:visible group-hover:pointer-events-auto'
+                    }`}
                 >
                   <div className="bg-zinc-950/95 border border-white/10 rounded-xl shadow-2xl p-1.5 backdrop-blur-md text-left">
                     <div className="px-3 py-1.5 text-[9px] font-black text-white/40 tracking-wider uppercase border-b border-white/5 mb-1">
@@ -774,35 +766,31 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
 
       {/* Mobile Menu Slide Overlay */}
       <div
-        className={`fixed inset-0 z-[80] bg-black/60 backdrop-blur-sm transition-opacity duration-300 md:hidden ${
-          isMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
-        }`}
+        className={`fixed inset-0 z-[80] bg-black/60 backdrop-blur-sm transition-opacity duration-300 md:hidden ${isMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+          }`}
         onClick={() => setIsMenuOpen(false)}
       />
 
       {/* Mobile Drawer Panel - Floating Glass Card */}
       <div
-        className={`fixed top-24 left-4 right-4 max-h-[calc(100vh-120px)] overflow-y-auto z-[95] bg-[#0b0b0b]/95 border border-white/10 backdrop-blur-lg rounded-2xl transition-all duration-300 ease-in-out md:hidden shadow-2xl ${
-          isMenuOpen ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 -translate-y-4 pointer-events-none'
-        }`}
+        className={`fixed top-24 left-4 right-4 max-h-[calc(100vh-120px)] overflow-y-auto z-[95] bg-[#0b0b0b]/95 border border-white/10 backdrop-blur-lg rounded-2xl transition-all duration-300 ease-in-out md:hidden shadow-2xl ${isMenuOpen ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 -translate-y-4 pointer-events-none'
+          }`}
       >
         <div className="px-6 py-6 flex flex-col space-y-6">
-          
+
           {/* User Info (Mobile) */}
           <div
             style={{ transitionDelay: isMenuOpen ? '40ms' : '0ms' }}
-            className={`flex items-center space-x-4 border-b border-white/5 pb-4 transition-all duration-300 ${
-              isMenuOpen ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4'
-            }`}
+            className={`flex items-center space-x-4 border-b border-white/5 pb-4 transition-all duration-300 ${isMenuOpen ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4'
+              }`}
           >
             <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center font-bold text-sm text-[#FF7420]">
               {localUserName.charAt(0).toUpperCase()}
             </div>
             <div>
               <p className="text-sm font-semibold text-white/90">{localUserName}</p>
-              <span className={`text-[9px] px-2 py-0.5 rounded-full font-black tracking-wider uppercase ${
-                localIsAdmin ? 'bg-[#FF7420]/15 text-[#FF7420] border border-[#FF7420]/20' : 'bg-white/5 text-white/50 border border-white/10'
-              }`}>
+              <span className={`text-[9px] px-2 py-0.5 rounded-full font-black tracking-wider uppercase ${localIsAdmin ? 'bg-[#FF7420]/15 text-[#FF7420] border border-[#FF7420]/20' : 'bg-white/5 text-white/50 border border-white/10'
+                }`}>
                 {localIsAdmin ? 'ADMINISTRADOR' : 'EMPLEADO'}
               </span>
             </div>
@@ -816,11 +804,10 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                   <Link
                     href="/computo/inventario"
                     onClick={() => setIsMenuOpen(false)}
-                    className={`border px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold ${
-                      pathname === '/computo/inventario' 
-                        ? 'bg-emerald-600 border-emerald-500 text-white' 
-                        : 'bg-white/5 border-white/5 text-white/90 hover:bg-white/10'
-                    }`}
+                    className={`border px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold ${pathname === '/computo/inventario'
+                      ? 'bg-emerald-600 border-emerald-500 text-white'
+                      : 'bg-white/5 border-white/5 text-white/90 hover:bg-white/10'
+                      }`}
                   >
                     <Laptop size={14} className="text-emerald-400" /> Inventario
                   </Link>
@@ -828,22 +815,20 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                 <Link
                   href="/computo/servicios"
                   onClick={() => setIsMenuOpen(false)}
-                  className={`border px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold ${
-                    pathname === '/computo/servicios' 
-                      ? 'bg-emerald-600 border-emerald-500 text-white' 
-                      : 'bg-white/5 border-white/5 text-white/90 hover:bg-white/10'
-                  }`}
+                  className={`border px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold ${pathname === '/computo/servicios'
+                    ? 'bg-emerald-600 border-emerald-500 text-white'
+                    : 'bg-white/5 border-white/5 text-white/90 hover:bg-white/10'
+                    }`}
                 >
                   <Wrench size={14} className="text-emerald-400" /> Soporte TI
                 </Link>
                 <Link
                   href="/computo/mantenimientos"
                   onClick={() => setIsMenuOpen(false)}
-                  className={`border px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold ${
-                    pathname === '/computo/mantenimientos' 
-                      ? 'bg-emerald-600 border-emerald-500 text-white' 
-                      : 'bg-white/5 border-white/5 text-white/90 hover:bg-white/10'
-                  }`}
+                  className={`border px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold ${pathname === '/computo/mantenimientos'
+                    ? 'bg-emerald-600 border-emerald-500 text-white'
+                    : 'bg-white/5 border-white/5 text-white/90 hover:bg-white/10'
+                    }`}
                 >
                   <CalendarClock size={14} className="text-emerald-400" /> Mantenimientos
                 </Link>
@@ -851,11 +836,10 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                   <Link
                     href="/computo/documentos"
                     onClick={() => setIsMenuOpen(false)}
-                    className={`border px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold ${
-                      pathname === '/computo/documentos' 
-                        ? 'bg-emerald-600 border-emerald-500 text-white' 
-                        : 'bg-white/5 border-white/5 text-white/90 hover:bg-white/10'
-                    }`}
+                    className={`border px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold ${pathname === '/computo/documentos'
+                      ? 'bg-emerald-600 border-emerald-500 text-white'
+                      : 'bg-white/5 border-white/5 text-white/90 hover:bg-white/10'
+                      }`}
                   >
                     <FolderOpen size={14} className="text-emerald-400" /> Documentos
                   </Link>
@@ -864,11 +848,10 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                   <Link
                     href="/computo/empleados"
                     onClick={() => setIsMenuOpen(false)}
-                    className={`border px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold ${
-                      pathname === '/computo/empleados' 
-                        ? 'bg-emerald-600 border-emerald-500 text-white' 
-                        : 'bg-white/5 border-white/5 text-white/90 hover:bg-white/10'
-                    }`}
+                    className={`border px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold ${pathname === '/computo/empleados'
+                      ? 'bg-emerald-600 border-emerald-500 text-white'
+                      : 'bg-white/5 border-white/5 text-white/90 hover:bg-white/10'
+                      }`}
                   >
                     <User size={14} className="text-emerald-400" /> Personal
                   </Link>
@@ -883,11 +866,10 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                 <Link
                   href="/dashboard/servicios"
                   onClick={() => setIsMenuOpen(false)}
-                  className={`border px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold ${
-                    pathname === '/dashboard/servicios' 
-                      ? 'bg-zinc-800 border-zinc-700 text-white' 
-                      : 'bg-white/5 border-white/5 text-white/90 hover:bg-white/10'
-                  }`}
+                  className={`border px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold ${pathname === '/dashboard/servicios'
+                    ? 'bg-zinc-800 border-zinc-700 text-white'
+                    : 'bg-white/5 border-white/5 text-white/90 hover:bg-white/10'
+                    }`}
                 >
                   <Wrench size={14} className="text-zinc-400" /> Servicios
                 </Link>
@@ -895,11 +877,10 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                   <Link
                     href="/dashboard/inventario"
                     onClick={() => setIsMenuOpen(false)}
-                    className={`border px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold ${
-                      pathname === '/dashboard/inventario' 
-                        ? 'bg-zinc-800 border-zinc-700 text-white' 
-                        : 'bg-white/5 border-white/5 text-white/90 hover:bg-white/10'
-                    }`}
+                    className={`border px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold ${pathname === '/dashboard/inventario'
+                      ? 'bg-zinc-800 border-zinc-700 text-white'
+                      : 'bg-white/5 border-white/5 text-white/90 hover:bg-white/10'
+                      }`}
                   >
                     <Car size={14} className="text-zinc-400" /> Flota
                   </Link>
@@ -908,11 +889,10 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                   <Link
                     href="/dashboard/costos"
                     onClick={() => setIsMenuOpen(false)}
-                    className={`border px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold ${
-                      pathname === '/dashboard/costos' 
-                        ? 'bg-zinc-800 border-zinc-700 text-white' 
-                        : 'bg-white/5 border-white/5 text-white/90 hover:bg-white/10'
-                    }`}
+                    className={`border px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold ${pathname === '/dashboard/costos'
+                      ? 'bg-zinc-800 border-zinc-700 text-white'
+                      : 'bg-white/5 border-white/5 text-white/90 hover:bg-white/10'
+                      }`}
                   >
                     <DollarSign size={14} className="text-zinc-400" /> Costos
                   </Link>
@@ -920,33 +900,30 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                 <Link
                   href="/dashboard/usuarios"
                   onClick={() => setIsMenuOpen(false)}
-                  className={`border px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold ${
-                    pathname === '/dashboard/usuarios' 
-                      ? 'bg-zinc-800 border-zinc-700 text-white' 
-                      : 'bg-white/5 border-white/5 text-white/90 hover:bg-white/10'
-                  }`}
+                  className={`border px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold ${pathname === '/dashboard/usuarios'
+                    ? 'bg-zinc-800 border-zinc-700 text-white'
+                    : 'bg-white/5 border-white/5 text-white/90 hover:bg-white/10'
+                    }`}
                 >
                   <User size={14} className="text-zinc-400" /> Usuarios
                 </Link>
                 <Link
                   href={localIsAdmin ? "/dashboard/checklists" : "/dashboard/mis-checklists"}
                   onClick={() => setIsMenuOpen(false)}
-                  className={`border px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold ${
-                    pathname === '/dashboard/checklists' || pathname === '/dashboard/mis-checklists'
-                      ? 'bg-zinc-800 border-zinc-700 text-white' 
-                      : 'bg-white/5 border-white/5 text-white/90 hover:bg-white/10'
-                  }`}
+                  className={`border px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold ${pathname === '/dashboard/checklists' || pathname === '/dashboard/mis-checklists'
+                    ? 'bg-zinc-800 border-zinc-700 text-white'
+                    : 'bg-white/5 border-white/5 text-white/90 hover:bg-white/10'
+                    }`}
                 >
                   <FileText size={14} className="text-zinc-400" /> Checklists
                 </Link>
                 <Link
                   href={localIsAdmin ? "/dashboard/documentos" : "/dashboard/mis-documentos"}
                   onClick={() => setIsMenuOpen(false)}
-                  className={`border px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold ${
-                    pathname === '/dashboard/documentos' || pathname === '/dashboard/mis-documentos'
-                      ? 'bg-zinc-800 border-zinc-700 text-white' 
-                      : 'bg-white/5 border-white/5 text-white/90 hover:bg-white/10'
-                  }`}
+                  className={`border px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold ${pathname === '/dashboard/documentos' || pathname === '/dashboard/mis-documentos'
+                    ? 'bg-zinc-800 border-zinc-700 text-white'
+                    : 'bg-white/5 border-white/5 text-white/90 hover:bg-white/10'
+                    }`}
                 >
                   <FolderOpen size={14} className="text-zinc-400" /> Documentos
                 </Link>
@@ -954,14 +931,13 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                   <Link
                     href="/verificaciones"
                     onClick={() => setIsMenuOpen(false)}
-                    className={`border px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold ${
-                      pathname === '/verificaciones' 
-                        ? 'bg-zinc-800 border-zinc-700 text-white' 
-                        : 'bg-white/5 border-white/5 text-white/90 hover:bg-white/10'
-                  }`}
-                >
-                  <CalendarCheck size={14} className="text-zinc-400" /> Verificaciones
-                </Link>
+                    className={`border px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold ${pathname === '/verificaciones'
+                      ? 'bg-zinc-800 border-zinc-700 text-white'
+                      : 'bg-white/5 border-white/5 text-white/90 hover:bg-white/10'
+                      }`}
+                  >
+                    <CalendarCheck size={14} className="text-zinc-400" /> Verificaciones
+                  </Link>
                 )}
                 <div className="h-px bg-white/5 my-2"></div>
               </>
@@ -1018,7 +994,7 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
 
 
                 <div className="h-px bg-white/5 my-2"></div>
-                
+
                 <a
                   href="/portal"
                   onClick={() => setIsMenuOpen(false)}
