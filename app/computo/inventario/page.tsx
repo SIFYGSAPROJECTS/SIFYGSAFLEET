@@ -23,6 +23,7 @@ interface EquipoComputo {
   CR: string | null;
   Fecha_CR: string | null;
   Proveedor: string | null;
+  Email_Empleado: string | null;
 }
 
 type TabPrincipal = 'activos' | 'bajas' | 'revision';
@@ -44,7 +45,7 @@ export default function ComputoInventarioPage() {
   const [sysModal, setSysModal] = useState<{ isOpen: boolean, type: ModalType, title: string, message: React.ReactNode }>({ isOpen: false, type: 'info', title: '', message: '' });
   const [formData, setFormData] = useState({
     C_Interno: '', Empresa: '', Tipo: 'Laptop', Marca: '', Modelo: '', Service_Tag: '', Cargador: '',
-    Usuario: '', Departamento: '', Puesto_Proyecto: '', N_EMP: '',
+    Usuario: '', Departamento: '', Puesto_Proyecto: '', Email_Empleado: '',
     Estatus: 'Asignado', CR: 'NO', Fecha_CR: '', Proveedor: ''
   });
 
@@ -161,7 +162,7 @@ export default function ComputoInventarioPage() {
     setModoEdicion(false);
     setFormData({
       C_Interno: '', Empresa: '', Tipo: 'Laptop', Marca: '', Modelo: '', Service_Tag: '', Cargador: '',
-      Usuario: '', Departamento: '', Puesto_Proyecto: '', N_EMP: '',
+      Usuario: '', Departamento: '', Puesto_Proyecto: '', Email_Empleado: '',
       Estatus: 'Asignado', CR: 'NO', Fecha_CR: '', Proveedor: ''
     });
     setModalAbierto(true);
@@ -180,7 +181,7 @@ export default function ComputoInventarioPage() {
       Usuario: equipo.Usuario || '',
       Departamento: equipo.Departamento || '',
       Puesto_Proyecto: equipo.Puesto_Proyecto || '',
-      N_EMP: equipo.N_EMP || '',
+      Email_Empleado: equipo.Email_Empleado || '',
       Estatus: equipo.Estatus || 'Asignado',
       CR: equipo.CR || 'NO',
       Fecha_CR: equipo.Fecha_CR ? equipo.Fecha_CR.split('T')[0] : '', // Format para input type="date"
@@ -194,10 +195,15 @@ export default function ComputoInventarioPage() {
     const metodo = modoEdicion ? 'PUT' : 'POST';
 
     try {
+      const payload = {
+        ...formData,
+        Email_Empleado: formData.Email_Empleado ? formData.Email_Empleado : null
+      };
+
       const res = await fetch('/api/computo/inventario', {
         method: metodo,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
       if (res.ok) {
@@ -237,7 +243,7 @@ export default function ComputoInventarioPage() {
       { header: 'Usuario', key: 'Usuario', width: 30 },
       { header: 'Departamento', key: 'Departamento', width: 20 },
       { header: 'Puesto/Proyecto', key: 'Puesto_Proyecto', width: 20 },
-      { header: 'N_EMP', key: 'N_EMP', width: 10 },
+      { header: 'Email Empleado', key: 'Email_Empleado', width: 30 },
       { header: 'Estatus', key: 'Estatus', width: 15 },
       { header: 'CR', key: 'CR', width: 10 },
       { header: 'Fecha CR', key: 'Fecha_CR', width: 15 },
@@ -293,7 +299,7 @@ export default function ComputoInventarioPage() {
         Usuario: getColIndex('Usuario') !== -1 ? getColIndex('Usuario') : (getColIndex('Usuario') !== -1 ? getColIndex('Uusario') : 8),
         Departamento: getColIndex('Departamento') !== -1 ? getColIndex('Departamento') : 9,
         Puesto_Proyecto: getColIndex('Puesto/Proyecto') !== -1 ? getColIndex('Puesto/Proyecto') : 10,
-        N_EMP: getColIndex('N_EMP') !== -1 ? getColIndex('N_EMP') : 11,
+        Email_Empleado: getColIndex('Email Empleado') !== -1 ? getColIndex('Email Empleado') : 11,
         Estatus: getColIndex('Estatus') !== -1 ? getColIndex('Estatus') : 12,
         CR: getColIndex('CR') !== -1 ? getColIndex('CR') : 13,
         Fecha_CR: getColIndex('Fecha CR') !== -1 ? getColIndex('Fecha CR') : 14,
@@ -710,8 +716,8 @@ export default function ComputoInventarioPage() {
                   <input type="text" value={formData.Usuario} onChange={e => setFormData({ ...formData, Usuario: e.target.value })} className="w-full bg-white border border-[var(--border-cream)] text-[var(--text-main)] rounded-lg p-2.5 focus:ring-2 focus:ring-emerald-500 outline-none placeholder-stone-300" placeholder="Ej. Juan Pérez García" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">Núm. Empleado (N_EMP)</label>
-                  <input type="text" value={formData.N_EMP} onChange={e => setFormData({ ...formData, N_EMP: e.target.value })} className="w-full bg-white border border-[var(--border-cream)] text-[var(--text-main)] rounded-lg p-2.5 focus:ring-2 focus:ring-emerald-500 outline-none placeholder-stone-300" placeholder="Ej. 1024" />
+                  <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">Correo del Usuario</label>
+                  <input type="email" value={formData.Email_Empleado} onChange={e => setFormData({ ...formData, Email_Empleado: e.target.value })} className="w-full bg-white border border-[var(--border-cream)] text-[var(--text-main)] rounded-lg p-2.5 focus:ring-2 focus:ring-emerald-500 outline-none placeholder-stone-300" placeholder="Ej. usuario@empresa.com" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">Departamento</label>

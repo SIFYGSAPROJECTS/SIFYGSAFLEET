@@ -156,6 +156,7 @@ export default function FormatoInspeccion({ datosBase, onClose, onSuccess }: any
       const formDataUpload = new FormData();
       formDataUpload.append('file', file);
       formDataUpload.append('prefix', `edificios/${datosBase.Id_Edificio}/`);
+      formDataUpload.append('bucket', 'edificios');
 
       const response = await fetch('/api/mantenimientos/upload', {
         method: 'POST',

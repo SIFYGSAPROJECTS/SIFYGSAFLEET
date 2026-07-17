@@ -7,6 +7,23 @@ import HistorialEquipo from './HistorialEquipo';
 import { Calendar, List, Search, Filter, Plus, CalendarClock, Laptop, Wrench } from 'lucide-react';
 import PremiumSelect from '@/components/ui/PremiumSelect';
 
+const fixEncoding = (str: string) => {
+  if (!str) return str;
+  let current = str;
+  let previous = "";
+  let attempts = 0;
+  while (current !== previous && attempts < 3) {
+    previous = current;
+    try {
+      current = decodeURIComponent(escape(current));
+    } catch (e) {
+      break;
+    }
+    attempts++;
+  }
+  return previous.replace(/\u00A0/g, ' ');
+};
+
 export default function MantenimientosClient({ initialPlanes, initialReportes, inventario, isAdmin, currentUserEmail }: any) {
   const [view, setView] = useState<'calendario' | 'lista' | 'historial'>('calendario');
   const [planes, setPlanes] = useState(initialPlanes);
@@ -119,14 +136,20 @@ export default function MantenimientosClient({ initialPlanes, initialReportes, i
             <CalendarioMantenimientos 
               reportes={reportes} 
               planes={planes} 
-              onDateClick={(date, reps) => {}}
+              onDateClick={(date, reps) => {
+                if (isAdmin) {
+                  const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+                  setNuevoPlanForm(prev => ({ ...prev, Fecha_Inicio: formattedDate }));
+                  setShowNuevoPlan(true);
+                }
+              }}
               onReporteClick={(rep) => setSelectedReporte(rep)}
             />
           ) : (
             <div className="bg-[var(--bg-floating)] border border-[var(--border-cream)] rounded-2xl overflow-hidden shadow-2xl flex flex-col h-full">
               <div className="p-4 border-b border-[var(--border-cream)] bg-white/[0.02] flex justify-between items-center">
                 <h3 className="font-bold text-[var(--text-main)]">Reportes de Mantenimiento</h3>
-                <span className="text-xs bg-white shadow-md px-2 py-1 rounded-md text-white/70">{reportes.length} registros</span>
+                <span className="text-xs bg-[var(--bg-hover)] border border-[var(--border-cream)] px-2 py-1 rounded-md text-[var(--text-muted)] font-semibold">{reportes.length} registros</span>
               </div>
               <div className="flex-1 overflow-y-auto custom-scrollbar p-2">
                 <table className="w-full text-left text-sm">
@@ -149,6 +172,7 @@ export default function MantenimientosClient({ initialPlanes, initialReportes, i
                           <span className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide ${
                             rep.Estado === 'COMPLETADO' ? 'bg-emerald-500/20 text-emerald-400' :
                             rep.Estado === 'CONFIRMADO' ? 'bg-cyan-500/20 text-cyan-400' :
+                            rep.Estado === 'REPROGRAMADO' ? 'bg-orange-500/20 text-orange-400' :
                             'bg-blue-500/20 text-blue-400'
                           }`}>
                             {rep.Estado}
@@ -192,7 +216,7 @@ export default function MantenimientosClient({ initialPlanes, initialReportes, i
                 }}
                 options={inventario.map((eq: any) => ({
                   value: eq.C_Interno,
-                  label: `${eq.C_Interno} - ${eq.Usuario || 'Sin Asignar'}`
+                  label: `${eq.C_Interno} - ${fixEncoding(eq.Usuario) || 'Sin Asignar'}`
                 }))}
                 placeholder={isAdmin ? "-- Buscar y seleccionar equipo --" : "-- Selecciona tu equipo --"}
                 searchable={true}
@@ -241,9 +265,9 @@ export default function MantenimientosClient({ initialPlanes, initialReportes, i
                   onChange={(val) => setNuevoPlanForm({...nuevoPlanForm, C_Interno: val})}
                   options={inventario.map((eq: any) => ({
                     value: eq.C_Interno,
-                    label: eq.C_Interno
+                    label: `${eq.C_Interno} - ${fixEncoding(eq.Usuario) || 'Sin Asignar'}`
                   }))}
-                  placeholder="Seleccione un equipo..."
+                  placeholder="-- Seleccionar equipo --"
                   searchable={true}
                 />
               </div>

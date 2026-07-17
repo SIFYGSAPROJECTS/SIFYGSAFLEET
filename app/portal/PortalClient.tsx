@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Car, Laptop, Phone, Cctv, Wind, Building, CalendarDays, Package, Info, Wallet } from 'lucide-react';
+import { Car, Laptop, Phone, Cctv, AirVent, Building, CalendarDays, Package, Info, Wallet } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/ui/Navbar';
 
@@ -9,7 +9,7 @@ const modules = [
   { id: 'transporte', name: 'Transporte', icon: Car, route: '/dashboard', color: 'text-blue-400', bg: 'bg-blue-400/10' },
   { id: 'computo', name: 'Cómputo', icon: Laptop, route: '/computo', color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
   { id: 'telefonia', name: 'Telefonía', icon: Phone, route: '/telefonia/inventario', color: 'text-purple-400', bg: 'bg-purple-400/10' },
-  { id: 'clima', name: 'Aires acondicionados', icon: Wind, route: '/clima/inventario', color: 'text-cyan-400', bg: 'bg-cyan-400/10' },
+  { id: 'clima', name: 'A / A', icon: AirVent, route: '/clima/inventario', color: 'text-cyan-400', bg: 'bg-cyan-400/10' },
   { id: 'edificios', name: 'Edificios', icon: Building, route: '/edificios', color: 'text-amber-400', bg: 'bg-amber-400/10' },
   { id: 'gastos', name: 'Gastos Generales', icon: Wallet, route: '/gastos', color: 'text-teal-400', bg: 'bg-teal-400/10' },
   { id: 'mobiliario', name: 'Mobiliario', icon: Package, route: null, color: 'text-orange-400', bg: 'bg-orange-400/10' },
@@ -123,7 +123,7 @@ export default function PortalClient({ isAdmin, userAreas, userName }: { isAdmin
                 <button
                   key={module.id}
                   onClick={() => handleModuleClick(module.route, module.name, hasAccess)}
-                  className={`group relative flex flex-col items-center p-8 rounded-3xl border transition-all duration-300 text-left w-full
+                  className={`group relative flex flex-col items-center p-8 rounded-3xl border transition-all duration-300 text-center w-full
                     ${isAvailable
                       ? 'bg-white/[0.03] hover:bg-white/[0.08] border-white/10 hover:border-white/20 hover:shadow-[0_8px_30px_rgb(0,0,0,0.4)] cursor-pointer'
                       : 'bg-black/20 border-white/5 opacity-40 hover:opacity-70 cursor-not-allowed hover:border-white/10'
@@ -135,8 +135,8 @@ export default function PortalClient({ isAdmin, userAreas, userName }: { isAdmin
                     <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl pointer-events-none"></div>
                   )}
 
-                  <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-6 transition-transform duration-500 ${isAvailable ? 'group-hover:scale-110 group-hover:-translate-y-1' : ''} ${module.bg}`}>
-                    <Icon className={`w-8 h-8 ${module.color}`} strokeWidth={1.5} />
+                  <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-6 transition-all duration-500 ${isAvailable ? 'group-hover:scale-110 group-hover:-translate-y-2 group-hover:shadow-[0_0_20px_rgba(255,255,255,0.15)]' : ''} ${module.bg}`}>
+                    <Icon className={`w-8 h-8 ${module.color} transition-all duration-500 ${isAvailable ? 'group-hover:rotate-12 group-hover:scale-110' : ''}`} strokeWidth={1.5} />
                   </div>
 
                   <h3 className="text-lg font-bold text-white/90 mb-2 group-hover:text-white transition-colors">

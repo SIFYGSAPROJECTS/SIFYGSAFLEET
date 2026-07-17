@@ -35,8 +35,7 @@ export const MantenimientoAsignadoEmail = ({
   reporteId,
   appUrl,
 }: Props) => {
-  const confirmUrl = `${appUrl}/api/mantenimientos/confirmar?id=${reporteId}&accion=confirmar`;
-  const rescheduleUrl = `${appUrl}/portal?action=reprogramar&id=${reporteId}`; // Could redirect to a specific portal view
+  const portalUrl = `${appUrl}/computo/mantenimientos`;
 
   return (
     <Html>
@@ -70,17 +69,12 @@ export const MantenimientoAsignadoEmail = ({
           </Section>
 
           <Text style={text}>
-            Por favor confirma si estarás disponible en esta fecha para realizar el mantenimiento a tu equipo.
+            Por favor ingresa al portal de SIFYGSA para confirmar tu asistencia o solicitar una reprogramación si la fecha no se ajusta a tus tiempos.
           </Text>
 
           <Section style={buttonContainer}>
-            <Button style={buttonConfirm} href={confirmUrl}>
-              Sí, confirmo la fecha
-            </Button>
-            <br />
-            <br />
-            <Button style={buttonReschedule} href={rescheduleUrl}>
-              No puedo, necesito reprogramar
+            <Button style={buttonConfirm} href={portalUrl}>
+              Ver mi Cita en SIFYGSA
             </Button>
           </Section>
           

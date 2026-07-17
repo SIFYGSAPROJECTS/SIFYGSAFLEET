@@ -103,7 +103,7 @@ export async function POST(request: Request) {
         await enviarCorreo({
           to: equipoInfo.Email_Empleado,
           subject: `🔧 Mantenimiento programado para tu equipo: ${equipoInfo.C_Interno}`,
-          react: emailHtml
+          html: emailHtml
         });
         console.log(`Email enviado a ${equipoInfo.Email_Empleado}`);
       } catch (emailError) {

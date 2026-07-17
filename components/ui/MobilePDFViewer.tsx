@@ -39,7 +39,7 @@ export default function MobilePDFViewer({ url }: MobilePDFViewerProps) {
   }
 
   return (
-    <div className="w-full h-full overflow-y-auto bg-stone-100 flex flex-col items-center py-4">
+    <div className="w-full h-full overflow-y-auto bg-[var(--bg-screen)] flex flex-col items-center py-4">
       {error ? (
         <div className="flex flex-col items-center justify-center h-48 gap-3 text-stone-500">
           <AlertCircle size={32} />

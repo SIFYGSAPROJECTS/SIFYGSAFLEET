@@ -70,7 +70,7 @@ export async function POST(request: Request) {
         await enviarCorreo({
           to: adminEmail,
           subject: `⚠️ Reprogramación solicitada: Mantenimiento de ${reporte.C_Interno}`,
-          react: emailHtml
+          html: emailHtml
         });
       } catch (emailError) {
         console.error('Error enviando email a admin:', emailError);

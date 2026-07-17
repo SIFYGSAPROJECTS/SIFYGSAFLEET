@@ -1,5 +1,25 @@
 import React, { useState } from 'react';
 import { X, Save, FileText, FileDown, Plus, Trash2, UploadCloud, AlertCircle, CheckCircle2 } from 'lucide-react';
+import dynamic from 'next/dynamic';
+
+const MobilePDFViewer = dynamic(() => import('@/components/ui/MobilePDFViewer'), { ssr: false });
+
+const fixEncoding = (str: string) => {
+  if (!str) return str;
+  let current = str;
+  let previous = "";
+  let attempts = 0;
+  while (current !== previous && attempts < 3) {
+    previous = current;
+    try {
+      current = decodeURIComponent(escape(current));
+    } catch (e) {
+      break;
+    }
+    attempts++;
+  }
+  return previous.replace(/\u00A0/g, ' ');
+};
 
 export default function FormularioFRM({ reporte, onClose, onSave, onRefresh, isAdmin }: any) {
   // Parse Datos_Formato
@@ -14,6 +34,7 @@ export default function FormularioFRM({ reporte, onClose, onSave, onRefresh, isA
     ...reporte,
     Datos_Formato: {
       accesorios: initialDatos.accesorios || { teclado: false, mouse: false, monitor: false, estacion: false },
+      accesorios_series: initialDatos.accesorios_series || { teclado: '', mouse: '', monitor: '', estacion: '' },
       preventivo: initialDatos.preventivo || "Se recibe: \n\nSe entrega: ",
       correctivo: initialDatos.correctivo || "Se recibe: N/A\n\nSe entrega: N/A",
       reprogramacion: initialDatos.reprogramacion || { inmediato: true, fecha: '', responsable: 'C.A.S.M', dependencia: 'INFRAESTRUCTURA' }
@@ -22,6 +43,43 @@ export default function FormularioFRM({ reporte, onClose, onSave, onRefresh, isA
   
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  
+  // User Actions State
+  const [isConfirming, setIsConfirming] = useState(false);
+  const [isRescheduling, setIsRescheduling] = useState(false);
+  const [rescheduleReason, setRescheduleReason] = useState('');
+
+  const handleUserAction = async (accion: 'confirmar' | 'reprogramar') => {
+    if (accion === 'reprogramar' && !rescheduleReason.trim()) {
+      alert("Por favor indica un motivo o la fecha en la que prefieres el mantenimiento.");
+      return;
+    }
+    
+    setIsConfirming(true);
+    try {
+      const res = await fetch('/api/mantenimientos/confirmar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: reporte.Id_Reporte,
+          accion,
+          motivo: rescheduleReason
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        onRefresh();
+        onClose();
+      } else {
+        alert(data.error || "Error al procesar la solicitud");
+      }
+    } catch (e) {
+      alert("Error de conexión");
+    } finally {
+      setIsConfirming(false);
+    }
+  };
 
   const handleInputChange = (field: string, value: any) => {
     setFormData((prev: any) => ({ ...prev, [field]: value }));
@@ -46,7 +104,7 @@ export default function FormularioFRM({ reporte, onClose, onSave, onRefresh, isA
       const payload = {
         ...formData,
         Datos_Formato: JSON.stringify(formData.Datos_Formato),
-        Estado: complete ? 'COMPLETADO' : formData.Estado,
+        Estado: complete ? 'COMPLETADO' : (formData.Estado === 'REPROGRAMADO' ? 'PENDIENTE' : formData.Estado),
         Fecha_Ejecucion: complete && !formData.Fecha_Ejecucion ? new Date().toISOString() : formData.Fecha_Ejecucion
       };
 
@@ -96,6 +154,17 @@ export default function FormularioFRM({ reporte, onClose, onSave, onRefresh, isA
     });
   };
 
+  const previewPDF = () => {
+    import('@/lib/pdf/generarFRM').then(({ generarFRM_PDF }) => {
+      generarFRM_PDF({
+          ...formData,
+          Datos_Formato: JSON.stringify(formData.Datos_Formato)
+      }).then(doc => {
+        setPreviewUrl(doc.output('datauristring'));
+      });
+    });
+  };
+
   const exportExcel = async () => {
     const { exportarFRM_Excel } = await import('@/lib/pdf/exportarFRM_Excel');
     await exportarFRM_Excel({
@@ -112,6 +181,8 @@ export default function FormularioFRM({ reporte, onClose, onSave, onRefresh, isA
       setIsUploading(true);
       const data = new FormData();
       data.append('file', file);
+      data.append('bucket', 'mantenimientos-computo');
+      data.append('prefix', 'evidencias/');
       const res = await fetch('/api/mantenimientos/upload', {
         method: 'POST',
         body: data
@@ -132,7 +203,7 @@ export default function FormularioFRM({ reporte, onClose, onSave, onRefresh, isA
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-      <div className="bg-[var(--bg-floating)] w-full max-w-5xl max-h-[95vh] rounded-2xl border border-[var(--border-cream)] shadow-2xl flex flex-col overflow-hidden">
+      <div className={`bg-[var(--bg-floating)] w-full max-w-5xl max-h-[95vh] rounded-2xl border border-[var(--border-cream)] shadow-2xl overflow-hidden ${previewUrl ? 'hidden' : 'flex flex-col'}`}>
         
         {/* Header */}
         <div className="flex items-center justify-between p-5 border-b border-[var(--border-cream)] bg-[var(--bg-screen)]">
@@ -156,18 +227,35 @@ export default function FormularioFRM({ reporte, onClose, onSave, onRefresh, isA
         {/* Scrollable Content */}
         <div className="flex-1 overflow-y-auto p-6 space-y-8 custom-scrollbar">
           
+          {/* Alerta de Reprogramación */}
+          {isAdmin && formData.Estado === 'REPROGRAMADO' && (
+            <div className="bg-orange-500/10 border border-orange-500/30 p-4 rounded-xl flex gap-3 animate-in fade-in zoom-in-95 duration-300">
+              <AlertCircle className="text-orange-500 shrink-0 mt-0.5" size={20} />
+              <div>
+                <h4 className="text-orange-500 font-bold text-sm mb-1">El usuario solicitó posponer esta cita</h4>
+                <p className="text-[var(--text-main)] text-sm">{formData.Motivo_Rechazo || "Sin motivo especificado."}</p>
+                <p className="text-[var(--text-muted)] text-xs mt-2 italic">Para atender esta solicitud, cambia la 'Fecha de Ejecución' y el estado volverá automáticamente a PENDIENTE para que puedas enviarle una nueva notificación al usuario.</p>
+              </div>
+            </div>
+          )}
+
           {/* Info Básica */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white/[0.02] border border-[var(--border-cream)] p-5 rounded-xl">
             <div>
               <label className="block text-[11px] font-bold text-[var(--text-muted)] uppercase mb-2">Técnico Asignado</label>
-              <input
-                type="text"
+              <select
                 value={formData.Tecnico || ''}
                 onChange={(e) => handleInputChange('Tecnico', e.target.value)}
-                className="w-full bg-[var(--bg-screen)] border border-[var(--border-cream)] rounded-lg px-3 py-2 text-sm text-[var(--text-main)] focus:border-emerald-500 outline-none disabled:opacity-70 disabled:cursor-not-allowed"
-                placeholder="Nombre del técnico"
+                className="w-full bg-[var(--bg-screen)] border border-[var(--border-cream)] rounded-lg px-3 py-2 text-sm text-[var(--text-main)] focus:border-emerald-500 outline-none disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer appearance-none"
                 disabled={!isAdmin}
-              />
+              >
+                <option value="" disabled>Selecciona un técnico...</option>
+                <option value="Alan Armando Montiel Rodriguez">Alan Armando Montiel Rodriguez</option>
+                <option value="Citlali Astrid Sanchez Martinez">Citlali Astrid Sanchez Martinez</option>
+                {formData.Tecnico && formData.Tecnico !== "Alan Armando Montiel Rodriguez" && formData.Tecnico !== "Citlali Astrid Sanchez Martinez" && (
+                  <option value={formData.Tecnico}>{formData.Tecnico}</option>
+                )}
+              </select>
             </div>
             <div>
               <label className="block text-[11px] font-bold text-[var(--text-muted)] uppercase mb-2">Fecha de Ejecución</label>
@@ -209,7 +297,7 @@ export default function FormularioFRM({ reporte, onClose, onSave, onRefresh, isA
             </div>
             <div>
                 <label className="block text-[10px] font-bold text-[var(--text-muted)] uppercase mb-1">Usuario</label>
-                <p className="text-sm font-semibold truncate" title={formData.equipo?.Usuario}>{formData.equipo?.Usuario || 'N/A'}</p>
+                <p className="text-sm font-semibold truncate" title={fixEncoding(formData.equipo?.Usuario)}>{fixEncoding(formData.equipo?.Usuario) || 'N/A'}</p>
             </div>
             <div>
                 <label className="block text-[10px] font-bold text-[var(--text-muted)] uppercase mb-1">Serie Cargador</label>
@@ -222,15 +310,27 @@ export default function FormularioFRM({ reporte, onClose, onSave, onRefresh, isA
             <h3 className="text-sm font-bold text-[var(--text-main)] uppercase tracking-wider mb-4 border-b border-[var(--border-cream)] pb-2">Accesorios Adicionales</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {['teclado', 'mouse', 'monitor', 'estacion'].map(acc => (
-                <label key={acc} className="flex items-center gap-3 p-3 rounded-lg border border-[var(--border-cream)] bg-white/[0.01] hover:bg-white/[0.03] cursor-pointer transition-colors group">
-                  <div className={`w-5 h-5 rounded flex items-center justify-center border transition-all ${
-                    formData.Datos_Formato.accesorios[acc] ? 'bg-emerald-500 border-emerald-500' : 'border-white/20 group-hover:border-white/40 bg-[var(--bg-screen)]'
-                  }`}>
-                    {formData.Datos_Formato.accesorios[acc] && <CheckCircle2 size={14} className="text-[#0F1115]" />}
-                  </div>
-                  <span className={`text-sm capitalize ${formData.Datos_Formato.accesorios[acc] ? 'text-[var(--text-main)] font-medium' : 'text-[var(--text-muted)]'}`}>{acc}</span>
-                  <input type="checkbox" className="hidden" checked={formData.Datos_Formato.accesorios[acc]} onChange={() => handleDatosFormatoChange('accesorios', acc, !formData.Datos_Formato.accesorios[acc])} disabled={!isAdmin} />
-                </label>
+                <div key={acc} className="flex flex-col gap-2 p-3 rounded-lg border border-[var(--border-cream)] bg-white/[0.01] transition-colors">
+                  <label className="flex items-center gap-3 cursor-pointer group">
+                    <div className={`w-5 h-5 rounded flex items-center justify-center border transition-all ${
+                      formData.Datos_Formato.accesorios[acc] ? 'bg-emerald-500 border-emerald-500' : 'border-zinc-400/50 group-hover:border-zinc-500 bg-black/5'
+                    }`}>
+                      {formData.Datos_Formato.accesorios[acc] && <CheckCircle2 size={14} className="text-[#0F1115]" />}
+                    </div>
+                    <span className={`text-sm capitalize ${formData.Datos_Formato.accesorios[acc] ? 'text-[var(--text-main)] font-medium' : 'text-[var(--text-muted)]'}`}>{acc}</span>
+                    <input type="checkbox" className="hidden" checked={formData.Datos_Formato.accesorios[acc]} onChange={() => handleDatosFormatoChange('accesorios', acc, !formData.Datos_Formato.accesorios[acc])} disabled={!isAdmin} />
+                  </label>
+                  {formData.Datos_Formato.accesorios[acc] && (
+                    <input
+                      type="text"
+                      placeholder="Número de serie..."
+                      value={formData.Datos_Formato.accesorios_series?.[acc] || ''}
+                      onChange={(e) => handleDatosFormatoChange('accesorios_series', acc, e.target.value)}
+                      disabled={!isAdmin}
+                      className="w-full bg-[var(--bg-screen)] border border-[var(--border-cream)] rounded px-2 py-1 text-xs text-[var(--text-main)] focus:border-emerald-500 outline-none disabled:opacity-70 mt-1"
+                    />
+                  )}
+                </div>
               ))}
             </div>
           </div>
@@ -294,7 +394,7 @@ export default function FormularioFRM({ reporte, onClose, onSave, onRefresh, isA
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 bg-[var(--bg-screen)] border border-[var(--border-cream)] p-5 rounded-xl items-end">
                 <label className="flex items-center gap-3 cursor-pointer group mb-2">
                   <div className={`w-5 h-5 rounded flex items-center justify-center border transition-all ${
-                    formData.Datos_Formato.reprogramacion.inmediato ? 'bg-emerald-500 border-emerald-500' : 'border-white/20 group-hover:border-white/40 bg-[var(--bg-screen)]'
+                    formData.Datos_Formato.reprogramacion.inmediato ? 'bg-emerald-500 border-emerald-500' : 'border-zinc-400/50 group-hover:border-zinc-500 bg-black/5'
                   }`}>
                     {formData.Datos_Formato.reprogramacion.inmediato && <CheckCircle2 size={14} className="text-[#0F1115]" />}
                   </div>
@@ -393,8 +493,11 @@ export default function FormularioFRM({ reporte, onClose, onSave, onRefresh, isA
                 <div className="h-8 w-px bg-[var(--border-cream)] mx-1 hidden sm:block"></div>
               </>
             )}
+            <button onClick={previewPDF} className="flex items-center gap-2 px-4 py-2 bg-[var(--bg-hover)] hover:bg-white shadow-md rounded-xl text-sm font-semibold transition-colors">
+              <FileText size={16} className="text-amber-500" /> <span className="hidden sm:inline">Vista Previa</span>
+            </button>
             <button onClick={generatePDF} className="flex items-center gap-2 px-4 py-2 bg-[var(--bg-hover)] hover:bg-white shadow-md rounded-xl text-sm font-semibold transition-colors">
-              <FileText size={16} className="text-emerald-400" /> <span className="hidden sm:inline">PDF</span>
+              <FileDown size={16} className="text-emerald-400" /> <span className="hidden sm:inline">PDF</span>
             </button>
             <button onClick={exportExcel} className="flex items-center gap-2 px-4 py-2 bg-[var(--bg-hover)] hover:bg-white shadow-md rounded-xl text-sm font-semibold transition-colors">
               <FileDown size={16} className="text-emerald-400" /> <span className="hidden sm:inline">Excel</span>
@@ -422,9 +525,86 @@ export default function FormularioFRM({ reporte, onClose, onSave, onRefresh, isA
                 </button>
               </>
             )}
+            {!isAdmin && formData.Estado === 'PENDIENTE' && (
+              <>
+                <button 
+                  onClick={() => setIsRescheduling(true)} 
+                  disabled={isConfirming}
+                  className="flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-bold bg-orange-500/20 text-orange-400 hover:bg-orange-500/30 border border-orange-500/30 transition-colors disabled:opacity-50"
+                >
+                  {isConfirming ? 'Procesando...' : 'Posponer Cita'}
+                </button>
+                <button 
+                  onClick={() => handleUserAction('confirmar')} 
+                  disabled={isConfirming}
+                  className="flex items-center gap-2 px-6 py-2 rounded-xl text-sm font-bold bg-emerald-500 text-[#0F1115] hover:bg-emerald-400 transition-all shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:shadow-[0_0_30px_rgba(16,185,129,0.5)] disabled:opacity-50"
+                >
+                  <CheckCircle2 size={16} /> {isConfirming ? 'Confirmando...' : 'Confirmar Fecha'}
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>
+
+      {/* Modal de Vista Previa PDF */}
+      {previewUrl && (
+        <div className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 sm:p-10">
+          <div className="bg-[var(--bg-floating)] w-full max-w-5xl h-full rounded-2xl flex flex-col shadow-2xl overflow-hidden border border-[var(--border-cream)]">
+            <div className="flex items-center justify-between p-4 border-b border-[var(--border-cream)] bg-[var(--bg-screen)]">
+              <h3 className="font-bold text-[var(--text-main)] flex items-center gap-2">
+                <FileText size={18} className="text-amber-500" /> Vista Previa del Documento
+              </h3>
+              <button onClick={() => setPreviewUrl(null)} className="p-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-xl transition-colors">
+                <X size={20} />
+              </button>
+            </div>
+            <div className="flex-1 bg-[var(--bg-screen)] w-full h-full rounded-b-2xl overflow-hidden relative flex flex-col">
+              {/* Fallback download button overlaid on top just in case */}
+              <div className="absolute top-4 right-6 z-10">
+                <a href={previewUrl} download={`FRM_${formData.Consecutivo_FRM}_${formData.C_Interno}.pdf`} className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-lg transition-colors inline-block">
+                  Descargar PDF
+                </a>
+              </div>
+              <MobilePDFViewer url={previewUrl} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Reprogramación (Usuario) */}
+      {isRescheduling && (
+        <div className="fixed inset-0 z-[300] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-[var(--bg-floating)] w-full max-w-md rounded-2xl flex flex-col shadow-2xl overflow-hidden border border-[var(--border-cream)] p-6">
+            <h3 className="font-bold text-xl text-[var(--text-main)] mb-2">Posponer Mantenimiento</h3>
+            <p className="text-sm text-[var(--text-muted)] mb-4">
+              Por favor indica el motivo por el cual no puedes atender el mantenimiento o sugiere una fecha y hora diferente. Sistemas se pondrá en contacto o te asignará una nueva fecha.
+            </p>
+            <textarea
+              value={rescheduleReason}
+              onChange={(e) => setRescheduleReason(e.target.value)}
+              placeholder="Ej. Ese día tengo auditoría a las 10am, prefiero el miércoles por la tarde..."
+              className="w-full bg-[var(--bg-screen)] border border-[var(--border-cream)] rounded-xl p-4 text-sm text-[var(--text-main)] focus:border-orange-500 outline-none min-h-[120px] resize-none mb-6"
+            />
+            <div className="flex justify-end gap-3">
+              <button 
+                onClick={() => setIsRescheduling(false)} 
+                disabled={isConfirming}
+                className="px-5 py-2 rounded-xl text-sm font-bold bg-[var(--bg-hover)] hover:bg-white transition-colors disabled:opacity-50"
+              >
+                Cancelar
+              </button>
+              <button 
+                onClick={() => handleUserAction('reprogramar')} 
+                disabled={isConfirming || !rescheduleReason.trim()}
+                className="px-6 py-2 rounded-xl text-sm font-bold bg-orange-500 text-white hover:bg-orange-600 transition-colors disabled:opacity-50"
+              >
+                {isConfirming ? 'Enviando...' : 'Enviar Solicitud'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

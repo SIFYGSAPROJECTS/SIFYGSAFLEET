@@ -1,6 +1,35 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 
+export async function GET(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const Id_Edificio = searchParams.get('Id_Edificio');
+
+    if (!Id_Edificio) {
+      return NextResponse.json({ error: 'Falta el Id del Edificio' }, { status: 400 });
+    }
+
+    const inspecciones = await prisma.inspeccion_Edificio.findMany({
+      where: { Id_Edificio: parseInt(Id_Edificio) },
+      include: {
+        fotos: true,
+        areas: {
+          include: {
+            detalles: true
+          }
+        }
+      },
+      orderBy: { Fecha_Inspeccion: 'desc' }
+    });
+
+    return NextResponse.json(inspecciones, { status: 200 });
+  } catch (error) {
+    console.error('Error fetching inspecciones:', error);
+    return NextResponse.json({ error: 'Error interno' }, { status: 500 });
+  }
+}
+
 export async function POST(request: Request) {
   try {
     const data = await request.json();

@@ -86,9 +86,9 @@ export default function CalendarioMantenimientos({ reportes, planes, onDateClick
       </div>
 
       {/* Calendar Grid */}
-      <div className="grid grid-cols-7 flex-1 auto-rows-fr overflow-y-auto custom-scrollbar">
+      <div className="grid grid-cols-7 flex-1 auto-rows-[minmax(120px,1fr)] overflow-y-auto custom-scrollbar">
         {Array.from({ length: paddingDays }).map((_, i) => (
-          <div key={`padding-${i}`} className="border-r border-b border-stone-200 bg-[var(--bg-screen)] p-2 min-h-[100px]"></div>
+          <div key={`padding-${i}`} className="border-r border-b border-[var(--border-cream)] bg-[var(--bg-screen)] p-2 min-h-[120px]"></div>
         ))}
         
         {days.map((day: Date, idx: number) => {
@@ -105,7 +105,7 @@ export default function CalendarioMantenimientos({ reportes, planes, onDateClick
           return (
             <div 
               key={day.toString()} 
-              className={`border-r border-b border-stone-200 p-2 min-h-[120px] transition-colors cursor-pointer group hover:bg-stone-100/50 ${!isCurrentMonth ? 'opacity-40 bg-[var(--bg-screen)]' : 'bg-white'}`}
+              className={`border-r border-b border-[var(--border-cream)] p-2 transition-colors cursor-pointer group hover:bg-stone-100/50 ${!isCurrentMonth ? 'opacity-40 bg-[var(--bg-screen)]' : 'bg-[var(--bg-floating)]'}`}
               onClick={() => onDateClick(day, reportesOfDay)}
             >
               <div className="flex justify-between items-start mb-2">
@@ -126,11 +126,13 @@ export default function CalendarioMantenimientos({ reportes, planes, onDateClick
                   <div 
                     key={reporte.Id_Reporte}
                     onClick={(e) => { e.stopPropagation(); onReporteClick(reporte); }}
-                    className={`text-[10px] p-1.5 rounded-md border flex items-center gap-1.5 transition-all hover:brightness-125 truncate ${getStatusColor(reporte.Estado)}`}
+                    className={`text-[10px] p-1.5 rounded-md border flex items-center gap-1.5 transition-all hover:brightness-125 overflow-hidden ${getStatusColor(reporte.Estado)}`}
                     title={`${reporte.C_Interno} - ${reporte.Tipo_Mtto}`}
                   >
-                    {getStatusIcon(reporte.Estado)}
-                    <span className="font-semibold truncate">{reporte.C_Interno}</span>
+                    <div className="shrink-0 flex items-center">
+                      {getStatusIcon(reporte.Estado)}
+                    </div>
+                    <span className="font-semibold truncate leading-none mt-0.5">{reporte.C_Interno}</span>
                   </div>
                 ))}
                 {reportesOfDay.length > 3 && (

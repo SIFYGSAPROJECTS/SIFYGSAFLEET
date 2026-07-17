@@ -11,19 +11,21 @@ const EMAIL_FROM = process.env.EMAIL_FROM || 'SIFYGSA Notificaciones <notificaci
 interface EnviarCorreoParams {
   to: string | string[];
   subject: string;
-  react: React.ReactElement | React.ReactNode | null;
+  react?: React.ReactElement | React.ReactNode | null;
+  html?: string;
 }
 
 /**
  * Función centralizada para enviar correos usando Resend
  */
-export async function enviarCorreo({ to, subject, react }: EnviarCorreoParams) {
+export async function enviarCorreo({ to, subject, react, html }: EnviarCorreoParams) {
   try {
     const { data, error } = await resend.emails.send({
       from: EMAIL_FROM,
       to,
       subject,
-      react,
+      ...(react ? { react } : {}),
+      ...(html ? { html } : {}),
     });
 
     if (error) {

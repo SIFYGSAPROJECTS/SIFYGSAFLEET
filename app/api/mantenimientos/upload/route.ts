@@ -17,9 +17,10 @@ export async function POST(request: Request) {
 
     const prefixParam = formData.get('prefix') as string;
     const prefix = prefixParam ? prefixParam.replace(/^\/+/, '').replace(/\/*$/, '/') : 'evidencias_mtto/';
+    const bucketParam = formData.get('bucket') as string;
 
     // Upload to MinIO
-    const url = await uploadToMinio(`${prefix}${filename}`, buffer, file.type);
+    const url = await uploadToMinio(`${prefix}${filename}`, buffer, file.type, bucketParam || 'documentos');
 
     return NextResponse.json({ url });
   } catch (error) {

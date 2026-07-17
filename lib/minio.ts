@@ -17,7 +17,7 @@ export const minioClient = new Minio.Client({
 
 // Función para inicializar los buckets principales en caso de que no existan
 export const setupMinioBuckets = async () => {
-  const buckets = ['evidencias', 'checklists', 'documentos'];
+  const buckets = ['evidencias', 'checklists', 'documentos', 'edificios'];
   
   for (const bucketName of buckets) {
     try {
@@ -47,11 +47,23 @@ export const setupMinioBuckets = async () => {
   }
 };
 
-export const uploadToMinio = async (objectName: string, buffer: Buffer, contentType: string) => {
-  const bucketName = 'documentos';
+export const uploadToMinio = async (objectName: string, buffer: Buffer, contentType: string, bucketName: string = 'documentos') => {
   const exists = await minioClient.bucketExists(bucketName);
   if (!exists) {
     await minioClient.makeBucket(bucketName, 'us-east-1');
+    const policy = {
+      Version: '2012-10-17',
+      Statement: [
+        {
+          Action: ['s3:GetObject'],
+          Effect: 'Allow',
+          Principal: { AWS: ['*'] },
+          Resource: [`arn:aws:s3:::${bucketName}/*`],
+        },
+      ],
+    };
+    await minioClient.setBucketPolicy(bucketName, JSON.stringify(policy));
+    console.info(`Bucket policy applied for new bucket: ${bucketName}`);
   }
 
   await minioClient.putObject(bucketName, objectName, buffer, undefined, {

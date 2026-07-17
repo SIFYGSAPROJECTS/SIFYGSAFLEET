@@ -265,7 +265,7 @@ export default function ProgramacionClient() {
                   <td className="px-3 py-1.5 border-r border-stone-100">
                     <input
                       type="date"
-                      value={row.Fecha_Sol}
+                      value={row.Fecha_Sol || ''}
                       onChange={(e) => handleCellChange(index, 'Fecha_Sol', e.target.value)}
                       className="w-32 bg-transparent border border-transparent hover:border-stone-200 focus:bg-white focus:border-orange-400 rounded px-2 py-1.5 outline-none text-stone-700 text-sm"
                     />
@@ -276,7 +276,7 @@ export default function ProgramacionClient() {
                       min="1"
                       max="100"
                       placeholder="Ej. 1"
-                      value={row.Partida}
+                      value={row.Partida || ''}
                       onChange={(e) => handleCellChange(index, 'Partida', e.target.value)}
                       className="w-24 bg-transparent border border-transparent hover:border-stone-200 focus:bg-white focus:border-orange-400 rounded px-2 py-1.5 outline-none text-stone-700 text-sm"
                     />
@@ -286,7 +286,7 @@ export default function ProgramacionClient() {
                       type="text"
                       list="servicios-list"
                       placeholder="Descripción..."
-                      value={row.Servicio_Producto}
+                      value={row.Servicio_Producto || ''}
                       onChange={(e) => handleCellChange(index, 'Servicio_Producto', e.target.value)}
                       className="w-48 bg-transparent border border-transparent hover:border-stone-200 focus:bg-white focus:border-orange-400 rounded px-2 py-1.5 outline-none text-stone-700 text-sm"
                     />
@@ -307,14 +307,14 @@ export default function ProgramacionClient() {
                       type="text"
                       list="proveedores-list"
                       placeholder="Proveedor..."
-                      value={row.Proveedor}
+                      value={row.Proveedor || ''}
                       onChange={(e) => handleCellChange(index, 'Proveedor', e.target.value)}
                       className="w-36 bg-transparent border border-transparent hover:border-stone-200 focus:bg-white focus:border-orange-400 rounded px-2 py-1.5 outline-none text-stone-700 text-sm"
                     />
                   </td>
                   <td className="px-3 py-1.5 border-r border-stone-100">
                     <PremiumSelect
-                      value={row.Empresa}
+                      value={row.Empresa || ''}
                       onChange={(val) => handleCellChange(index, 'Empresa', val)}
                       options={[
                         { value: 'AVH', label: 'AVH' },
@@ -331,7 +331,7 @@ export default function ProgramacionClient() {
                   <td className="px-3 py-1.5 border-r border-stone-100">
                     <input
                       type="date"
-                      value={row.Fecha_Pago}
+                      value={row.Fecha_Pago || ''}
                       onChange={(e) => handleCellChange(index, 'Fecha_Pago', e.target.value)}
                       className="w-32 bg-transparent border border-transparent hover:border-stone-200 focus:bg-white focus:border-orange-400 rounded px-2 py-1.5 outline-none text-stone-700 text-sm"
                     />
@@ -340,7 +340,7 @@ export default function ProgramacionClient() {
                     <input
                       type="text"
                       placeholder="Folio/Factura..."
-                      value={row.Factura_Comprobacion}
+                      value={row.Factura_Comprobacion || ''}
                       onChange={(e) => handleCellChange(index, 'Factura_Comprobacion', e.target.value)}
                       onBlur={(e) => checkFolio(index, e.target.value, row.Id)}
                       className="w-36 bg-transparent border border-transparent hover:border-stone-200 focus:bg-white focus:border-orange-400 rounded px-2 py-1.5 outline-none text-stone-700 text-sm font-mono"
@@ -350,7 +350,7 @@ export default function ProgramacionClient() {
                     <input
                       type="text"
                       placeholder="Usuario..."
-                      value={row.Usuario}
+                      value={row.Usuario || ''}
                       onChange={(e) => handleCellChange(index, 'Usuario', e.target.value)}
                       className="w-32 bg-transparent border border-transparent hover:border-stone-200 focus:bg-white focus:border-orange-400 rounded px-2 py-1.5 outline-none text-stone-700 text-sm"
                     />
@@ -358,7 +358,7 @@ export default function ProgramacionClient() {
                   <td className="px-3 py-1.5 border-r border-stone-100">
                     <div className="flex flex-col gap-1">
                       <PremiumSelect
-                        value={row.Estatus}
+                        value={row.Estatus || 'Pendiente'}
                         onChange={(val) => handleCellChange(index, 'Estatus', val)}
                         options={[
                           { value: 'Pendiente', label: 'Pendiente' },
