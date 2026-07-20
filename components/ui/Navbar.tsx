@@ -453,18 +453,11 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                       </Link>
                     )}
                     <Link
-                      href="/computo/servicios"
+                      href="/computo/soporte-mantenimientos"
                       className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all text-white/80 hover:text-white hover:bg-white/5 group/item"
                     >
                       <Wrench size={14} className="text-emerald-400 transition-transform duration-300 ease-in-out group-hover/item:rotate-12" />
-                      <span>Soporte TI</span>
-                    </Link>
-                    <Link
-                      href="/computo/mantenimientos"
-                      className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all text-white/80 hover:text-white hover:bg-white/5 group/item"
-                    >
-                      <CalendarClock size={14} className="text-emerald-400 transition-transform duration-300 ease-in-out group-hover/item:scale-110" />
-                      <span>Mantenimientos</span>
+                      <span>Soporte y Mantenimientos</span>
                     </Link>
                     {localIsAdmin && (
                       <Link
@@ -813,24 +806,14 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                   </Link>
                 )}
                 <Link
-                  href="/computo/servicios"
+                  href="/computo/soporte-mantenimientos"
                   onClick={() => setIsMenuOpen(false)}
-                  className={`border px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold ${pathname === '/computo/servicios'
+                  className={`border px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold ${pathname === '/computo/soporte-mantenimientos'
                     ? 'bg-emerald-600 border-emerald-500 text-white'
                     : 'bg-white/5 border-white/5 text-white/90 hover:bg-white/10'
                     }`}
                 >
-                  <Wrench size={14} className="text-emerald-400" /> Soporte TI
-                </Link>
-                <Link
-                  href="/computo/mantenimientos"
-                  onClick={() => setIsMenuOpen(false)}
-                  className={`border px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold ${pathname === '/computo/mantenimientos'
-                    ? 'bg-emerald-600 border-emerald-500 text-white'
-                    : 'bg-white/5 border-white/5 text-white/90 hover:bg-white/10'
-                    }`}
-                >
-                  <CalendarClock size={14} className="text-emerald-400" /> Mantenimientos
+                  <Wrench size={14} className="text-emerald-400" /> Soporte y Mantenimientos
                 </Link>
                 {localIsAdmin && (
                   <Link

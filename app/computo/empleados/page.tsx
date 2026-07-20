@@ -24,6 +24,7 @@ interface Computo {
   Marca: string;
   Modelo: string;
   Email_Empleado: string | null;
+  Usuario: string | null;
 }
 
 export default function PersonalPage() {
@@ -128,10 +129,39 @@ export default function PersonalPage() {
     setModalAbierto(true);
   };
 
-  //  FILTRO DEL BUSCADOR: Muestra coincidencias por C_Interno
+  //  FILTRO DEL BUSCADOR: Muestra coincidencias por C_Interno, Usuario, Marca, Modelo, Service Tag
   const sugerenciasEquipos = equipos.filter(v => {
-    if (!v.C_Interno) return false;
-    return v.C_Interno.toLowerCase().includes(busquedaEquipo.toLowerCase());
+    if (!busquedaEquipo) return false;
+    const term = busquedaEquipo.toLowerCase();
+    
+    return (
+      (v.C_Interno && v.C_Interno.toLowerCase().includes(term)) ||
+      (v.Usuario && v.Usuario.toLowerCase().includes(term)) ||
+      (v.Marca && v.Marca.toLowerCase().includes(term)) ||
+      (v.Modelo && v.Modelo.toLowerCase().includes(term)) ||
+      (v.Service_Tag && v.Service_Tag.toLowerCase().includes(term))
+    );
+  });
+
+  //  SUGERENCIAS INTELIGENTES POR NOMBRE (Equipos sin asignar que coincidan con el nombre tecleado)
+  const sugerenciasPorNombre = equipos.filter(v => {
+    // Solo sugerir equipos no asignados formalmente
+    if (v.Email_Empleado) return false;
+    
+    // Necesitamos que tenga algo capturado en el nombre del usuario original (Excel)
+    if (!v.Usuario) return false;
+
+    // Solo buscamos si ya escribió al menos 3 letras de nombre
+    if (!formData.Nombre_Empleado || formData.Nombre_Empleado.length < 3) return false;
+
+    const nomNorm = formData.Nombre_Empleado.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    const patNorm = (formData.A_Paterno || '').normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    const usrNorm = v.Usuario.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
+    if (patNorm.length > 2) {
+      return usrNorm.includes(nomNorm) && usrNorm.includes(patNorm);
+    }
+    return usrNorm.includes(nomNorm);
   });
 
   const solicitarCambioAcceso = (emp: Empleado) => {
@@ -518,7 +548,7 @@ export default function PersonalPage() {
                         className="w-full pl-10 pr-4 py-3 bg-white border border-[var(--border-cream)] rounded-xl text-[var(--text-main)] focus:ring-2 focus:ring-[#71717a] outline-none transition-all placeholder:text-stone-300 text-sm"
                       />
                       
-                      {/* MENÚ DE SUGERENCIAS */}
+                    {/* MENÚ DE SUGERENCIAS */}
                       {mostrarSugerencias && busquedaEquipo.length > 0 && (
                         <div className="absolute z-[60] w-full mt-1 bg-white border border-[var(--border-cream)] rounded-xl shadow-2xl max-h-52 overflow-y-auto scrollbar-hide">
                           {sugerenciasEquipos.length > 0 ? (
@@ -559,6 +589,40 @@ export default function PersonalPage() {
                       )}
                     </div>
                     
+                    {/* SECCIÓN DE SUGERENCIAS INTELIGENTES POR NOMBRE */}
+                    {!modoEdicion && sugerenciasPorNombre.length > 0 && equiposSeleccionados.length === 0 && (
+                      <div className="mt-3 p-3 bg-indigo-50 border border-indigo-100 rounded-xl">
+                        <div className="flex items-center gap-2 mb-2 text-indigo-700">
+                          <AlertTriangle size={14} />
+                          <span className="text-xs font-bold uppercase tracking-widest">Sugerencias Inteligentes</span>
+                        </div>
+                        <p className="text-xs text-indigo-600 mb-3 leading-relaxed">
+                          Encontramos estos equipos en el inventario que parecen pertenecer a <b>{formData.Nombre_Empleado} {formData.A_Paterno}</b> pero aún no están vinculados.
+                        </p>
+                        <div className="flex flex-col gap-2">
+                          {sugerenciasPorNombre.map((eq) => (
+                            <button
+                              key={eq.C_Interno}
+                              type="button"
+                              onClick={() => {
+                                setEquiposSeleccionados(prev => [...prev, eq]);
+                              }}
+                              className="flex items-center justify-between p-2 bg-white rounded-lg border border-indigo-200 hover:border-indigo-400 hover:shadow-sm transition-all group"
+                            >
+                              <div className="flex items-center gap-2 text-left">
+                                <Laptop size={14} className="text-indigo-500" />
+                                <div>
+                                  <div className="text-sm font-bold text-slate-700">{eq.C_Interno}</div>
+                                  <div className="text-[10px] text-slate-500">Registrado como: {eq.Usuario}</div>
+                                </div>
+                              </div>
+                              <PlusCircle size={16} className="text-indigo-400 group-hover:text-indigo-600" />
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
                     {equiposSeleccionados.length > 0 && (
                       <div className="flex flex-wrap gap-2 mt-2 pt-2 border-t border-[var(--border-cream)]">
                         {equiposSeleccionados.map((eq) => (

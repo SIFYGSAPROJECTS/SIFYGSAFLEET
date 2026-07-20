@@ -38,7 +38,7 @@ export default async function ComputoDashboardPage() {
           {/* BOTÓN "NUEVO SOPORTE" (Solo para empleados) */}
           {!isAdmin && (
             <Link 
-              href="/computo/servicios?tab=nueva" 
+              href="/computo/soporte-mantenimientos?tab=nueva" 
               className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-lg font-bold flex items-center gap-2 transition-all shadow-lg active:scale-95 shrink-0"
             >
               <PlusCircle size={20} />

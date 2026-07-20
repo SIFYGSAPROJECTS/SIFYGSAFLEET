@@ -35,7 +35,7 @@ export const MantenimientoAsignadoEmail = ({
   reporteId,
   appUrl,
 }: Props) => {
-  const portalUrl = `${appUrl}/computo/mantenimientos`;
+  const portalUrl = `${appUrl}/computo/soporte-mantenimientos`;
 
   return (
     <Html>

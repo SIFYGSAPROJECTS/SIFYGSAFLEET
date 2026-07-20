@@ -64,7 +64,7 @@ export const TicketComputoAdminEmail = ({
                 <li style={listItem}><strong>Motivo:</strong> {motivo}</li>
                 <li style={listItem}>
                   <strong>Ingrese a los detalles:</strong>{' '}
-                  <Link href="https://cloud.sifygsa.com/computo/servicios" style={link}>
+                  <Link href="https://cloud.sifygsa.com/computo/soporte-mantenimientos" style={link}>
                     Ver Seguimiento de Tickets SIFYGSA (Folio {folio})
                   </Link>
                 </li>

@@ -71,7 +71,7 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
               Modelo: previousReporte.equipo.Modelo || 'Genérico',
               Service_Tag: previousReporte.equipo.Service_Tag || 'N/A'
             },
-            fechaProgramada: new Date(updatedReporte.Fecha_Programada).toISOString(),
+            fechaProgramada: new Date(updatedReporte.Fecha_Programada).toLocaleDateString('es-MX', { timeZone: 'UTC', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }),
             tipoMtto: updatedReporte.Tipo_Mtto,
             reporteId: updatedReporte.Id_Reporte,
             appUrl: appUrl

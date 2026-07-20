@@ -53,7 +53,7 @@ export const MantenimientoReprogramadoEmail = ({
           </Section>
 
           <Section style={buttonContainer}>
-            <Button style={button} href={`${appUrl}/computo/mantenimientos`}>
+            <Button style={button} href={`${appUrl}/computo/soporte-mantenimientos`}>
               Ir a Mantenimientos
             </Button>
           </Section>

@@ -67,10 +67,10 @@ export default function ComputoMenu({ userRole, totalEquipos = 0, equiposReparac
 
   const tarjetasMantenimiento = (
     <>
-      <Link href="/computo/servicios" className="p-6 bg-[var(--bg-floating)] border border-[var(--border-cream)] border-t-4 border-t-emerald-500 rounded-xl hover:bg-[var(--bg-hover)] hover:shadow-xl transition-all duration-300 group text-left block">
+      <Link href="/computo/soporte-mantenimientos" className="p-6 bg-[var(--bg-floating)] border border-[var(--border-cream)] border-t-4 border-t-emerald-500 rounded-xl hover:bg-[var(--bg-hover)] hover:shadow-xl transition-all duration-300 group text-left block">
         <Wrench className="w-8 h-8 text-emerald-500 mb-4" />
-        <span className="block font-bold text-lg text-[var(--text-main)] font-serif">Soporte y Tickets</span>
-        <span className="text-sm text-[var(--text-muted)]">Solicitar reparaciones y dar seguimiento a servicios.</span>
+        <span className="block font-bold text-lg text-[var(--text-main)] font-serif">Soporte y Mantenimientos</span>
+        <span className="text-sm text-[var(--text-muted)]">Solicitar reparaciones y dar seguimiento a servicios preventivos.</span>
       </Link>
     </>
   );
@@ -115,25 +115,14 @@ export default function ComputoMenu({ userRole, totalEquipos = 0, equiposReparac
           )}
 
           <Link
-            href="/computo/servicios"
+            href="/computo/soporte-mantenimientos"
             className={`flex-1 flex justify-center px-6 py-2.5 font-bold text-sm items-center gap-2 rounded-lg transition-all whitespace-nowrap ${
-              activeTab === 'servicios' 
+              activeTab === 'servicios' || activeTab === 'mantenimientos'
                 ? 'bg-white text-[var(--text-main)] shadow-md' 
                 : 'text-[var(--text-muted)] hover:text-emerald-600 hover:bg-[var(--bg-screen)]/50'
             }`}
           >
-            <Wrench size={18} /> <span className="hidden sm:inline">Soporte TI</span>
-          </Link>
-
-          <Link
-            href="/computo/mantenimientos"
-            className={`flex-1 flex justify-center px-6 py-2.5 font-bold text-sm items-center gap-2 rounded-lg transition-all whitespace-nowrap ${
-              activeTab === 'mantenimientos' 
-                ? 'bg-white text-[var(--text-main)] shadow-md' 
-                : 'text-[var(--text-muted)] hover:text-emerald-600 hover:bg-[var(--bg-screen)]/50'
-            }`}
-          >
-            <CalendarClock size={18} /> <span className="hidden sm:inline">Mantenimientos</span>
+            <Wrench size={18} /> <span className="hidden sm:inline">Soporte y Mantenimientos</span>
           </Link>
 
           {isAdmin && (

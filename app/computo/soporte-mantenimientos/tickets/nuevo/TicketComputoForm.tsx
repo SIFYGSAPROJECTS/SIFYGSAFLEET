@@ -106,8 +106,8 @@ export default function TicketComputoForm({ equipos }: { equipos: any[] }) {
 
       setTimeout(() => {
         router.refresh();
-        setExitoGuardado(false);
-        router.push('/computo/servicios?tab=seguimiento');
+        // Redirige o actualiza
+        router.push('/computo/soporte-mantenimientos?tab=seguimiento');
       }, 3000);
 
     } catch (error: any) {

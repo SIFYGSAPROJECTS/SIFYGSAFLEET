@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Wrench, History, Activity, ArrowLeft, PlusCircle, User, Laptop, FileText, Download, FolderOpen } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
@@ -13,11 +14,12 @@ interface Props {
   tickets: any[];
   equipos: any[];
   isAdmin: boolean;
-  rol: string | undefined;
+  rol: string;
   empleados?: any[];
+  leftControl?: React.ReactNode;
 }
 
-export default function ServiciosComputoTabs({ tickets, equipos, isAdmin, rol, empleados = [] }: Props) {
+export default function ServiciosComputoTabs({ tickets, equipos, isAdmin, rol, empleados = [], leftControl }: Props) {
   const searchParams = useSearchParams();
   const tabParam = searchParams.get('tab');
 
@@ -100,54 +102,73 @@ export default function ServiciosComputoTabs({ tickets, equipos, isAdmin, rol, e
     <div className="space-y-6">
       
       <div className="max-w-[95%] mx-auto">
-        <div className="flex flex-col lg:flex-row justify-between lg:items-end gap-5 mb-8 border-b border-[var(--border-cream)] pb-4">
-          {/* LEFT SIDE: Title and Description */}
-          <div className="flex-grow text-left">
-            <h1 className="text-2xl sm:text-3xl font-black text-[var(--text-main)] flex items-center gap-3 font-serif">
-              <Wrench className="text-emerald-500" size={32} /> Soporte y Servicios TI
-            </h1>
-            <p className="text-[var(--text-muted)] mt-2 font-medium text-sm sm:text-base">
-              {isAdmin ? 'Gestión de tickets y reparaciones de equipos.' : 'Reporta fallas y solicita soporte técnico.'}
-            </p>
+        <div className="flex flex-col xl:flex-row justify-between items-center gap-5 mb-6">
+          {/* Left Side: Module Switcher (if provided) */}
+          <div className="flex w-full xl:w-auto justify-center xl:justify-start shrink-0">
+            {leftControl}
           </div>
 
-          {/* RIGHT SIDE: Tabs and Export Button */}
+          {/* Right Side: Inner Tabs and Export Button */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 shrink-0 overflow-x-auto scrollbar-hide">
             <div className="flex space-x-1 bg-stone-100 p-1 rounded-xl">
               <button
                 onClick={() => setActiveTab('nueva')}
-                className={`px-4 py-2 font-bold text-xs sm:text-sm flex items-center gap-1.5 rounded-lg transition-all whitespace-nowrap ${
+                className={`relative flex items-center justify-center gap-1.5 px-4 py-2 font-bold text-xs sm:text-sm rounded-lg transition-colors whitespace-nowrap ${
                   activeTab === 'nueva' 
-                    ? 'bg-white text-emerald-600 shadow-sm border border-[var(--border-cream)]' 
+                    ? 'text-emerald-600' 
                     : 'text-slate-500 hover:text-slate-800'
                 }`}
               >
-                <PlusCircle size={16} /> Nuevo Ticket
+                {activeTab === 'nueva' && (
+                  <motion.div
+                    layoutId="tickets-inner-pill"
+                    className="absolute inset-0 bg-white rounded-lg shadow-sm border border-[var(--border-cream)] z-0"
+                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                  />
+                )}
+                <PlusCircle size={16} className="relative z-10" />
+                <span className="relative z-10">Nuevo Ticket</span>
               </button>
 
               <button
                 onClick={() => setActiveTab('seguimiento')}
-                className={`px-4 py-2 font-bold text-xs sm:text-sm flex items-center gap-1.5 rounded-lg transition-all whitespace-nowrap ${
+                className={`relative flex items-center justify-center gap-1.5 px-4 py-2 font-bold text-xs sm:text-sm rounded-lg transition-colors whitespace-nowrap ${
                   activeTab === 'seguimiento' 
-                    ? 'bg-white text-cyan-600 shadow-sm border border-[var(--border-cream)]' 
+                    ? 'text-cyan-600' 
                     : 'text-slate-500 hover:text-slate-800'
                 }`}
               >
-                <Activity size={16} /> Seguimiento
-                <span className={`ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-mono ${activeTab === 'seguimiento' ? 'bg-cyan-600 text-white' : 'bg-stone-200 text-slate-600'}`}>
+                {activeTab === 'seguimiento' && (
+                  <motion.div
+                    layoutId="tickets-inner-pill"
+                    className="absolute inset-0 bg-white rounded-lg shadow-sm border border-[var(--border-cream)] z-0"
+                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                  />
+                )}
+                <Activity size={16} className="relative z-10" />
+                <span className="relative z-10">Seguimiento</span>
+                <span className={`relative z-10 ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-mono transition-colors ${activeTab === 'seguimiento' ? 'bg-cyan-100 text-cyan-800' : 'bg-stone-200 text-slate-600'}`}>
                   {activos.length}
                 </span>
               </button>
 
               <button
                 onClick={() => setActiveTab('historial')}
-                className={`px-4 py-2 font-bold text-xs sm:text-sm flex items-center gap-1.5 rounded-lg transition-all whitespace-nowrap ${
+                className={`relative flex items-center justify-center gap-1.5 px-4 py-2 font-bold text-xs sm:text-sm rounded-lg transition-colors whitespace-nowrap ${
                   activeTab === 'historial' 
-                    ? 'bg-white text-purple-600 shadow-sm border border-[var(--border-cream)]' 
+                    ? 'text-purple-600' 
                     : 'text-slate-500 hover:text-slate-800'
                 }`}
               >
-                <History size={16} /> Historial
+                {activeTab === 'historial' && (
+                  <motion.div
+                    layoutId="tickets-inner-pill"
+                    className="absolute inset-0 bg-white rounded-lg shadow-sm border border-[var(--border-cream)] z-0"
+                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                  />
+                )}
+                <History size={16} className="relative z-10" />
+                <span className="relative z-10">Historial</span>
               </button>
             </div>
 
@@ -161,34 +182,57 @@ export default function ServiciosComputoTabs({ tickets, equipos, isAdmin, rol, e
       </div>
 
       <div className="">
-        {activeTab === 'nueva' && (
-          <div className="max-w-[95%] mx-auto">
-          <div className="max-w-3xl mx-auto">
-             {equipos.length === 0 ? (
-                <div className="bg-emerald-600/10 border border-emerald-600/30 text-emerald-700 p-6 rounded-xl text-center shadow-lg">
-                  <p className="font-bold text-lg mb-2 font-serif">No tienes equipos asignados</p>
-                  <p className="text-sm">Contacta al área de TI para que te asigne una computadora.</p>
-                </div>
-              ) : (
-                <TicketComputoForm equipos={equipos} />
-              )}
-          </div>
-          </div>
-        )}
+        <AnimatePresence mode="wait">
+          {activeTab === 'nueva' && (
+            <motion.div 
+              key="nueva"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="max-w-[95%] mx-auto"
+            >
+              <div className="max-w-3xl mx-auto">
+                 {equipos.length === 0 ? (
+                    <div className="bg-emerald-600/10 border border-emerald-600/30 text-emerald-700 p-6 rounded-xl text-center shadow-lg">
+                      <p className="font-bold text-lg mb-2 font-serif">No tienes equipos asignados</p>
+                      <p className="text-sm">Contacta al área de TI para que te asigne una computadora.</p>
+                    </div>
+                  ) : (
+                    <TicketComputoForm equipos={equipos} />
+                  )}
+              </div>
+            </motion.div>
+          )}
 
-        {activeTab === 'seguimiento' && (
-          <div className="max-w-[95%] mx-auto">
-          <div className="bg-[var(--bg-floating)]/50 p-1 rounded-xl">
-            <SeguimientoComputoClient ticketsIniciales={ticketsSeguimiento} isAdmin={isAdmin} empleados={empleados} />
-          </div>
-          </div>
-        )}
+          {activeTab === 'seguimiento' && (
+            <motion.div 
+              key="seguimiento"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="max-w-[95%] mx-auto"
+            >
+              <div className="bg-[var(--bg-floating)]/50 p-1 rounded-xl">
+                <SeguimientoComputoClient ticketsIniciales={ticketsSeguimiento} isAdmin={isAdmin} empleados={empleados} />
+              </div>
+            </motion.div>
+          )}
 
-        {activeTab === 'historial' && (
-          <div className="w-full">
-            <HistorialComputoClient historial={tickets} rol={rol} />
-          </div>
-        )}
+          {activeTab === 'historial' && (
+            <motion.div 
+              key="historial"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="w-full"
+            >
+              <HistorialComputoClient historial={tickets} rol={rol} />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
