@@ -167,7 +167,7 @@ export default function MantenimientosClient({ initialPlanes, initialReportes, i
                       <tr key={rep.Id_Reporte} className="hover:bg-white/[0.02] transition-colors group">
                         <td className="p-4 font-semibold text-emerald-400">{rep.Consecutivo_FRM}</td>
                         <td className="p-4 font-medium">{rep.C_Interno}</td>
-                        <td className="p-4 text-[var(--text-muted)]">{new Date(rep.Fecha_Programada).toLocaleDateString()}</td>
+                        <td className="p-4 text-[var(--text-muted)]">{new Date(rep.Fecha_Programada).toLocaleDateString('es-MX', { timeZone: 'UTC' })}</td>
                         <td className="p-4">
                           <span className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide ${
                             rep.Estado === 'COMPLETADO' ? 'bg-emerald-500/20 text-emerald-400' :

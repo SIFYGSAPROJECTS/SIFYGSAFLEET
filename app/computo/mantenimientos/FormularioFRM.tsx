@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Save, FileText, FileDown, Plus, Trash2, UploadCloud, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { X, Save, FileText, FileDown, Plus, Trash2, UploadCloud, AlertCircle, CheckCircle2, CalendarClock } from 'lucide-react';
 import dynamic from 'next/dynamic';
 
 const MobilePDFViewer = dynamic(() => import('@/components/ui/MobilePDFViewer'), { ssr: false });
@@ -125,6 +125,43 @@ export default function FormularioFRM({ reporte, onClose, onSave, onRefresh, isA
     }
   };
 
+  const handleSaveReagendar = async () => {
+    if (!rescheduleReason) {
+      alert("Selecciona una fecha válida");
+      return;
+    }
+    
+    setIsConfirming(true);
+    try {
+      const payload = {
+        ...formData,
+        Datos_Formato: JSON.stringify(formData.Datos_Formato),
+        Estado: 'PENDIENTE',
+        Fecha_Programada: new Date(rescheduleReason).toISOString()
+      };
+
+      const res = await fetch(`/api/mantenimientos/reportes/${reporte.Id_Reporte}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      
+      const data = await res.json();
+      if (res.ok) {
+        alert("Cita reagendada. Se ha enviado un correo al usuario.");
+        onRefresh();
+        onClose();
+      } else {
+        alert(data.error || "Error al reagendar la cita.");
+      }
+    } catch (error) {
+      console.error("Error al reagendar:", error);
+      alert("Error de conexión");
+    } finally {
+      setIsConfirming(false);
+    }
+  };
+
   const handleDeletePlan = async () => {
     if (confirm("¿Estás seguro de que deseas eliminar todo el plan de mantenimiento y sus reportes? Esta acción no se puede deshacer.")) {
       try {
@@ -227,6 +264,40 @@ export default function FormularioFRM({ reporte, onClose, onSave, onRefresh, isA
         {/* Scrollable Content */}
         <div className="flex-1 overflow-y-auto p-6 space-y-8 custom-scrollbar">
           
+          {!isAdmin && formData.Estado !== 'COMPLETADO' ? (
+            <div className="flex flex-col items-center justify-center py-10 px-4 text-center animate-in fade-in zoom-in-95 duration-500">
+              <div className="w-20 h-20 bg-emerald-500/10 rounded-full flex items-center justify-center mb-6">
+                <CalendarClock className="text-emerald-500" size={40} />
+              </div>
+              <h3 className="text-2xl font-bold text-[var(--text-main)] mb-2">
+                Mantenimiento {formData.Tipo_Mtto}
+              </h3>
+              <p className="text-[var(--text-muted)] max-w-md mx-auto mb-8">
+                Tu equipo <span className="font-semibold text-[var(--text-main)]">{formData.C_Interno}</span> tiene una cita programada para el día{' '}
+                <span className="font-semibold text-emerald-500">
+                  {new Date(formData.Fecha_Programada).toLocaleDateString('es-MX', { timeZone: 'UTC', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                </span>.
+              </p>
+              
+              <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md">
+                <button 
+                  onClick={() => setIsRescheduling(true)} 
+                  disabled={isConfirming || formData.Estado === 'REPROGRAMADO'}
+                  className="flex-1 px-5 py-3 rounded-xl text-sm font-bold bg-orange-500/10 text-orange-500 hover:bg-orange-500/20 border border-orange-500/30 transition-colors disabled:opacity-50"
+                >
+                  {formData.Estado === 'REPROGRAMADO' ? 'Reprogramación Solicitada' : 'No puedo, Posponer Cita'}
+                </button>
+                <button 
+                  onClick={() => handleUserAction('confirmar')} 
+                  disabled={isConfirming || formData.Estado === 'CONFIRMADO' || formData.Estado === 'REPROGRAMADO'}
+                  className="flex-1 px-5 py-3 rounded-xl text-sm font-bold bg-emerald-500 text-white hover:bg-emerald-400 transition-all shadow-lg disabled:opacity-50"
+                >
+                  {formData.Estado === 'CONFIRMADO' ? 'Cita Confirmada' : 'Confirmar de Enterado'}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <>
           {/* Alerta de Reprogramación */}
           {isAdmin && formData.Estado === 'REPROGRAMADO' && (
             <div className="bg-orange-500/10 border border-orange-500/30 p-4 rounded-xl flex gap-3 animate-in fade-in zoom-in-95 duration-300">
@@ -479,11 +550,12 @@ export default function FormularioFRM({ reporte, onClose, onSave, onRefresh, isA
                 <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase">Usuario</span>
             </div>
           </div>
-
+          </>
+          )}
         </div>
 
-        {/* Footer Actions */}
-        <div className="flex items-center justify-between p-5 border-t border-[var(--border-cream)] bg-[var(--bg-screen)]">
+        {/* Footer */}
+        <div className="p-5 border-t border-[var(--border-cream)] bg-[var(--bg-screen)] flex flex-wrap gap-4 items-center justify-between">
           <div className="flex gap-2">
             {isAdmin && (
               <>
@@ -510,6 +582,13 @@ export default function FormularioFRM({ reporte, onClose, onSave, onRefresh, isA
             {isAdmin && (
               <>
                 <button 
+                  onClick={() => setIsRescheduling(true)} 
+                  disabled={isSaving}
+                  className="flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-bold bg-orange-500/20 text-orange-400 hover:bg-orange-500/30 border border-orange-500/30 transition-colors"
+                >
+                  <CalendarClock size={16} /> Reagendar Fecha
+                </button>
+                <button 
                   onClick={() => handleSave(false)} 
                   disabled={isSaving}
                   className="flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-bold bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 border border-blue-500/30 transition-colors disabled:opacity-50"
@@ -522,24 +601,6 @@ export default function FormularioFRM({ reporte, onClose, onSave, onRefresh, isA
                   className="flex items-center gap-2 px-6 py-2 rounded-xl text-sm font-bold bg-emerald-500 text-[#0F1115] hover:bg-emerald-400 transition-all shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:shadow-[0_0_30px_rgba(16,185,129,0.5)] disabled:opacity-50 disabled:shadow-none disabled:bg-zinc-600 disabled:text-zinc-400"
                 >
                   <CheckCircle2 size={16} /> Completar
-                </button>
-              </>
-            )}
-            {!isAdmin && formData.Estado === 'PENDIENTE' && (
-              <>
-                <button 
-                  onClick={() => setIsRescheduling(true)} 
-                  disabled={isConfirming}
-                  className="flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-bold bg-orange-500/20 text-orange-400 hover:bg-orange-500/30 border border-orange-500/30 transition-colors disabled:opacity-50"
-                >
-                  {isConfirming ? 'Procesando...' : 'Posponer Cita'}
-                </button>
-                <button 
-                  onClick={() => handleUserAction('confirmar')} 
-                  disabled={isConfirming}
-                  className="flex items-center gap-2 px-6 py-2 rounded-xl text-sm font-bold bg-emerald-500 text-[#0F1115] hover:bg-emerald-400 transition-all shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:shadow-[0_0_30px_rgba(16,185,129,0.5)] disabled:opacity-50"
-                >
-                  <CheckCircle2 size={16} /> {isConfirming ? 'Confirmando...' : 'Confirmar Fecha'}
                 </button>
               </>
             )}
@@ -572,20 +633,40 @@ export default function FormularioFRM({ reporte, onClose, onSave, onRefresh, isA
         </div>
       )}
 
-      {/* Modal de Reprogramación (Usuario) */}
+      {/* Modal de Reprogramación (Usuario y Admin) */}
       {isRescheduling && (
         <div className="fixed inset-0 z-[300] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-[var(--bg-floating)] w-full max-w-md rounded-2xl flex flex-col shadow-2xl overflow-hidden border border-[var(--border-cream)] p-6">
-            <h3 className="font-bold text-xl text-[var(--text-main)] mb-2">Posponer Mantenimiento</h3>
-            <p className="text-sm text-[var(--text-muted)] mb-4">
-              Por favor indica el motivo por el cual no puedes atender el mantenimiento o sugiere una fecha y hora diferente. Sistemas se pondrá en contacto o te asignará una nueva fecha.
-            </p>
-            <textarea
-              value={rescheduleReason}
-              onChange={(e) => setRescheduleReason(e.target.value)}
-              placeholder="Ej. Ese día tengo auditoría a las 10am, prefiero el miércoles por la tarde..."
-              className="w-full bg-[var(--bg-screen)] border border-[var(--border-cream)] rounded-xl p-4 text-sm text-[var(--text-main)] focus:border-orange-500 outline-none min-h-[120px] resize-none mb-6"
-            />
+            <h3 className="font-bold text-xl text-[var(--text-main)] mb-2">
+              {isAdmin ? 'Reagendar Mantenimiento' : 'Posponer Mantenimiento'}
+            </h3>
+            
+            {isAdmin ? (
+              <>
+                <p className="text-sm text-[var(--text-muted)] mb-4">
+                  Selecciona la nueva fecha para el mantenimiento. Al confirmar, se enviará un nuevo correo al usuario y el estado cambiará a PENDIENTE.
+                </p>
+                <input
+                  type="date"
+                  value={rescheduleReason}
+                  onChange={(e) => setRescheduleReason(e.target.value)}
+                  className="w-full bg-[var(--bg-screen)] border border-[var(--border-cream)] rounded-xl px-4 py-3 text-sm text-[var(--text-main)] focus:border-orange-500 outline-none mb-6"
+                />
+              </>
+            ) : (
+              <>
+                <p className="text-sm text-[var(--text-muted)] mb-4">
+                  Por favor indica el motivo por el cual no puedes atender el mantenimiento o sugiere una fecha y hora diferente. Sistemas se pondrá en contacto o te asignará una nueva fecha.
+                </p>
+                <textarea
+                  value={rescheduleReason}
+                  onChange={(e) => setRescheduleReason(e.target.value)}
+                  placeholder="Ej. Ese día tengo auditoría a las 10am, prefiero el miércoles por la tarde..."
+                  className="w-full bg-[var(--bg-screen)] border border-[var(--border-cream)] rounded-xl p-4 text-sm text-[var(--text-main)] focus:border-orange-500 outline-none min-h-[120px] resize-none mb-6"
+                />
+              </>
+            )}
+
             <div className="flex justify-end gap-3">
               <button 
                 onClick={() => setIsRescheduling(false)} 
@@ -595,11 +676,11 @@ export default function FormularioFRM({ reporte, onClose, onSave, onRefresh, isA
                 Cancelar
               </button>
               <button 
-                onClick={() => handleUserAction('reprogramar')} 
+                onClick={() => isAdmin ? handleSaveReagendar() : handleUserAction('reprogramar')} 
                 disabled={isConfirming || !rescheduleReason.trim()}
-                className="px-6 py-2 rounded-xl text-sm font-bold bg-orange-500 text-white hover:bg-orange-600 transition-colors disabled:opacity-50"
+                className="px-6 py-2 rounded-xl text-sm font-bold bg-orange-500 text-white hover:bg-orange-600 transition-colors disabled:opacity-50 flex items-center gap-2"
               >
-                {isConfirming ? 'Enviando...' : 'Enviar Solicitud'}
+                {isConfirming ? 'Procesando...' : (isAdmin ? 'Reagendar y Avisar' : 'Enviar Solicitud')}
               </button>
             </div>
           </div>

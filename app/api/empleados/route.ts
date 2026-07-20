@@ -23,7 +23,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { Email, Nombre_Empleado, A_Paterno, A_Materno, Cargo, Departamento, Rol, Estatus_Acceso, Consecutivo_Vehiculo, C_Interno_Computo, Admin_TI } = body;
+    const { Email, Nombre_Empleado, A_Paterno, A_Materno, Cargo, Departamento, Rol, Estatus_Acceso, Consecutivo_Vehiculo, Equipos_Computo, Admin_TI } = body;
     const emailLower = Email.toLowerCase();
 
     // Verificamos si el empleado ya existe
@@ -53,11 +53,20 @@ export async function POST(request: Request) {
           });
         }
 
-        if (C_Interno_Computo) {
-          await tx.inventario_Computo.update({
-            where: { C_Interno: C_Interno_Computo },
-            data: { Email_Empleado: emailLower }
+        if (Equipos_Computo && Array.isArray(Equipos_Computo)) {
+          // Limpiar equipos anteriores de este usuario
+          await tx.inventario_Computo.updateMany({
+            where: { Email_Empleado: emailLower },
+            data: { Email_Empleado: null }
           });
+          
+          if (Equipos_Computo.length > 0) {
+            // Asignar nuevos equipos
+            await tx.inventario_Computo.updateMany({
+              where: { C_Interno: { in: Equipos_Computo } },
+              data: { Email_Empleado: emailLower }
+            });
+          }
         }
         return empleado;
       });
@@ -90,9 +99,9 @@ export async function POST(request: Request) {
           });
         }
 
-        if (C_Interno_Computo) {
-          await tx.inventario_Computo.update({
-            where: { C_Interno: C_Interno_Computo },
+        if (Equipos_Computo && Array.isArray(Equipos_Computo) && Equipos_Computo.length > 0) {
+          await tx.inventario_Computo.updateMany({
+            where: { C_Interno: { in: Equipos_Computo } },
             data: { Email_Empleado: emailLower }
           });
         }
@@ -132,7 +141,7 @@ export async function POST(request: Request) {
 export async function PUT(request: Request) {
   try {
     const body = await request.json();
-    const { Email, Nombre_Empleado, A_Paterno, A_Materno, Cargo, Departamento, Rol, Estatus_Acceso, Consecutivo_Vehiculo, C_Interno_Computo, Admin_TI } = body;
+    const { Email, Nombre_Empleado, A_Paterno, A_Materno, Cargo, Departamento, Rol, Estatus_Acceso, Consecutivo_Vehiculo, Equipos_Computo, Admin_TI } = body;
 
     const empleadoViejo = await prisma.empleados.findUnique({
       where: { Email },
@@ -159,16 +168,18 @@ export async function PUT(request: Request) {
         }
       }
 
-      // SOLO si la petición incluye C_Interno_Computo (aunque sea null), actualizamos computadoras
-      if (C_Interno_Computo !== undefined) {
+      // SOLO si la petición incluye Equipos_Computo, actualizamos computadoras
+      if (Equipos_Computo !== undefined && Array.isArray(Equipos_Computo)) {
+        // Liberar todos los equipos que tenía previamente este empleado
         await tx.inventario_Computo.updateMany({
           where: { Email_Empleado: Email },
           data: { Email_Empleado: null }
         });
 
-        if (C_Interno_Computo) {
-          await tx.inventario_Computo.update({
-            where: { C_Interno: C_Interno_Computo },
+        if (Equipos_Computo.length > 0) {
+          // Asignar los equipos que vienen en la petición
+          await tx.inventario_Computo.updateMany({
+            where: { C_Interno: { in: Equipos_Computo } },
             data: { Email_Empleado: Email }
           });
         }
@@ -216,11 +227,11 @@ export async function PUT(request: Request) {
         }
       }
 
-      if (C_Interno_Computo !== undefined) {
+      if (Equipos_Computo !== undefined && Array.isArray(Equipos_Computo)) {
         const oldComputos = empleadoViejo.inventarioComputos.map((c: any) => c.C_Interno).join(', ') || 'Ninguno';
-        const newComputo = C_Interno_Computo || 'Ninguno';
-        if (oldComputos !== newComputo) {
-          changes['Cómputo Asignado'] = { from: oldComputos, to: newComputo };
+        const newComputos = Equipos_Computo.join(', ') || 'Ninguno';
+        if (oldComputos !== newComputos) {
+          changes['Equipo(s) de Cómputo'] = { from: oldComputos, to: newComputos };
         }
       }
 

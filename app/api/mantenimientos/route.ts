@@ -1,14 +1,29 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { cookies } from 'next/headers';
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const c_interno = searchParams.get('c_interno');
     
-    let whereClause = {};
+    // Security check
+    const cookieStore = await cookies();
+    const userEmail = cookieStore.get('user_email')?.value;
+    const userRole = cookieStore.get('user_role')?.value || 'USER';
+    const userAdminTi = cookieStore.get('user_admin_ti')?.value === 'true';
+    const isAdmin = ['ADMIN', 'GERENCIAL'].includes(userRole) || userAdminTi;
+    
+    let whereClause: any = {};
     if (c_interno) {
       whereClause = { C_Interno: c_interno };
+    }
+    
+    // If not admin, only fetch records for their assigned equipment
+    if (!isAdmin && userEmail) {
+      whereClause.equipo = { Email_Empleado: userEmail };
+    } else if (!isAdmin && !userEmail) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
     const planes = await prisma.plan_Mantenimiento.findMany({

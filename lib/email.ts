@@ -26,7 +26,8 @@ export async function enviarCorreo({ to, subject, react, html }: EnviarCorreoPar
       subject,
       ...(react ? { react } : {}),
       ...(html ? { html } : {}),
-    });
+      ...(!react && !html ? { text: subject } : {})
+    } as any);
 
     if (error) {
       console.error('Error al enviar correo (Resend API):', error);

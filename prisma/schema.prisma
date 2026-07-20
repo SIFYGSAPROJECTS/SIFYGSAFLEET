@@ -55,15 +55,15 @@ model Inventario_Automoviles {
   Estatus_Operativo String                         @default("Activo en flota") @db.VarChar(30)
   Kilometraje       Int?
   checklists        Checklist[]
+  costos_gasolina   Costos_Gasolina[]
   costos            Costos_Mantenimiento[]
+  costos_peajes     Costos_Peajes[]
   documentos        Documentos_Unidad[]
   bitacora_autos    Historial_Auto[]
   historial_reg     Historial_Registro_Automovil[]
   encargado         Empleados?                     @relation("EncargadoAuto", fields: [Email_encargado], references: [Email])
   solicitudes       Solicitud[]
   verificaciones    Verificacion_Vehicular[]
-  costos_gasolina   Costos_Gasolina[]
-  costos_peajes     Costos_Peajes[]
 }
 
 model Telefono {
@@ -338,6 +338,8 @@ model Comprobacion_Gastos {
   Fecha_Registro DateTime  @default(now())
   Anio           Int       @default(2026)
   Semana         Int       @default(1)
+  Estatus        String?   @default("Pendiente") @db.VarChar(50)
+  Monto_Pagado   Float?    @default(0)
   empleado       Empleados @relation(fields: [Email_Empleado], references: [Email])
 }
 
@@ -351,89 +353,89 @@ model Bitacora_Auditoria {
 }
 
 model Edificio {
-  Id_Edificio         Int                   @id @default(autoincrement())
-  Sucursal            String                @db.VarChar(150)
-  Direccion           String
-  Departamentos       String
-  Foto_Portada        String?
-  Activo              Boolean               @default(true)
-  Fecha_Creacion      DateTime              @default(now())
-  inspecciones        Inspeccion_Edificio[]
+  Id_Edificio    Int                   @id @default(autoincrement())
+  Sucursal       String                @db.VarChar(150)
+  Direccion      String
+  Departamentos  String
+  Foto_Portada   String?
+  Activo         Boolean               @default(true)
+  Fecha_Creacion DateTime              @default(now())
+  inspecciones   Inspeccion_Edificio[]
 }
 
 model Foto_Inspeccion_Edificio {
-  Id_Foto             Int                 @id @default(autoincrement())
-  Id_Inspeccion       Int
-  Url_Foto            String
-  Descripcion         String?             @db.VarChar(255)
-  Fecha_Subida        DateTime            @default(now())
-  inspeccion          Inspeccion_Edificio @relation(fields: [Id_Inspeccion], references: [Id_Inspeccion], onDelete: Cascade)
+  Id_Foto       Int                 @id @default(autoincrement())
+  Id_Inspeccion Int
+  Url_Foto      String
+  Descripcion   String?             @db.VarChar(255)
+  Fecha_Subida  DateTime            @default(now())
+  inspeccion    Inspeccion_Edificio @relation(fields: [Id_Inspeccion], references: [Id_Inspeccion], onDelete: Cascade)
 }
 
 model Historial_Partes {
-  Id_Parte              Int                   @id @default(autoincrement())
-  Id_Reporte            Int
-  C_Interno             String                @db.VarChar(100)
-  Nombre_Parte          String                @db.VarChar(150)
-  Parte_Anterior        String?               @db.VarChar(200)
-  Parte_Nueva           String?               @db.VarChar(200)
-  Motivo_Cambio         String?
-  Costo                 Float?                @default(0)
-  Fecha_Cambio          DateTime              @default(now())
-  Evidencia_URL         String?
-  equipo                Inventario_Computo    @relation(fields: [C_Interno], references: [C_Interno], onDelete: Cascade)
-  reporte               Reporte_Mantenimiento @relation(fields: [Id_Reporte], references: [Id_Reporte], onDelete: Cascade)
+  Id_Parte       Int                   @id @default(autoincrement())
+  Id_Reporte     Int
+  C_Interno      String                @db.VarChar(100)
+  Nombre_Parte   String                @db.VarChar(150)
+  Parte_Anterior String?               @db.VarChar(200)
+  Parte_Nueva    String?               @db.VarChar(200)
+  Motivo_Cambio  String?
+  Costo          Float?                @default(0)
+  Fecha_Cambio   DateTime              @default(now())
+  Evidencia_URL  String?
+  equipo         Inventario_Computo    @relation(fields: [C_Interno], references: [C_Interno], onDelete: Cascade)
+  reporte        Reporte_Mantenimiento @relation(fields: [Id_Reporte], references: [Id_Reporte], onDelete: Cascade)
 }
 
 model Inspeccion_Edificio {
-  Id_Inspeccion            Int                        @id @default(autoincrement())
-  Id_Edificio              Int
-  Consecutivo              String                     @db.VarChar(50)
-  Fecha_Inspeccion         DateTime                   @default(now())
-  Inspector                String?                    @db.VarChar(100)
-  Estado                   String                     @default("PENDIENTE")
-  Datos_Formato            String?
-  Observaciones            String?
-  fotos                    Foto_Inspeccion_Edificio[]
-  areas                    Inspeccion_Area[]
-  edificio                 Edificio                   @relation(fields: [Id_Edificio], references: [Id_Edificio], onDelete: Cascade)
+  Id_Inspeccion    Int                        @id @default(autoincrement())
+  Id_Edificio      Int
+  Consecutivo      String                     @db.VarChar(50)
+  Fecha_Inspeccion DateTime                   @default(now())
+  Inspector        String?                    @db.VarChar(100)
+  Estado           String                     @default("PENDIENTE")
+  Datos_Formato    String?
+  Observaciones    String?
+  fotos            Foto_Inspeccion_Edificio[]
+  areas            Inspeccion_Area[]
+  edificio         Edificio                   @relation(fields: [Id_Edificio], references: [Id_Edificio], onDelete: Cascade)
 }
 
 model Inspeccion_Area {
-  Id_Area         Int                 @id @default(autoincrement())
-  Id_Inspeccion   Int
-  Nombre          String              @db.VarChar(150)
-  Puertas         Int                 @default(0)
-  Luminarias      Int                 @default(0)
-  Estado          String              @db.VarChar(50)
-  Observaciones   String?
-  Categorias      String?
-  Inspeccion      Inspeccion_Edificio @relation(fields: [Id_Inspeccion], references: [Id_Inspeccion], onDelete: Cascade)
-  detalles        Inspeccion_Detalle[]
+  Id_Area       Int                  @id @default(autoincrement())
+  Id_Inspeccion Int
+  Nombre        String               @db.VarChar(150)
+  Puertas       Int                  @default(0)
+  Luminarias    Int                  @default(0)
+  Estado        String               @db.VarChar(50)
+  Observaciones String?
+  Categorias    String?
+  Inspeccion    Inspeccion_Edificio  @relation(fields: [Id_Inspeccion], references: [Id_Inspeccion], onDelete: Cascade)
+  detalles      Inspeccion_Detalle[]
 }
 
 model Inspeccion_Detalle {
-  Id_Detalle      Int                 @id @default(autoincrement())
-  Id_Area         Int
-  Item            String              @db.VarChar(200)
-  Estado          String              @db.VarChar(50)
-  Observaciones   String?
-  Area            Inspeccion_Area     @relation(fields: [Id_Area], references: [Id_Area], onDelete: Cascade)
+  Id_Detalle    Int             @id @default(autoincrement())
+  Id_Area       Int
+  Item          String          @db.VarChar(200)
+  Estado        String          @db.VarChar(50)
+  Observaciones String?
+  Area          Inspeccion_Area @relation(fields: [Id_Area], references: [Id_Area], onDelete: Cascade)
 }
 
 model Plan_Mantenimiento {
-  Id_Plan               Int                     @id @default(autoincrement())
-  C_Interno             String                  @db.VarChar(100)
-  Tipo_Mtto             String                  @db.VarChar(50)
-  Frecuencia_Meses      Int                     @default(6)
-  Fecha_Inicio          DateTime                @db.Date
-  Fecha_Proximo         DateTime                @db.Date
-  Activo                Boolean                 @default(true)
-  Observaciones         String?
-  Creado_Por            String?                 @db.VarChar(100)
-  Fecha_Creacion        DateTime                @default(now())
-  equipo                Inventario_Computo      @relation(fields: [C_Interno], references: [C_Interno], onDelete: Cascade)
-  reportes              Reporte_Mantenimiento[]
+  Id_Plan          Int                     @id @default(autoincrement())
+  C_Interno        String                  @db.VarChar(100)
+  Tipo_Mtto        String                  @db.VarChar(50)
+  Frecuencia_Meses Int                     @default(6)
+  Fecha_Inicio     DateTime                @db.Date
+  Fecha_Proximo    DateTime                @db.Date
+  Activo           Boolean                 @default(true)
+  Observaciones    String?
+  Creado_Por       String?                 @db.VarChar(100)
+  Fecha_Creacion   DateTime                @default(now())
+  equipo           Inventario_Computo      @relation(fields: [C_Interno], references: [C_Interno], onDelete: Cascade)
+  reportes         Reporte_Mantenimiento[]
 }
 
 model Reporte_Mantenimiento {
@@ -455,8 +457,7 @@ model Reporte_Mantenimiento {
   Revision_Red       Boolean            @default(false)
   Actividades_Extra  String?
   Observaciones      String?
-    Datos_Formato      String?
-    Estado             String             @default("PENDIENTE")
+  Estado             String             @default("PENDIENTE")
   Email_Notificado   String?            @db.VarChar(100)
   Confirmado         Boolean?
   Motivo_Rechazo     String?
@@ -466,6 +467,7 @@ model Reporte_Mantenimiento {
   Firma_Tecnico      String?
   Firma_Responsable  String?
   Fecha_Creacion     DateTime           @default(now())
+  Datos_Formato      String?
   partes_cambiadas   Historial_Partes[]
   equipo             Inventario_Computo @relation(fields: [C_Interno], references: [C_Interno], onDelete: Cascade)
   plan               Plan_Mantenimiento @relation(fields: [Id_Plan], references: [Id_Plan], onDelete: Cascade)
@@ -485,6 +487,8 @@ model Programacion_Semanal {
   Estatus              String    @default("Pendiente")
   Monto_Pagado         Float?    @default(0)
   Fecha_Registro       DateTime  @default(now())
+  Anio                 Int       @default(2026)
+  Semana               Int       @default(27)
 }
 
 model Inventario_Aires_Acondicionados {
@@ -501,36 +505,36 @@ model Inventario_Aires_Acondicionados {
 }
 
 model Inventario_Telefonia {
-  N_Interno   String   @id @db.VarChar(100)
-  Empresa     String?  @db.VarChar(100)
-  Cliente     String?  @db.VarChar(100)
-  Marca       String?  @db.VarChar(100)
-  Modelo      String?  @db.VarChar(100)
-  Usuario     String?  @db.VarChar(150)
-  Departamento String? @db.VarChar(100)
-  Ubicacion    String? @db.VarChar(100)
-  IMEI        String?  @db.VarChar(100)
-  ICCID       String?  @db.VarChar(100)
-  Region_SIM  String?  @db.VarChar(50)
-  Cuenta      String?  @db.VarChar(100)
-  Numero      String?  @db.VarChar(50)
-  Plan        String?  @db.VarChar(150)
-  PZO         Int?     @default(0)
-  Estatus     String?  @default("Activo") @db.VarChar(100)
-  Fecha_Alta  DateTime @default(now())
+  N_Interno    String   @id @db.VarChar(100)
+  Empresa      String?  @db.VarChar(100)
+  Cliente      String?  @db.VarChar(100)
+  Marca        String?  @db.VarChar(100)
+  Modelo       String?  @db.VarChar(100)
+  Usuario      String?  @db.VarChar(150)
+  IMEI         String?  @db.VarChar(100)
+  ICCID        String?  @db.VarChar(100)
+  Region_SIM   String?  @db.VarChar(50)
+  Cuenta       String?  @db.VarChar(100)
+  Numero       String?  @db.VarChar(50)
+  Plan         String?  @db.VarChar(150)
+  PZO          Int?     @default(0)
+  Estatus      String?  @default("Activo") @db.VarChar(100)
+  Fecha_Alta   DateTime @default(now())
+  Departamento String?  @db.VarChar(100)
+  Ubicacion    String?  @db.VarChar(100)
 }
 
 model Costos_Gasolina {
-  Id_Gasto      Int                    @id @default(autoincrement())
-  Fecha_Hora    DateTime
-  Consecutivo   String                 @db.VarChar(10)
-  Estacion      String
-  Combustible   String
-  Litros        Float
-  Precio        Float
-  Total         Float
-  Fecha_Registro DateTime              @default(now())
-  auto          Inventario_Automoviles @relation(fields: [Consecutivo], references: [Consecutivo], onDelete: Cascade)
+  Id_Gasto       Int                    @id @default(autoincrement())
+  Fecha_Hora     DateTime
+  Consecutivo    String                 @db.VarChar(10)
+  Estacion       String
+  Combustible    String
+  Litros         Float
+  Precio         Float
+  Total          Float
+  Fecha_Registro DateTime               @default(now())
+  auto           Inventario_Automoviles @relation(fields: [Consecutivo], references: [Consecutivo], onDelete: Cascade)
 }
 
 model Costos_Peajes {

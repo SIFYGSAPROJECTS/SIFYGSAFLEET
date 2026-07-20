@@ -41,8 +41,8 @@ export default function PersonalPage() {
 
   // ESTADOS DEL BUSCADOR INTELIGENTE
   const [busquedaEquipo, setBusquedaEquipo] = useState('');
+  const [equiposSeleccionados, setEquiposSeleccionados] = useState<any[]>([]);
   const [mostrarSugerencias, setMostrarSugerencias] = useState(false);
-  const [equipoSeleccionado, setEquipoSeleccionado] = useState<Computo | null>(null);
 
   const [formData, setFormData] = useState<Partial<Empleado>>({
     Email: '', Nombre_Empleado: '', A_Paterno: '', A_Materno: '', Cargo: '', Departamento: '', Rol: 'USER', Admin_TI: false, Estatus_Acceso: 'Activo'
@@ -108,7 +108,7 @@ export default function PersonalPage() {
   const abrirModalNuevo = () => {
     setModoEdicion(false);
     setBusquedaEquipo(''); // Limpiamos el buscador
-    setEquipoSeleccionado(null);
+    setEquiposSeleccionados([]);
     setFormData({ Email: '', Nombre_Empleado: '', A_Paterno: '', A_Materno: '', Cargo: '', Departamento: '', Rol: 'USER', Admin_TI: false, Estatus_Acceso: 'Activo' });
     setModalAbierto(true);
   };
@@ -116,10 +116,10 @@ export default function PersonalPage() {
   const abrirModalEditar = (emp: Empleado) => {
     setModoEdicion(true);
 
-    //  Buscamos si el empleado tiene equipo y la ponemos en el buscador
-    const vAsignado = equipos.find(v => v.Email_Empleado === emp.Email);
-    setEquipoSeleccionado(vAsignado || null);
-    setBusquedaEquipo(vAsignado ? vAsignado.C_Interno : '');
+    //  Buscamos si el empleado tiene equipos asignados
+    const vAsignados = equipos.filter(v => v.Email_Empleado === emp.Email);
+    setEquiposSeleccionados(vAsignados);
+    setBusquedaEquipo('');
 
     setFormData({
       Email: emp.Email, Nombre_Empleado: emp.Nombre_Empleado, A_Paterno: emp.A_Paterno, A_Materno: emp.A_Materno || '',
@@ -164,10 +164,10 @@ export default function PersonalPage() {
     setGuardando(true);
     const metodo = modoEdicion ? 'PUT' : 'POST';
 
-    //  ENVIAMOS EL C_INTERNO SELECCIONADO AL BACKEND
+    //  ENVIAMOS LOS EQUIPOS SELECCIONADOS AL BACKEND
     const payload = {
       ...formData,
-      C_Interno_Computo: equipoSeleccionado ? equipoSeleccionado.C_Interno : null
+      Equipos_Computo: equiposSeleccionados.map(e => e.C_Interno)
     };
 
     try {
@@ -513,32 +513,32 @@ export default function PersonalPage() {
                         onChange={(e) => {
                           setBusquedaEquipo(e.target.value);
                           setMostrarSugerencias(true);
-                          if (e.target.value.trim() === '') {
-                            setEquipoSeleccionado(null);
-                          }
                         }}
                         onFocus={() => setMostrarSugerencias(true)}
                         className="w-full pl-10 pr-4 py-3 bg-white border border-[var(--border-cream)] rounded-xl text-[var(--text-main)] focus:ring-2 focus:ring-[#71717a] outline-none transition-all placeholder:text-stone-300 text-sm"
                       />
-
+                      
                       {/* MENÚ DE SUGERENCIAS */}
                       {mostrarSugerencias && busquedaEquipo.length > 0 && (
                         <div className="absolute z-[60] w-full mt-1 bg-white border border-[var(--border-cream)] rounded-xl shadow-2xl max-h-52 overflow-y-auto scrollbar-hide">
                           {sugerenciasEquipos.length > 0 ? (
                             sugerenciasEquipos.map((unidad) => {
-                              const ocupadoPorOtro = !!(unidad.Email_Empleado && unidad.Email_Empleado !== formData.Email);
+                              const yaSeleccionado = equiposSeleccionados.some(e => e.C_Interno === unidad.C_Interno);
+                              const ocupadoPorOtro = !!(unidad.Email_Empleado && unidad.Email_Empleado !== formData.Email && !yaSeleccionado);
 
                               return (
                                 <button
                                   key={unidad.C_Interno}
                                   type="button"
-                                  disabled={ocupadoPorOtro}
+                                  disabled={ocupadoPorOtro || yaSeleccionado}
                                   onClick={() => {
-                                    setEquipoSeleccionado(unidad);
-                                    setBusquedaEquipo(unidad.C_Interno);
+                                    if (!yaSeleccionado) {
+                                      setEquiposSeleccionados(prev => [...prev, unidad]);
+                                    }
+                                    setBusquedaEquipo('');
                                     setMostrarSugerencias(false);
                                   }}
-                                  className={`w-full px-4 py-3 text-left border-b border-[var(--border-cream)] last:border-none flex justify-between items-center group transition-colors ${ocupadoPorOtro ? 'bg-red-50/50 cursor-not-allowed opacity-60' : 'hover:bg-[var(--bg-hover)]'}`}
+                                  className={`w-full px-4 py-3 text-left border-b border-[var(--border-cream)] last:border-none flex justify-between items-center group transition-colors ${(ocupadoPorOtro || yaSeleccionado) ? 'bg-red-50/50 cursor-not-allowed opacity-60' : 'hover:bg-[var(--bg-hover)]'}`}
                                 >
                                   <div>
                                     <p className={`text-sm font-bold transition-colors ${ocupadoPorOtro ? 'text-stone-400 group-hover:text-red-500' : 'text-[var(--text-main)] group-hover:text-[#71717a]'}`}>
@@ -558,6 +558,24 @@ export default function PersonalPage() {
                         </div>
                       )}
                     </div>
+                    
+                    {equiposSeleccionados.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mt-2 pt-2 border-t border-[var(--border-cream)]">
+                        {equiposSeleccionados.map((eq) => (
+                          <span key={eq.C_Interno} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-sm">
+                            <Laptop size={14} className="text-emerald-500" />
+                            {eq.C_Interno}
+                            <button
+                              type="button"
+                              onClick={() => setEquiposSeleccionados(prev => prev.filter(item => item.C_Interno !== eq.C_Interno))}
+                              className="ml-1 text-emerald-400 hover:text-emerald-900 focus:outline-none bg-emerald-100 hover:bg-emerald-200 rounded p-0.5 transition-colors"
+                            >
+                              <X size={14} />
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   {modoEdicion && (

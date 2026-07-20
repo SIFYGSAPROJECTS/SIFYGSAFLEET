@@ -12,6 +12,8 @@ interface ComprobacionRecord {
   Cargo: number;
   Abono: number;
   Saldo: number;
+  Estatus: string;
+  Monto_Pagado: number;
 }
 
 export default function ComprobacionesClient({ userEmail, isAdmin }: { userEmail: string, isAdmin: boolean }) {
@@ -53,7 +55,9 @@ export default function ComprobacionesClient({ userEmail, isAdmin }: { userEmail
     Concepto: '',
     Cargo: 0,
     Abono: 0,
-    Saldo: 0
+    Saldo: 0,
+    Estatus: 'Pendiente',
+    Monto_Pagado: 0
   });
 
   const addRow = () => {
@@ -169,7 +173,9 @@ export default function ComprobacionesClient({ userEmail, isAdmin }: { userEmail
                 <th className="px-3 py-3 font-semibold text-center border-r border-emerald-200 w-12">#</th>
                 <th className="px-3 py-3 font-semibold border-r border-emerald-200 w-40">Fecha</th>
                 <th className="px-3 py-3 font-semibold border-r border-emerald-200 w-48">No. Factura</th>
-                <th className="px-3 py-3 font-semibold border-r border-emerald-200 min-w-[300px]">Concepto</th>
+                <th className="px-3 py-3 font-semibold border-r border-emerald-200 min-w-[250px]">Concepto</th>
+                <th className="px-3 py-3 font-semibold border-r border-emerald-200 w-36 text-center">Estatus</th>
+                {/* <th className="px-3 py-3 font-semibold border-r border-emerald-200 w-32 text-right">Pago Parcial</th> */}
                 <th className="px-3 py-3 font-semibold border-r border-emerald-200 w-32 text-right">Cargo</th>
                 <th className="px-3 py-3 font-semibold border-r border-emerald-200 w-32 text-right">Abono</th>
                 <th className="px-3 py-3 font-semibold border-r border-emerald-200 w-32 text-right">Saldo</th>
@@ -208,6 +214,40 @@ export default function ComprobacionesClient({ userEmail, isAdmin }: { userEmail
                       className="w-full bg-transparent border border-transparent hover:border-stone-200 focus:bg-white focus:border-emerald-400 rounded px-2 py-1.5 outline-none text-stone-700 text-sm"
                     />
                   </td>
+                  <td className="px-3 py-1.5 border-r border-stone-100">
+                    <select
+                      value={row.Estatus || 'Pendiente'}
+                      onChange={(e) => handleCellChange(index, 'Estatus', e.target.value)}
+                      className={`w-full bg-transparent border border-transparent hover:border-stone-200 focus:bg-white focus:border-emerald-400 rounded px-2 py-1.5 outline-none text-sm font-semibold
+                        ${row.Estatus === 'Pagado' ? 'text-emerald-600' : 
+                          row.Estatus === 'Pago Parcial' ? 'text-amber-500' : 
+                          row.Estatus === 'Rechazado' ? 'text-red-500' : 'text-stone-500'}`}
+                    >
+                      <option value="Pendiente">Pendiente</option>
+                      <option value="Pago Parcial">Pago Parcial</option>
+                      <option value="Pagado">Pagado</option>
+                      <option value="Rechazado">Rechazado</option>
+                    </select>
+                  </td>
+                  {/* 
+                  <td className="px-3 py-1.5 border-r border-stone-100">
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      placeholder="0.00"
+                      value={row.Monto_Pagado || ''}
+                      onChange={(e) => {
+                        const val = parseFloat(e.target.value) || 0;
+                        handleCellChange(index, 'Monto_Pagado', val);
+                        if (val > 0 && row.Estatus === 'Pendiente') {
+                          handleCellChange(index, 'Estatus', 'Pago Parcial');
+                        }
+                      }}
+                      className="w-full text-right bg-transparent border border-transparent hover:border-stone-200 focus:bg-white focus:border-amber-400 rounded px-2 py-1.5 outline-none text-stone-700 text-sm"
+                    />
+                  </td>
+                  */}
                   <td className="px-3 py-1.5 border-r border-stone-100">
                     <input
                       type="number"

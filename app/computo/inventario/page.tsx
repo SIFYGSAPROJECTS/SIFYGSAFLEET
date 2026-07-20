@@ -304,6 +304,7 @@ export default function ComputoInventarioPage() {
         CR: getColIndex('CR') !== -1 ? getColIndex('CR') : 13,
         Fecha_CR: getColIndex('Fecha CR') !== -1 ? getColIndex('Fecha CR') : 14,
         Proveedor: getColIndex('Proveedor') !== -1 ? getColIndex('Proveedor') : 15,
+        N_EMP: getColIndex('N EMP') !== -1 ? getColIndex('N EMP') : (getColIndex('N° EMP') !== -1 ? getColIndex('N° EMP') : 16),
       };
 
       worksheet.eachRow((row, rowNumber) => {

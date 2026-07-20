@@ -53,7 +53,7 @@ export default function ProgramacionClient() {
   const fetchRecords = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/gastos/programacion`);
+      const res = await fetch(`/api/gastos/programacion?semana=${semana}&anio=${anio}`);
       if (res.ok) {
         const data = await res.json();
         if (data.length > 0) {
@@ -63,6 +63,19 @@ export default function ProgramacionClient() {
             Fecha_Pago: d.Fecha_Pago ? new Date(d.Fecha_Pago).toISOString().split('T')[0] : ''
           }));
           setRegistros(formatted);
+        } else {
+          setRegistros([{
+            Fecha_Sol: new Date().toISOString().split('T')[0],
+            Partida: '',
+            Servicio_Producto: '',
+            Monto: 0,
+            Proveedor: '',
+            Empresa: '',
+            Fecha_Pago: '',
+            Factura_Comprobacion: '',
+            Usuario: '',
+            Estatus: 'Pendiente'
+          }]);
         }
       }
     } catch (e) {
@@ -90,7 +103,7 @@ export default function ProgramacionClient() {
       const res = await fetch('/api/gastos/programacion', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ registros })
+        body: JSON.stringify({ semana, anio, registros })
       });
       if (res.ok) {
         setSysModal({ isOpen: true, type: 'success', title: 'Guardado', message: 'Los registros se han guardado exitosamente.' });
@@ -292,15 +305,21 @@ export default function ProgramacionClient() {
                     />
                   </td>
                   <td className="px-3 py-1.5 border-r border-stone-100">
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      placeholder="0.00"
-                      value={row.Monto || ''}
-                      onChange={(e) => handleCellChange(index, 'Monto', parseFloat(e.target.value) || 0)}
-                      className="w-28 text-right bg-transparent border border-transparent hover:border-stone-200 focus:bg-white focus:border-orange-400 rounded px-2 py-1.5 outline-none text-stone-700 text-sm font-semibold"
-                    />
+                    <div className="relative w-28 group/input">
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        placeholder="0.00"
+                        value={row.Monto || ''}
+                        onChange={(e) => handleCellChange(index, 'Monto', parseFloat(e.target.value) || 0)}
+                        className="w-full text-right bg-transparent border border-transparent hover:border-stone-200 focus:bg-white focus:border-orange-400 rounded px-2 py-1.5 outline-none text-stone-700 text-sm font-semibold opacity-0 focus:opacity-100 absolute inset-0 z-10"
+                      />
+                      <div className="w-full text-right bg-transparent border border-transparent rounded px-2 py-1.5 text-stone-700 text-sm font-semibold group-focus-within/input:opacity-0 flex items-center justify-between">
+                        <span className="text-stone-400 select-none">$</span>
+                        <span>{row.Monto ? new Intl.NumberFormat('es-MX', { minimumFractionDigits: 2 }).format(row.Monto) : '0.00'}</span>
+                      </div>
+                    </div>
                   </td>
                   <td className="px-3 py-1.5 border-r border-stone-100">
                     <input

@@ -79,7 +79,7 @@ export const MantenimientoAsignadoEmail = ({
           </Section>
           
           <Text style={footerText}>
-            Si tienes dudas, contacta al departamento de Sistemas.
+            Si tienes dudas, contacta al departamento de Infraestructura.
           </Text>
         </Container>
       </Body>

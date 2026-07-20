@@ -3,6 +3,7 @@ import { prisma } from '@/lib/db';
 import { enviarCorreo } from '@/lib/email';
 import { render } from '@react-email/render';
 import MantenimientoAsignadoEmail from '@/components/emails/MantenimientoAsignadoEmail';
+import { cookies } from 'next/headers';
 
 export async function GET(request: Request) {
   try {
@@ -10,9 +11,23 @@ export async function GET(request: Request) {
     const c_interno = searchParams.get('c_interno');
     const estado = searchParams.get('estado');
     
+    // Security check
+    const cookieStore = await cookies();
+    const userEmail = cookieStore.get('user_email')?.value;
+    const userRole = cookieStore.get('user_role')?.value || 'USER';
+    const userAdminTi = cookieStore.get('user_admin_ti')?.value === 'true';
+    const isAdmin = ['ADMIN', 'GERENCIAL'].includes(userRole) || userAdminTi;
+    
     let whereClause: any = {};
     if (c_interno) whereClause.C_Interno = c_interno;
     if (estado) whereClause.Estado = estado;
+    
+    // If not admin, only fetch records for their assigned equipment
+    if (!isAdmin && userEmail) {
+      whereClause.equipo = { Email_Empleado: userEmail };
+    } else if (!isAdmin && !userEmail) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
 
     const reportes = await prisma.reporte_Mantenimiento.findMany({
       where: whereClause,
@@ -80,8 +95,10 @@ export async function POST(request: Request) {
     if (equipoInfo?.Email_Empleado) {
       try {
         const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-        // Convert dates to string format for the email template
-        const fechaString = new Date(data.Fecha_Programada).toLocaleDateString('es-MX', {
+        
+        // Formatear la fecha directamente del registro recién creado, forzando UTC para evitar corrimientos
+        const fechaString = new Date(nuevoReporte.Fecha_Programada).toLocaleDateString('es-MX', {
+          timeZone: 'UTC',
           weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
         });
         

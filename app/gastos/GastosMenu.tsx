@@ -9,6 +9,14 @@ export default function GastosMenu() {
 
   const menuItems = [
     {
+      id: 'programacion',
+      name: 'Programación Semanal',
+      icon: CalendarDays,
+      href: '/gastos/programacion',
+      color: 'text-orange-600',
+      activeColor: 'bg-orange-600 text-white shadow-md'
+    },
+    {
       id: 'comprobaciones',
       name: 'Comprobaciones de Gastos',
       icon: FileText,
@@ -31,14 +39,6 @@ export default function GastosMenu() {
       href: '/gastos/viaticos',
       color: 'text-sky-600',
       activeColor: 'bg-sky-600 text-white shadow-md'
-    },
-    {
-      id: 'programacion',
-      name: 'Programación Semanal',
-      icon: CalendarDays,
-      href: '/gastos/programacion',
-      color: 'text-orange-600',
-      activeColor: 'bg-orange-600 text-white shadow-md'
     }
   ];
 

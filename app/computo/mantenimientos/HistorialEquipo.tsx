@@ -53,7 +53,10 @@ export default function HistorialEquipo({ cInterno, reportes, onViewFRM }: Histo
                   {reporte.Tipo_Mtto}
                 </span>
                 <span className="text-xs text-[var(--text-muted)] font-medium">
-                  {format(fecha, "dd MMM yyyy", { locale: es })}
+                  {fecha.toLocaleDateString('es-MX', { 
+                    timeZone: reporte.Fecha_Ejecucion ? undefined : 'UTC', 
+                    day: 'numeric', month: 'short', year: 'numeric' 
+                  })}
                 </span>
               </div>
               

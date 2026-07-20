@@ -55,7 +55,9 @@ export async function PUT(request: Request) {
             Concepto: r.Concepto || '',
             Cargo: Number(r.Cargo) || 0,
             Abono: Number(r.Abono) || 0,
-            Saldo: Number(r.Saldo) || 0
+            Saldo: Number(r.Saldo) || 0,
+            Estatus: r.Estatus || 'Pendiente',
+            Monto_Pagado: Number(r.Monto_Pagado) || 0
           }))
         });
       }
