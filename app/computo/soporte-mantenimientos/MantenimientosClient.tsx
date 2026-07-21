@@ -1,11 +1,13 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import CalendarioMantenimientos from './CalendarioMantenimientos';
 import FormularioFRM from './FormularioFRM';
 import HistorialEquipo from './HistorialEquipo';
-import { Calendar, List, Search, Filter, Plus, CalendarClock, Laptop, Wrench } from 'lucide-react';
+import { CalendarClock, Filter, Settings, FileSpreadsheet, Search, CheckCircle, AlertCircle, Wrench, X, Laptop, Calendar, List, Plus } from "lucide-react";
+import { useSearchParams } from 'next/navigation';
+import toast from 'react-hot-toast';
 import PremiumSelect from '@/components/ui/PremiumSelect';
 
 const fixEncoding = (str: string) => {
@@ -29,14 +31,33 @@ export default function MantenimientosClient({ initialPlanes, initialReportes, i
   const [view, setView] = useState<'calendario' | 'lista' | 'historial'>('calendario');
   const [planes, setPlanes] = useState(initialPlanes);
   const [reportes, setReportes] = useState(initialReportes);
+  const searchParams = useSearchParams();
+  const autoOpenId = searchParams.get('reporteId');
+  const timestamp = searchParams.get('t');
   const [selectedReporte, setSelectedReporte] = useState<any>(null);
+
+  useEffect(() => {
+    if (autoOpenId && reportes.length > 0) {
+      const found = reportes.find((r: any) => r.Id_Reporte === parseInt(autoOpenId));
+      if (found) {
+        setSelectedReporte(found);
+        toast.success(`Abriendo cita programada para ${found.C_Interno}`, { icon: '📅' });
+      }
+    }
+  }, [autoOpenId, timestamp, reportes]);
   const [search, setSearch] = useState('');
   const [equipoHistorial, setEquipoHistorial] = useState('');
   
   // States for Nuevo Plan
   const [showNuevoPlan, setShowNuevoPlan] = useState(false);
   const [isSavingPlan, setIsSavingPlan] = useState(false);
-  const [nuevoPlanForm, setNuevoPlanForm] = useState({ C_Interno: '', Tipo_Mtto: 'Preventivo', Frecuencia_Meses: 6, Fecha_Inicio: new Date().toISOString().split('T')[0] });
+  const [nuevoPlanForm, setNuevoPlanForm] = useState({
+    C_Interno: '',
+    Frecuencia_Meses: 6,
+    Tipo_Mtto: 'Preventivo',
+    Fecha_Inicio: new Date().toISOString().split('T')[0],
+    Horario: '8:00-13:00'
+  });
 
   const refreshData = async () => {
     const [resPlanes, resReportes] = await Promise.all([
@@ -68,7 +89,8 @@ export default function MantenimientosClient({ initialPlanes, initialReportes, i
             Id_Plan: plan.Id_Plan,
             C_Interno: plan.C_Interno,
             Fecha_Programada: plan.Fecha_Inicio,
-            Tipo_Mtto: plan.Tipo_Mtto
+            Tipo_Mtto: plan.Tipo_Mtto,
+            Horario: nuevoPlanForm.Horario
           })
         });
 
@@ -353,14 +375,28 @@ export default function MantenimientosClient({ initialPlanes, initialReportes, i
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-bold text-[var(--text-muted)] uppercase mb-2">Fecha Inicio (Primer Servicio)</label>
-                <input 
-                  type="date" 
-                  className="w-full bg-[var(--bg-screen)] border border-[var(--border-cream)] rounded-xl px-3 py-2.5 text-sm text-[var(--text-main)] outline-none"
-                  value={nuevoPlanForm.Fecha_Inicio}
-                  onChange={(e) => setNuevoPlanForm({...nuevoPlanForm, Fecha_Inicio: e.target.value})}
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-[var(--text-muted)] uppercase mb-2">Fecha Inicio (Primer Servicio)</label>
+                  <input 
+                    type="date" 
+                    className="w-full bg-[var(--bg-screen)] border border-[var(--border-cream)] rounded-xl px-3 py-2.5 text-sm text-[var(--text-main)] outline-none"
+                    value={nuevoPlanForm.Fecha_Inicio}
+                    onChange={(e) => setNuevoPlanForm({...nuevoPlanForm, Fecha_Inicio: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-[var(--text-muted)] uppercase mb-2">Horario Asignado</label>
+                  <PremiumSelect 
+                    value={nuevoPlanForm.Horario}
+                    onChange={(val) => setNuevoPlanForm({...nuevoPlanForm, Horario: val})}
+                    options={[
+                      { value: '8:00-13:00', label: '8:00 a 13:00 hrs (Matutino)' },
+                      { value: '14:00-18:00', label: '14:00 a 18:00 hrs (Vespertino)' }
+                    ]}
+                    placeholder="Horario"
+                  />
+                </div>
               </div>
             </div>
 

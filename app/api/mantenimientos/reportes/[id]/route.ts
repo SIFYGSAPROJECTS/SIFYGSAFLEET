@@ -64,6 +64,14 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
           
           const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
           
+          let parsedHorario = '8:00-13:00';
+          if (updatedReporte.Datos_Formato) {
+            try {
+              const datos = JSON.parse(updatedReporte.Datos_Formato);
+              if (datos.horario) parsedHorario = datos.horario;
+            } catch(e){}
+          }
+          
           const emailHtml = await render(MantenimientoAsignadoEmail({
             equipoData: {
               C_Interno: previousReporte.equipo.C_Interno,
@@ -72,6 +80,7 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
               Service_Tag: previousReporte.equipo.Service_Tag || 'N/A'
             },
             fechaProgramada: new Date(updatedReporte.Fecha_Programada).toLocaleDateString('es-MX', { timeZone: 'UTC', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }),
+            horario: parsedHorario,
             tipoMtto: updatedReporte.Tipo_Mtto,
             reporteId: updatedReporte.Id_Reporte,
             appUrl: appUrl

@@ -60,6 +60,7 @@ export async function POST(request: Request) {
             },
             fechaOriginal: fechaString,
             motivo: motivo || 'No especificado',
+            reporteId: reporte.Id_Reporte,
             appUrl
           })
         );

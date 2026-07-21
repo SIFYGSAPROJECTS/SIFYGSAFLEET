@@ -5,6 +5,83 @@ import { enviarCorreo } from '@/lib/email';
 import { TicketCreatedEmail } from '@/components/emails/TicketCreatedEmail';
 import { logAuditoria } from '@/lib/utils/audit';
 
+// Obtiene los tickets pendientes (notificaciones)
+export async function GET(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const estado = searchParams.get('estado');
+
+    const cookieStore = await cookies();
+    const userEmail = cookieStore.get('user_email')?.value;
+
+    if (!userEmail) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
+
+    const usuario = await prisma.empleados.findUnique({
+      where: { Email: userEmail }
+    });
+    const isAdmin = ['ADMIN', 'GERENCIAL'].includes(usuario?.Rol || '');
+
+    // Condición: Si no es admin, solo ve los tickets donde él es el solicitante o el encargado del auto
+    const condicionBase = isAdmin ? {} : {
+      OR: [
+        { Email_Empleado: userEmail },
+        { auto: { Email_encargado: userEmail } }
+      ]
+    };
+
+    const condicionEstado = estado ? { Estado: estado } : {};
+
+    const reportes = await prisma.solicitud.findMany({
+      where: {
+        ...condicionBase,
+        ...condicionEstado
+      },
+      include: {
+        auto: {
+          include: { encargado: true }
+        },
+        empleado: true
+      },
+      orderBy: { Fecha_Realizacion: 'desc' }
+    });
+
+    const ticketsFormateados = reportes.map(t => ({ ...t, tipoAlerta: 'ticket' }));
+
+    // Buscar Documentos próximos a vencer
+    const docCondicionBase = isAdmin ? {} : {
+      vehiculo: { Email_encargado: userEmail }
+    };
+
+    const documentosCrudos = await prisma.documentos_Unidad.findMany({
+      where: {
+        ...docCondicionBase,
+        Fecha_Expiracion: { not: null },
+        Aviso_Dias: { not: null }
+      },
+      include: {
+        vehiculo: true
+      }
+    });
+
+    const hoy = new Date();
+    const documentosExpirando = documentosCrudos.filter((doc) => {
+      const fechaExp = new Date(doc.Fecha_Expiracion!);
+      const diffTime = fechaExp.getTime() - hoy.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      return diffDays <= (doc.Aviso_Dias || 0);
+    }).map(doc => ({ ...doc, tipoAlerta: 'documento' }));
+
+    const combinado = [...ticketsFormateados, ...documentosExpirando];
+
+    return NextResponse.json(combinado);
+  } catch (error) {
+    console.error('Error fetching tickets:', error);
+    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
+  }
+}
+
 // Registra una nueva solicitud de servicio y notifica a los involucrados
 export async function POST(request: Request) {
   try {

@@ -49,11 +49,18 @@ export default function FormularioFRM({ reporte, onClose, onSave, onRefresh, isA
   const [isConfirming, setIsConfirming] = useState(false);
   const [isRescheduling, setIsRescheduling] = useState(false);
   const [rescheduleReason, setRescheduleReason] = useState('');
+  const [rescheduleTime, setRescheduleTime] = useState(initialDatos.horario || '8:00-13:00');
+  const [userRescheduleDate, setUserRescheduleDate] = useState('');
+  const [userRescheduleComment, setUserRescheduleComment] = useState('');
 
   const handleUserAction = async (accion: 'confirmar' | 'reprogramar') => {
-    if (accion === 'reprogramar' && !rescheduleReason.trim()) {
-      alert("Por favor indica un motivo o la fecha en la que prefieres el mantenimiento.");
-      return;
+    let finalReason = rescheduleReason;
+    if (accion === 'reprogramar') {
+      if (!userRescheduleDate) {
+        alert("Por favor selecciona la nueva fecha sugerida.");
+        return;
+      }
+      finalReason = `Fecha Sugerida: ${userRescheduleDate}\nHorario: ${rescheduleTime === '8:00-13:00' ? '8:00-13:00 (Matutino)' : '14:00-18:00 (Vespertino)'}\nComentarios: ${userRescheduleComment || 'Ninguno'}`;
     }
     
     setIsConfirming(true);
@@ -64,7 +71,7 @@ export default function FormularioFRM({ reporte, onClose, onSave, onRefresh, isA
         body: JSON.stringify({
           id: reporte.Id_Reporte,
           accion,
-          motivo: rescheduleReason
+          motivo: finalReason
         })
       });
       const data = await res.json();
@@ -135,7 +142,10 @@ export default function FormularioFRM({ reporte, onClose, onSave, onRefresh, isA
     try {
       const payload = {
         ...formData,
-        Datos_Formato: JSON.stringify(formData.Datos_Formato),
+        Datos_Formato: JSON.stringify({
+          ...formData.Datos_Formato,
+          horario: rescheduleTime
+        }),
         Estado: 'PENDIENTE',
         Fecha_Programada: new Date(rescheduleReason).toISOString()
       };
@@ -304,7 +314,7 @@ export default function FormularioFRM({ reporte, onClose, onSave, onRefresh, isA
               <AlertCircle className="text-orange-500 shrink-0 mt-0.5" size={20} />
               <div>
                 <h4 className="text-orange-500 font-bold text-sm mb-1">El usuario solicitó posponer esta cita</h4>
-                <p className="text-[var(--text-main)] text-sm">{formData.Motivo_Rechazo || "Sin motivo especificado."}</p>
+                <p className="text-[var(--text-main)] text-sm whitespace-pre-wrap">{formData.Motivo_Rechazo || "Sin motivo especificado."}</p>
                 <p className="text-[var(--text-muted)] text-xs mt-2 italic">Para atender esta solicitud, cambia la 'Fecha de Ejecución' y el estado volverá automáticamente a PENDIENTE para que puedas enviarle una nueva notificación al usuario.</p>
               </div>
             </div>
@@ -644,25 +654,64 @@ export default function FormularioFRM({ reporte, onClose, onSave, onRefresh, isA
             {isAdmin ? (
               <>
                 <p className="text-sm text-[var(--text-muted)] mb-4">
-                  Selecciona la nueva fecha para el mantenimiento. Al confirmar, se enviará un nuevo correo al usuario y el estado cambiará a PENDIENTE.
+                  Selecciona la nueva fecha y horario para el mantenimiento. Al confirmar, se enviará un nuevo correo al usuario y el estado cambiará a PENDIENTE.
                 </p>
-                <input
-                  type="date"
-                  value={rescheduleReason}
-                  onChange={(e) => setRescheduleReason(e.target.value)}
-                  className="w-full bg-[var(--bg-screen)] border border-[var(--border-cream)] rounded-xl px-4 py-3 text-sm text-[var(--text-main)] focus:border-orange-500 outline-none mb-6"
-                />
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                  <div>
+                    <label className="block text-[11px] font-bold text-[var(--text-muted)] uppercase mb-2">Nueva Fecha</label>
+                    <input
+                      type="date"
+                      value={rescheduleReason}
+                      onChange={(e) => setRescheduleReason(e.target.value)}
+                      className="w-full bg-[var(--bg-screen)] border border-[var(--border-cream)] rounded-xl px-3 py-2.5 text-sm text-[var(--text-main)] focus:border-orange-500 outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-bold text-[var(--text-muted)] uppercase mb-2">Horario Asignado</label>
+                    <select
+                      value={rescheduleTime}
+                      onChange={(e) => setRescheduleTime(e.target.value)}
+                      className="w-full bg-[var(--bg-screen)] border border-[var(--border-cream)] rounded-xl px-3 py-2.5 text-sm text-[var(--text-main)] focus:border-orange-500 outline-none appearance-none"
+                    >
+                      <option value="8:00-13:00">8:00 a 13:00 hrs (Matutino)</option>
+                      <option value="14:00-18:00">14:00 a 18:00 hrs (Vespertino)</option>
+                    </select>
+                  </div>
+                </div>
               </>
             ) : (
               <>
                 <p className="text-sm text-[var(--text-muted)] mb-4">
-                  Por favor indica el motivo por el cual no puedes atender el mantenimiento o sugiere una fecha y hora diferente. Sistemas se pondrá en contacto o te asignará una nueva fecha.
+                  Por favor indica la nueva fecha y horario en la que puedes atender el mantenimiento. Sistemas lo validará y te asignará la nueva cita.
                 </p>
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <label className="block text-[11px] font-bold text-[var(--text-muted)] uppercase mb-2">Fecha Sugerida</label>
+                    <input
+                      type="date"
+                      value={userRescheduleDate}
+                      onChange={(e) => setUserRescheduleDate(e.target.value)}
+                      className="w-full bg-[var(--bg-screen)] border border-[var(--border-cream)] rounded-xl px-3 py-2 text-sm text-[var(--text-main)] focus:border-orange-500 outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-bold text-[var(--text-muted)] uppercase mb-2">Horario Sugerido</label>
+                    <select
+                      value={rescheduleTime}
+                      onChange={(e) => setRescheduleTime(e.target.value)}
+                      className="w-full bg-[var(--bg-screen)] border border-[var(--border-cream)] rounded-xl px-3 py-2 text-sm text-[var(--text-main)] focus:border-orange-500 outline-none appearance-none"
+                    >
+                      <option value="8:00-13:00">8:00 a 13:00 hrs (Matutino)</option>
+                      <option value="14:00-18:00">14:00 a 18:00 hrs (Vespertino)</option>
+                    </select>
+                  </div>
+                </div>
+                <label className="block text-[11px] font-bold text-[var(--text-muted)] uppercase mb-2">Comentarios Adicionales (Opcional)</label>
                 <textarea
-                  value={rescheduleReason}
-                  onChange={(e) => setRescheduleReason(e.target.value)}
-                  placeholder="Ej. Ese día tengo auditoría a las 10am, prefiero el miércoles por la tarde..."
-                  className="w-full bg-[var(--bg-screen)] border border-[var(--border-cream)] rounded-xl p-4 text-sm text-[var(--text-main)] focus:border-orange-500 outline-none min-h-[120px] resize-none mb-6"
+                  value={userRescheduleComment}
+                  onChange={(e) => setUserRescheduleComment(e.target.value)}
+                  placeholder="Ej. Tengo auditoría a las 10am, prefiero temprano..."
+                  className="w-full bg-[var(--bg-screen)] border border-[var(--border-cream)] rounded-xl p-3 text-sm text-[var(--text-main)] focus:border-orange-500 outline-none min-h-[80px] resize-none mb-6"
                 />
               </>
             )}
@@ -677,7 +726,7 @@ export default function FormularioFRM({ reporte, onClose, onSave, onRefresh, isA
               </button>
               <button 
                 onClick={() => isAdmin ? handleSaveReagendar() : handleUserAction('reprogramar')} 
-                disabled={isConfirming || !rescheduleReason.trim()}
+                disabled={isConfirming || (isAdmin ? !rescheduleReason : !userRescheduleDate)}
                 className="px-6 py-2 rounded-xl text-sm font-bold bg-orange-500 text-white hover:bg-orange-600 transition-colors disabled:opacity-50 flex items-center gap-2"
               >
                 {isConfirming ? 'Procesando...' : (isAdmin ? 'Reagendar y Avisar' : 'Enviar Solicitud')}

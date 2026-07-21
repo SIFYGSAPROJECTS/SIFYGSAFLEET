@@ -19,15 +19,19 @@ interface Props {
 export default function ServiciosTabs({ tickets, vehiculos, isAdmin, rol }: Props) {
   const searchParams = useSearchParams();
   const tabParam = searchParams.get('tab');
+  const ticketId = searchParams.get('ticketId');
+  const timestamp = searchParams.get('t');
 
   // Inicializa la pestaña activa en 'Nueva Orden' por defecto o el parámetro de la URL
-  const [activeTab, setActiveTab] = useState(tabParam || 'nueva');
+  const [activeTab, setActiveTab] = useState(ticketId ? 'seguimiento' : (tabParam || 'nueva'));
 
   useEffect(() => {
-    if (tabParam) {
+    if (ticketId) {
+      setActiveTab('seguimiento');
+    } else if (tabParam) {
       setActiveTab(tabParam);
     }
-  }, [tabParam]);
+  }, [tabParam, ticketId, timestamp]);
 
   const activos = tickets.filter(t => t.Estado !== 'LISTO');
   // Conserva un límite de 30 tickets recientes para mantener el rendimiento de la vista

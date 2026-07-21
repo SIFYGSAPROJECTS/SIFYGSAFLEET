@@ -23,6 +23,7 @@ interface Props {
     Service_Tag: string;
   };
   fechaProgramada: string;
+  horario?: string;
   tipoMtto: string;
   reporteId: number;
   appUrl: string;
@@ -31,11 +32,12 @@ interface Props {
 export const MantenimientoAsignadoEmail = ({
   equipoData,
   fechaProgramada,
+  horario = '8:00-13:00',
   tipoMtto,
   reporteId,
   appUrl,
 }: Props) => {
-  const portalUrl = `${appUrl}/computo/soporte-mantenimientos`;
+  const portalUrl = `${appUrl}/computo/soporte-mantenimientos?reporteId=${reporteId}`;
 
   return (
     <Html>
@@ -49,23 +51,28 @@ export const MantenimientoAsignadoEmail = ({
             Hola, se ha programado un mantenimiento <strong>{tipoMtto.toLowerCase()}</strong> para el equipo que tienes asignado.
           </Text>
 
-          <Section style={informationTable}>
-            <Row style={informationTableRow}>
-              <Column colSpan={2}>
-                <Text style={informationTableLabel}>FECHA PROGRAMADA</Text>
-                <Text style={informationTableValue}>{fechaProgramada}</Text>
-              </Column>
-            </Row>
-            <Row style={informationTableRow}>
-              <Column>
-                <Text style={informationTableLabel}>EQUIPO</Text>
-                <Text style={informationTableValue}>{equipoData.C_Interno}</Text>
-              </Column>
-              <Column>
-                <Text style={informationTableLabel}>MODELO</Text>
-                <Text style={informationTableValue}>{equipoData.Marca} {equipoData.Modelo}</Text>
-              </Column>
-            </Row>
+          <Section style={informationTableWrapper}>
+            <Section style={informationTable}>
+              <Row style={informationTableRow}>
+                <Column colSpan={2}>
+                  <Text style={informationTableLabel}>FECHA Y HORARIO PROGRAMADO</Text>
+                  <Text style={informationTableValue}>
+                    {fechaProgramada} <br/> 
+                    <strong>Horario:</strong> {horario === '8:00-13:00' ? '8:00 a 13:00 hrs (Matutino)' : (horario === '14:00-18:00' ? '14:00 a 18:00 hrs (Vespertino)' : horario)}
+                  </Text>
+                </Column>
+              </Row>
+              <Row style={informationTableRow}>
+                <Column>
+                  <Text style={informationTableLabel}>EQUIPO</Text>
+                  <Text style={informationTableValue}>{equipoData.C_Interno}</Text>
+                </Column>
+                <Column>
+                  <Text style={informationTableLabel}>MODELO</Text>
+                  <Text style={informationTableValue}>{equipoData.Marca} {equipoData.Modelo}</Text>
+                </Column>
+              </Row>
+            </Section>
           </Section>
 
           <Text style={text}>
@@ -95,6 +102,7 @@ MantenimientoAsignadoEmail.PreviewProps = {
     Service_Tag: 'ABC1234',
   },
   fechaProgramada: '15 de Octubre de 2026',
+  horario: '8:00-13:00',
   tipoMtto: 'Preventivo',
   reporteId: 1,
   appUrl: 'http://localhost:3000',
@@ -133,12 +141,18 @@ const text = {
   padding: '0 40px',
 };
 
+const informationTableWrapper = {
+  padding: '0 40px',
+  width: '100%',
+  boxSizing: 'border-box' as const,
+};
+
 const informationTable = {
   borderCollapse: 'collapse' as const,
-  margin: '20px 40px',
-  width: 'calc(100% - 80px)',
+  width: '100%',
   backgroundColor: '#f9f9f9',
   borderRadius: '8px',
+  overflow: 'hidden',
 };
 
 const informationTableRow = {

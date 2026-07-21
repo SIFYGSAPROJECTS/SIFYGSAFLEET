@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { Wrench, Laptop, ShieldCheck, Ticket } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import MantenimientosClient from "./MantenimientosClient";
@@ -15,7 +16,19 @@ export default function SoporteMantenimientoClient({
   isAdmin,
   currentUserEmail
 }: any) {
-  const [activeTab, setActiveTab] = useState<'tickets' | 'mantenimientos'>('tickets');
+  const searchParams = useSearchParams();
+  const reporteId = searchParams.get('reporteId');
+  const timestamp = searchParams.get('t');
+
+  const [activeTab, setActiveTab] = useState<'tickets' | 'mantenimientos'>(
+    reporteId ? 'mantenimientos' : 'tickets'
+  );
+
+  useEffect(() => {
+    if (reporteId) {
+      setActiveTab('mantenimientos');
+    }
+  }, [reporteId, timestamp]);
 
   const moduleSwitcher = (
     <div className="relative flex bg-[var(--bg-floating)] p-1 rounded-2xl border border-[var(--border-cream)] shadow-sm w-fit">

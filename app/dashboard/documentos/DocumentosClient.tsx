@@ -5,10 +5,12 @@ import {
   Search, Upload, FileText, AlertCircle, Car, User, Palette, Gauge,
   ArrowLeft, X, Eye, Download, Trash2, PencilLine, Wrench, DollarSign,
   FolderOpen, ShieldCheck, CreditCard, Info, ChevronDown, FilePlus2,
-  CheckCircle2, Calendar, Bell
-, CalendarCheck } from 'lucide-react';
+  CheckCircle2, Calendar, Bell, CalendarCheck
+} from 'lucide-react';
 import SystemModal, { ModalType } from '@/components/ui/SystemModal';
 import DynamicMobilePDFViewer from '@/components/ui/DynamicMobilePDFViewer';
+import { useSearchParams } from 'next/navigation';
+import toast from 'react-hot-toast';
 
 interface Props {
   vehiculos?: any[];
@@ -61,8 +63,23 @@ export default function DocumentosPage({ vehiculos = [], isAdmin = false }: Prop
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
   }, []);
+
+  const searchParams = useSearchParams();
+  const consecutivoParam = searchParams.get('consecutivo');
+  const timestampParam = searchParams.get('t');
+
+  useEffect(() => {
+    if (consecutivoParam) {
+      setConsecutivoInput(consecutivoParam);
+      buscarVehiculo(consecutivoParam);
+      toast.success(`Abriendo expediente de la unidad ${consecutivoParam}`, { icon: '📄' });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [consecutivoParam, timestampParam]);
 
   // Auto-scroll del item activo dentro del dropdown
   useEffect(() => {
@@ -120,8 +137,10 @@ export default function DocumentosPage({ vehiculos = [], isAdmin = false }: Prop
     setActiveIndex(-1);
   };
 
-  const buscarVehiculo = async () => {
-    if (!consecutivoInput) return;
+  const buscarVehiculo = async (idForzado?: string | React.MouseEvent | React.FormEvent) => {
+    const isString = typeof idForzado === 'string';
+    const targetId = isString ? idForzado : consecutivoInput;
+    if (!targetId) return;
     setCargando(true);
     setMensaje('');
     setErrorBusqueda(false);
@@ -129,7 +148,7 @@ export default function DocumentosPage({ vehiculos = [], isAdmin = false }: Prop
     setVehiculoInfo(null);
     setEditandoDocumentoId(null);
     setShowDropdown(false);
-    const idBusqueda = consecutivoInput.toUpperCase();
+    const idBusqueda = targetId.toUpperCase();
     try {
       const res = await fetch(`/api/documentos?consecutivo=${encodeURIComponent(idBusqueda)}`);
       const data = await res.json();

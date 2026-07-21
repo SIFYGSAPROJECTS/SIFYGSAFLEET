@@ -1,12 +1,33 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
+import toast from 'react-hot-toast';
 import StatusUpdater from './StatusUpdater';
 import { Activity, MapPin, Calendar, Clock, Timer, Wrench, CheckCircle2, User, Phone, ExternalLink } from 'lucide-react';
 
 export default function SeguimientoClient({ ticketsIniciales = [], isAdmin }: any) {
   const [datosTemporales, setDatosTemporales] = useState<Record<string, any>>({});
   const [vista, setVista] = useState<'proceso' | 'finalizadas'>('proceso');
+  const searchParams = useSearchParams();
+  const ticketId = searchParams.get('ticketId');
+  const timestamp = searchParams.get('t');
+
+  useEffect(() => {
+    if (ticketId) {
+      setTimeout(() => {
+        const element = document.getElementById(`ticket-${ticketId}`);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          element.classList.add('ring-4', 'ring-cyan-500', 'ring-offset-4', 'ring-offset-[#0a0a0a]', 'transition-all', 'duration-500');
+          setTimeout(() => {
+            element.classList.remove('ring-4', 'ring-cyan-500', 'ring-offset-4', 'ring-offset-[#0a0a0a]');
+          }, 2000);
+          toast.success(`Visualizando ticket de servicio ${ticketId}`, { icon: '🚘' });
+        }
+      }, 100); // Pequeño retraso para asegurar que el DOM pintó las tarjetas
+    }
+  }, [ticketId, timestamp]);
 
   if (!ticketsIniciales || ticketsIniciales.length === 0) {
     return <div className="bg-[var(--bg-floating)] p-12 rounded-xl text-center text-[var(--text-muted)] font-bold border border-[var(--border-cream)]">No hay unidades en el sistema.</div>;
@@ -81,7 +102,7 @@ export default function SeguimientoClient({ ticketsIniciales = [], isAdmin }: an
         const esFinalizadoReal = ticket.Estado === 'LISTO';
 
         return (
-          <div key={ticket.Pk_folio_ticket} className={`bg-[var(--bg-floating)] rounded-xl shadow-xl border-x border-b border-[var(--border-cream)] border-t-4 p-5 sm:p-8 transition-colors ${esFinalizadoVisual ? 'border-t-emerald-500' : 'border-t-[#71717a]'}`}>
+          <div id={`ticket-${ticket.Pk_folio_ticket}`} key={ticket.Pk_folio_ticket} className={`bg-[var(--bg-floating)] rounded-xl shadow-xl border-x border-b border-[var(--border-cream)] border-t-4 p-5 sm:p-8 transition-colors ${esFinalizadoVisual ? 'border-t-emerald-500' : 'border-t-[#71717a]'}`}>
             <div className="flex flex-col md:flex-row justify-between items-start mb-10 gap-6">
               <div>
                 <span className={`px-2 py-1 rounded text-[10px] font-mono font-black mb-3 inline-block tracking-[0.2em] ${esFinalizadoVisual ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'bg-[#71717a]/10 text-[#71717a] border border-[#71717a]/20'}`}>

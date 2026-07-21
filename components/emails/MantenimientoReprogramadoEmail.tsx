@@ -19,6 +19,7 @@ interface Props {
   };
   fechaOriginal: string;
   motivo: string;
+  reporteId: number;
   appUrl: string;
 }
 
@@ -26,6 +27,7 @@ export const MantenimientoReprogramadoEmail = ({
   equipoData,
   fechaOriginal,
   motivo,
+  reporteId,
   appUrl,
 }: Props) => {
   return (
@@ -53,7 +55,7 @@ export const MantenimientoReprogramadoEmail = ({
           </Section>
 
           <Section style={buttonContainer}>
-            <Button style={button} href={`${appUrl}/computo/soporte-mantenimientos`}>
+            <Button style={button} href={`${appUrl}/computo/soporte-mantenimientos?reporteId=${reporteId}`}>
               Ir a Mantenimientos
             </Button>
           </Section>
@@ -70,6 +72,7 @@ MantenimientoReprogramadoEmail.PreviewProps = {
   },
   fechaOriginal: '15 de Octubre de 2026',
   motivo: 'Estaré de vacaciones esa semana, favor de pasarlo para el día lunes 19.',
+  reporteId: 1,
   appUrl: 'http://localhost:3000',
 } as Props;
 
@@ -125,6 +128,7 @@ const motivoBox = {
   fontSize: '14px',
   fontStyle: 'italic',
   margin: '10px 0',
+  whiteSpace: 'pre-wrap' as const,
 };
 
 const buttonContainer = {

@@ -3,6 +3,7 @@ import { Geist_Mono, Inter, Newsreader } from "next/font/google";
 import "./globals.css";
 // 1. IMPORTAMOS LOS HEADERS
 import { headers } from 'next/headers';
+import { Toaster } from 'react-hot-toast';
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
@@ -50,6 +51,16 @@ export default async function RootLayout({
       <body
         className={`${inter.variable} ${newsreader.variable} ${geistMono.variable} font-sans antialiased bg-[var(--bg-screen)] text-[var(--text-main)] min-h-screen bg-fixed`}
       >
+        <Toaster 
+          position="top-right" 
+          toastOptions={{
+            style: {
+              background: 'var(--bg-floating)',
+              color: 'var(--text-main)',
+              border: '1px solid var(--border-cream)',
+            }
+          }}
+        />
         {children}
       </body>
     </html>

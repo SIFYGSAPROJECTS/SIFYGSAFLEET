@@ -77,19 +77,20 @@ export async function POST(request: Request) {
     const numStr = (count + 1).toString().padStart(4, '0');
     const consecutivo = `FRM-${year}-${numStr}`;
 
-    const nuevoReporte = await prisma.reporte_Mantenimiento.create({
-      data: {
-        Consecutivo_FRM: consecutivo,
-        Id_Plan: data.Id_Plan,
-        C_Interno: data.C_Interno,
-        Fecha_Programada: new Date(data.Fecha_Programada),
-        Tipo_Mtto: data.Tipo_Mtto,
-        Estado: 'PENDIENTE',
-        Email_Notificado: equipoInfo?.Email_Empleado || null,
-        Tecnico: data.Tecnico || null,
-        Observaciones: data.Observaciones || null,
-      }
-    });
+      const nuevoReporte = await prisma.reporte_Mantenimiento.create({
+        data: {
+          Consecutivo_FRM: consecutivo,
+          Id_Plan: data.Id_Plan,
+          C_Interno: data.C_Interno,
+          Fecha_Programada: new Date(data.Fecha_Programada),
+          Tipo_Mtto: data.Tipo_Mtto,
+          Estado: 'PENDIENTE',
+          Email_Notificado: equipoInfo?.Email_Empleado || null,
+          Tecnico: data.Tecnico || null,
+          Observaciones: data.Observaciones || null,
+          Datos_Formato: JSON.stringify({ horario: data.Horario || '8:00-13:00' })
+        }
+      });
 
     // Send email notification to the user if they have an email assigned
     if (equipoInfo?.Email_Empleado) {
@@ -111,6 +112,7 @@ export async function POST(request: Request) {
               Service_Tag: equipoInfo.Service_Tag || 'N/A'
             },
             fechaProgramada: fechaString,
+            horario: data.Horario || '8:00-13:00',
             tipoMtto: data.Tipo_Mtto,
             reporteId: nuevoReporte.Id_Reporte,
             appUrl
