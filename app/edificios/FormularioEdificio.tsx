@@ -1,21 +1,48 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
 "use client";
-import React, { useState } from 'react';
-import { Building2, MapPin, X, Save, UploadCloud } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Building2, MapPin, X, Save, UploadCloud, ImageIcon } from 'lucide-react';
+import Image from 'next/image';
 
 const DEPARTAMENTOS_OPCIONES = [
   "HSE", "Administración", "Compras", "Ventas", "GESAPE", 
   "GYCP", "Infraestructura", "Servicios e Ingeniería", "Dirección General"
 ];
 
-export default function FormularioEdificio({ onClose, onSuccess }: any) {
+export default function FormularioEdificio({ onClose, onSuccess, edificioParaEditar }: any) {
   const [formData, setFormData] = useState({
     Sucursal: '',
     Direccion: '',
-    Departamentos: [] as string[],
-    Foto_Portada: '' // We will skip actual file upload for now, maybe just a placeholder or leave empty
+    Departamentos: [] as string[]
   });
+  const [fotoFile, setFotoFile] = useState<File | null>(null);
+  const [fotoPreview, setFotoPreview] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    if (edificioParaEditar) {
+      let deptos = [];
+      try { deptos = typeof edificioParaEditar.Departamentos === 'string' ? JSON.parse(edificioParaEditar.Departamentos) : edificioParaEditar.Departamentos; } 
+      catch { deptos = typeof edificioParaEditar.Departamentos === 'string' ? edificioParaEditar.Departamentos.split(',').map((d:string)=>d.trim()) : []; }
+      
+      setFormData({
+        Sucursal: edificioParaEditar.Sucursal || '',
+        Direccion: edificioParaEditar.Direccion || '',
+        Departamentos: Array.isArray(deptos) ? deptos : []
+      });
+      if (edificioParaEditar.Foto_Portada) {
+        setFotoPreview(edificioParaEditar.Foto_Portada);
+      }
+    }
+  }, [edificioParaEditar]);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setFotoFile(file);
+      setFotoPreview(URL.createObjectURL(file));
+    }
+  };
 
   const toggleDepto = (depto: string) => {
     setFormData(prev => {
@@ -33,10 +60,20 @@ export default function FormularioEdificio({ onClose, onSuccess }: any) {
     
     setIsSaving(true);
     try {
+      const formPayload = new FormData();
+      if (edificioParaEditar) {
+        formPayload.append('Id_Edificio', edificioParaEditar.Id_Edificio.toString());
+      }
+      formPayload.append('Sucursal', formData.Sucursal);
+      formPayload.append('Direccion', formData.Direccion);
+      formPayload.append('Departamentos', JSON.stringify(formData.Departamentos));
+      if (fotoFile) {
+        formPayload.append('Foto_Portada', fotoFile);
+      }
+
       const res = await fetch('/api/edificios', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        method: edificioParaEditar ? 'PUT' : 'POST',
+        body: formPayload
       });
       const data = await res.json();
       if (res.ok) {
@@ -57,7 +94,7 @@ export default function FormularioEdificio({ onClose, onSuccess }: any) {
       <div className="bg-[var(--bg-floating)] w-full max-w-lg rounded-2xl border border-[var(--border-cream)] shadow-2xl flex flex-col max-h-[90vh]">
         <div className="p-5 border-b border-[var(--border-cream)] flex justify-between items-center bg-white/[0.02]">
           <h2 className="text-xl font-bold text-amber-500 flex items-center gap-2">
-            <Building2 size={20} /> Nuevo Edificio
+            <Building2 size={20} /> {edificioParaEditar ? 'Editar Edificio' : 'Nuevo Edificio'}
           </h2>
           <button onClick={onClose} className="p-2 bg-[var(--bg-hover)] text-[var(--text-muted)] hover:text-white rounded-lg transition-colors">
             <X size={18} />
@@ -108,6 +145,26 @@ export default function FormularioEdificio({ onClose, onSuccess }: any) {
                   {depto}
                 </button>
               ))}
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-[var(--text-muted)] uppercase mb-3">Foto de Presentación</label>
+            <div className="flex items-center gap-4">
+              <div className="relative w-32 h-32 rounded-xl border-2 border-dashed border-[var(--border-cream)] flex items-center justify-center bg-[var(--bg-screen)] overflow-hidden">
+                {fotoPreview ? (
+                  <Image src={fotoPreview} alt="Preview" fill className="object-cover" />
+                ) : (
+                  <ImageIcon size={32} className="text-stone-500 opacity-50" />
+                )}
+              </div>
+              <div className="flex-1">
+                <label className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 bg-[var(--bg-hover)] text-stone-200 border border-[var(--border-cream)] rounded-xl hover:bg-white hover:text-[#0F1115] transition-all text-sm font-semibold">
+                  <UploadCloud size={16} /> Subir Imagen
+                  <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
+                </label>
+                <p className="text-xs text-[var(--text-muted)] mt-2">Formatos: JPG, PNG. Se recomienda imagen horizontal.</p>
+              </div>
             </div>
           </div>
         </div>

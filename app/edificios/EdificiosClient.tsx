@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import React, { useState } from 'react';
-import { Plus, Building2, MapPin, Layers, FileCheck2, Calendar, Image as ImageIcon, X, CheckCircle2 } from 'lucide-react';
+import { Plus, Building2, MapPin, Layers, FileCheck2, Calendar, Image as ImageIcon, X, CheckCircle2, PencilLine } from 'lucide-react';
 import Image from 'next/image';
 import FormularioEdificio from './FormularioEdificio';
 import FormatoInspeccion from './FormatoInspeccion';
@@ -9,15 +9,24 @@ import FormatoInspeccion from './FormatoInspeccion';
 export default function EdificiosClient({ initialEdificios, currentUserEmail }: any) {
   const [edificios, setEdificios] = useState(initialEdificios || []);
   const [showNuevoEdificio, setShowNuevoEdificio] = useState(false);
+  const [edificioAEditar, setEdificioAEditar] = useState<any>(null);
   const [inspeccionActiva, setInspeccionActiva] = useState<any>(null); // Null = hidden, Object = show modal
   const [historialEdificio, setHistorialEdificio] = useState<any>(null);
   const [historialData, setHistorialData] = useState<any[]>([]);
   const [loadingHistorial, setLoadingHistorial] = useState(false);
   const [fotoEnGrande, setFotoEnGrande] = useState<string | null>(null);
 
-  const handleEdificioAdded = (nuevoEdificio: any) => {
-    setEdificios((prev: any) => [...prev, nuevoEdificio]);
+  const handleEdificioAdded = (edificioGuardado: any) => {
+    setEdificios((prev: any) => {
+      const existe = prev.find((e: any) => e.Id_Edificio === edificioGuardado.Id_Edificio);
+      if (existe) {
+        return prev.map((e: any) => e.Id_Edificio === edificioGuardado.Id_Edificio ? edificioGuardado : e);
+      } else {
+        return [...prev, edificioGuardado];
+      }
+    });
     setShowNuevoEdificio(false);
+    setEdificioAEditar(null);
   };
 
   const openInspeccion = (edificio: any) => {
@@ -120,12 +129,20 @@ export default function EdificiosClient({ initialEdificios, currentUserEmail }: 
                     >
                       <FileCheck2 size={18} /> Realizar Inspección
                     </button>
-                    <button 
-                      onClick={() => openHistorial(edif)}
-                      className="w-full flex items-center justify-center gap-2 py-2 bg-zinc-800/50 hover:bg-zinc-800 text-stone-300 border border-zinc-700/50 rounded-xl font-bold transition-colors"
-                    >
-                      <Calendar size={18} /> Historial y Fotos
-                    </button>
+                    <div className="flex gap-2">
+                      <button 
+                        onClick={() => openHistorial(edif)}
+                        className="flex-1 flex items-center justify-center gap-2 py-2 bg-zinc-800/50 hover:bg-zinc-800 text-stone-300 border border-zinc-700/50 rounded-xl font-bold transition-colors text-sm"
+                      >
+                        <Calendar size={16} /> Historial
+                      </button>
+                      <button 
+                        onClick={() => setEdificioAEditar(edif)}
+                        className="flex-1 flex items-center justify-center gap-2 py-2 bg-zinc-800/50 hover:bg-zinc-800 text-stone-300 border border-zinc-700/50 rounded-xl font-bold transition-colors text-sm"
+                      >
+                        <PencilLine size={16} /> Editar
+                      </button>
+                    </div>
                   </div>
                 </div>
               );
@@ -135,9 +152,13 @@ export default function EdificiosClient({ initialEdificios, currentUserEmail }: 
       </div>
 
       {/* Modals */}
-      {showNuevoEdificio && (
+      {(showNuevoEdificio || edificioAEditar) && (
         <FormularioEdificio 
-          onClose={() => setShowNuevoEdificio(false)}
+          edificioParaEditar={edificioAEditar}
+          onClose={() => {
+            setShowNuevoEdificio(false);
+            setEdificioAEditar(null);
+          }}
           onSuccess={handleEdificioAdded}
         />
       )}

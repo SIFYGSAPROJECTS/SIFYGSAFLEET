@@ -666,7 +666,7 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
             )}
 
             {/* Notification Bell */}
-            <NotificationBell isAdmin={localIsAdmin} moduleType={type === 'dashboard' ? 'vehiculos' : 'computo'} />
+            <NotificationBell isAdmin={localIsAdmin} moduleType={type === 'dashboard' ? 'vehiculos' : type} />
             <div className="h-6 w-px bg-white/10 mx-1"></div>
 
             {/* User Dropdown for Logout */}

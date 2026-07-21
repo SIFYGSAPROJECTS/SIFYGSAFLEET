@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Bell, CalendarClock, Ticket, AlertCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-export default function NotificationBell({ isAdmin, moduleType = 'computo' }: { isAdmin: boolean; moduleType?: 'computo' | 'vehiculos' }) {
+export default function NotificationBell({ isAdmin, moduleType = 'computo' }: { isAdmin: boolean; moduleType?: string }) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [isRinging, setIsRinging] = useState(false);
@@ -62,9 +62,15 @@ export default function NotificationBell({ isAdmin, moduleType = 'computo' }: { 
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
-        const url = moduleType === 'vehiculos' 
-          ? '/api/tickets?estado=PENDIENTE' 
-          : '/api/mantenimientos/reportes?estado=PENDIENTE';
+        let url = '';
+        if (moduleType === 'vehiculos') {
+          url = '/api/tickets?estado=PENDIENTE';
+        } else if (moduleType === 'computo') {
+          url = '/api/mantenimientos/reportes?estado=PENDIENTE';
+        } else {
+          setReportes([]);
+          return;
+        }
           
         const res = await fetch(url);
         if (res.ok) {
@@ -92,6 +98,8 @@ export default function NotificationBell({ isAdmin, moduleType = 'computo' }: { 
   }, []);
 
   const total = reportes.length;
+
+  if (total === 0) return null;
 
   return (
     <div className="relative group flex items-center justify-center" ref={dropdownRef}>
