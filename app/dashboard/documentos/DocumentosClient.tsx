@@ -135,6 +135,7 @@ export default function DocumentosPage({ vehiculos = [], isAdmin = false }: Prop
     setConsecutivoInput(numEco);
     setShowDropdown(false);
     setActiveIndex(-1);
+    buscarVehiculo(numEco);
   };
 
   const buscarVehiculo = async (idForzado?: string | React.MouseEvent | React.FormEvent) => {
@@ -361,6 +362,10 @@ export default function DocumentosPage({ vehiculos = [], isAdmin = false }: Prop
                           id={`suggestion-${idx}`}
                           role="option"
                           aria-selected={idx === activeIndex}
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                            handleSelectVehiculo(v.Num_Eco);
+                          }}
                           onClick={() => handleSelectVehiculo(v.Num_Eco)}
                           onMouseEnter={() => setActiveIndex(idx)}
                           className={`px-4 py-3 cursor-pointer text-[var(--text-main)] flex items-center justify-between transition-colors border-b border-[var(--border-cream)] last:border-0 ${
