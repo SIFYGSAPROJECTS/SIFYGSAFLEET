@@ -6,7 +6,8 @@ const MobilePDFViewer = dynamic(() => import('@/components/ui/MobilePDFViewer'),
 
 const fixEncoding = (str: string) => {
   if (!str) return str;
-  let current = str;
+  // Reemplazar caracteres especiales de CP1252 que fallan en escape()
+  let current = str.replace(/ƒ/g, '\x83').replace(/‚/g, '\x82').replace(/„/g, '\x84').replace(/…/g, '\x85');
   let previous = "";
   let attempts = 0;
   while (current !== previous && attempts < 3) {

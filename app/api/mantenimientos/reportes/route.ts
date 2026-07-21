@@ -72,9 +72,23 @@ export async function POST(request: Request) {
     });
 
     // Generate FRM consecutivo (e.g. FRM-26-0001)
-    const count = await prisma.reporte_Mantenimiento.count();
     const year = new Date().getFullYear().toString().slice(-2);
-    const numStr = (count + 1).toString().padStart(4, '0');
+    const latestReporte = await prisma.reporte_Mantenimiento.findFirst({
+      where: {
+        Consecutivo_FRM: { startsWith: `FRM-${year}-` }
+      },
+      orderBy: { Id_Reporte: 'desc' }
+    });
+
+    let nextNum = 1;
+    if (latestReporte && latestReporte.Consecutivo_FRM) {
+      const parts = latestReporte.Consecutivo_FRM.split('-');
+      if (parts.length === 3) {
+        nextNum = parseInt(parts[2], 10) + 1;
+      }
+    }
+
+    const numStr = nextNum.toString().padStart(4, '0');
     const consecutivo = `FRM-${year}-${numStr}`;
 
       const nuevoReporte = await prisma.reporte_Mantenimiento.create({
