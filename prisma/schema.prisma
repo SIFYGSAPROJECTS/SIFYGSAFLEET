@@ -486,6 +486,7 @@ model Programacion_Semanal {
   Usuario              String
   Estatus              String    @default("Pendiente")
   Monto_Pagado         Float?    @default(0)
+  Comprobante_URL      String?
   Fecha_Registro       DateTime  @default(now())
   Anio                 Int       @default(2026)
   Semana               Int       @default(27)

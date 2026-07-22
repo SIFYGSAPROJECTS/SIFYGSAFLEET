@@ -34,13 +34,13 @@ export default function NotificationBell({ isAdmin, moduleType = 'computo' }: { 
       osc2.type = 'sine';
       osc2.frequency.setValueAtTime(2637.02, now); // Nota E7
 
-      // Envolvente de volumen muy suave (sin causar ruidos o clics)
+      // Envolvente de volumen (aumentado a petición)
       gain1.gain.setValueAtTime(0.001, now);
-      gain1.gain.linearRampToValueAtTime(0.03, now + 0.015);
+      gain1.gain.linearRampToValueAtTime(0.12, now + 0.015);
       gain1.gain.exponentialRampToValueAtTime(0.0001, now + 0.45);
 
       gain2.gain.setValueAtTime(0.001, now);
-      gain2.gain.linearRampToValueAtTime(0.01, now + 0.015);
+      gain2.gain.linearRampToValueAtTime(0.06, now + 0.015);
       gain2.gain.exponentialRampToValueAtTime(0.0001, now + 0.25);
 
       osc1.connect(gain1);

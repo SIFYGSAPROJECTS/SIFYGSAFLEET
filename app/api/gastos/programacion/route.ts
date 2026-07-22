@@ -49,6 +49,7 @@ export async function PUT(request: Request) {
         Usuario: row.Usuario,
         Estatus: row.Estatus,
         Monto_Pagado: parseFloat(row.Monto_Pagado) || 0,
+        Comprobante_URL: row.Comprobante_URL || null,
         Semana: semana || 27,
         Anio: anio || 2026
       };

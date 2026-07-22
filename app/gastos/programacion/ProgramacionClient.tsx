@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { CalendarRange, CalendarDays, Plus, Save, Trash2, ChevronDown } from 'lucide-react';
+import { CalendarRange, CalendarDays, Plus, Save, Trash2, ChevronDown, Wand2, Eye, Paperclip, Loader2, FileText, X } from 'lucide-react';
 import GastosMenu from '../GastosMenu';
 import PremiumSelect from '@/components/ui/PremiumSelect';
 import SystemModal from '@/components/ui/SystemModal';
@@ -19,6 +19,7 @@ interface ProgramacionRecord {
   Usuario: string;
   Estatus: string;
   Monto_Pagado?: number;
+  Comprobante_URL?: string;
 }
 
 export default function ProgramacionClient() {
@@ -43,6 +44,8 @@ export default function ProgramacionClient() {
   const [loading, setLoading] = useState(true);
   const [sysModal, setSysModal] = useState<{isOpen: boolean, type: 'success' | 'error' | 'warning' | 'info', title: string, message: string}>({ isOpen: false, type: 'info', title: '', message: '' });
   const [proveedoresList, setProveedoresList] = useState<string[]>([]);
+  const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
+  const [previewFile, setPreviewFile] = useState<{ url: string; title: string } | null>(null);
   const [serviciosList, setServiciosList] = useState<string[]>([]);
 
   useEffect(() => {
@@ -121,6 +124,27 @@ export default function ProgramacionClient() {
 
   const checkFolio = async (index: number, folio: string, id?: number) => {
     if (!folio) return;
+    
+    // Auto-formatear si el usuario teclea una fecha con separadores (es un pago no facturable)
+    // Se requieren los separadores (/ o - o .) para evitar chocar con folios reales que sean solo números.
+    const dateRegex = /^(\d{2})[-./](\d{2})[-./](\d{4})$|^(\d{4})[-./](\d{2})[-./](\d{2})$/;
+    if (dateRegex.test(folio)) {
+      // Extraemos solo los números para limpiar el string
+      const digitsOnly = folio.replace(/\D/g, '');
+      let cleanDate = folio;
+      // Ya sabemos que tiene 8 dígitos por el regex
+      if (dateRegex.exec(folio)?.[1]) { // Empieza con 2 digitos (día)
+        cleanDate = `${digitsOnly.slice(0,2)}-${digitsOnly.slice(2,4)}-${digitsOnly.slice(4,8)}`;
+      } else { // Empieza con 4 digitos (año)
+        cleanDate = `${digitsOnly.slice(6,8)}-${digitsOnly.slice(4,6)}-${digitsOnly.slice(0,4)}`;
+      }
+      
+      const randomSuffix = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+      const newFolio = `NBF-${cleanDate}-${randomSuffix}`;
+      handleCellChange(index, 'Factura_Comprobacion', newFolio);
+      return; // Ya no choca en DB
+    }
+
     try {
       const res = await fetch(`/api/gastos/programacion/verificar-folio?folio=${encodeURIComponent(folio)}&ignoreId=${id || ''}`);
       if (res.ok) {
@@ -138,6 +162,75 @@ export default function ProgramacionClient() {
     } catch (e) {
       console.error(e);
     }
+  };
+
+  const handleFileUpload = async (index: number, file: File) => {
+    if (!file) return;
+    setUploadingIndex(index);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await fetch('/api/gastos/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      if (res.ok) {
+        const data = await res.json();
+        handleCellChange(index, 'Comprobante_URL', data.url);
+      } else {
+        const err = await res.json();
+        setSysModal({ isOpen: true, type: 'error', title: 'Error al Subir', message: err.error || 'No se pudo subir el archivo.' });
+      }
+    } catch (e) {
+      setSysModal({ isOpen: true, type: 'error', title: 'Error de Conexión', message: 'No se pudo conectar con el servidor.' });
+    }
+    setUploadingIndex(null);
+  };
+
+  const generateNoFacturable = (index: number) => {
+    const row = registros[index];
+    let baseStr = '';
+    const currentInput = (row?.Factura_Comprobacion || '').trim();
+
+    const dateRegex = /^(\d{2})[-./](\d{2})[-./](\d{4})$|^(\d{4})[-./](\d{2})[-./](\d{2})$/;
+
+    if (currentInput) {
+      if (dateRegex.test(currentInput)) {
+        // Si el usuario escribió una fecha en el input, usar esa fecha
+        const digitsOnly = currentInput.replace(/\D/g, '');
+        if (dateRegex.exec(currentInput)?.[1]) {
+          baseStr = `${digitsOnly.slice(0,2)}-${digitsOnly.slice(2,4)}-${digitsOnly.slice(4,8)}`;
+        } else {
+          baseStr = `${digitsOnly.slice(6,8)}-${digitsOnly.slice(4,6)}-${digitsOnly.slice(0,4)}`;
+        }
+      } else if (currentInput.startsWith('NBF-')) {
+        // Si ya tiene formato NBF, extraemos su fecha para no sobreescribirla
+        const withoutPrefix = currentInput.replace(/^NBF-/, '');
+        baseStr = withoutPrefix.replace(/-\d{3}$/, '');
+      } else {
+        // Si escribió otro texto (ej: TICKET-12), usarlo como base limpiando caracteres no deseados
+        baseStr = currentInput.replace(/[^a-zA-Z0-9_-]/g, '');
+      }
+    }
+
+    // Si no había texto en el input (o era ya un NBF), buscar en Fecha_Pago
+    if (!baseStr) {
+      if (row && row.Fecha_Pago) {
+        const parts = row.Fecha_Pago.split('-');
+        if (parts.length === 3) {
+          baseStr = `${parts[2]}-${parts[1]}-${parts[0]}`;
+        }
+      }
+    }
+
+    // Si tampoco hay Fecha_Pago, usar la fecha de hoy
+    if (!baseStr) {
+      const today = new Date();
+      baseStr = `${today.getDate().toString().padStart(2, '0')}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getFullYear()}`;
+    }
+
+    const randomSuffix = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+    handleCellChange(index, 'Factura_Comprobacion', `NBF-${baseStr}-${randomSuffix}`);
   };
 
   const addRow = () => {
@@ -251,16 +344,17 @@ export default function ProgramacionClient() {
             <thead className="bg-[#cd5c24] text-white">
               <tr>
                 <th className="px-3 py-3 font-semibold border-r border-white/20 text-center w-12">#</th>
-                <th className="px-3 py-3 font-semibold border-r border-white/20 text-center">Fecha de solicitud</th>
-                <th className="px-3 py-3 font-semibold border-r border-white/20 text-center">Partida</th>
-                <th className="px-3 py-3 font-semibold border-r border-white/20 text-center">Servicio/Producto</th>
+                <th className="px-3 py-3 font-semibold border-r border-white/20 text-center">Fecha solicitud</th>
+                <th className="px-2 py-3 font-semibold border-r border-white/20 text-center w-14">Pta.</th>
+                <th className="px-3 py-3 font-semibold border-r border-white/20 text-center">Servicio / Producto</th>
                 <th className="px-3 py-3 font-semibold border-r border-white/20 text-center">Monto</th>
                 <th className="px-3 py-3 font-semibold border-r border-white/20 text-center">Proveedor</th>
-                <th className="px-3 py-3 font-semibold border-r border-white/20 text-center">Empresa</th>
-                <th className="px-3 py-3 font-semibold border-r border-white/20 text-center">Fecha de pago</th>
-                <th className="px-3 py-3 font-semibold border-r border-white/20 text-center">Factura/Comprobacion</th>
-                <th className="px-3 py-3 font-semibold border-r border-white/20 text-center">Usuario</th>
-                <th className="px-3 py-3 font-semibold border-r border-white/20 text-center">Estatus</th>
+                <th className="px-2 py-3 font-semibold border-r border-white/20 text-center w-24">Empresa</th>
+                <th className="px-3 py-3 font-semibold border-r border-white/20 text-center">Fecha pago</th>
+                <th className="px-3 py-3 font-semibold border-r border-white/20 text-center">Factura / Comprobación</th>
+                <th className="px-2 py-3 font-semibold border-r border-white/20 text-center w-20">Ticket</th>
+                <th className="px-2 py-3 font-semibold border-r border-white/20 text-center w-24">Usuario</th>
+                <th className="px-2 py-3 font-semibold border-r border-white/20 text-center w-28">Estatus</th>
                 <th className="px-3 py-3 font-semibold w-12 text-center"></th>
               </tr>
             </thead>
@@ -283,15 +377,15 @@ export default function ProgramacionClient() {
                       className="w-32 bg-transparent border border-transparent hover:border-stone-200 focus:bg-white focus:border-orange-400 rounded px-2 py-1.5 outline-none text-stone-700 text-sm"
                     />
                   </td>
-                  <td className="px-3 py-1.5 border-r border-stone-100">
+                  <td className="px-2 py-1.5 border-r border-stone-100 text-center">
                     <input
                       type="number"
                       min="1"
                       max="100"
-                      placeholder="Ej. 1"
+                      placeholder="1"
                       value={row.Partida || ''}
                       onChange={(e) => handleCellChange(index, 'Partida', e.target.value)}
-                      className="w-24 bg-transparent border border-transparent hover:border-stone-200 focus:bg-white focus:border-orange-400 rounded px-2 py-1.5 outline-none text-stone-700 text-sm"
+                      className="w-12 text-center bg-transparent border border-transparent hover:border-stone-200 focus:bg-white focus:border-orange-400 rounded px-1 py-1.5 outline-none text-stone-700 text-sm font-semibold"
                     />
                   </td>
                   <td className="px-3 py-1.5 border-r border-stone-100">
@@ -299,9 +393,10 @@ export default function ProgramacionClient() {
                       type="text"
                       list="servicios-list"
                       placeholder="Descripción..."
+                      title={row.Servicio_Producto || ''}
                       value={row.Servicio_Producto || ''}
                       onChange={(e) => handleCellChange(index, 'Servicio_Producto', e.target.value)}
-                      className="w-48 bg-transparent border border-transparent hover:border-stone-200 focus:bg-white focus:border-orange-400 rounded px-2 py-1.5 outline-none text-stone-700 text-sm"
+                      className="w-56 bg-transparent border border-transparent hover:border-stone-200 focus:bg-white focus:border-orange-400 rounded px-2 py-1.5 outline-none text-stone-700 text-sm truncate"
                     />
                   </td>
                   <td className="px-3 py-1.5 border-r border-stone-100">
@@ -326,12 +421,13 @@ export default function ProgramacionClient() {
                       type="text"
                       list="proveedores-list"
                       placeholder="Proveedor..."
+                      title={row.Proveedor || ''}
                       value={row.Proveedor || ''}
                       onChange={(e) => handleCellChange(index, 'Proveedor', e.target.value)}
-                      className="w-36 bg-transparent border border-transparent hover:border-stone-200 focus:bg-white focus:border-orange-400 rounded px-2 py-1.5 outline-none text-stone-700 text-sm"
+                      className="w-36 bg-transparent border border-transparent hover:border-stone-200 focus:bg-white focus:border-orange-400 rounded px-2 py-1.5 outline-none text-stone-700 text-sm truncate"
                     />
                   </td>
-                  <td className="px-3 py-1.5 border-r border-stone-100">
+                  <td className="px-2 py-1.5 border-r border-stone-100 text-center">
                     <PremiumSelect
                       value={row.Empresa || ''}
                       onChange={(val) => handleCellChange(index, 'Empresa', val)}
@@ -341,10 +437,10 @@ export default function ProgramacionClient() {
                         { value: 'SIAVSA', label: 'SIAVSA' },
                         { value: 'VIPSA', label: 'VIPSA' },
                       ]}
-                      placeholder="Seleccione..."
+                      placeholder="Empresa..."
                       accent="orange"
                       compact={true}
-                      className="w-32"
+                      className="w-24"
                     />
                   </td>
                   <td className="px-3 py-1.5 border-r border-stone-100">
@@ -356,25 +452,83 @@ export default function ProgramacionClient() {
                     />
                   </td>
                   <td className="px-3 py-1.5 border-r border-stone-100">
-                    <input
-                      type="text"
-                      placeholder="Folio/Factura..."
-                      value={row.Factura_Comprobacion || ''}
-                      onChange={(e) => handleCellChange(index, 'Factura_Comprobacion', e.target.value)}
-                      onBlur={(e) => checkFolio(index, e.target.value, row.Id)}
-                      className="w-36 bg-transparent border border-transparent hover:border-stone-200 focus:bg-white focus:border-orange-400 rounded px-2 py-1.5 outline-none text-stone-700 text-sm font-mono"
-                    />
+                    <div className="flex items-center gap-1">
+                      <input
+                        type="text"
+                        placeholder="Folio/Factura..."
+                        value={row.Factura_Comprobacion || ''}
+                        onChange={(e) => handleCellChange(index, 'Factura_Comprobacion', e.target.value)}
+                        onBlur={(e) => checkFolio(index, e.target.value, row.Id)}
+                        className="w-32 bg-transparent border border-transparent hover:border-stone-200 focus:bg-white focus:border-orange-400 rounded px-2 py-1.5 outline-none text-stone-700 text-sm font-mono"
+                      />
+                      <button 
+                        onClick={() => generateNoFacturable(index)}
+                        title="Generar Folio No Facturable"
+                        className="p-1.5 text-stone-300 hover:text-orange-500 hover:bg-orange-50 rounded transition-colors"
+                      >
+                        <Wand2 size={14} />
+                      </button>
+                    </div>
                   </td>
-                  <td className="px-3 py-1.5 border-r border-stone-100">
+                  <td className="px-3 py-1.5 border-r border-stone-100 text-center">
+                    {row.Comprobante_URL ? (
+                      <div className="flex items-center justify-center gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => setPreviewFile({ url: row.Comprobante_URL!, title: row.Factura_Comprobacion || `Partida #${row.Partida || (index + 1)}` })}
+                          title="Ver Comprobante / Ticket"
+                          className="p-1.5 bg-orange-50 text-[#cd5c24] hover:bg-orange-100 rounded-lg transition-colors flex items-center gap-1 text-xs font-semibold"
+                        >
+                          <Eye size={14} />
+                          <span>Ver</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (window.confirm('¿Estás seguro de quitar este comprobante de la fila? (El archivo no se borrará del servidor)')) {
+                              handleCellChange(index, 'Comprobante_URL', '');
+                            }
+                          }}
+                          title="Eliminar Comprobante"
+                          className="p-1.5 text-stone-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                        >
+                          <Trash2 size={13} />
+                        </button>
+                      </div>
+                    ) : (
+                      <label className="cursor-pointer inline-flex items-center justify-center gap-1 px-2.5 py-1.5 bg-stone-50 border border-stone-200 hover:bg-orange-50 hover:border-orange-200 text-stone-600 hover:text-[#cd5c24] rounded-lg transition-all text-xs font-medium">
+                        {uploadingIndex === index ? (
+                          <Loader2 size={14} className="animate-spin text-[#cd5c24]" />
+                        ) : (
+                          <>
+                            <Paperclip size={13} />
+                            <span>Subir</span>
+                          </>
+                        )}
+                        <input
+                          type="file"
+                          accept="image/*,application/pdf"
+                          className="hidden"
+                          disabled={uploadingIndex === index}
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleFileUpload(index, file);
+                          }}
+                        />
+                      </label>
+                    )}
+                  </td>
+                  <td className="px-2 py-1.5 border-r border-stone-100">
                     <input
                       type="text"
                       placeholder="Usuario..."
+                      title={row.Usuario || ''}
                       value={row.Usuario || ''}
                       onChange={(e) => handleCellChange(index, 'Usuario', e.target.value)}
-                      className="w-32 bg-transparent border border-transparent hover:border-stone-200 focus:bg-white focus:border-orange-400 rounded px-2 py-1.5 outline-none text-stone-700 text-sm"
+                      className="w-24 bg-transparent border border-transparent hover:border-stone-200 focus:bg-white focus:border-orange-400 rounded px-2 py-1.5 outline-none text-stone-700 text-sm truncate"
                     />
                   </td>
-                  <td className="px-3 py-1.5 border-r border-stone-100">
+                  <td className="px-2 py-1.5 border-r border-stone-100">
                     <div className="flex flex-col gap-1">
                       <PremiumSelect
                         value={row.Estatus || 'Pendiente'}
@@ -382,12 +536,12 @@ export default function ProgramacionClient() {
                         options={[
                           { value: 'Pendiente', label: 'Pendiente' },
                           { value: 'Pagado', label: 'Pagado' },
-                          { value: 'Pago Parcial', label: 'Pago Parcial' },
+                          { value: 'Pago Parcial', label: 'Parcial' },
                           { value: 'Cancelado', label: 'Cancelado' },
                         ]}
                         accent="orange"
                         compact={true}
-                        className="w-36"
+                        className="w-28"
                       />
                       
                       {row.Estatus === 'Pago Parcial' && (
@@ -448,6 +602,50 @@ export default function ProgramacionClient() {
           </button>
         </div>
       </div>
+
+      {/* Ticket / Comprobante Preview Modal */}
+      {previewFile && (
+        <div className="fixed inset-0 z-[200] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden shadow-2xl border border-stone-200">
+            <div className="px-5 py-3 border-b border-stone-200 flex justify-between items-center bg-stone-50">
+              <div className="flex items-center gap-2">
+                <FileText size={18} className="text-[#cd5c24]" />
+                <h3 className="font-bold text-stone-800 text-sm">Comprobante de Pago: {previewFile.title}</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPreviewFile(null)}
+                className="p-1.5 text-stone-400 hover:text-stone-700 hover:bg-stone-200 rounded-full transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            <div className="p-4 overflow-auto flex-1 flex items-center justify-center bg-stone-100 min-h-[400px]">
+              {previewFile.url.toLowerCase().includes('.pdf') ? (
+                <iframe
+                  src={previewFile.url}
+                  className="w-full h-[75vh] rounded-lg border border-stone-300 shadow-inner"
+                />
+              ) : (
+                <img
+                  src={previewFile.url}
+                  alt="Comprobante de Pago"
+                  className="max-h-[75vh] max-w-full object-contain rounded-lg shadow-md"
+                />
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* System Modal */}
+      <SystemModal
+        isOpen={sysModal.isOpen}
+        type={sysModal.type}
+        title={sysModal.title}
+        message={sysModal.message}
+        onClose={() => setSysModal({ ...sysModal, isOpen: false })}
+      />
     </div>
   );
 }
