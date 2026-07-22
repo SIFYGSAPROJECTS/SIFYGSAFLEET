@@ -124,10 +124,6 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
           {/* RIGHT SIDE: Action Buttons (Desktop Only) - User Profile Capsule for Portal (No Portal menu) */}
           <div className="hidden md:flex items-center bg-white/5 border border-white/5 rounded-xl p-0.5 shadow-inner backdrop-blur-md">
             
-            <NotificationBell isAdmin={localIsAdmin} />
-            
-            <div className="h-6 w-px bg-white/10 mx-1"></div>
-
             {/* User Dropdown for Logout */}
             <div className="relative group">
               <div

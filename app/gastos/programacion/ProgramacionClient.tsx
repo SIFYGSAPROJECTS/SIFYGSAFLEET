@@ -641,10 +641,10 @@ export default function ProgramacionClient() {
       {/* System Modal */}
       <SystemModal
         isOpen={sysModal.isOpen}
-        type={sysModal.type}
+        type={sysModal.type as any}
         title={sysModal.title}
         message={sysModal.message}
-        onClose={() => setSysModal({ ...sysModal, isOpen: false })}
+        onConfirm={() => setSysModal({ ...sysModal, isOpen: false })}
       />
     </div>
   );
