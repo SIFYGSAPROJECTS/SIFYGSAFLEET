@@ -5,8 +5,10 @@ import { Plus, Building2, MapPin, Layers, FileCheck2, Calendar, Image as ImageIc
 import Image from 'next/image';
 import FormularioEdificio from './FormularioEdificio';
 import FormatoInspeccion from './FormatoInspeccion';
+import ConsumiblesClient from './ConsumiblesClient';
 
 export default function EdificiosClient({ initialEdificios, currentUserEmail }: any) {
+  const [activeTab, setActiveTab] = useState<'instalaciones' | 'consumibles'>('instalaciones');
   const [edificios, setEdificios] = useState(initialEdificios || []);
   const [showNuevoEdificio, setShowNuevoEdificio] = useState(false);
   const [edificioAEditar, setEdificioAEditar] = useState<any>(null);
@@ -61,7 +63,38 @@ export default function EdificiosClient({ initialEdificios, currentUserEmail }: 
 
   return (
     <div className="flex flex-col h-[calc(100vh-180px)] gap-6">
-      {/* Top Action Bar */}
+      
+      {/* Tabs */}
+      <div className="flex flex-wrap bg-[var(--bg-floating)] p-1 rounded-2xl border border-[var(--border-cream)] shadow-md w-full sm:w-fit">
+        <button
+          onClick={() => setActiveTab('instalaciones')}
+          className={`px-6 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${
+            activeTab === 'instalaciones' 
+              ? 'bg-amber-500 text-[#0F1115] shadow-lg' 
+              : 'text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-white/5'
+          }`}
+        >
+          <Building2 size={16} /> Mis Instalaciones
+        </button>
+        <button
+          onClick={() => setActiveTab('consumibles')}
+          className={`px-6 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${
+            activeTab === 'consumibles' 
+              ? 'bg-amber-500 text-[#0F1115] shadow-lg' 
+              : 'text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-white/5'
+          }`}
+        >
+          <Layers size={16} /> Consumibles
+        </button>
+      </div>
+
+      {activeTab === 'consumibles' && (
+        <ConsumiblesClient currentUserEmail={currentUserEmail} edificios={edificios} />
+      )}
+
+      {activeTab === 'instalaciones' && (
+        <>
+          {/* Top Action Bar */}
       <div className="flex justify-between items-center bg-[var(--bg-floating)] p-4 rounded-2xl border border-[var(--border-cream)] shadow-lg">
         <h2 className="text-xl font-bold text-[var(--text-main)] flex items-center gap-2">
           <Building2 className="text-amber-500" /> Mis Instalaciones
@@ -315,6 +348,8 @@ export default function EdificiosClient({ initialEdificios, currentUserEmail }: 
             <Image src={fotoEnGrande} alt="Evidencia ampliada" fill className="object-contain" />
           </div>
         </div>
+      )}
+      </>
       )}
     </div>
   );

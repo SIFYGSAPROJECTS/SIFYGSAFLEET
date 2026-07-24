@@ -5,7 +5,7 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { ArrowLeft, CalendarCheck, Car, DollarSign, FileText, FolderOpen, User, Wrench } from "lucide-react";
 import ScrollToTop from "@/components/ui/ScrollToTop";
-import CopilotChat from "@/components/ai/CopilotChat";
+
 import Navbar from "@/components/ui/Navbar";
 
 export const dynamic = 'force-dynamic';
@@ -35,7 +35,7 @@ export default async function VerificacionesPage({
       {/* NAVBAR */}
       <Navbar type="dashboard" userName={userName} userRole={userRole} isAdmin={isAdmin} maxWidth="max-w-[95%]" />
       <ScrollToTop />
-      <CopilotChat />
+
       <div className="flex justify-end mb-4">
         <YearSelector currentYear={anio} />
       </div>

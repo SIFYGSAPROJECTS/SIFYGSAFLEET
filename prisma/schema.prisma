@@ -361,6 +361,7 @@ model Edificio {
   Activo         Boolean               @default(true)
   Fecha_Creacion DateTime              @default(now())
   inspecciones   Inspeccion_Edificio[]
+  consumibles    Consumible[]
 }
 
 model Foto_Inspeccion_Edificio {
@@ -552,4 +553,31 @@ model Costos_Peajes {
   Consecar         String?
   Fecha_Registro   DateTime               @default(now())
   auto             Inventario_Automoviles @relation(fields: [Consecutivo], references: [Consecutivo], onDelete: Cascade)
+}
+
+model Consumible {
+  Id_Consumible      Int      @id @default(autoincrement())
+  Id_Edificio        Int
+  Nombre             String   @db.VarChar(150)
+  Tipo               String   @db.VarChar(100)
+  Unidad_Medida      String   @db.VarChar(50)
+  Cantidad_Actual    Float    @default(0)
+  Capacidad_Maxima   Float    @default(0)
+  Umbral_Alerta      Float    @default(0)
+  Fecha_Actualizacion DateTime @default(now()) @updatedAt
+  
+  edificio           Edificio @relation(fields: [Id_Edificio], references: [Id_Edificio], onDelete: Cascade)
+  movimientos        Movimiento_Consumible[]
+}
+
+model Movimiento_Consumible {
+  Id_Movimiento      Int      @id @default(autoincrement())
+  Id_Consumible      Int
+  Tipo_Movimiento    String   @db.VarChar(20)
+  Cantidad           Float
+  Fecha_Movimiento   DateTime @default(now())
+  Usuario            String   @db.VarChar(100)
+  Observaciones      String?
+  
+  consumible         Consumible @relation(fields: [Id_Consumible], references: [Id_Consumible], onDelete: Cascade)
 }

@@ -2,7 +2,7 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import IdleTimer from '@/components/security/IdleTimer';
 import RoleGuard from '@/components/security/RoleGuard';
-import CopilotChat from '@/components/ai/CopilotChat';
+
 import ScrollToTop from '@/components/ui/ScrollToTop';
 import Navbar from '@/components/ui/Navbar';
 
@@ -41,7 +41,7 @@ export default async function EdificiosLayout({
           {children}
         </main>
       </div>
-      <CopilotChat />
+
       <ScrollToTop />
     </>
   );

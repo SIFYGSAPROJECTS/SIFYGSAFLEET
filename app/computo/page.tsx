@@ -14,7 +14,11 @@ export default async function ComputoDashboardPage() {
   // Obtener conteos para los KPIs (solo si es Admin, o lo ignoramos si es usuario normal pero el componente Menu ya se encarga)
   const totalEquipos = isAdmin ? await prisma.inventario_Computo.count() : 0;
   const equiposReparacion = isAdmin ? await prisma.inventario_Computo.count({
-    where: { Estatus: 'En Reparación' }
+    where: {
+      Estatus: {
+        in: ['En Reparación', 'Revision', 'En Revisión', 'revision', 'Revisar', 'ReparaciÃ³n']
+      }
+    }
   }) : 0;
 
   return (
