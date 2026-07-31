@@ -108,7 +108,9 @@ export async function POST(request: Request) {
     if (tieneComputo) areas.push('COMPUTO');
 
     if (['ADMIN', 'GERENCIAL'].includes(usuario.Rol)) {
-      areas = ['AUTOS', 'COMPUTO'];
+      areas = ['AUTOS', 'COMPUTO', 'EDIFICIOS'];
+    } else if (usuario.Rol === 'INFRAESTRUCTURA') {
+      areas.push('EDIFICIOS');
     }
 
     // Guardamos la información en las Cookies

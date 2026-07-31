@@ -19,9 +19,10 @@ export default async function EdificiosPage() {
   const userRole = cookieStore.get('user_role')?.value || 'USER';
   const userAdminTi = cookieStore.get('user_admin_ti')?.value === 'true';
   const isAdmin = ['ADMIN', 'GERENCIAL'].includes(userRole) || userAdminTi;
+  const isInfra = userRole === 'INFRAESTRUCTURA';
 
-  if (!isAdmin) {
-    // Only admins or managers can see this module as per user request
+  if (!isAdmin && !isInfra) {
+    // Only admins, managers or infra can see this module
     redirect("/portal");
   }
   

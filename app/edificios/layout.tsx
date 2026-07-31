@@ -22,8 +22,9 @@ export default async function EdificiosLayout({
   const userName = cookieStore.get('user_name')?.value || 'Usuario';
   const userAdminTi = cookieStore.get('user_admin_ti')?.value === 'true';
   const isAdmin = ['ADMIN', 'GERENCIAL'].includes(userRole) || userAdminTi;
+  const isInfra = userRole === 'INFRAESTRUCTURA';
 
-  if (!isAdmin) {
+  if (!isAdmin && !isInfra) {
     redirect('/portal');
   }
 

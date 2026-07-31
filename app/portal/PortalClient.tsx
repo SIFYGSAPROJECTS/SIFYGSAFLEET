@@ -42,7 +42,7 @@ export default function PortalClient({ isAdmin, userAreas, userName }: { isAdmin
     if (moduleId === 'gastos') return userAreas.includes('GASTOS');
     if (moduleId === 'clima') return userAreas.includes('CLIMA') || isAdmin;
     if (moduleId === 'telefonia') return userAreas.includes('TELEFONIA') || isAdmin;
-    if (moduleId === 'edificios') return false; // Only admins can see this module
+    if (moduleId === 'edificios') return userAreas.includes('EDIFICIOS') || isAdmin;
     return false;
   };
 

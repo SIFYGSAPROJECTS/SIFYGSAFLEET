@@ -55,6 +55,8 @@ export default function LoginPage() {
             router.push('/computo');
           } else if (areas.includes('AUTOS')) {
             router.push('/dashboard');
+          } else if (areas.includes('EDIFICIOS')) {
+            router.push('/edificios');
           } else {
             router.push('/portal');
           }

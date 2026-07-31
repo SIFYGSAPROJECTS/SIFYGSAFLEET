@@ -64,6 +64,13 @@ export default function ConsumiblesClient({ currentUserEmail, edificios }: any) 
     c.Tipo.toLowerCase().includes(search.toLowerCase())
   );
 
+  const groupedConsumibles = filteredConsumibles.reduce((acc: any, item: any) => {
+    const branch = item.edificio?.Sucursal || 'Sin Asignar';
+    if (!acc[branch]) acc[branch] = [];
+    acc[branch].push(item);
+    return acc;
+  }, {});
+
   const handleSaveNuevo = async () => {
     if (!nuevoForm.Nombre || !nuevoForm.Id_Edificio) {
       setSysModal({ isOpen: true, type: 'error', title: 'Error', message: 'Faltan campos obligatorios (Nombre y Sucursal).' });
@@ -245,174 +252,179 @@ export default function ConsumiblesClient({ currentUserEmail, edificios }: any) 
         </div>
       </div>
 
-      {/* VISTA DETALLADA (TARJETAS) */}
       {viewMode === 'cards' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-20 overflow-y-auto custom-scrollbar">
-          {filteredConsumibles.map(item => {
-            const pct = getPercentage(item.Cantidad_Actual, item.Capacidad_Maxima);
-            const color = getStatusColor(item.Cantidad_Actual, item.Capacidad_Maxima, item.Umbral_Alerta);
-            
-            let IconType = Package;
-            if (item.Tipo === 'Limpieza') IconType = Droplets;
-            if (item.Tipo === 'Papelería') IconType = PenTool;
-            if (item.Tipo === 'Cafetería') IconType = Coffee;
-
-            return (
-              <div key={item.Id_Consumible} className="bg-[var(--bg-floating)] border border-[var(--border-cream)] rounded-2xl p-5 shadow-lg flex flex-col justify-between min-h-[235px] relative overflow-hidden group">
-                {item.Cantidad_Actual <= item.Umbral_Alerta && (
-                  <div className="absolute top-0 left-0 w-full h-1 bg-red-500 animate-pulse" />
-                )}
-                
-                {/* Header: Titulo con altura fija para alineacion nítida */}
-                <div className="flex justify-between items-start gap-2">
-                  <div className="flex gap-3 items-center min-w-0 flex-1">
-                    <div className="w-10 h-10 rounded-xl bg-[var(--bg-screen)] border border-[var(--border-cream)] flex items-center justify-center text-amber-500 shadow-sm shrink-0">
-                      <IconType size={20} />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <h3 className="font-bold text-[var(--text-main)] text-sm line-clamp-2 leading-tight h-9 flex items-center" title={item.Nombre}>
-                        {item.Nombre}
-                      </h3>
-                      <p className="text-xs text-[var(--text-muted)] flex items-center gap-1 mt-1 truncate">
-                        <MapPin size={10} className="shrink-0" /> {item.edificio?.Sucursal}
-                      </p>
-                    </div>
-                  </div>
-                  <span className="text-[10px] uppercase font-bold tracking-wider px-2.5 py-1 bg-[var(--bg-screen)] border border-[var(--border-cream)] rounded-lg text-[var(--text-muted)] shadow-sm shrink-0">
-                    {item.Tipo}
-                  </span>
-                </div>
-
-                {/* Seccion de la Barra Verde de Progreso (Alineada simétricamente) */}
-                <div className="my-3">
-                  <div className="flex justify-between text-sm mb-2">
-                    <span className="text-[var(--text-muted)] font-medium">Stock Actual:</span>
-                    <span className="font-black text-[var(--text-main)]">{item.Cantidad_Actual} <span className="text-xs font-semibold text-[var(--text-muted)]">{item.Unidad_Medida}</span></span>
-                  </div>
+        <div className="flex flex-col gap-8 pb-20 overflow-y-auto custom-scrollbar">
+          {Object.entries(groupedConsumibles).map(([sucursal, items]: [string, any]) => (
+            <div key={sucursal}>
+              <h3 className="text-lg font-bold text-[var(--text-main)] mb-4 flex items-center gap-2 border-b border-[var(--border-cream)] pb-2">
+                <MapPin className="text-amber-500" size={20} /> {sucursal}
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {items.map((item: any) => {
+                  const pct = getPercentage(item.Cantidad_Actual, item.Capacidad_Maxima);
+                  const color = getStatusColor(item.Cantidad_Actual, item.Capacidad_Maxima, item.Umbral_Alerta);
                   
-                  {/* Progress Bar */}
-                  <div className="w-full bg-stone-300/50 dark:bg-black/40 rounded-full h-2.5 overflow-hidden border border-[var(--border-cream)]">
-                    <div className={`h-2.5 rounded-full transition-all duration-1000 ${color}`} style={{ width: `${pct}%` }}></div>
-                  </div>
-                  
-                  <div className="flex justify-between mt-2 text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-wider">
-                    <span>Alerta: {item.Umbral_Alerta}</span>
-                    <span>Max: {item.Capacidad_Maxima}</span>
-                  </div>
-                </div>
+                  let IconType = Package;
+                  if (item.Tipo === 'Limpieza') IconType = Droplets;
+                  if (item.Tipo === 'Papelería') IconType = PenTool;
+                  if (item.Tipo === 'Cafetería') IconType = Coffee;
 
-                <div className="grid grid-cols-2 gap-2 pt-3 border-t border-[var(--border-cream)] mt-auto">
-                  <button 
-                    onClick={() => setMovimientoModal({ item, tipo: 'SALIDA' })}
-                    className="py-2 flex items-center justify-center gap-1.5 bg-red-500/10 text-red-500 hover:bg-red-500/20 border border-red-500/20 rounded-xl text-xs font-bold transition-colors"
-                  >
-                    - Salida
-                  </button>
-                  <button 
-                    onClick={() => setMovimientoModal({ item, tipo: 'ENTRADA' })}
-                    className="py-2 flex items-center justify-center gap-1.5 bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 border border-emerald-500/20 rounded-xl text-xs font-bold transition-colors"
-                  >
-                    + Entrada
-                  </button>
-                </div>
+                  return (
+                    <div key={item.Id_Consumible} className="bg-[var(--bg-floating)] border border-[var(--border-cream)] rounded-2xl p-5 shadow-lg flex flex-col justify-between min-h-[235px] relative overflow-hidden group">
+                      {item.Cantidad_Actual <= item.Umbral_Alerta && (
+                        <div className="absolute top-0 left-0 w-full h-1 bg-red-500 animate-pulse" />
+                      )}
+                      
+                      <div className="flex justify-between items-start gap-2">
+                        <div className="flex gap-3 items-center min-w-0 flex-1">
+                          <div className="w-10 h-10 rounded-xl bg-[var(--bg-screen)] border border-[var(--border-cream)] flex items-center justify-center text-amber-500 shadow-sm shrink-0">
+                            <IconType size={20} />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <h3 className="font-bold text-[var(--text-main)] text-sm line-clamp-2 leading-tight h-9 flex items-center" title={item.Nombre}>
+                              {item.Nombre}
+                            </h3>
+                            <p className="text-xs text-[var(--text-muted)] flex items-center gap-1 mt-1 truncate">
+                              <span className="text-[9px] uppercase font-bold tracking-wider">{item.Tipo}</span>
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="my-3">
+                        <div className="flex justify-between text-sm mb-2">
+                          <span className="text-[var(--text-muted)] font-medium">Stock Actual:</span>
+                          <span className="font-black text-[var(--text-main)]">{item.Cantidad_Actual} <span className="text-xs font-semibold text-[var(--text-muted)]">{item.Unidad_Medida}</span></span>
+                        </div>
+                        
+                        <div className="w-full bg-stone-300/50 dark:bg-black/40 rounded-full h-2.5 overflow-hidden border border-[var(--border-cream)]">
+                          <div className={`h-2.5 rounded-full transition-all duration-1000 ${color}`} style={{ width: `${pct}%` }}></div>
+                        </div>
+                        
+                        <div className="flex justify-between mt-2 text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-wider">
+                          <span>Alerta: {item.Umbral_Alerta}</span>
+                          <span>Max: {item.Capacidad_Maxima}</span>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2 pt-3 border-t border-[var(--border-cream)] mt-auto">
+                        <button 
+                          onClick={() => setMovimientoModal({ item, tipo: 'SALIDA' })}
+                          className="py-2 flex items-center justify-center gap-1.5 bg-red-500/10 text-red-500 hover:bg-red-500/20 border border-red-500/20 rounded-xl text-xs font-bold transition-colors"
+                        >
+                          - Salida
+                        </button>
+                        <button 
+                          onClick={() => setMovimientoModal({ item, tipo: 'ENTRADA' })}
+                          className="py-2 flex items-center justify-center gap-1.5 bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 border border-emerald-500/20 rounded-xl text-xs font-bold transition-colors"
+                        >
+                          + Entrada
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-            );
-          })}
+            </div>
+          ))}
 
           {filteredConsumibles.length === 0 && !loading && (
-            <div className="col-span-full py-12 text-center text-[var(--text-muted)]">
+            <div className="py-12 text-center text-[var(--text-muted)]">
               No hay consumibles registrados.
             </div>
           )}
         </div>
       )}
 
-      {/* VISTA COMPACTA (MODO INVENTARIO RÁPIDO PARA MÓVIL/TABLET) */}
       {viewMode === 'compact' && (
-        <div className="flex flex-col gap-2.5 pb-20 overflow-y-auto custom-scrollbar">
-          {filteredConsumibles.map(item => {
-            let IconType = Package;
-            if (item.Tipo === 'Limpieza') IconType = Droplets;
-            if (item.Tipo === 'Papelería') IconType = PenTool;
-            if (item.Tipo === 'Cafetería') IconType = Coffee;
+        <div className="flex flex-col gap-6 pb-20 overflow-y-auto custom-scrollbar">
+          {Object.entries(groupedConsumibles).map(([sucursal, items]: [string, any]) => (
+            <div key={sucursal} className="flex flex-col gap-2.5">
+              <h3 className="text-sm font-bold text-[var(--text-main)] mb-1 flex items-center gap-2 border-b border-[var(--border-cream)] pb-1.5">
+                <MapPin className="text-amber-500" size={16} /> {sucursal}
+              </h3>
+              {items.map((item: any) => {
+                let IconType = Package;
+                if (item.Tipo === 'Limpieza') IconType = Droplets;
+                if (item.Tipo === 'Papelería') IconType = PenTool;
+                if (item.Tipo === 'Cafetería') IconType = Coffee;
 
-            const isLowStock = item.Cantidad_Actual <= item.Umbral_Alerta;
+                const isLowStock = item.Cantidad_Actual <= item.Umbral_Alerta;
 
-            return (
-              <div 
-                key={item.Id_Consumible}
-                className={`bg-[var(--bg-floating)] border border-[var(--border-cream)] rounded-2xl p-3 shadow-md flex items-center justify-between gap-3 transition-all ${
-                  isLowStock ? 'border-l-4 border-l-red-500' : ''
-                }`}
-              >
-                <div className="flex items-center gap-3 min-w-0 flex-1">
-                  <div className="w-10 h-10 rounded-xl bg-[var(--bg-screen)] border border-[var(--border-cream)] flex items-center justify-center text-amber-500 shrink-0 shadow-sm">
-                    <IconType size={20} />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <h4 className="font-bold text-sm text-[var(--text-main)] truncate" title={item.Nombre}>{item.Nombre}</h4>
-                      {isLowStock && (
-                        <span className="px-1.5 py-0.5 rounded text-[9px] font-black bg-red-500/10 text-red-500 border border-red-500/20 shrink-0">
-                          Bajo Stock
-                        </span>
-                      )}
+                return (
+                  <div 
+                    key={item.Id_Consumible}
+                    className={`bg-[var(--bg-floating)] border border-[var(--border-cream)] rounded-2xl p-3 shadow-md flex items-center justify-between gap-3 transition-all ${
+                      isLowStock ? 'border-l-4 border-l-red-500' : ''
+                    }`}
+                  >
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <div className="w-10 h-10 rounded-xl bg-[var(--bg-screen)] border border-[var(--border-cream)] flex items-center justify-center text-amber-500 shrink-0 shadow-sm">
+                        <IconType size={20} />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-bold text-sm text-[var(--text-main)] truncate" title={item.Nombre}>{item.Nombre}</h4>
+                          {isLowStock && (
+                            <span className="px-1.5 py-0.5 rounded text-[9px] font-black bg-red-500/10 text-red-500 border border-red-500/20 shrink-0">
+                              Bajo Stock
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-[var(--text-muted)] truncate flex items-center gap-1.5 mt-0.5">
+                          <span className="font-medium text-amber-600 dark:text-amber-400">{item.Unidad_Medida}</span>
+                        </p>
+                      </div>
                     </div>
-                    <p className="text-xs text-[var(--text-muted)] truncate flex items-center gap-1.5 mt-0.5">
-                      <span>{item.edificio?.Sucursal}</span>
-                      <span>•</span>
-                      <span className="font-medium text-amber-600 dark:text-amber-400">{item.Unidad_Medida}</span>
-                    </p>
+
+                    <div className="flex items-center gap-2 shrink-0 bg-[var(--bg-screen)] border border-[var(--border-cream)] p-1 rounded-xl shadow-inner">
+                      <button 
+                        onClick={() => handleQuickAdjust(item, -1)}
+                        className="w-9 h-9 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-500 font-black text-lg flex items-center justify-center active:scale-90 transition-all shadow-sm"
+                        title="Restar 1 unidad"
+                      >
+                        -
+                      </button>
+
+                      <div className="w-14 text-center">
+                        <input
+                          type="number"
+                          min="0"
+                          step="any"
+                          value={editingId === item.Id_Consumible ? editingValue : item.Cantidad_Actual}
+                          onFocus={() => {
+                            setEditingId(item.Id_Consumible);
+                            setEditingValue(item.Cantidad_Actual.toString());
+                          }}
+                          onChange={(e) => setEditingValue(e.target.value)}
+                          onBlur={() => handleDirectQuantitySubmit(item)}
+                          onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); }}
+                          className="w-full text-center font-black text-base text-[var(--text-main)] bg-transparent hover:bg-[var(--bg-hover)] focus:bg-[var(--bg-hover)] rounded-lg outline-none focus:ring-2 focus:ring-amber-500/50 py-0.5 transition-all cursor-pointer focus:cursor-text"
+                          title="Toca para editar la cantidad directamente"
+                        />
+                      </div>
+
+                      <button 
+                        onClick={() => handleQuickAdjust(item, 1)}
+                        className="w-9 h-9 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500 font-black text-lg flex items-center justify-center active:scale-90 transition-all shadow-sm"
+                        title="Sumar 1 unidad"
+                      >
+                        +
+                      </button>
+
+                      <button
+                        onClick={() => setMovimientoModal({ item, tipo: 'ENTRADA' })}
+                        title="Registrar cantidad específica"
+                        className="ml-1 px-2 py-1 bg-[var(--bg-hover)] text-[var(--text-muted)] hover:text-white rounded-lg text-xs font-bold transition-colors hidden sm:block"
+                      >
+                        +Lote
+                      </button>
+                    </div>
                   </div>
-                </div>
-
-                {/* Controles de conteo directo a 1 clic */}
-                <div className="flex items-center gap-2 shrink-0 bg-[var(--bg-screen)] border border-[var(--border-cream)] p-1 rounded-xl shadow-inner">
-                  <button 
-                    onClick={() => handleQuickAdjust(item, -1)}
-                    className="w-9 h-9 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-500 font-black text-lg flex items-center justify-center active:scale-90 transition-all shadow-sm"
-                    title="Restar 1 unidad"
-                  >
-                    -
-                  </button>
-
-                  <div className="w-14 text-center">
-                    <input
-                      type="number"
-                      min="0"
-                      step="any"
-                      value={editingId === item.Id_Consumible ? editingValue : item.Cantidad_Actual}
-                      onFocus={() => {
-                        setEditingId(item.Id_Consumible);
-                        setEditingValue(item.Cantidad_Actual.toString());
-                      }}
-                      onChange={(e) => setEditingValue(e.target.value)}
-                      onBlur={() => handleDirectQuantitySubmit(item)}
-                      onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); }}
-                      className="w-full text-center font-black text-base text-[var(--text-main)] bg-transparent hover:bg-[var(--bg-hover)] focus:bg-[var(--bg-hover)] rounded-lg outline-none focus:ring-2 focus:ring-amber-500/50 py-0.5 transition-all cursor-pointer focus:cursor-text"
-                      title="Toca para editar la cantidad directamente"
-                    />
-                  </div>
-
-                  <button 
-                    onClick={() => handleQuickAdjust(item, 1)}
-                    className="w-9 h-9 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500 font-black text-lg flex items-center justify-center active:scale-90 transition-all shadow-sm"
-                    title="Sumar 1 unidad"
-                  >
-                    +
-                  </button>
-
-                  <button
-                    onClick={() => setMovimientoModal({ item, tipo: 'ENTRADA' })}
-                    title="Registrar cantidad específica"
-                    className="ml-1 px-2 py-1 bg-[var(--bg-hover)] text-[var(--text-muted)] hover:text-white rounded-lg text-xs font-bold transition-colors hidden sm:block"
-                  >
-                    +Lote
-                  </button>
-                </div>
-              </div>
-            );
-          })}
+                );
+              })}
+            </div>
+          ))}
 
           {filteredConsumibles.length === 0 && !loading && (
             <div className="py-12 text-center text-[var(--text-muted)]">

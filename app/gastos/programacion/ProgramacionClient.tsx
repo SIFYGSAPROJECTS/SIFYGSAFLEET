@@ -47,7 +47,7 @@ export default function ProgramacionClient() {
   const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
   const [previewFile, setPreviewFile] = useState<{ url: string; title: string } | null>(null);
   const [serviciosList, setServiciosList] = useState<string[]>([]);
-
+  const [mobileView, setMobileView] = useState<'cards' | 'table'>('cards');
   useEffect(() => {
     fetchRecords();
     fetchSuggestions();
@@ -305,11 +305,11 @@ export default function ProgramacionClient() {
             </p>
           </div>
           
-          <div className="flex items-center gap-3 bg-white border border-stone-200 px-4 py-2 rounded-xl shadow-sm">
-            <CalendarRange className="w-5 h-5 text-stone-400" />
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-semibold text-stone-600">Año:</span>
-              <div className="w-32">
+          <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-3 bg-white border border-stone-200 px-3 sm:px-4 py-2 rounded-xl shadow-sm w-full md:w-auto">
+            <CalendarRange className="w-5 h-5 text-stone-400 hidden sm:block shrink-0" />
+            <div className="flex items-center gap-2 flex-1 min-w-[120px]">
+              <span className="text-xs sm:text-sm font-semibold text-stone-600 shrink-0">Año:</span>
+              <div className="w-full">
                 <PremiumSelect 
                   value={anio.toString()} 
                   onChange={val => setAnio(Number(val))}
@@ -319,10 +319,10 @@ export default function ProgramacionClient() {
                 />
               </div>
             </div>
-            <div className="w-px h-6 bg-stone-200 mx-1"></div>
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-semibold text-stone-600">Semana:</span>
-              <div className="w-40">
+            <div className="hidden sm:block w-px h-6 bg-stone-200 mx-1 shrink-0"></div>
+            <div className="flex items-center gap-2 flex-1 min-w-[140px]">
+              <span className="text-xs sm:text-sm font-semibold text-stone-600 shrink-0">Semana:</span>
+              <div className="w-full">
                 <PremiumSelect 
                   value={semana.toString()} 
                   onChange={val => setSemana(Number(val))}
@@ -338,8 +338,28 @@ export default function ProgramacionClient() {
       </div>
 
       {/* Main Table */}
-      <div className="bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden animate-in fade-in slide-in-from-bottom-8 duration-700 relative">
-        <div className="overflow-x-auto min-h-[400px] pb-32">
+      {/* Main Container */}
+      <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 relative">
+
+        {/* Toggle Vista Móvil */}
+        <div className="md:hidden flex items-center bg-stone-100 p-1 rounded-xl w-fit mb-4 border border-stone-200">
+          <button 
+            onClick={() => setMobileView('cards')} 
+            className={`px-4 py-1.5 rounded-lg text-sm font-bold transition-all ${mobileView === 'cards' ? 'bg-white text-orange-600 shadow-sm' : 'text-stone-500 hover:text-stone-700'}`}
+          >
+            Tarjetas
+          </button>
+          <button 
+            onClick={() => setMobileView('table')} 
+            className={`px-4 py-1.5 rounded-lg text-sm font-bold transition-all ${mobileView === 'table' ? 'bg-white text-orange-600 shadow-sm' : 'text-stone-500 hover:text-stone-700'}`}
+          >
+            Tabla
+          </button>
+        </div>
+        
+        {/* VISTA ESCRITORIO (TABLA) */}
+        <div className={`${mobileView === 'table' ? 'block' : 'hidden md:block'} bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden`}>
+          <div className="overflow-x-auto min-h-[400px] pb-16">
           <table className="w-full text-left text-sm whitespace-nowrap">
             <thead className="bg-[#cd5c24] text-white">
               <tr>
@@ -583,8 +603,8 @@ export default function ProgramacionClient() {
           </table>
         </div>
         
-        {/* Footer Actions */}
-        <div className="p-4 border-t border-stone-200 bg-stone-50 flex items-center justify-between">
+        {/* Footer Actions Desktop */}
+        <div className="hidden md:flex p-4 border-t border-stone-200 bg-stone-50 items-center justify-between rounded-b-2xl">
           <button
             onClick={addRow}
             className="flex items-center gap-2 text-sm font-bold text-orange-600 hover:text-orange-700 hover:bg-orange-100/50 px-4 py-2 rounded-lg transition-colors"
@@ -601,6 +621,222 @@ export default function ProgramacionClient() {
             {saving ? 'Guardando...' : `Guardar Semana ${semana}`}
           </button>
         </div>
+        </div>
+
+        {/* VISTA MÓVIL (TARJETAS) */}
+        <div className={`md:hidden flex-col gap-4 mt-2 pb-28 ${mobileView === 'cards' ? 'flex' : 'hidden'}`}>
+          {registros.map((row, index) => {
+            const getBorderColor = () => {
+              if (row.Estatus === 'Pagado') return 'border-emerald-400';
+              if (row.Estatus === 'Cancelado') return 'border-red-400';
+              if (row.Estatus === 'Pago Parcial') return 'border-yellow-400';
+              return 'border-orange-300';
+            };
+            const getBgColor = () => {
+              if (row.Estatus === 'Pagado') return 'bg-emerald-50';
+              if (row.Estatus === 'Cancelado') return 'bg-red-50';
+              if (row.Estatus === 'Pago Parcial') return 'bg-yellow-50';
+              return 'bg-white';
+            };
+
+            return (
+              <div key={index} className={`rounded-2xl border-l-4 shadow-sm p-4 relative flex flex-col gap-3 ${getBorderColor()} ${getBgColor()}`}>
+                <button 
+                  onClick={() => removeRow(index)} 
+                  className="absolute top-3 right-3 p-1.5 text-stone-400 hover:text-red-500 hover:bg-red-100 rounded-md transition-colors"
+                >
+                  <Trash2 size={16} />
+                </button>
+
+                <div className="flex items-center justify-between mb-1 pr-8 border-b border-stone-200 pb-3">
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-stone-500 text-sm">Reg. #{index + 1}</span>
+                    <input
+                      type="number"
+                      placeholder="Pta"
+                      value={row.Partida || ''}
+                      onChange={(e) => handleCellChange(index, 'Partida', e.target.value)}
+                      className="w-12 text-center bg-white border border-stone-200 focus:border-orange-400 rounded px-1 py-1 outline-none text-stone-700 text-xs font-bold shadow-inner"
+                    />
+                  </div>
+                  <PremiumSelect
+                    value={row.Estatus || 'Pendiente'}
+                    onChange={(val) => handleCellChange(index, 'Estatus', val)}
+                    options={[
+                      { value: 'Pendiente', label: 'Pendiente' },
+                      { value: 'Pagado', label: 'Pagado' },
+                      { value: 'Pago Parcial', label: 'Parcial' },
+                      { value: 'Cancelado', label: 'Cancelado' },
+                    ]}
+                    accent="orange"
+                    compact={true}
+                    className="w-28"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[9px] uppercase font-bold text-stone-400 tracking-wider">Fecha Solicitud</label>
+                    <input type="date" value={row.Fecha_Sol || ''} onChange={(e) => handleCellChange(index, 'Fecha_Sol', e.target.value)} className="w-full bg-white border border-stone-200 focus:border-orange-400 rounded-lg px-2 py-2 outline-none text-sm" />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[9px] uppercase font-bold text-stone-400 tracking-wider">Fecha Pago</label>
+                    <input type="date" value={row.Fecha_Pago || ''} onChange={(e) => handleCellChange(index, 'Fecha_Pago', e.target.value)} className="w-full bg-white border border-stone-200 focus:border-orange-400 rounded-lg px-2 py-2 outline-none text-sm" />
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <label className="text-[9px] uppercase font-bold text-stone-400 tracking-wider">Servicio / Producto</label>
+                  <input type="text" list="servicios-list" placeholder="Descripción..." value={row.Servicio_Producto || ''} onChange={(e) => handleCellChange(index, 'Servicio_Producto', e.target.value)} className="w-full bg-white border border-stone-200 focus:border-orange-400 rounded-lg px-3 py-2 outline-none text-sm font-medium" />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[9px] uppercase font-bold text-stone-400 tracking-wider">Proveedor</label>
+                    <input type="text" list="proveedores-list" placeholder="Proveedor" value={row.Proveedor || ''} onChange={(e) => handleCellChange(index, 'Proveedor', e.target.value)} className="w-full bg-white border border-stone-200 focus:border-orange-400 rounded-lg px-2 py-2 outline-none text-sm" />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[9px] uppercase font-bold text-stone-400 tracking-wider">Empresa</label>
+                    <PremiumSelect
+                      value={row.Empresa || ''}
+                      onChange={(val) => handleCellChange(index, 'Empresa', val)}
+                      options={[{ value: 'AVH', label: 'AVH' }, { value: 'SIFYGSA', label: 'SIFYGSA' }, { value: 'SIAVSA', label: 'SIAVSA' }, { value: 'VIPSA', label: 'VIPSA' }]}
+                      accent="orange"
+                      compact={true}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[9px] uppercase font-bold text-stone-400 tracking-wider">Monto $</label>
+                    <div className="relative">
+                      <span className="absolute left-2.5 top-2 text-orange-500 text-sm font-bold">$</span>
+                      <input type="number" min="0" step="0.01" placeholder="0.00" value={row.Monto || ''} onChange={(e) => handleCellChange(index, 'Monto', parseFloat(e.target.value) || 0)} className="w-full bg-white border border-stone-200 focus:border-orange-400 rounded-lg pl-6 pr-2 py-2 outline-none text-sm font-black text-stone-800 shadow-inner" />
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[9px] uppercase font-bold text-stone-400 tracking-wider">Solicitante</label>
+                    <input type="text" placeholder="Usuario" value={row.Usuario || ''} onChange={(e) => handleCellChange(index, 'Usuario', e.target.value)} className="w-full bg-white border border-stone-200 focus:border-orange-400 rounded-lg px-2 py-2 outline-none text-sm" />
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <label className="text-[9px] uppercase font-bold text-stone-400 tracking-wider">Factura / Folio</label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      placeholder="Folio/Factura..."
+                      value={row.Factura_Comprobacion || ''}
+                      onChange={(e) => handleCellChange(index, 'Factura_Comprobacion', e.target.value)}
+                      onBlur={(e) => checkFolio(index, e.target.value, row.Id)}
+                      className="w-full bg-white border border-stone-200 focus:border-orange-400 rounded-lg px-3 py-2 outline-none text-sm font-mono shadow-inner"
+                    />
+                    <button 
+                      onClick={() => generateNoFacturable(index)}
+                      title="Generar Folio NBF"
+                      className="p-2.5 text-orange-600 bg-orange-50 border border-orange-200 hover:text-white hover:bg-orange-500 rounded-lg transition-colors flex shrink-0 shadow-sm"
+                    >
+                      <Wand2 size={16} />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between border-t border-stone-200 pt-3 mt-1">
+                  <span className="text-[9px] uppercase font-black text-stone-500 tracking-widest">Evidencia</span>
+                  {row.Comprobante_URL ? (
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setPreviewFile({ url: row.Comprobante_URL!, title: row.Factura_Comprobacion || `Partida #${row.Partida || (index + 1)}` })}
+                        className="px-3 py-1.5 bg-orange-100 text-[#cd5c24] hover:bg-orange-200 rounded-lg transition-colors flex items-center gap-1.5 text-xs font-bold shadow-sm"
+                      >
+                        <Eye size={14} /> Ver
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (window.confirm('¿Estás seguro de quitar este comprobante?')) {
+                            handleCellChange(index, 'Comprobante_URL', '');
+                          }
+                        }}
+                        className="px-2.5 py-1.5 text-stone-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  ) : (
+                    <label className="cursor-pointer inline-flex items-center justify-center gap-1.5 px-4 py-1.5 bg-white border border-stone-200 hover:bg-orange-50 hover:border-orange-200 text-stone-600 hover:text-[#cd5c24] rounded-lg transition-all text-xs font-bold shadow-sm active:scale-95">
+                      {uploadingIndex === index ? (
+                        <Loader2 size={14} className="animate-spin text-[#cd5c24]" />
+                      ) : (
+                        <>
+                          <Paperclip size={13} />
+                          <span>Adjuntar</span>
+                        </>
+                      )}
+                      <input
+                        type="file"
+                        accept="image/*,application/pdf"
+                        className="hidden"
+                        disabled={uploadingIndex === index}
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleFileUpload(index, file);
+                        }}
+                      />
+                    </label>
+                  )}
+                </div>
+
+                {row.Estatus === 'Pago Parcial' && (
+                  <div className="flex flex-col gap-2 mt-2 bg-sky-50 p-3 rounded-xl border border-sky-200 shadow-inner">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-sky-800">Monto Pagado:</span>
+                      <div className="relative w-32">
+                        <span className="absolute left-2.5 top-1.5 text-sky-600 text-sm font-bold">$</span>
+                        <input
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          placeholder="0.00"
+                          value={row.Monto_Pagado || ''}
+                          onChange={(e) => handleCellChange(index, 'Monto_Pagado', parseFloat(e.target.value) || 0)}
+                          className="w-full bg-white border border-sky-300 focus:border-sky-500 rounded-lg pl-7 pr-2 py-1.5 text-sm font-black text-sky-900 outline-none shadow-sm"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between pt-2 border-t border-sky-100">
+                      <span className="text-xs font-bold text-stone-500">Monto Restante:</span>
+                      <span className="text-sm font-black text-stone-700">
+                        {new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format((row.Monto || 0) - (row.Monto_Pagado || 0))}
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+      </div>
+
+      {/* Floating Action Buttons para Móvil */}
+      <div className="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 flex items-center justify-between gap-2 z-[100] w-[90%] max-w-[320px] bg-white/80 backdrop-blur-xl p-2 rounded-full border border-stone-200 shadow-[0_8px_30px_rgba(0,0,0,0.12)]">
+        <button
+          onClick={addRow}
+          className="flex-1 flex items-center justify-center gap-1 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold px-4 py-3 rounded-full active:scale-95 transition-all text-sm"
+        >
+          <Plus size={18} /> Agregar
+        </button>
+        <button
+          onClick={handleSave}
+          disabled={saving || loading}
+          className="flex-[1.5] flex items-center justify-center gap-2 bg-orange-600 hover:bg-orange-700 text-white font-black px-6 py-3 rounded-full shadow-[0_4px_15px_rgba(205,92,36,0.4)] active:scale-95 transition-all text-sm disabled:opacity-50"
+        >
+          {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save size={18} />}
+          {saving ? 'Guardar...' : 'Guardar'}
+        </button>
       </div>
 
       {/* Ticket / Comprobante Preview Modal */}

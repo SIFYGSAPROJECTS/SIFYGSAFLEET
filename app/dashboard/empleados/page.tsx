@@ -427,6 +427,7 @@ export default function PersonalPage() {
                       { value: 'USER', label: 'EMPLEADO (USER)' },
                       { value: 'GERENCIAL', label: 'GERENTE (GERENCIAL)' },
                       { value: 'ADMIN', label: 'ADMINISTRADOR (ADMIN)' },
+                      { value: 'INFRAESTRUCTURA', label: 'INFRAESTRUCTURA' },
                     ]}
                   />
                 </div>

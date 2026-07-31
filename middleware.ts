@@ -34,7 +34,7 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Rutas que requieren autenticación
-  const protectedPaths = ['/portal', '/dashboard', '/computo', '/programa-anual', '/verificaciones', '/auditoria', '/gastos'];
+  const protectedPaths = ['/portal', '/dashboard', '/computo', '/programa-anual', '/verificaciones', '/auditoria', '/gastos', '/edificios'];
   const isProtectedPath = protectedPaths.some(path => pathname === path || pathname.startsWith(path + '/'));
 
   if (isProtectedPath) {
@@ -83,6 +83,10 @@ export function middleware(request: NextRequest) {
       }
       if (pathname.startsWith('/computo') && !userAreas.includes('COMPUTO')) {
         // No tiene acceso a computo
+        return NextResponse.redirect(new URL("/portal", request.url));
+      }
+      if (pathname.startsWith('/edificios') && !userAreas.includes('EDIFICIOS')) {
+        // No tiene acceso a edificios
         return NextResponse.redirect(new URL("/portal", request.url));
       }
     }
