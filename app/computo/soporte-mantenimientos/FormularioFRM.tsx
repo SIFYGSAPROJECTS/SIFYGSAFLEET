@@ -214,11 +214,16 @@ export default function FormularioFRM({ reporte, onClose, onSave, onRefresh, isA
   };
 
   const exportExcel = async () => {
-    const { exportarFRM_Excel } = await import('@/lib/pdf/exportarFRM_Excel');
-    await exportarFRM_Excel({
-          ...formData,
-          Datos_Formato: JSON.stringify(formData.Datos_Formato)
-    });
+    try {
+      const { exportarFRM_Excel } = await import('@/lib/pdf/exportarFRM_Excel');
+      await exportarFRM_Excel({
+            ...formData,
+            Datos_Formato: JSON.stringify(formData.Datos_Formato)
+      });
+    } catch (error) {
+      console.error("Error al exportar Excel:", error);
+      alert("Hubo un error al generar el archivo Excel. Verifica los datos del reporte.");
+    }
   };
 
   const handleUploadEvidencia = async (field: string, e: React.ChangeEvent<HTMLInputElement>) => {

@@ -4,12 +4,20 @@ import { prisma } from '@/lib/db';
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const semana = parseInt(searchParams.get('semana') || '27');
+    const semanaParam = searchParams.get('semana');
     const anio = parseInt(searchParams.get('anio') || '2026');
 
+    const whereClause: any = { Anio: anio };
+    if (semanaParam && semanaParam !== 'all') {
+      whereClause.Semana = parseInt(semanaParam);
+    }
+
     const registros = await prisma.programacion_Semanal.findMany({
-      where: { Semana: semana, Anio: anio },
-      orderBy: { Id: 'asc' }
+      where: whereClause,
+      orderBy: [
+        { Semana: 'asc' },
+        { Id: 'asc' }
+      ]
     });
     return NextResponse.json(registros);
   } catch (error: any) {

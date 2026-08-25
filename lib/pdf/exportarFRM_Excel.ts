@@ -2,6 +2,42 @@ import * as ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 import { format } from 'date-fns';
 
+const formatUTC = (dateString: string | Date | null) => {
+  if (!dateString) return 'Pendiente';
+  try {
+    const d = new Date(dateString);
+    if (isNaN(d.getTime())) return 'Pendiente';
+    const day = String(d.getUTCDate()).padStart(2, '0');
+    const month = String(d.getUTCMonth() + 1).padStart(2, '0');
+    const year = d.getUTCFullYear();
+    return `${day} de ${getMonthName(d.getUTCMonth())} ${year}`;
+  } catch(e) {
+    return 'Pendiente';
+  }
+};
+
+const getMonthName = (m: number) => {
+  const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+  return months[m];
+};
+
+const fixEncoding = (str: string) => {
+  if (!str) return str;
+  let current = str;
+  let previous = "";
+  let attempts = 0;
+  while (current !== previous && attempts < 3) {
+    previous = current;
+    try {
+      current = decodeURIComponent(escape(current));
+    } catch (e) {
+      break;
+    }
+    attempts++;
+  }
+  return previous.replace(/\u00A0/g, ' ');
+};
+
 export const exportarFRM_Excel = async (reporte: any) => {
   const workbook = new ExcelJS.Workbook();
   workbook.creator = 'SIFYGSA';
@@ -9,250 +45,337 @@ export const exportarFRM_Excel = async (reporte: any) => {
 
   const worksheet = workbook.addWorksheet('Reporte de Mantenimiento');
 
-  // Ajustar anchos de columnas
+  // Ajustar anchos de columnas: A a F (6 columnas)
   worksheet.columns = [
-    { width: 3 },  // A (Espaciador)
-    { width: 25 }, // B
-    { width: 30 }, // C
-    { width: 20 }, // D
-    { width: 30 }, // E
-    { width: 3 },  // F (Espaciador)
+    { width: 22 }, // A
+    { width: 22 }, // B
+    { width: 22 }, // C
+    { width: 22 }, // D
+    { width: 25 }, // E
+    { width: 25 }, // F
   ];
 
-  // Estilos
-  const titleFont = { name: 'Arial', size: 14, bold: true };
-  const headerFont = { name: 'Arial', size: 10, bold: true, color: { argb: 'FFFFFFFF' } };
-  const normalFont = { name: 'Arial', size: 10 };
+  let df: any = {};
+  if (reporte.Datos_Formato) {
+    try {
+      df = typeof reporte.Datos_Formato === 'string' ? JSON.parse(reporte.Datos_Formato) : reporte.Datos_Formato;
+    } catch(e){}
+  }
   
-  const headerFill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF009966' } }; // Verde SIFYGSA
-  const lightFill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF2F2F2' } };
+  const accesorios = df.accesorios || {};
+  const accesorios_series = df.accesorios_series || {};
+  const reprogramacion = df.reprogramacion || {};
+
+  // Estilos y Colores
+  const borderColor = 'FFF0501E'; // Naranja SIFYGSA
+  const headerFillColor = 'FFEBEBE1'; // Gris/Verde clarito
+  const darkGrayFill = 'FF808080';
+  
+  const boldFont = { name: 'Arial', size: 10, bold: true };
+  const normalFont = { name: 'Arial', size: 10 };
+  const titleFont = { name: 'Arial', size: 12, bold: true };
+  
+  const applyBorders = (startCol: number, startRow: number, endCol: number, endRow: number) => {
+    for (let r = startRow; r <= endRow; r++) {
+      for (let c = startCol; c <= endCol; c++) {
+        const cell = worksheet.getCell(r, c);
+        cell.border = {
+          top: { style: 'thin', color: { argb: borderColor } },
+          left: { style: 'thin', color: { argb: borderColor } },
+          bottom: { style: 'thin', color: { argb: borderColor } },
+          right: { style: 'thin', color: { argb: borderColor } }
+        };
+        cell.alignment = { vertical: 'middle', wrapText: true, ...cell.alignment };
+        if (!cell.font) cell.font = normalFont;
+      }
+    }
+  };
+
+  const setCellContent = (cellId: string, value: any, font = normalFont, align: any = { horizontal: 'center', vertical: 'middle' }, fill?: string) => {
+    const cell = worksheet.getCell(cellId);
+    cell.value = value;
+    cell.font = font;
+    cell.alignment = { wrapText: true, ...align };
+    if (fill) {
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: fill } };
+    }
+  };
+
+  const loadPhotoAsBase64 = async (url: string | null) => {
+    if (!url) return null;
+    try {
+      const res = await fetch(`/api/proxy-image?url=${encodeURIComponent(url)}`);
+      if (!res.ok) return null;
+      const data = await res.json();
+      return data.base64;
+    } catch(e) {
+      return null;
+    }
+  };
+
+  const [fotoAntes, fotoDespues, fotosExtra] = await Promise.all([
+    loadPhotoAsBase64(reporte.Foto_Antes),
+    loadPhotoAsBase64(reporte.Foto_Despues),
+    loadPhotoAsBase64(reporte.Fotos_Extra)
+  ]);
+  const photos = [fotoAntes, fotoDespues, fotosExtra].filter(Boolean) as string[];
 
   // ==========================================
   // ENCABEZADO Y TÍTULO
   // ==========================================
-  worksheet.mergeCells('B2:E2');
-  const titleCell = worksheet.getCell('B2');
-  titleCell.value = 'REGISTRO DE MANTENIMIENTO PREVENTIVO/CORRECTIVO';
-  titleCell.font = titleFont;
-  titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
+  worksheet.mergeCells('A1:B3');
+  // Se insertaría el logo aquí, pero en JS puro necesitamos fetch
+  try {
+    const response = await fetch('/logo.png');
+    if (response.ok) {
+      const blob = await response.blob();
+      
+      const base64data = await new Promise<string>((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = img.width;
+          canvas.height = img.height;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(img, 0, 0);
+            const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const data = imgData.data;
+            for (let i = 0; i < data.length; i += 4) {
+              const r = data[i], g = data[i+1], b = data[i+2], a = data[i+3];
+              if (a > 0) {
+                const max = Math.max(r, g, b);
+                const min = Math.min(r, g, b);
+                // Si el pixel es blanco/gris claro (baja saturación y alto brillo)
+                if (max - min < 40 && max > 180) {
+                  // Convertir a gris muy oscuro/negro
+                  const darken = 30; 
+                  data[i] = darken;
+                  data[i+1] = darken;
+                  data[i+2] = darken;
+                }
+              }
+            }
+            ctx.putImageData(imgData, 0, 0);
+            resolve(canvas.toDataURL('image/png'));
+          } else {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.readAsDataURL(blob);
+          }
+        };
+        img.onerror = () => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.readAsDataURL(blob);
+        };
+        img.src = URL.createObjectURL(blob);
+      });
 
-  worksheet.mergeCells('D4:E4');
-  worksheet.getCell('D4').value = `FRM: ${reporte.Consecutivo_FRM}`;
-  worksheet.getCell('D4').font = { bold: true };
-  worksheet.getCell('D4').alignment = { horizontal: 'right' };
+      const imageId = workbook.addImage({
+        base64: base64data,
+        extension: 'png',
+      });
+      worksheet.addImage(imageId, {
+        tl: { col: 0.1, row: 0.1 },
+        ext: { width: 140, height: 40 }
+      });
+    }
+  } catch (e) {}
 
-  const fechaFormat = reporte.Fecha_Ejecucion ? new Date(reporte.Fecha_Ejecucion) : new Date(reporte.Fecha_Programada);
-  worksheet.mergeCells('D5:E5');
-  worksheet.getCell('D5').value = `Fecha: ${format(fechaFormat, 'dd/MM/yyyy')}`;
-  worksheet.getCell('D5').alignment = { horizontal: 'right' };
+  worksheet.mergeCells('C1:D3');
+  setCellContent('C1', `REGISTRO DE MANTENIMIENTO PREVENTIVO\nEQUIPO DE CÓMPUTO`, titleFont);
+
+  worksheet.mergeCells('E1:F1');
+  setCellContent('E1', 'Página 1 de 1', normalFont);
+  worksheet.mergeCells('E2:F2');
+  setCellContent('E2', `Fecha: ${reporte.Fecha_Ejecucion ? formatUTC(reporte.Fecha_Ejecucion) : formatUTC(reporte.Fecha_Programada)}`, normalFont);
+  worksheet.mergeCells('E3:F3');
+  setCellContent('E3', 'Revisión: 01', normalFont);
+
+  applyBorders(1, 1, 6, 3);
+  
+  // Row 4 is a small spacer
+  worksheet.getRow(4).height = 10;
+
+  // ==========================================
+  // FECHAS Y MANTENIMIENTO
+  // ==========================================
+  worksheet.mergeCells('A5:B5');
+  setCellContent('A5', 'Mantenimiento a realizar:', boldFont, { horizontal: 'left' });
+  
+  const circlePrev = reporte.Tipo_Mtto?.toUpperCase() === 'PREVENTIVO' ? '⚫' : '⚪';
+  const circleCorr = reporte.Tipo_Mtto?.toUpperCase() === 'CORRECTIVO' ? '⚫' : '⚪';
+  
+  worksheet.mergeCells('C5:D5');
+  setCellContent('C5', `PREVENTIVO          ${circlePrev}`, normalFont);
+  
+  setCellContent('E5', `CORRECTIVO   ${circleCorr}`, normalFont);
+  setCellContent('F5', 'N° de Reporte:', boldFont, { horizontal: 'left' });
+
+  worksheet.mergeCells('A6:B6');
+  setCellContent('A6', 'Fecha de Programación:', boldFont);
+  worksheet.mergeCells('C6:D6');
+  setCellContent('C6', formatUTC(reporte.Fecha_Programada), normalFont);
+  setCellContent('E6', 'Fecha de ejecución', boldFont);
+  setCellContent('F6', formatUTC(reporte.Fecha_Ejecucion), normalFont);
+
+  applyBorders(1, 5, 6, 6);
+
+  worksheet.getRow(7).height = 10; // spacer
 
   // ==========================================
   // DATOS DEL EQUIPO
   // ==========================================
-  let row = 7;
-  worksheet.mergeCells(`B${row}:E${row}`);
-  const headerEquipo = worksheet.getCell(`B${row}`);
-  headerEquipo.value = 'DATOS DEL EQUIPO';
-  headerEquipo.font = headerFont;
-  headerEquipo.fill = headerFill as any;
-  headerEquipo.alignment = { horizontal: 'center' };
+  worksheet.mergeCells('A8:F8');
+  setCellContent('A8', 'Datos del Equipo', boldFont, { horizontal: 'left' }, headerFillColor);
   
-  row++;
-  worksheet.getCell(`B${row}`).value = 'N° Interno:';
-  worksheet.getCell(`C${row}`).value = reporte.equipo.C_Interno;
-  worksheet.getCell(`D${row}`).value = 'Service TAG:';
-  worksheet.getCell(`E${row}`).value = reporte.equipo.Service_Tag || 'N/A';
+  setCellContent('A9', 'N° Interno:', boldFont, { horizontal: 'left' }, headerFillColor);
+  setCellContent('B9', reporte.C_Interno || reporte.equipo?.C_Interno || 'N/A', normalFont);
   
-  row++;
-  worksheet.getCell(`B${row}`).value = 'Tipo:';
-  worksheet.getCell(`C${row}`).value = reporte.equipo.Tipo || 'N/A';
-  worksheet.getCell(`D${row}`).value = 'Marca:';
-  worksheet.getCell(`E${row}`).value = reporte.equipo.Marca || 'N/A';
+  setCellContent('C9', { richText: [{ font: boldFont, text: 'Tipo: ' }, { font: normalFont, text: reporte.equipo?.Tipo || 'N/A' }] }, normalFont, { horizontal: 'left' });
+  setCellContent('D9', { richText: [{ font: boldFont, text: 'Modelo: ' }, { font: normalFont, text: reporte.equipo?.Modelo || 'N/A' }] }, normalFont, { horizontal: 'left' });
+  setCellContent('E9', { richText: [{ font: boldFont, text: 'Marca: ' }, { font: normalFont, text: reporte.equipo?.Marca || 'N/A' }] }, normalFont, { horizontal: 'left' });
+  setCellContent('F9', { richText: [{ font: boldFont, text: 'Service TAG: ' }, { font: normalFont, text: reporte.equipo?.Service_Tag || 'N/A' }] }, normalFont, { horizontal: 'left' });
+  
+  worksheet.mergeCells('A10:B10');
+  setCellContent('A10', `Departamento\n${reporte.equipo?.Departamento || 'N/A'}`, normalFont, { horizontal: 'center' });
+  worksheet.getCell('A10').font = boldFont; // To make the first line bold we should use rich text, but a quick workaround is whole cell bold or normal. Let's use richText:
+  worksheet.getCell('A10').value = { richText: [{ font: boldFont, text: 'Departamento\n' }, { font: normalFont, text: reporte.equipo?.Departamento || 'N/A' }] };
 
-  row++;
-  worksheet.getCell(`B${row}`).value = 'Modelo:';
-  worksheet.getCell(`C${row}`).value = reporte.equipo.Modelo || 'N/A';
-  worksheet.getCell(`D${row}`).value = 'Cargador:';
-  worksheet.getCell(`E${row}`).value = reporte.equipo.Cargador || 'N/A';
+  worksheet.mergeCells('C10:D10');
+  worksheet.getCell('C10').value = { richText: [{ font: boldFont, text: 'Nombre de usuario\n' }, { font: normalFont, text: fixEncoding(reporte.equipo?.Usuario) || 'N/A' }] };
+  worksheet.getCell('C10').alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
 
-  row++;
-  worksheet.getCell(`B${row}`).value = 'Usuario:';
-  worksheet.getCell(`C${row}`).value = reporte.equipo.Usuario || 'N/A';
-  worksheet.getCell(`D${row}`).value = 'Departamento:';
-  worksheet.getCell(`E${row}`).value = reporte.equipo.Departamento || 'N/A';
+  worksheet.mergeCells('E10:E10');
+  worksheet.getCell('E10').value = { richText: [{ font: boldFont, text: 'Serie de cargador\n' }, { font: normalFont, text: reporte.equipo?.Cargador || 'N/A' }] };
+  worksheet.getCell('E10').alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
 
-  // Aplicar fondo gris a los labels
-  for(let r = 8; r <= 11; r++) {
-    worksheet.getCell(`B${r}`).fill = lightFill as any;
-    worksheet.getCell(`B${r}`).font = { bold: true };
-    worksheet.getCell(`D${r}`).fill = lightFill as any;
-    worksheet.getCell(`D${r}`).font = { bold: true };
-    
-    // Borders
-    ['B', 'C', 'D', 'E'].forEach(col => {
-      worksheet.getCell(`${col}${r}`).border = {
-        top: {style:'thin', color: {argb:'FFDDDDDD'}},
-        left: {style:'thin', color: {argb:'FFDDDDDD'}},
-        bottom: {style:'thin', color: {argb:'FFDDDDDD'}},
-        right: {style:'thin', color: {argb:'FFDDDDDD'}}
-      };
-    });
-  }
-
-  row += 3;
+  setCellContent('F10', '', normalFont, {}, darkGrayFill);
+  
+  worksheet.getRow(9).height = 20;
+  worksheet.getRow(10).height = 30;
+  applyBorders(1, 8, 6, 10);
 
   // ==========================================
-  // PARTES CAMBIADAS
+  // ACCESORIOS ADICIONALES
   // ==========================================
-  worksheet.mergeCells(`B${row}:E${row}`);
-  const headerPartes = worksheet.getCell(`B${row}`);
-  headerPartes.value = 'PARTES REEMPLAZADAS O INSTALADAS';
-  headerPartes.font = headerFont;
-  headerPartes.fill = headerFill as any;
-  headerPartes.alignment = { horizontal: 'center' };
+  worksheet.mergeCells('A11:F11');
+  setCellContent('A11', 'Accesorios adicionales al mantenimiento | Indicar N° Interno', boldFont, { horizontal: 'left' }, headerFillColor);
+  
+  worksheet.mergeCells('A12:B12');
+  setCellContent('A12', `Teclado ${accesorios.teclado ? '⚫' : '⚪'} ${accesorios.teclado ? (accesorios_series.teclado || 'N/A') : 'N/A'}`, normalFont, { horizontal: 'center' });
+  setCellContent('C12', `Mouse ${accesorios.mouse ? '⚫' : '⚪'} ${accesorios.mouse ? (accesorios_series.mouse || 'N/A') : 'N/A'}`, normalFont, { horizontal: 'center' });
+  setCellContent('D12', `Monitor ${accesorios.monitor ? '⚫' : '⚪'} ${accesorios.monitor ? (accesorios_series.monitor || 'N/A') : 'N/A'}`, normalFont, { horizontal: 'center' });
+  worksheet.mergeCells('E12:F12');
+  setCellContent('E12', `Estación de trabajo ${accesorios.estacion ? '⚫' : '⚪'} ${accesorios.estacion ? (accesorios_series.estacion || 'N/A') : 'N/A'}`, normalFont, { horizontal: 'center' });
 
-  row++;
-  ['Componente', 'Parte Anterior', 'Parte Nueva', 'Motivo del Cambio'].forEach((h, i) => {
-    const cols = ['B', 'C', 'D', 'E'];
-    const cell = worksheet.getCell(`${cols[i]}${row}`);
-    cell.value = h;
-    cell.fill = lightFill as any;
-    cell.font = { bold: true };
-  });
-
-  row++;
-  if (reporte.partes_cambiadas && reporte.partes_cambiadas.length > 0) {
-    reporte.partes_cambiadas.forEach((parte: any) => {
-      worksheet.getCell(`B${row}`).value = parte.Nombre_Parte;
-      worksheet.getCell(`C${row}`).value = parte.Parte_Anterior || 'N/A';
-      worksheet.getCell(`D${row}`).value = parte.Parte_Nueva || 'N/A';
-      worksheet.getCell(`E${row}`).value = parte.Motivo_Cambio || '';
-      row++;
-    });
-  } else {
-    worksheet.mergeCells(`B${row}:E${row}`);
-    worksheet.getCell(`B${row}`).value = 'No se registraron cambios de partes en este mantenimiento.';
-    worksheet.getCell(`B${row}`).alignment = { horizontal: 'center' };
-    worksheet.getCell(`B${row}`).font = { italic: true };
-    row++;
-  }
-
-  row += 2;
-
-  row += 2;
+  applyBorders(1, 11, 6, 12);
+  worksheet.getRow(13).height = 10;
 
   // ==========================================
-  // DETALLES Y OBSERVACIONES (Se recibe / Se entrega)
+  // DETALLES DE MANTENIMIENTO
   // ==========================================
-  worksheet.mergeCells(`B${row}:E${row}`);
-  const headerObs = worksheet.getCell(`B${row}`);
-  headerObs.value = 'DETALLES DE MANTENIMIENTO';
-  headerObs.font = headerFont;
-  headerObs.fill = headerFill as any;
-  headerObs.alignment = { horizontal: 'center' };
+  worksheet.mergeCells('A14:F14');
+  setCellContent('A14', 'Detalles de Mantenimiento', boldFont, { horizontal: 'left' }, headerFillColor);
   
-  row++;
-  worksheet.mergeCells(`B${row}:D${row}`);
-  worksheet.getCell(`B${row}`).value = reporte.Tipo_Mtto === 'Preventivo' ? 'PREVENTIVO' : 'N/A';
-  worksheet.getCell(`E${row}`).value = reporte.Tipo_Mtto === 'Correctivo' ? 'CORRECTIVO' : 'N/A';
-  worksheet.getCell(`B${row}`).font = { bold: true };
-  worksheet.getCell(`E${row}`).font = { bold: true };
+  worksheet.mergeCells('A15:C15');
+  setCellContent('A15', 'PREVENTIVO', boldFont, { horizontal: 'center' });
+  worksheet.mergeCells('D15:F15');
+  setCellContent('D15', 'CORRECTIVO', boldFont, { horizontal: 'center' });
   
-  row++;
-  worksheet.mergeCells(`B${row}:E${row+1}`);
-  worksheet.getCell(`B${row}`).value = `Se recibe: \n${reporte.Observaciones || 'Sin observaciones al recibir'}`;
-  worksheet.getCell(`B${row}`).alignment = { wrapText: true, vertical: 'top' };
+  worksheet.mergeCells('A16:C16');
+  setCellContent('A16', df.preventivo || '', normalFont, { horizontal: 'left', vertical: 'top' });
+  worksheet.mergeCells('D16:F16');
+  setCellContent('D16', df.correctivo || '', normalFont, { horizontal: 'left', vertical: 'top' });
   
-  row += 2;
-  worksheet.mergeCells(`B${row}:E${row+1}`);
-  worksheet.getCell(`B${row}`).value = `Se entrega: \n${reporte.Actividades_Extra || 'Sin observaciones al entregar'}`;
-  worksheet.getCell(`B${row}`).alignment = { wrapText: true, vertical: 'top' };
+  worksheet.getRow(16).height = 60;
+  applyBorders(1, 14, 6, 16);
+  worksheet.getRow(17).height = 10;
 
-  row += 3;
   // ==========================================
   // EVIDENCIA FOTOGRÁFICA
   // ==========================================
-  worksheet.mergeCells(`B${row}:E${row}`);
-  const headerEvid = worksheet.getCell(`B${row}`);
-  headerEvid.value = 'EVIDENCIA FOTOGRÁFICA';
-  headerEvid.font = headerFont;
-  headerEvid.fill = headerFill as any;
-  headerEvid.alignment = { horizontal: 'center' };
+  worksheet.mergeCells('A18:F18');
+  setCellContent('A18', 'Evidencia Fotográfica', boldFont, { horizontal: 'left' }, headerFillColor);
   
-  row++;
-  if (reporte.partes_cambiadas && reporte.partes_cambiadas.some((p:any) => p.Evidencia_URL)) {
-    worksheet.mergeCells(`B${row}:E${row}`);
-    worksheet.getCell(`B${row}`).value = 'Ver evidencias fotográficas adjuntas en el sistema.';
-    worksheet.getCell(`B${row}`).font = { italic: true };
+  worksheet.mergeCells('A19:F19');
+  
+  if (photos.length > 0) {
+    setCellContent('A19', '', normalFont, { horizontal: 'center', vertical: 'middle' });
+    worksheet.getRow(19).height = 160;
+    
+    photos.forEach((base64, index) => {
+      try {
+        const imageId = workbook.addImage({
+          base64: base64,
+          extension: base64.includes('image/png') ? 'png' : 'jpeg',
+        });
+        worksheet.addImage(imageId, {
+          tl: { col: 0.1 + (index * 2), row: 18.1 }, 
+          ext: { width: 220, height: 180 }
+        });
+      } catch (e) {
+        console.warn("No se pudo agregar una imagen a Excel", e);
+      }
+    });
   } else {
-    worksheet.mergeCells(`B${row}:E${row+4}`);
-    worksheet.getCell(`B${row}`).value = '[Espacio para evidencia fotográfica]';
-    worksheet.getCell(`B${row}`).alignment = { horizontal: 'center', vertical: 'middle' };
+    setCellContent('A19', 'No se adjuntaron evidencias fotográficas.', normalFont, { horizontal: 'center', vertical: 'middle' });
+    worksheet.getRow(19).height = 50;
   }
-
-  row += 6;
-
-  // ==========================================
-  // REPROGRAMACIÓN
-  // ==========================================
-  worksheet.mergeCells(`B${row}:E${row}`);
-  const headerReprog = worksheet.getCell(`B${row}`);
-  headerReprog.value = 'REPROGRAMACIÓN DEL PRÓXIMO MANTENIMIENTO';
-  headerReprog.font = headerFont;
-  headerReprog.fill = headerFill as any;
-  headerReprog.alignment = { horizontal: 'center' };
-
-  row++;
-  worksheet.getCell(`B${row}`).value = 'Realizar de inmediato';
-  worksheet.getCell(`C${row}`).value = 'SI O';
-  worksheet.getCell(`D${row}`).value = 'NO O';
-  worksheet.getCell(`E${row}`).value = `Realizar el día: _________________`;
   
-  row++;
-  worksheet.getCell(`B${row}`).value = 'Responsable de Atender:';
-  worksheet.getCell(`C${row}`).value = 'C.A.S.M'; // Example from template
-  worksheet.getCell(`D${row}`).value = 'Dependencia:';
-  worksheet.getCell(`E${row}`).value = 'INFRAESTRUCTURA';
+  applyBorders(1, 18, 6, 19);
+  worksheet.getRow(20).height = 10;
 
-  row++;
-  worksheet.mergeCells(`B${row}:E${row}`);
-  worksheet.getCell(`B${row}`).value = 'Observaciones Generales del Equipo:';
-  worksheet.getCell(`B${row}`).font = { bold: true };
+  // ==========================================
+  // REPROGRAMACIÓN Y OBSERVACIONES
+  // ==========================================
+  worksheet.mergeCells('A21:F21');
+  setCellContent('A21', 'REPROGRAMACIÓN DEL PRÓXIMO MANTENIMIENTO', boldFont, { horizontal: 'center' }, headerFillColor);
 
-  row += 3;
+  worksheet.mergeCells('A22:B22');
+  setCellContent('A22', 'Realizar de inmediato', normalFont);
+  setCellContent('C22', `SI  ${reprogramacion.inmediato ? '⚫' : '⚪'}`, normalFont);
+  setCellContent('D22', `NO  ${!reprogramacion.inmediato ? '⚫' : '⚪'}`, normalFont);
+  worksheet.mergeCells('E22:F22');
+  setCellContent('E22', `Realizar el día: ${reprogramacion.fecha || ''}`, normalFont, { horizontal: 'left' });
+
+  worksheet.mergeCells('A23:B23');
+  setCellContent('A23', 'Responsable de Atender:', boldFont);
+  worksheet.mergeCells('C23:D23');
+  setCellContent('C23', reprogramacion.responsable || 'C.A.S.M', normalFont);
+  worksheet.mergeCells('E23:F23');
+  setCellContent('E23', `Dependencia: ${reprogramacion.dependencia || 'INFRAESTRUCTURA'}`, normalFont, { horizontal: 'left' });
+
+  worksheet.mergeCells('A24:F24');
+  setCellContent('A24', 'Observaciones Generales del Equipo:', boldFont, { horizontal: 'left' }, headerFillColor);
+  worksheet.mergeCells('A25:F25');
+  setCellContent('A25', reporte.Observaciones || 'Ninguna.', normalFont, { horizontal: 'left', vertical: 'top' });
+  worksheet.getRow(25).height = 40;
+
+  applyBorders(1, 21, 6, 25);
+  worksheet.getRow(26).height = 20;
+
   // ==========================================
   // FIRMAS
   // ==========================================
-  worksheet.mergeCells(`B${row}:C${row}`);
-  worksheet.mergeCells(`D${row}:E${row}`);
-  worksheet.getCell(`B${row}`).value = 'Nombre y firma';
-  worksheet.getCell(`D${row}`).value = 'Nombre y firma';
-  worksheet.getCell(`B${row}`).alignment = { horizontal: 'center' };
-  worksheet.getCell(`D${row}`).alignment = { horizontal: 'center' };
-  worksheet.getCell(`B${row}`).font = { bold: true };
-  worksheet.getCell(`D${row}`).font = { bold: true };
+  worksheet.mergeCells('B28:C28');
+  setCellContent('B28', reporte.Firma_Tecnico || reporte.Tecnico || 'Nombre y firma', normalFont);
+  worksheet.getCell('B28').border = { bottom: { style: 'thin' } };
 
-  row += 2;
-  worksheet.mergeCells(`B${row}:C${row}`);
-  worksheet.mergeCells(`D${row}:E${row}`);
-  worksheet.getCell(`B${row}`).value = reporte.Tecnico || 'Citlali Astrid Sanchez Martinez';
-  worksheet.getCell(`D${row}`).value = reporte.equipo.Usuario || 'Usuario del Equipo';
-  worksheet.getCell(`B${row}`).alignment = { horizontal: 'center' };
-  worksheet.getCell(`D${row}`).alignment = { horizontal: 'center' };
-  worksheet.getCell(`B${row}`).border = { bottom: { style: 'thin' } };
-  worksheet.getCell(`D${row}`).border = { bottom: { style: 'thin' } };
+  worksheet.mergeCells('D28:E28');
+  setCellContent('D28', reporte.Firma_Responsable || fixEncoding(reporte.equipo?.Usuario) || 'Nombre y firma', normalFont);
+  worksheet.getCell('D28').border = { bottom: { style: 'thin' } };
 
-  row++;
-  worksheet.mergeCells(`B${row}:C${row}`);
-  worksheet.mergeCells(`D${row}:E${row}`);
-  worksheet.getCell(`B${row}`).value = 'Responsable de Mantenimiento';
-  worksheet.getCell(`D${row}`).value = 'Usuario';
-  worksheet.getCell(`B${row}`).alignment = { horizontal: 'center' };
-  worksheet.getCell(`D${row}`).alignment = { horizontal: 'center' };
+  worksheet.mergeCells('B29:C29');
+  setCellContent('B29', 'Responsable de Mantenimiento', boldFont);
+
+  worksheet.mergeCells('D29:E29');
+  setCellContent('D29', 'Usuario', boldFont);
 
   // Generar y descargar
   const buffer = await workbook.xlsx.writeBuffer();
   const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-  const safeName = reporte.equipo.C_Interno.replace(/[^a-z0-9]/gi, '_').toLowerCase();
-  saveAs(blob, `FRM_${safeName}_${reporte.Consecutivo_FRM}.xlsx`);
+  const safeName = (reporte.equipo?.C_Interno || 'NA').replace(/[^a-z0-9]/gi, '_').toLowerCase();
+  saveAs(blob, `FRM_${safeName}_${reporte.Consecutivo_FRM || 'NUEVO'}.xlsx`);
 };

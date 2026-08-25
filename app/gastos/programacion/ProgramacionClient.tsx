@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { CalendarRange, CalendarDays, Plus, Save, Trash2, ChevronDown, Wand2, Eye, Paperclip, Loader2, FileText, X } from 'lucide-react';
+import { CalendarRange, CalendarDays, Plus, Save, Trash2, ChevronDown, Wand2, Eye, Paperclip, Loader2, FileText, X, ChevronLeft, ChevronRight, Layers } from 'lucide-react';
 import GastosMenu from '../GastosMenu';
 import PremiumSelect from '@/components/ui/PremiumSelect';
 import SystemModal from '@/components/ui/SystemModal';
@@ -20,6 +20,7 @@ interface ProgramacionRecord {
   Estatus: string;
   Monto_Pagado?: number;
   Comprobante_URL?: string;
+  Semana?: number;
 }
 
 export default function ProgramacionClient() {
@@ -40,6 +41,7 @@ export default function ProgramacionClient() {
   const currentWeekNumber = Math.ceil((new Date().getTime() - new Date(new Date().getFullYear(), 0, 1).getTime()) / 86400000 / 7);
   const [semana, setSemana] = useState<number>(currentWeekNumber);
   const [anio, setAnio] = useState<number>(new Date().getFullYear());
+  const [viewMode, setViewMode] = useState<'semanal' | 'completa'>('semanal');
 
   const [loading, setLoading] = useState(true);
   const [sysModal, setSysModal] = useState<{isOpen: boolean, type: 'success' | 'error' | 'warning' | 'info', title: string, message: string}>({ isOpen: false, type: 'info', title: '', message: '' });
@@ -51,12 +53,13 @@ export default function ProgramacionClient() {
   useEffect(() => {
     fetchRecords();
     fetchSuggestions();
-  }, [semana, anio]);
+  }, [semana, anio, viewMode]);
 
   const fetchRecords = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/gastos/programacion?semana=${semana}&anio=${anio}`);
+      const semanaParam = viewMode === 'completa' ? 'all' : semana;
+      const res = await fetch(`/api/gastos/programacion?semana=${semanaParam}&anio=${anio}`);
       if (res.ok) {
         const data = await res.json();
         if (data.length > 0) {
@@ -66,6 +69,16 @@ export default function ProgramacionClient() {
             Fecha_Pago: d.Fecha_Pago ? new Date(d.Fecha_Pago).toISOString().split('T')[0] : ''
           }));
           setRegistros(formatted);
+          
+          if (viewMode === 'completa') {
+            setTimeout(() => {
+              const rowId = `row-week-${currentWeekNumber}`;
+              const element = document.getElementById(rowId);
+              if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }
+            }, 500);
+          }
         } else {
           setRegistros([{
             Fecha_Sol: new Date().toISOString().split('T')[0],
@@ -305,10 +318,12 @@ export default function ProgramacionClient() {
             </p>
           </div>
           
-          <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-3 bg-white border border-stone-200 px-3 sm:px-4 py-2 rounded-xl shadow-sm w-full md:w-auto">
-            <CalendarRange className="w-5 h-5 text-stone-400 hidden sm:block shrink-0" />
-            <div className="flex items-center gap-2 flex-1 min-w-[120px]">
-              <span className="text-xs sm:text-sm font-semibold text-stone-600 shrink-0">Año:</span>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-3 bg-white border border-stone-200 p-3 sm:px-4 sm:py-2 rounded-xl shadow-sm w-full md:w-auto">
+            <div className="flex items-center justify-between sm:justify-start gap-2 flex-1 sm:min-w-[120px]">
+              <div className="flex items-center gap-2">
+                <CalendarRange className="w-5 h-5 text-stone-400 shrink-0" />
+                <span className="text-sm font-semibold text-stone-600 shrink-0">Año:</span>
+              </div>
               <div className="w-full">
                 <PremiumSelect 
                   value={anio.toString()} 
@@ -320,9 +335,16 @@ export default function ProgramacionClient() {
               </div>
             </div>
             <div className="hidden sm:block w-px h-6 bg-stone-200 mx-1 shrink-0"></div>
-            <div className="flex items-center gap-2 flex-1 min-w-[140px]">
-              <span className="text-xs sm:text-sm font-semibold text-stone-600 shrink-0">Semana:</span>
-              <div className="w-full">
+            <div className={`flex items-center justify-between sm:justify-start gap-1.5 shrink-0 ${viewMode === 'completa' ? 'opacity-50 pointer-events-none' : ''}`}>
+              <span className="text-sm font-semibold text-stone-600 shrink-0">Semana:</span>
+              <button 
+                onClick={() => setSemana(prev => prev > 1 ? prev - 1 : 53)}
+                className="p-1.5 text-stone-400 hover:bg-orange-50 hover:text-orange-600 rounded-lg transition-colors shrink-0"
+                title="Semana Anterior"
+              >
+                <ChevronLeft size={18} />
+              </button>
+              <div className="w-[110px] shrink-0">
                 <PremiumSelect 
                   value={semana.toString()} 
                   onChange={val => setSemana(Number(val))}
@@ -331,7 +353,25 @@ export default function ProgramacionClient() {
                   compact={true}
                 />
               </div>
+              <button 
+                onClick={() => setSemana(prev => prev < 53 ? prev + 1 : 1)}
+                className="p-1.5 text-stone-400 hover:bg-orange-50 hover:text-orange-600 rounded-lg transition-colors shrink-0"
+                title="Semana Siguiente"
+              >
+                <ChevronRight size={18} />
+              </button>
             </div>
+            
+            <div className="hidden sm:block w-px h-6 bg-stone-200 mx-3 shrink-0"></div>
+            
+            <button
+              onClick={() => setViewMode(prev => prev === 'semanal' ? 'completa' : 'semanal')}
+              className={`flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-bold transition-all shrink-0 ${viewMode === 'completa' ? 'bg-orange-600 text-white shadow-md shadow-orange-600/20' : 'bg-stone-100 text-stone-600 hover:bg-stone-200 hover:text-stone-800'}`}
+              title={viewMode === 'completa' ? 'Vista Semanal' : 'Tirada Completa'}
+            >
+              <Layers size={16} />
+              <span>{viewMode === 'completa' ? 'Vista Semanal' : 'Ver Todo el Año'}</span>
+            </button>
           </div>
         </div>
         <GastosMenu />
@@ -360,44 +400,44 @@ export default function ProgramacionClient() {
         {/* VISTA ESCRITORIO (TABLA) */}
         <div className={`${mobileView === 'table' ? 'block' : 'hidden md:block'} bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden`}>
           <div className="overflow-x-auto min-h-[400px] pb-16">
-          <table className="w-full text-left text-sm whitespace-nowrap">
+          <table className="w-full text-left text-sm align-top">
             <thead className="bg-[#cd5c24] text-white">
               <tr>
-                <th className="px-3 py-3 font-semibold border-r border-white/20 text-center w-12">#</th>
-                <th className="px-3 py-3 font-semibold border-r border-white/20 text-center">Fecha solicitud</th>
-                <th className="px-2 py-3 font-semibold border-r border-white/20 text-center w-14">Pta.</th>
-                <th className="px-3 py-3 font-semibold border-r border-white/20 text-center">Servicio / Producto</th>
-                <th className="px-3 py-3 font-semibold border-r border-white/20 text-center">Monto</th>
-                <th className="px-3 py-3 font-semibold border-r border-white/20 text-center">Proveedor</th>
-                <th className="px-2 py-3 font-semibold border-r border-white/20 text-center w-24">Empresa</th>
-                <th className="px-3 py-3 font-semibold border-r border-white/20 text-center">Fecha pago</th>
-                <th className="px-3 py-3 font-semibold border-r border-white/20 text-center">Factura / Comprobación</th>
-                <th className="px-2 py-3 font-semibold border-r border-white/20 text-center w-20">Ticket</th>
-                <th className="px-2 py-3 font-semibold border-r border-white/20 text-center w-24">Usuario</th>
-                <th className="px-2 py-3 font-semibold border-r border-white/20 text-center w-28">Estatus</th>
-                <th className="px-3 py-3 font-semibold w-12 text-center"></th>
+                <th className="px-2 py-3 font-semibold border-r border-white/20 text-center w-12 shrink-0">Pta.</th>
+                <th className="px-2 py-3 font-semibold border-r border-white/20 text-center w-28 shrink-0">Fecha sol.</th>
+                <th className="p-0 border-r border-white/20">
+                  <div className="px-3 py-3 font-semibold text-center min-w-[150px] w-[250px] max-w-[800px] resize-x overflow-hidden h-full">Servicio / Producto</div>
+                </th>
+                <th className="px-2 py-3 font-semibold border-r border-white/20 text-center w-24 shrink-0">Monto</th>
+                <th className="p-0 border-r border-white/20">
+                  <div className="px-3 py-3 font-semibold text-center min-w-[150px] w-[200px] max-w-[500px] resize-x overflow-hidden h-full">Proveedor</div>
+                </th>
+                <th className="px-2 py-3 font-semibold border-r border-white/20 text-center w-24 shrink-0">Empresa</th>
+                <th className="px-2 py-3 font-semibold border-r border-white/20 text-center w-28 shrink-0">Fecha pago</th>
+                <th className="p-0 border-r border-white/20">
+                  <div className="px-3 py-3 font-semibold text-center min-w-[120px] w-[180px] max-w-[400px] resize-x overflow-hidden h-full">Factura/Folio</div>
+                </th>
+                <th className="px-2 py-3 font-semibold border-r border-white/20 text-center w-16 shrink-0">Ticket</th>
+                <th className="p-0 border-r border-white/20">
+                  <div className="px-3 py-3 font-semibold text-center min-w-[100px] w-[140px] max-w-[300px] resize-x overflow-hidden h-full">Usuario</div>
+                </th>
+                <th className="px-2 py-3 font-semibold border-r border-white/20 text-center w-28 shrink-0">Estatus</th>
+                <th className="px-3 py-3 font-semibold w-12 text-center shrink-0"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-stone-200">
-              {registros.map((row, index) => (
-                <tr key={index} className={`transition-colors group
+              {registros.map((row, index) => {
+                const isCurrentWeekStart = viewMode === 'completa' && row.Semana === currentWeekNumber && (index === 0 || registros[index - 1].Semana !== currentWeekNumber);
+                
+                return (
+                <tr key={index} id={isCurrentWeekStart ? `row-week-${currentWeekNumber}` : undefined} className={`transition-colors group
+                  ${isCurrentWeekStart ? 'border-t-4 border-t-orange-500 ' : ''}
                   ${row.Estatus === 'Pagado' ? 'bg-emerald-200 hover:bg-emerald-300 focus-within:bg-emerald-300' : 
                     row.Estatus === 'Cancelado' ? 'bg-red-200 hover:bg-red-300 focus-within:bg-red-300' : 
                     row.Estatus === 'Pago Parcial' ? 'bg-yellow-200 hover:bg-yellow-300 focus-within:bg-yellow-300' : 
                     'hover:bg-orange-50/30 focus-within:bg-orange-50/50'}
                 `}>
-                  <td className="px-3 py-1.5 text-center text-stone-400 font-medium text-xs border-r border-stone-100/70">
-                    {index + 1}
-                  </td>
-                  <td className="px-3 py-1.5 border-r border-stone-100">
-                    <input
-                      type="date"
-                      value={row.Fecha_Sol || ''}
-                      onChange={(e) => handleCellChange(index, 'Fecha_Sol', e.target.value)}
-                      className="w-32 bg-transparent border border-transparent hover:border-stone-200 focus:bg-white focus:border-orange-400 rounded px-2 py-1.5 outline-none text-stone-700 text-sm"
-                    />
-                  </td>
-                  <td className="px-2 py-1.5 border-r border-stone-100 text-center">
+                  <td className="px-2 py-1.5 border-r border-stone-100 text-center align-top">
                     <input
                       type="number"
                       min="1"
@@ -405,22 +445,30 @@ export default function ProgramacionClient() {
                       placeholder="1"
                       value={row.Partida || ''}
                       onChange={(e) => handleCellChange(index, 'Partida', e.target.value)}
-                      className="w-12 text-center bg-transparent border border-transparent hover:border-stone-200 focus:bg-white focus:border-orange-400 rounded px-1 py-1.5 outline-none text-stone-700 text-sm font-semibold"
+                      className="w-10 text-center bg-transparent border border-transparent hover:border-stone-200 focus:bg-white focus:border-orange-400 rounded px-1 py-1.5 outline-none text-stone-700 text-sm font-semibold mt-1"
                     />
                   </td>
-                  <td className="px-3 py-1.5 border-r border-stone-100">
+                  <td className="px-2 py-1.5 border-r border-stone-100 align-top">
                     <input
-                      type="text"
-                      list="servicios-list"
+                      type="date"
+                      value={row.Fecha_Sol || ''}
+                      onChange={(e) => handleCellChange(index, 'Fecha_Sol', e.target.value)}
+                      className="w-28 bg-transparent border border-transparent hover:border-stone-200 focus:bg-white focus:border-orange-400 rounded px-1 py-1.5 outline-none text-stone-700 text-sm mt-1"
+                    />
+                  </td>
+                  <td className="px-3 py-1.5 border-r border-stone-100 align-top relative group/textarea">
+                    <textarea
+                      rows={1}
                       placeholder="Descripción..."
                       title={row.Servicio_Producto || ''}
                       value={row.Servicio_Producto || ''}
                       onChange={(e) => handleCellChange(index, 'Servicio_Producto', e.target.value)}
-                      className="w-56 bg-transparent border border-transparent hover:border-stone-200 focus:bg-white focus:border-orange-400 rounded px-2 py-1.5 outline-none text-stone-700 text-sm truncate"
+                      style={{ fieldSizing: 'content' } as React.CSSProperties}
+                      className="w-full min-h-[34px] bg-transparent border border-transparent hover:border-stone-200 focus:bg-white focus:border-orange-400 rounded px-2 py-1.5 outline-none text-stone-700 text-sm resize-none overflow-hidden block leading-relaxed"
                     />
                   </td>
-                  <td className="px-3 py-1.5 border-r border-stone-100">
-                    <div className="relative w-28 group/input">
+                  <td className="px-2 py-1.5 border-r border-stone-100 align-top">
+                    <div className="relative w-24 group/input mt-1 mx-auto">
                       <input
                         type="number"
                         min="0"
@@ -436,50 +484,52 @@ export default function ProgramacionClient() {
                       </div>
                     </div>
                   </td>
-                  <td className="px-3 py-1.5 border-r border-stone-100">
-                    <input
-                      type="text"
-                      list="proveedores-list"
+                  <td className="px-3 py-1.5 border-r border-stone-100 align-top">
+                    <textarea
+                      rows={1}
                       placeholder="Proveedor..."
                       title={row.Proveedor || ''}
                       value={row.Proveedor || ''}
                       onChange={(e) => handleCellChange(index, 'Proveedor', e.target.value)}
-                      className="w-36 bg-transparent border border-transparent hover:border-stone-200 focus:bg-white focus:border-orange-400 rounded px-2 py-1.5 outline-none text-stone-700 text-sm truncate"
+                      style={{ fieldSizing: 'content' } as React.CSSProperties}
+                      className="w-full min-h-[34px] bg-transparent border border-transparent hover:border-stone-200 focus:bg-white focus:border-orange-400 rounded px-2 py-1.5 outline-none text-stone-700 text-sm resize-none overflow-hidden block leading-relaxed"
                     />
                   </td>
-                  <td className="px-2 py-1.5 border-r border-stone-100 text-center">
-                    <PremiumSelect
-                      value={row.Empresa || ''}
-                      onChange={(val) => handleCellChange(index, 'Empresa', val)}
-                      options={[
-                        { value: 'AVH', label: 'AVH' },
-                        { value: 'SIFYGSA', label: 'SIFYGSA' },
-                        { value: 'SIAVSA', label: 'SIAVSA' },
-                        { value: 'VIPSA', label: 'VIPSA' },
-                      ]}
-                      placeholder="Empresa..."
-                      accent="orange"
-                      compact={true}
-                      className="w-24"
-                    />
+                  <td className="px-2 py-1.5 border-r border-stone-100 text-center align-top">
+                    <div className="mt-1">
+                      <PremiumSelect
+                        value={row.Empresa || ''}
+                        onChange={(val) => handleCellChange(index, 'Empresa', val)}
+                        options={[
+                          { value: 'AVH', label: 'AVH' },
+                          { value: 'SIFYGSA', label: 'SIFYGSA' },
+                          { value: 'SIAVSA', label: 'SIAVSA' },
+                          { value: 'VIPSA', label: 'VIPSA' },
+                        ]}
+                        placeholder="Empresa..."
+                        accent="orange"
+                        compact={true}
+                        className="w-24"
+                      />
+                    </div>
                   </td>
-                  <td className="px-3 py-1.5 border-r border-stone-100">
+                  <td className="px-2 py-1.5 border-r border-stone-100">
                     <input
                       type="date"
                       value={row.Fecha_Pago || ''}
                       onChange={(e) => handleCellChange(index, 'Fecha_Pago', e.target.value)}
-                      className="w-32 bg-transparent border border-transparent hover:border-stone-200 focus:bg-white focus:border-orange-400 rounded px-2 py-1.5 outline-none text-stone-700 text-sm"
+                      className="w-28 bg-transparent border border-transparent hover:border-stone-200 focus:bg-white focus:border-orange-400 rounded px-1 py-1.5 outline-none text-stone-700 text-sm mt-1"
                     />
                   </td>
-                  <td className="px-3 py-1.5 border-r border-stone-100">
-                    <div className="flex items-center gap-1">
+                  <td className="px-1 py-1.5 border-r border-stone-100 align-top">
+                    <div className="flex items-center gap-1 mt-1">
                       <input
                         type="text"
                         placeholder="Folio/Factura..."
                         value={row.Factura_Comprobacion || ''}
                         onChange={(e) => handleCellChange(index, 'Factura_Comprobacion', e.target.value)}
                         onBlur={(e) => checkFolio(index, e.target.value, row.Id)}
-                        className="w-32 bg-transparent border border-transparent hover:border-stone-200 focus:bg-white focus:border-orange-400 rounded px-2 py-1.5 outline-none text-stone-700 text-sm font-mono"
+                        className="w-32 bg-transparent border border-transparent hover:border-stone-200 focus:bg-white focus:border-orange-400 rounded px-1 py-1.5 outline-none text-stone-700 text-sm font-mono mt-1"
                       />
                       <button 
                         onClick={() => generateNoFacturable(index)}
@@ -490,7 +540,8 @@ export default function ProgramacionClient() {
                       </button>
                     </div>
                   </td>
-                  <td className="px-3 py-1.5 border-r border-stone-100 text-center">
+                  <td className="px-3 py-1.5 border-r border-stone-100 text-center align-top">
+                    <div className="mt-1">
                     {row.Comprobante_URL ? (
                       <div className="flex items-center justify-center gap-1.5">
                         <button
@@ -537,19 +588,21 @@ export default function ProgramacionClient() {
                         />
                       </label>
                     )}
+                    </div>
                   </td>
-                  <td className="px-2 py-1.5 border-r border-stone-100">
-                    <input
-                      type="text"
+                  <td className="px-2 py-1.5 border-r border-stone-100 align-top">
+                    <textarea
+                      rows={1}
                       placeholder="Usuario..."
                       title={row.Usuario || ''}
                       value={row.Usuario || ''}
                       onChange={(e) => handleCellChange(index, 'Usuario', e.target.value)}
-                      className="w-24 bg-transparent border border-transparent hover:border-stone-200 focus:bg-white focus:border-orange-400 rounded px-2 py-1.5 outline-none text-stone-700 text-sm truncate"
+                      style={{ fieldSizing: 'content' } as React.CSSProperties}
+                      className="w-full min-h-[34px] bg-transparent border border-transparent hover:border-stone-200 focus:bg-white focus:border-orange-400 rounded px-2 py-1.5 outline-none text-stone-700 text-sm resize-none overflow-hidden block leading-relaxed"
                     />
                   </td>
-                  <td className="px-2 py-1.5 border-r border-stone-100">
-                    <div className="flex flex-col gap-1">
+                  <td className="px-2 py-1.5 border-r border-stone-100 align-top">
+                    <div className="flex flex-col gap-1 mt-1">
                       <PremiumSelect
                         value={row.Estatus || 'Pendiente'}
                         onChange={(val) => handleCellChange(index, 'Estatus', val)}
@@ -588,17 +641,17 @@ export default function ProgramacionClient() {
                       )}
                     </div>
                   </td>
-                  <td className="px-3 py-1.5 text-center">
+                  <td className="px-3 py-1.5 text-center align-top">
                     <button
                       onClick={() => removeRow(index)}
-                      className="p-1.5 text-stone-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
+                      className="p-1.5 text-stone-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100 mt-1"
                       title="Eliminar fila"
                     >
                       <Trash2 size={16} />
                     </button>
                   </td>
                 </tr>
-              ))}
+              )})}
             </tbody>
           </table>
         </div>
@@ -614,13 +667,15 @@ export default function ProgramacionClient() {
           
           <button
             onClick={handleSave}
-            disabled={saving || loading}
+            disabled={saving || loading || viewMode === 'completa'}
             className="flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white font-bold px-8 py-2.5 rounded-xl shadow-lg shadow-orange-600/20 active:scale-95 transition-all disabled:opacity-50"
           >
             {saving ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save size={18} />}
-            {saving ? 'Guardando...' : `Guardar Semana ${semana}`}
+            {saving ? 'Guardando...' : (viewMode === 'completa' ? 'Solo Lectura' : `Guardar Semana ${semana}`)}
           </button>
         </div>
+        
+        {/* Floating Controls Removed */}
         </div>
 
         {/* VISTA MÓVIL (TARJETAS) */}
@@ -650,13 +705,13 @@ export default function ProgramacionClient() {
 
                 <div className="flex items-center justify-between mb-1 pr-8 border-b border-stone-200 pb-3">
                   <div className="flex items-center gap-2">
-                    <span className="font-bold text-stone-500 text-sm">Reg. #{index + 1}</span>
+                    <span className="font-bold text-stone-500 text-sm">Pta.</span>
                     <input
                       type="number"
                       placeholder="Pta"
                       value={row.Partida || ''}
                       onChange={(e) => handleCellChange(index, 'Partida', e.target.value)}
-                      className="w-12 text-center bg-white border border-stone-200 focus:border-orange-400 rounded px-1 py-1 outline-none text-stone-700 text-xs font-bold shadow-inner"
+                      className="w-16 text-center bg-white border border-stone-200 focus:border-orange-400 rounded px-1 py-1 outline-none text-stone-700 text-xs font-bold shadow-inner"
                     />
                   </div>
                   <PremiumSelect
@@ -831,13 +886,15 @@ export default function ProgramacionClient() {
         </button>
         <button
           onClick={handleSave}
-          disabled={saving || loading}
+          disabled={saving || loading || viewMode === 'completa'}
           className="flex-[1.5] flex items-center justify-center gap-2 bg-orange-600 hover:bg-orange-700 text-white font-black px-6 py-3 rounded-full shadow-[0_4px_15px_rgba(205,92,36,0.4)] active:scale-95 transition-all text-sm disabled:opacity-50"
         >
           {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save size={18} />}
-          {saving ? 'Guardar...' : 'Guardar'}
+          {saving ? 'Guardar...' : (viewMode === 'completa' ? 'Lectura' : 'Guardar')}
         </button>
       </div>
+      
+      {/* Mobile view toggle removed */}
 
       {/* Ticket / Comprobante Preview Modal */}
       {previewFile && (
