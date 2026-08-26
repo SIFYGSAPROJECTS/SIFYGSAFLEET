@@ -11,11 +11,92 @@ import { useRouter } from 'next/navigation';
 import SystemModal, { ModalType } from '@/components/ui/SystemModal';
 import PremiumSelect from '@/components/ui/PremiumSelect';
 import DynamicMobilePDFViewer from '@/components/ui/DynamicMobilePDFViewer';
+import { useWindowVirtualizer } from '@tanstack/react-virtual';
+import { memo, useRef } from 'react';
 
 interface Props {
   historial: any[];
   rol: string | undefined;
 }
+
+const obtenerEstiloTipoServicio = (tipo: string | null) => {
+  switch(tipo) {
+    case 'preventivo': return { bg: 'bg-blue-50', text: 'text-blue-600', border: 'border-blue-200', icon: <Calendar size={12} /> };
+    case 'correctivo': return { bg: 'bg-red-50', text: 'text-red-600', border: 'border-red-200', icon: <AlertTriangle size={12} /> };
+    case 'revision': return { bg: 'bg-amber-50', text: 'text-amber-600', border: 'border-amber-200', icon: <Search size={12} /> };
+    default: return { bg: 'bg-stone-50', text: 'text-stone-500', border: 'border-stone-200', icon: <Wrench size={12} /> };
+  }
+};
+
+const HistorialRow = memo(({ ticket, isAdmin, editandoFolio, subiendoFolio, abrirPrevisualizacion, handleSubirEvidencia, abrirModalEliminar }: any) => {
+  const estiloServicio = obtenerEstiloTipoServicio(ticket.Tipo_Servicio);
+  const tipoTexto = ticket.Tipo_Servicio 
+    ? ticket.Tipo_Servicio.charAt(0).toUpperCase() + ticket.Tipo_Servicio.slice(1) 
+    : 'S/N';
+
+  return (
+    <tr className="hover:bg-[var(--bg-hover)] even:bg-[var(--bg-screen)] transition-colors group">
+      <td className="p-4 font-mono text-sm font-bold text-[#71717a]">#{ticket.Pk_folio_ticket}</td>
+      <td className="p-4 text-sm text-[var(--text-muted)] font-medium">
+        {new Date(ticket.Fecha_Realizacion).toLocaleDateString('es-MX', { 
+          day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' 
+        })}
+      </td>
+      <td className="p-4 text-sm">
+        <div className="text-[var(--text-main)] font-bold">{ticket.auto?.Marca} {ticket.auto?.Modelo}</div>
+        <div className="text-xs text-[var(--text-muted)] font-mono tracking-tighter uppercase">{ticket.auto?.Placa} | {ticket.auto?.Consecutivo}</div>
+      </td>
+      <td className="p-4 text-sm">
+        <div className="text-[var(--text-main)] font-medium">{ticket.empleado?.Nombre_Empleado} {ticket.empleado?.A_Paterno}</div>
+        <div className="text-[10px] text-[var(--text-muted)]">{ticket.Email_Empleado}</div>
+      </td>
+      <td className="p-4 text-center">
+        <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded border text-xs font-bold ${estiloServicio.bg} ${estiloServicio.text} ${estiloServicio.border}`}>
+          {estiloServicio.icon}
+          {tipoTexto}
+        </span>
+      </td>
+      <td className="p-4 text-center">
+        {ticket.Evidencia ? (
+          <div className="flex items-center justify-center gap-2">
+            <button 
+              onClick={() => abrirPrevisualizacion(ticket.Evidencia)} 
+              className="inline-flex items-center gap-1.5 bg-[#71717a] hover:bg-[#52525b] text-white border border-transparent px-4 py-2 rounded-lg text-xs font-bold transition-all shadow-md active:scale-95"
+            >
+              <FileText size={14} /> VER FACTURA
+            </button>
+            {isAdmin && (
+              <>
+                <label className="cursor-pointer p-1.5 text-slate-500 hover:text-yellow-400 transition-colors" title="Reemplazar">
+                  {editandoFolio === ticket.Pk_folio_ticket ? <Loader2 size={16} className="animate-spin text-yellow-400" /> : <PencilLine size={16} />}
+                  <input type="file" accept=".pdf" className="hidden" onChange={(e) => handleSubirEvidencia(e, ticket.Pk_folio_ticket, ticket.auto?.Consecutivo || 'Unidad', true)} disabled={editandoFolio === ticket.Pk_folio_ticket} />
+                </label>
+                <button onClick={() => abrirModalEliminar(ticket.Pk_folio_ticket, ticket.Evidencia)} className="p-1.5 text-slate-500 hover:text-red-500 transition-colors" title="Eliminar">
+                  <Trash2 size={16} />
+                </button>
+              </>
+            )}
+          </div>
+        ) : (
+          isAdmin ? (
+            <label className="cursor-pointer inline-flex items-center justify-center gap-1.5 text-[var(--text-muted)] bg-white border border-[var(--border-cream)] px-3 py-1.5 rounded-md text-xs font-bold hover:border-[#71717a] hover:text-[#71717a] transition-all shadow-sm">
+              {subiendoFolio === ticket.Pk_folio_ticket ? <><Loader2 size={14} className="animate-spin" /> SUBIENDO</> : <><UploadCloud size={14} /> SUBIR</>}
+              <input type="file" accept=".pdf" className="hidden" onChange={(e) => handleSubirEvidencia(e, ticket.Pk_folio_ticket, ticket.auto?.Consecutivo || 'Unidad', false)} disabled={subiendoFolio === ticket.Pk_folio_ticket} />
+            </label>
+          ) : (
+            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Pendiente</span>
+          )
+        )}
+      </td>
+      <td className="p-4 text-center">
+        <Link href={`/dashboard/tickets/ver/${encodeURIComponent(ticket.Pk_folio_ticket)}`} className="inline-flex items-center justify-center gap-1.5 bg-white text-[var(--text-muted)] border border-[var(--border-cream)] px-3 py-1.5 rounded-md text-xs font-bold hover:bg-[#71717a] hover:text-white hover:border-[#71717a] transition-all shadow-sm">
+          <FileText size={14} /> TICKET
+        </Link>
+      </td>
+    </tr>
+  );
+});
+HistorialRow.displayName = 'HistorialRow';
 
 export default function HistorialClient({ historial, rol }: Props) {
   const isAdmin = ['ADMIN', 'GERENCIAL'].includes(rol || '');
@@ -146,14 +227,11 @@ export default function HistorialClient({ historial, rol }: Props) {
     setProcesando(false);
   };
 
-  const obtenerEstiloTipoServicio = (tipo: string | null) => {
-    switch(tipo) {
-      case 'preventivo': return { bg: 'bg-blue-50', text: 'text-blue-600', border: 'border-blue-200', icon: <Calendar size={12} /> };
-      case 'correctivo': return { bg: 'bg-red-50', text: 'text-red-600', border: 'border-red-200', icon: <AlertTriangle size={12} /> };
-      case 'revision': return { bg: 'bg-amber-50', text: 'text-amber-600', border: 'border-amber-200', icon: <Search size={12} /> };
-      default: return { bg: 'bg-stone-50', text: 'text-stone-500', border: 'border-stone-200', icon: <Wrench size={12} /> };
-    }
-  };
+  const rowVirtualizer = useWindowVirtualizer({
+    count: historialFiltrado.length,
+    estimateSize: () => 80, 
+    overscan: 10,
+  });
 
   return (
     <div className="w-full">
@@ -219,83 +297,46 @@ export default function HistorialClient({ historial, rol }: Props) {
                 <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 text-center bg-stone-50" style={{ top: `${headerHeight}px` }}>Acción</th>
               </tr>
             </thead>
-            <tbody className="">
-              {historialFiltrado.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="p-12 text-center text-slate-500 italic">
-                    No se encontraron registros con los filtros seleccionados.
-                  </td>
-                </tr>
-              ) : (
-                historialFiltrado.map((ticket) => {
-                  const estiloServicio = obtenerEstiloTipoServicio(ticket.Tipo_Servicio);
-                  const tipoTexto = ticket.Tipo_Servicio 
-                    ? ticket.Tipo_Servicio.charAt(0).toUpperCase() + ticket.Tipo_Servicio.slice(1) 
-                    : 'S/N';
-
+            <tbody className="relative">
+              {(() => {
+                const virtualItems = rowVirtualizer.getVirtualItems();
+                const paddingTop = virtualItems.length > 0 ? virtualItems[0]?.start || 0 : 0;
+                const paddingBottom = virtualItems.length > 0 ? rowVirtualizer.getTotalSize() - (virtualItems[virtualItems.length - 1]?.end || 0) : 0;
+                
+                if (historialFiltrado.length === 0) {
                   return (
-                  <tr key={ticket.Pk_folio_ticket} className="hover:bg-[var(--bg-hover)] even:bg-[var(--bg-screen)] transition-colors group">
-                    <td className="p-4 font-mono text-sm font-bold text-[#71717a]">#{ticket.Pk_folio_ticket}</td>
-                    <td className="p-4 text-sm text-[var(--text-muted)] font-medium">
-                      {new Date(ticket.Fecha_Realizacion).toLocaleDateString('es-MX', { 
-                        day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' 
-                      })}
-                    </td>
-                    <td className="p-4 text-sm">
-                      <div className="text-[var(--text-main)] font-bold">{ticket.auto?.Marca} {ticket.auto?.Modelo}</div>
-                      <div className="text-xs text-[var(--text-muted)] font-mono tracking-tighter uppercase">{ticket.auto?.Placa} | {ticket.auto?.Consecutivo}</div>
-                    </td>
-                    <td className="p-4 text-sm">
-                      <div className="text-[var(--text-main)] font-medium">{ticket.empleado?.Nombre_Empleado} {ticket.empleado?.A_Paterno}</div>
-                      <div className="text-[10px] text-[var(--text-muted)]">{ticket.Email_Empleado}</div>
-                    </td>
-                    <td className="p-4 text-center">
-                      <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded border text-xs font-bold ${estiloServicio.bg} ${estiloServicio.text} ${estiloServicio.border}`}>
-                        {estiloServicio.icon}
-                        {tipoTexto}
-                      </span>
-                    </td>
-                    <td className="p-4 text-center">
-                      {ticket.Evidencia ? (
-                        <div className="flex items-center justify-center gap-2">
-                          <button 
-                            onClick={() => abrirPrevisualizacion(ticket.Evidencia)} 
-                            className="inline-flex items-center gap-1.5 bg-[#71717a] hover:bg-[#52525b] text-white border border-transparent px-4 py-2 rounded-lg text-xs font-bold transition-all shadow-md active:scale-95"
-                          >
-                            <FileText size={14} /> VER FACTURA
-                          </button>
-                          {isAdmin && (
-                            <>
-                              <label className="cursor-pointer p-1.5 text-slate-500 hover:text-yellow-400 transition-colors" title="Reemplazar">
-                                {editandoFolio === ticket.Pk_folio_ticket ? <Loader2 size={16} className="animate-spin text-yellow-400" /> : <PencilLine size={16} />}
-                                <input type="file" accept=".pdf" className="hidden" onChange={(e) => handleSubirEvidencia(e, ticket.Pk_folio_ticket, ticket.auto?.Consecutivo || 'Unidad', true)} disabled={editandoFolio === ticket.Pk_folio_ticket} />
-                              </label>
-                              <button onClick={() => abrirModalEliminar(ticket.Pk_folio_ticket, ticket.Evidencia)} className="p-1.5 text-slate-500 hover:text-red-500 transition-colors" title="Eliminar">
-                                <Trash2 size={16} />
-                              </button>
-                            </>
-                          )}
-                        </div>
-                      ) : (
-                        isAdmin ? (
-                          <label className="cursor-pointer inline-flex items-center justify-center gap-1.5 text-[var(--text-muted)] bg-white border border-[var(--border-cream)] px-3 py-1.5 rounded-md text-xs font-bold hover:border-[#71717a] hover:text-[#71717a] transition-all shadow-sm">
-                            {subiendoFolio === ticket.Pk_folio_ticket ? <><Loader2 size={14} className="animate-spin" /> SUBIENDO</> : <><UploadCloud size={14} /> SUBIR</>}
-                            <input type="file" accept=".pdf" className="hidden" onChange={(e) => handleSubirEvidencia(e, ticket.Pk_folio_ticket, ticket.auto?.Consecutivo || 'Unidad', false)} disabled={subiendoFolio === ticket.Pk_folio_ticket} />
-                          </label>
-                        ) : (
-                          <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Pendiente</span>
-                        )
-                      )}
-                    </td>
-                    <td className="p-4 text-center">
-                      <Link href={`/dashboard/tickets/ver/${encodeURIComponent(ticket.Pk_folio_ticket)}`} className="inline-flex items-center justify-center gap-1.5 bg-white text-[var(--text-muted)] border border-[var(--border-cream)] px-3 py-1.5 rounded-md text-xs font-bold hover:bg-[#71717a] hover:text-white hover:border-[#71717a] transition-all shadow-sm">
-                        <FileText size={14} /> TICKET
-                      </Link>
-                    </td>
-                  </tr>
+                    <tr>
+                      <td colSpan={7} className="p-12 text-center text-slate-500 italic">
+                        No se encontraron registros con los filtros seleccionados.
+                      </td>
+                    </tr>
                   );
-                })
-              )}
+                }
+
+                return (
+                  <>
+                    {paddingTop > 0 && <tr><td style={{height: paddingTop}} colSpan={7} /></tr>}
+                    
+                    {virtualItems.map((virtualRow) => {
+                      const ticket = historialFiltrado[virtualRow.index];
+                      return (
+                        <HistorialRow
+                          key={virtualRow.index}
+                          ticket={ticket}
+                          isAdmin={isAdmin}
+                          editandoFolio={editandoFolio}
+                          subiendoFolio={subiendoFolio}
+                          abrirPrevisualizacion={abrirPrevisualizacion}
+                          handleSubirEvidencia={handleSubirEvidencia}
+                          abrirModalEliminar={abrirModalEliminar}
+                        />
+                      );
+                    })}
+                    
+                    {paddingBottom > 0 && <tr><td style={{height: paddingBottom}} colSpan={7} /></tr>}
+                  </>
+                );
+              })()}
             </tbody>
           </table>
         </div>

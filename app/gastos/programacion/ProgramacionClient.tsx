@@ -1,6 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { ProveedorCombobox } from './ProveedorCombobox';
+import { ColumnFilter } from './ColumnFilter';
+import { toast, Toaster } from 'react-hot-toast';
+import React, { useState, useEffect, useCallback, useMemo, memo, useRef } from 'react';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { CalendarRange, CalendarDays, Plus, Save, Trash2, ChevronDown, Wand2, Eye, Paperclip, Loader2, FileText, X, ChevronLeft, ChevronRight, Layers } from 'lucide-react';
 import GastosMenu from '../GastosMenu';
 import PremiumSelect from '@/components/ui/PremiumSelect';
@@ -22,6 +26,220 @@ interface ProgramacionRecord {
   Comprobante_URL?: string;
   Semana?: number;
 }
+
+interface RowProps {
+  row: ProgramacionRecord;
+  index: number;
+  isCurrentWeekStart?: boolean;
+  currentWeekNumber?: number;
+  uploadingIndex: number | null;
+  handleCellChange: (i: number, f: any, v: any) => void;
+  removeRow: (i: number) => void;
+  checkFolio: (i: number, f: string, id?: number) => void;
+  generateNoFacturable: (i: number) => void;
+  handleFileUpload: (i: number, file: File) => void;
+  setPreviewFile: (f: any) => void;
+  virtualIndex?: number;
+  measureRef?: (node: Element | null) => void;
+}
+
+const DesktopRow = memo(({
+  row, index, isCurrentWeekStart, currentWeekNumber, uploadingIndex,
+  handleCellChange, removeRow, checkFolio, generateNoFacturable,
+  handleFileUpload, setPreviewFile, virtualIndex, measureRef
+}: RowProps) => {
+  return (
+    <tr 
+      ref={measureRef}
+      data-index={virtualIndex}
+      id={isCurrentWeekStart ? `row-week-${currentWeekNumber}` : undefined} className={`transition-colors group
+      ${isCurrentWeekStart ? 'border-t-4 border-t-orange-500 ' : ''}
+      ${row.Estatus === 'Pagado' ? 'bg-emerald-200 hover:bg-emerald-300 focus-within:bg-emerald-300' : 
+        row.Estatus === 'Cancelado' ? 'bg-red-200 hover:bg-red-300 focus-within:bg-red-300' : 
+        row.Estatus === 'Pago Parcial' ? 'bg-yellow-200 hover:bg-yellow-300 focus-within:bg-yellow-300' : 
+        'hover:bg-orange-50/30 focus-within:bg-orange-50/50'}
+    `}>
+      <td className="px-2 py-1.5 border-r border-stone-100 text-center align-top">
+        <input type="number" min="1" max="100" placeholder="1" value={row.Partida || ''} onChange={(e) => handleCellChange(index, 'Partida', e.target.value)} className="w-10 text-center bg-transparent border border-transparent hover:border-stone-200 focus:bg-white focus:border-orange-400 rounded px-1 py-1.5 outline-none text-stone-700 text-sm font-semibold mt-1" />
+      </td>
+      <td className="px-2 py-1.5 border-r border-stone-100 align-top">
+        <input type="date" value={row.Fecha_Sol || ''} onChange={(e) => handleCellChange(index, 'Fecha_Sol', e.target.value)} className="w-28 bg-transparent border border-transparent hover:border-stone-200 focus:bg-white focus:border-orange-400 rounded px-1 py-1.5 outline-none text-stone-700 text-sm mt-1" />
+      </td>
+      <td className="px-3 py-1.5 border-r border-stone-100 align-top relative group/textarea">
+        <textarea rows={1} placeholder="Descripción..." title={row.Servicio_Producto || ''} value={row.Servicio_Producto || ''} onChange={(e) => handleCellChange(index, 'Servicio_Producto', e.target.value)} style={{ fieldSizing: 'content' } as React.CSSProperties} className="w-full min-h-[34px] bg-transparent border border-transparent hover:border-stone-200 focus:bg-white focus:border-orange-400 rounded px-2 py-1.5 outline-none text-stone-700 text-sm resize-none overflow-hidden block leading-relaxed" />
+      </td>
+      <td className="px-2 py-1.5 border-r border-stone-100 align-top">
+        <div className="relative w-24 group/input mt-1 mx-auto">
+          <input type="number" min="0" step="0.01" placeholder="0.00" value={row.Monto || ''} onChange={(e) => handleCellChange(index, 'Monto', parseFloat(e.target.value) || 0)} className="w-full text-right bg-transparent border border-transparent hover:border-stone-200 focus:bg-white focus:border-orange-400 rounded px-2 py-1.5 outline-none text-stone-700 text-sm font-semibold opacity-0 focus:opacity-100 absolute inset-0 z-10" />
+          <div className="w-full text-right bg-transparent border border-transparent rounded px-2 py-1.5 text-stone-700 text-sm font-semibold group-focus-within/input:opacity-0 flex items-center justify-between">
+            <span className="text-stone-400 select-none">$</span>
+            <span>{row.Monto ? new Intl.NumberFormat('es-MX', { minimumFractionDigits: 2 }).format(row.Monto) : '0.00'}</span>
+          </div>
+        </div>
+      </td>
+      <td className="px-3 py-1.5 border-r border-stone-100 align-top">
+        <ProveedorCombobox value={row.Proveedor || ''} onChange={(val) => handleCellChange(index, 'Proveedor', val)} placeholder="Proveedor..." className="w-full min-h-[34px] bg-transparent border border-transparent hover:border-stone-200 focus:bg-white focus:border-orange-400 rounded px-2 py-1.5 outline-none text-stone-700 text-sm resize-none overflow-hidden block leading-relaxed" />
+      </td>
+      <td className="px-2 py-1.5 border-r border-stone-100 text-center align-top">
+        <div className="mt-1">
+          <PremiumSelect value={row.Empresa || ''} onChange={(val) => handleCellChange(index, 'Empresa', val)} options={[{ value: 'AVH', label: 'AVH' }, { value: 'SIFYGSA', label: 'SIFYGSA' }, { value: 'SIAVSA', label: 'SIAVSA' }, { value: 'VIPSA', label: 'VIPSA' }]} placeholder="Empresa..." accent="orange" compact={true} className="w-24" />
+        </div>
+      </td>
+      <td className="px-2 py-1.5 border-r border-stone-100">
+        <input type="date" value={row.Fecha_Pago || ''} onChange={(e) => handleCellChange(index, 'Fecha_Pago', e.target.value)} className="w-28 bg-transparent border border-transparent hover:border-stone-200 focus:bg-white focus:border-orange-400 rounded px-1 py-1.5 outline-none text-stone-700 text-sm mt-1" />
+      </td>
+      <td className="px-1 py-1.5 border-r border-stone-100 align-top">
+        <div className="flex items-center gap-1 mt-1">
+          <input type="text" placeholder="Folio/Factura..." value={row.Factura_Comprobacion || ''} onChange={(e) => handleCellChange(index, 'Factura_Comprobacion', e.target.value)} onBlur={(e) => checkFolio(index, e.target.value, row.Id)} className="w-32 bg-transparent border border-transparent hover:border-stone-200 focus:bg-white focus:border-orange-400 rounded px-1 py-1.5 outline-none text-stone-700 text-sm font-mono mt-1" />
+          <button onClick={() => generateNoFacturable(index)} title="Generar Folio No Facturable" className="p-1.5 text-stone-300 hover:text-orange-500 hover:bg-orange-50 rounded transition-colors"><Wand2 size={14} /></button>
+        </div>
+      </td>
+      <td className="px-3 py-1.5 border-r border-stone-100 text-center align-top">
+        <div className="mt-1">
+        {row.Comprobante_URL ? (
+          <div className="flex items-center justify-center gap-1.5">
+            <button type="button" onClick={() => setPreviewFile({ url: row.Comprobante_URL!, title: row.Factura_Comprobacion || `Partida #${row.Partida || (index + 1)}` })} title="Ver Comprobante / Ticket" className="p-1.5 bg-orange-50 text-[#cd5c24] hover:bg-orange-100 rounded-lg transition-colors flex items-center gap-1 text-xs font-semibold"><Eye size={14} /><span>Ver</span></button>
+            <button type="button" onClick={() => { if (window.confirm('¿Estás seguro de quitar este comprobante de la fila?')) { handleCellChange(index, 'Comprobante_URL', ''); } }} title="Eliminar Comprobante" className="p-1.5 text-stone-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"><Trash2 size={13} /></button>
+          </div>
+        ) : (
+          <label className="cursor-pointer inline-flex items-center justify-center gap-1 px-2.5 py-1.5 bg-stone-50 border border-stone-200 hover:bg-orange-50 hover:border-orange-200 text-stone-600 hover:text-[#cd5c24] rounded-lg transition-all text-xs font-medium">
+            {uploadingIndex === index ? <Loader2 size={14} className="animate-spin text-[#cd5c24]" /> : <><Paperclip size={13} /><span>Subir</span></>}
+            <input type="file" accept="image/*,application/pdf" className="hidden" disabled={uploadingIndex === index} onChange={(e) => { const file = e.target.files?.[0]; if (file) handleFileUpload(index, file); }} />
+          </label>
+        )}
+        </div>
+      </td>
+      <td className="px-2 py-1.5 border-r border-stone-100 align-top">
+        <textarea rows={1} placeholder="Usuario..." title={row.Usuario || ''} value={row.Usuario || ''} onChange={(e) => handleCellChange(index, 'Usuario', e.target.value)} style={{ fieldSizing: 'content' } as React.CSSProperties} className="w-full min-h-[34px] bg-transparent border border-transparent hover:border-stone-200 focus:bg-white focus:border-orange-400 rounded px-2 py-1.5 outline-none text-stone-700 text-sm resize-none overflow-hidden block leading-relaxed" />
+      </td>
+      <td className="px-2 py-1.5 border-r border-stone-100 align-top">
+        <div className="flex flex-col gap-1 mt-1">
+          <PremiumSelect value={row.Estatus || 'Pendiente'} onChange={(val) => handleCellChange(index, 'Estatus', val)} options={[{ value: 'Pendiente', label: 'Pendiente' }, { value: 'Pagado', label: 'Pagado' }, { value: 'Pago Parcial', label: 'Parcial' }, { value: 'Cancelado', label: 'Cancelado' }]} accent="orange" compact={true} className="w-28" />
+          {row.Estatus === 'Pago Parcial' && (
+            <div className="flex flex-col gap-1 mt-1 bg-sky-50 p-1.5 rounded border border-sky-100">
+              <div className="flex items-center gap-1"><span className="text-[10px] font-semibold text-sky-700 w-12">Pagado:</span><input type="number" min="0" step="0.01" placeholder="0.00" value={row.Monto_Pagado || ''} onChange={(e) => handleCellChange(index, 'Monto_Pagado', parseFloat(e.target.value) || 0)} className="w-full text-right bg-white border border-sky-200 focus:border-sky-400 rounded px-1.5 py-1 outline-none text-sky-800 text-xs font-semibold" /></div>
+              <div className="flex items-center gap-1"><span className="text-[10px] font-semibold text-stone-500 w-12">Resta:</span><div className="w-full text-right px-1.5 py-1 text-xs font-bold text-stone-600">{new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format((row.Monto || 0) - (row.Monto_Pagado || 0))}</div></div>
+            </div>
+          )}
+        </div>
+      </td>
+      <td className="px-3 py-1.5 text-center align-top">
+        <button onClick={() => removeRow(index)} className="p-1.5 text-stone-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100 mt-1" title="Eliminar fila"><Trash2 size={16} /></button>
+      </td>
+    </tr>
+  );
+});
+
+const MobileRow = memo(({
+  row, index, uploadingIndex, handleCellChange, removeRow, checkFolio, generateNoFacturable, handleFileUpload, setPreviewFile
+}: RowProps) => {
+  const getBorderColor = () => {
+    if (row.Estatus === 'Pagado') return 'border-emerald-400';
+    if (row.Estatus === 'Cancelado') return 'border-red-400';
+    if (row.Estatus === 'Pago Parcial') return 'border-yellow-400';
+    return 'border-orange-300';
+  };
+  const getBgColor = () => {
+    if (row.Estatus === 'Pagado') return 'bg-emerald-50';
+    if (row.Estatus === 'Cancelado') return 'bg-red-50';
+    if (row.Estatus === 'Pago Parcial') return 'bg-yellow-50';
+    return 'bg-white';
+  };
+
+  return (
+    <div className={`rounded-2xl border-l-4 shadow-sm p-4 relative flex flex-col gap-3 ${getBorderColor()} ${getBgColor()}`}>
+      <button onClick={() => removeRow(index)} className="absolute top-3 right-3 p-1.5 text-stone-400 hover:text-red-500 hover:bg-red-100 rounded-md transition-colors"><Trash2 size={16} /></button>
+
+      <div className="flex items-center justify-between mb-1 pr-8 border-b border-stone-200 pb-3">
+        <div className="flex items-center gap-2">
+          <span className="font-bold text-stone-500 text-sm">Pta.</span>
+          <input type="number" placeholder="Pta" value={row.Partida || ''} onChange={(e) => handleCellChange(index, 'Partida', e.target.value)} className="w-16 text-center bg-white border border-stone-200 focus:border-orange-400 rounded px-1 py-1 outline-none text-stone-700 text-xs font-bold shadow-inner" />
+        </div>
+        <PremiumSelect value={row.Estatus || 'Pendiente'} onChange={(val) => handleCellChange(index, 'Estatus', val)} options={[{ value: 'Pendiente', label: 'Pendiente' }, { value: 'Pagado', label: 'Pagado' }, { value: 'Pago Parcial', label: 'Parcial' }, { value: 'Cancelado', label: 'Cancelado' }]} accent="orange" compact={true} className="w-28" />
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <div className="flex flex-col gap-1">
+          <label className="text-[9px] uppercase font-bold text-stone-400 tracking-wider">Fecha Solicitud</label>
+          <input type="date" value={row.Fecha_Sol || ''} onChange={(e) => handleCellChange(index, 'Fecha_Sol', e.target.value)} className="w-full bg-white border border-stone-200 focus:border-orange-400 rounded-lg px-2 py-2 outline-none text-sm" />
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className="text-[9px] uppercase font-bold text-stone-400 tracking-wider">Fecha Pago</label>
+          <input type="date" value={row.Fecha_Pago || ''} onChange={(e) => handleCellChange(index, 'Fecha_Pago', e.target.value)} className="w-full bg-white border border-stone-200 focus:border-orange-400 rounded-lg px-2 py-2 outline-none text-sm" />
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <label className="text-[9px] uppercase font-bold text-stone-400 tracking-wider">Servicio / Producto</label>
+        <input type="text" list="servicios-list" placeholder="Descripción..." value={row.Servicio_Producto || ''} onChange={(e) => handleCellChange(index, 'Servicio_Producto', e.target.value)} className="w-full bg-white border border-stone-200 focus:border-orange-400 rounded-lg px-3 py-2 outline-none text-sm font-medium" />
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <div className="flex flex-col gap-1">
+          <label className="text-[9px] uppercase font-bold text-stone-400 tracking-wider">Proveedor</label>
+          <input type="text" list="proveedores-list" placeholder="Proveedor" value={row.Proveedor || ''} onChange={(e) => handleCellChange(index, 'Proveedor', e.target.value)} className="w-full bg-white border border-stone-200 focus:border-orange-400 rounded-lg px-2 py-2 outline-none text-sm" />
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className="text-[9px] uppercase font-bold text-stone-400 tracking-wider">Empresa</label>
+          <PremiumSelect value={row.Empresa || ''} onChange={(val) => handleCellChange(index, 'Empresa', val)} options={[{ value: 'AVH', label: 'AVH' }, { value: 'SIFYGSA', label: 'SIFYGSA' }, { value: 'SIAVSA', label: 'SIAVSA' }, { value: 'VIPSA', label: 'VIPSA' }]} accent="orange" compact={true} />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <div className="flex flex-col gap-1">
+          <label className="text-[9px] uppercase font-bold text-stone-400 tracking-wider">Monto $</label>
+          <div className="relative">
+            <span className="absolute left-2.5 top-2 text-orange-500 text-sm font-bold">$</span>
+            <input type="number" min="0" step="0.01" placeholder="0.00" value={row.Monto || ''} onChange={(e) => handleCellChange(index, 'Monto', parseFloat(e.target.value) || 0)} className="w-full bg-white border border-stone-200 focus:border-orange-400 rounded-lg pl-6 pr-2 py-2 outline-none text-sm font-black text-stone-800 shadow-inner" />
+          </div>
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className="text-[9px] uppercase font-bold text-stone-400 tracking-wider">Solicitante</label>
+          <input type="text" placeholder="Usuario" value={row.Usuario || ''} onChange={(e) => handleCellChange(index, 'Usuario', e.target.value)} className="w-full bg-white border border-stone-200 focus:border-orange-400 rounded-lg px-2 py-2 outline-none text-sm" />
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <label className="text-[9px] uppercase font-bold text-stone-400 tracking-wider">Factura / Folio</label>
+        <div className="flex items-center gap-2">
+          <input type="text" placeholder="Folio/Factura..." value={row.Factura_Comprobacion || ''} onChange={(e) => handleCellChange(index, 'Factura_Comprobacion', e.target.value)} onBlur={(e) => checkFolio(index, e.target.value, row.Id)} className="w-full bg-white border border-stone-200 focus:border-orange-400 rounded-lg px-3 py-2 outline-none text-sm font-mono shadow-inner" />
+          <button onClick={() => generateNoFacturable(index)} title="Generar Folio NBF" className="p-2.5 text-orange-600 bg-orange-50 border border-orange-200 hover:text-white hover:bg-orange-500 rounded-lg transition-colors flex shrink-0 shadow-sm"><Wand2 size={16} /></button>
+        </div>
+      </div>
+
+      <div className="flex items-center justify-between border-t border-stone-200 pt-3 mt-1">
+        <span className="text-[9px] uppercase font-black text-stone-500 tracking-widest">Evidencia</span>
+        {row.Comprobante_URL ? (
+          <div className="flex items-center gap-2">
+            <button type="button" onClick={() => setPreviewFile({ url: row.Comprobante_URL!, title: row.Factura_Comprobacion || `Partida #${row.Partida || (index + 1)}` })} className="px-3 py-1.5 bg-orange-100 text-[#cd5c24] hover:bg-orange-200 rounded-lg transition-colors flex items-center gap-1.5 text-xs font-bold shadow-sm"><Eye size={14} /> Ver</button>
+            <button type="button" onClick={() => { if (window.confirm('¿Estás seguro de quitar este comprobante?')) { handleCellChange(index, 'Comprobante_URL', ''); } }} className="px-2.5 py-1.5 text-stone-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"><Trash2 size={14} /></button>
+          </div>
+        ) : (
+          <label className="cursor-pointer inline-flex items-center justify-center gap-1.5 px-4 py-1.5 bg-white border border-stone-200 hover:bg-orange-50 hover:border-orange-200 text-stone-600 hover:text-[#cd5c24] rounded-lg transition-all text-xs font-bold shadow-sm active:scale-95">
+            {uploadingIndex === index ? <Loader2 size={14} className="animate-spin text-[#cd5c24]" /> : <><Paperclip size={13} /><span>Adjuntar</span></>}
+            <input type="file" accept="image/*,application/pdf" className="hidden" disabled={uploadingIndex === index} onChange={(e) => { const file = e.target.files?.[0]; if (file) handleFileUpload(index, file); }} />
+          </label>
+        )}
+      </div>
+
+      {row.Estatus === 'Pago Parcial' && (
+        <div className="flex flex-col gap-2 mt-2 bg-sky-50 p-3 rounded-xl border border-sky-200 shadow-inner">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-sky-800">Monto Pagado:</span>
+            <div className="relative w-32">
+              <span className="absolute left-2.5 top-1.5 text-sky-600 text-sm font-bold">$</span>
+              <input type="number" min="0" step="0.01" placeholder="0.00" value={row.Monto_Pagado || ''} onChange={(e) => handleCellChange(index, 'Monto_Pagado', parseFloat(e.target.value) || 0)} className="w-full bg-white border border-sky-300 focus:border-sky-500 rounded-lg pl-7 pr-2 py-1.5 text-sm font-black text-sky-900 outline-none shadow-sm" />
+            </div>
+          </div>
+          <div className="flex items-center justify-between pt-2 border-t border-sky-100">
+            <span className="text-xs font-bold text-stone-500">Monto Restante:</span>
+            <span className="text-sm font-black text-stone-700">{new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format((row.Monto || 0) - (row.Monto_Pagado || 0))}</span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+});
 
 export default function ProgramacionClient() {
   const [registros, setRegistros] = useState<ProgramacionRecord[]>([{
@@ -50,6 +268,80 @@ export default function ProgramacionClient() {
   const [previewFile, setPreviewFile] = useState<{ url: string; title: string } | null>(null);
   const [serviciosList, setServiciosList] = useState<string[]>([]);
   const [mobileView, setMobileView] = useState<'cards' | 'table'>('cards');
+  const [columnFilters, setColumnFilters] = useState<Record<string, string[]>>({});
+  
+  const parentRefDesktop = useRef<HTMLDivElement>(null);
+  const parentRefMobile = useRef<HTMLDivElement>(null);
+  
+  const registrosFiltrados = useMemo(() => {
+    return registros.map((r, i) => [r, i] as const).filter(([row]) => {
+      for (const col in columnFilters) {
+        if (columnFilters[col] && columnFilters[col].length > 0) {
+          const val = String(row[col as keyof ProgramacionRecord] || '');
+          if (!columnFilters[col].includes(val)) return false;
+        }
+      }
+      return true;
+    });
+  }, [registros, columnFilters]);
+
+  const rowVirtualizerDesktop = useVirtualizer({
+    count: registrosFiltrados.length,
+    getScrollElement: () => parentRefDesktop.current,
+    estimateSize: () => 50,
+    overscan: 10,
+  });
+
+  const rowVirtualizerMobile = useVirtualizer({
+    count: registrosFiltrados.length,
+    getScrollElement: () => parentRefMobile.current,
+    estimateSize: () => 200, // Tarjetas móviles son más grandes
+    overscan: 10,
+  });
+
+  const virtualizerDesktopRef = useRef(rowVirtualizerDesktop);
+  virtualizerDesktopRef.current = rowVirtualizerDesktop;
+
+  const measureElementDesktop = useCallback(
+    (node: Element | null) => {
+      if (node) {
+        setTimeout(() => virtualizerDesktopRef.current.measureElement(node), 0);
+      }
+    },
+    []
+  );
+
+  const virtualizerMobileRef = useRef(rowVirtualizerMobile);
+  virtualizerMobileRef.current = rowVirtualizerMobile;
+
+  const measureElementMobile = useCallback(
+    (node: Element | null) => {
+      if (node) {
+        setTimeout(() => virtualizerMobileRef.current.measureElement(node), 0);
+      }
+    },
+    []
+  );
+
+  const [shouldScroll, setShouldScroll] = useState(false);
+
+  useEffect(() => {
+    if (viewMode === 'completa') {
+      setShouldScroll(true);
+    }
+  }, [viewMode]);
+
+  useEffect(() => {
+    if (shouldScroll && !loading && registrosFiltrados.length > 0) {
+      const weekIndex = registrosFiltrados.findIndex(([r]) => r.Semana === semana);
+      if (weekIndex !== -1) {
+        rowVirtualizerDesktop.scrollToIndex(weekIndex, { align: 'start' });
+        rowVirtualizerMobile.scrollToIndex(weekIndex, { align: 'start' });
+      }
+      setShouldScroll(false);
+    }
+  }, [shouldScroll, loading, registrosFiltrados, semana, rowVirtualizerDesktop, rowVirtualizerMobile]);
+
   useEffect(() => {
     fetchRecords();
     fetchSuggestions();
@@ -70,15 +362,7 @@ export default function ProgramacionClient() {
           }));
           setRegistros(formatted);
           
-          if (viewMode === 'completa') {
-            setTimeout(() => {
-              const rowId = `row-week-${currentWeekNumber}`;
-              const element = document.getElementById(rowId);
-              if (element) {
-                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              }
-            }, 500);
-          }
+          // Scroll behavior is now handled by the virtualizer effect
         } else {
           setRegistros([{
             Fecha_Sol: new Date().toISOString().split('T')[0],
@@ -135,27 +419,23 @@ export default function ProgramacionClient() {
     setSaving(false);
   };
 
-  const checkFolio = async (index: number, folio: string, id?: number) => {
+  const checkFolio = useCallback(async (index: number, folio: string, id?: number) => {
     if (!folio) return;
     
-    // Auto-formatear si el usuario teclea una fecha con separadores (es un pago no facturable)
-    // Se requieren los separadores (/ o - o .) para evitar chocar con folios reales que sean solo números.
     const dateRegex = /^(\d{2})[-./](\d{2})[-./](\d{4})$|^(\d{4})[-./](\d{2})[-./](\d{2})$/;
     if (dateRegex.test(folio)) {
-      // Extraemos solo los números para limpiar el string
       const digitsOnly = folio.replace(/\D/g, '');
       let cleanDate = folio;
-      // Ya sabemos que tiene 8 dígitos por el regex
-      if (dateRegex.exec(folio)?.[1]) { // Empieza con 2 digitos (día)
+      if (dateRegex.exec(folio)?.[1]) {
         cleanDate = `${digitsOnly.slice(0,2)}-${digitsOnly.slice(2,4)}-${digitsOnly.slice(4,8)}`;
-      } else { // Empieza con 4 digitos (año)
+      } else {
         cleanDate = `${digitsOnly.slice(6,8)}-${digitsOnly.slice(4,6)}-${digitsOnly.slice(0,4)}`;
       }
       
       const randomSuffix = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
       const newFolio = `NBF-${cleanDate}-${randomSuffix}`;
       handleCellChange(index, 'Factura_Comprobacion', newFolio);
-      return; // Ya no choca en DB
+      return; 
     }
 
     try {
@@ -175,9 +455,9 @@ export default function ProgramacionClient() {
     } catch (e) {
       console.error(e);
     }
-  };
+  }, []);
 
-  const handleFileUpload = async (index: number, file: File) => {
+  const handleFileUpload = useCallback(async (index: number, file: File) => {
     if (!file) return;
     setUploadingIndex(index);
     try {
@@ -198,56 +478,55 @@ export default function ProgramacionClient() {
       setSysModal({ isOpen: true, type: 'error', title: 'Error de Conexión', message: 'No se pudo conectar con el servidor.' });
     }
     setUploadingIndex(null);
-  };
+  }, []);
 
-  const generateNoFacturable = (index: number) => {
-    const row = registros[index];
-    let baseStr = '';
-    const currentInput = (row?.Factura_Comprobacion || '').trim();
+  const generateNoFacturable = useCallback((index: number) => {
+    setRegistros(prev => {
+      const row = prev[index];
+      let baseStr = '';
+      const currentInput = (row?.Factura_Comprobacion || '').trim();
 
-    const dateRegex = /^(\d{2})[-./](\d{2})[-./](\d{4})$|^(\d{4})[-./](\d{2})[-./](\d{2})$/;
+      const dateRegex = /^(\d{2})[-./](\d{2})[-./](\d{4})$|^(\d{4})[-./](\d{2})[-./](\d{2})$/;
 
-    if (currentInput) {
-      if (dateRegex.test(currentInput)) {
-        // Si el usuario escribió una fecha en el input, usar esa fecha
-        const digitsOnly = currentInput.replace(/\D/g, '');
-        if (dateRegex.exec(currentInput)?.[1]) {
-          baseStr = `${digitsOnly.slice(0,2)}-${digitsOnly.slice(2,4)}-${digitsOnly.slice(4,8)}`;
+      if (currentInput) {
+        if (dateRegex.test(currentInput)) {
+          const digitsOnly = currentInput.replace(/\D/g, '');
+          if (dateRegex.exec(currentInput)?.[1]) {
+            baseStr = `${digitsOnly.slice(0,2)}-${digitsOnly.slice(2,4)}-${digitsOnly.slice(4,8)}`;
+          } else {
+            baseStr = `${digitsOnly.slice(6,8)}-${digitsOnly.slice(4,6)}-${digitsOnly.slice(0,4)}`;
+          }
+        } else if (currentInput.startsWith('NBF-')) {
+          const withoutPrefix = currentInput.replace(/^NBF-/, '');
+          baseStr = withoutPrefix.replace(/-\d{3}$/, '');
         } else {
-          baseStr = `${digitsOnly.slice(6,8)}-${digitsOnly.slice(4,6)}-${digitsOnly.slice(0,4)}`;
-        }
-      } else if (currentInput.startsWith('NBF-')) {
-        // Si ya tiene formato NBF, extraemos su fecha para no sobreescribirla
-        const withoutPrefix = currentInput.replace(/^NBF-/, '');
-        baseStr = withoutPrefix.replace(/-\d{3}$/, '');
-      } else {
-        // Si escribió otro texto (ej: TICKET-12), usarlo como base limpiando caracteres no deseados
-        baseStr = currentInput.replace(/[^a-zA-Z0-9_-]/g, '');
-      }
-    }
-
-    // Si no había texto en el input (o era ya un NBF), buscar en Fecha_Pago
-    if (!baseStr) {
-      if (row && row.Fecha_Pago) {
-        const parts = row.Fecha_Pago.split('-');
-        if (parts.length === 3) {
-          baseStr = `${parts[2]}-${parts[1]}-${parts[0]}`;
+          baseStr = currentInput.replace(/[^a-zA-Z0-9_-]/g, '');
         }
       }
-    }
 
-    // Si tampoco hay Fecha_Pago, usar la fecha de hoy
-    if (!baseStr) {
-      const today = new Date();
-      baseStr = `${today.getDate().toString().padStart(2, '0')}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getFullYear()}`;
-    }
+      if (!baseStr) {
+        if (row && row.Fecha_Pago) {
+          const parts = row.Fecha_Pago.split('-');
+          if (parts.length === 3) {
+            baseStr = `${parts[2]}-${parts[1]}-${parts[0]}`;
+          }
+        }
+      }
 
-    const randomSuffix = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-    handleCellChange(index, 'Factura_Comprobacion', `NBF-${baseStr}-${randomSuffix}`);
-  };
+      if (!baseStr) {
+        const today = new Date();
+        baseStr = `${today.getDate().toString().padStart(2, '0')}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getFullYear()}`;
+      }
 
-  const addRow = () => {
-    setRegistros([...registros, {
+      const randomSuffix = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+      const newRegs = [...prev];
+      newRegs[index] = { ...row, Factura_Comprobacion: `NBF-${baseStr}-${randomSuffix}` };
+      return newRegs;
+    });
+  }, []);
+
+  const addRow = useCallback(() => {
+    setRegistros(prev => [...prev, {
       Fecha_Sol: new Date().toISOString().split('T')[0],
       Partida: '',
       Servicio_Producto: '',
@@ -259,33 +538,37 @@ export default function ProgramacionClient() {
       Usuario: '',
       Estatus: 'Pendiente'
     }]);
-  };
+  }, []);
 
-  const removeRow = (index: number) => {
-    const newRegs = [...registros];
-    newRegs.splice(index, 1);
-    if (newRegs.length === 0) {
-      newRegs.push({
-        Fecha_Sol: new Date().toISOString().split('T')[0],
-        Partida: '',
-        Servicio_Producto: '',
-        Monto: 0,
-        Proveedor: '',
-        Empresa: '',
-        Fecha_Pago: '',
-        Factura_Comprobacion: '',
-        Usuario: '',
-        Estatus: 'Pendiente'
-      });
-    }
-    setRegistros(newRegs);
-  };
+  const removeRow = useCallback((index: number) => {
+    setRegistros(prev => {
+      const newRegs = [...prev];
+      newRegs.splice(index, 1);
+      if (newRegs.length === 0) {
+        newRegs.push({
+          Fecha_Sol: new Date().toISOString().split('T')[0],
+          Partida: '',
+          Servicio_Producto: '',
+          Monto: 0,
+          Proveedor: '',
+          Empresa: '',
+          Fecha_Pago: '',
+          Factura_Comprobacion: '',
+          Usuario: '',
+          Estatus: 'Pendiente'
+        });
+      }
+      return newRegs;
+    });
+  }, []);
 
-  const handleCellChange = (index: number, field: keyof ProgramacionRecord, value: any) => {
-    const newRegs = [...registros];
-    newRegs[index] = { ...newRegs[index], [field]: value };
-    setRegistros(newRegs);
-  };
+  const handleCellChange = useCallback((index: number, field: keyof ProgramacionRecord, value: any) => {
+    setRegistros(prev => {
+      const newRegs = [...prev];
+      newRegs[index] = { ...newRegs[index], [field]: value };
+      return newRegs;
+    });
+  }, []);
 
   return (
     <div className="max-w-[1800px] mx-auto p-4 md:p-6 space-y-6">
@@ -306,8 +589,8 @@ export default function ProgramacionClient() {
       </datalist>
 
       {/* Header and Menu */}
-      <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-top-4 duration-500">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="flex flex-col gap-6 relative z-50">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative z-50">
           <div>
             <h1 className="text-2xl font-serif font-bold text-stone-800 flex items-center gap-2">
               <CalendarDays className="w-6 h-6 text-orange-600" />
@@ -318,19 +601,20 @@ export default function ProgramacionClient() {
             </p>
           </div>
           
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-3 bg-white border border-stone-200 p-3 sm:px-4 sm:py-2 rounded-xl shadow-sm w-full md:w-auto">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-3 bg-white border border-stone-200 p-3 sm:px-4 sm:py-2 rounded-xl shadow-sm w-full md:w-auto relative z-50">
             <div className="flex items-center justify-between sm:justify-start gap-2 flex-1 sm:min-w-[120px]">
               <div className="flex items-center gap-2">
                 <CalendarRange className="w-5 h-5 text-stone-400 shrink-0" />
                 <span className="text-sm font-semibold text-stone-600 shrink-0">Año:</span>
               </div>
-              <div className="w-full">
+              <div className="w-28">
                 <PremiumSelect 
                   value={anio.toString()} 
                   onChange={val => setAnio(Number(val))}
                   options={[2024, 2025, 2026, 2027, 2028].map(y => ({ value: y.toString(), label: y.toString() }))}
                   accent="orange"
                   compact={true}
+                  className="w-full"
                 />
               </div>
             </div>
@@ -344,13 +628,14 @@ export default function ProgramacionClient() {
               >
                 <ChevronLeft size={18} />
               </button>
-              <div className="w-[110px] shrink-0">
+              <div className="w-[120px] shrink-0">
                 <PremiumSelect 
                   value={semana.toString()} 
                   onChange={val => setSemana(Number(val))}
                   options={Array.from({ length: 53 }, (_, i) => i + 1).map(w => ({ value: w.toString(), label: `Semana ${w}` }))}
                   accent="orange"
                   compact={true}
+                  className="w-full"
                 />
               </div>
               <button 
@@ -374,12 +659,14 @@ export default function ProgramacionClient() {
             </button>
           </div>
         </div>
-        <GastosMenu />
+        <div className="relative z-10">
+          <GastosMenu />
+        </div>
       </div>
 
       {/* Main Table */}
       {/* Main Container */}
-      <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 relative">
+      <div className="relative z-0">
 
         {/* Toggle Vista Móvil */}
         <div className="md:hidden flex items-center bg-stone-100 p-1 rounded-xl w-fit mb-4 border border-stone-200">
@@ -399,259 +686,108 @@ export default function ProgramacionClient() {
         
         {/* VISTA ESCRITORIO (TABLA) */}
         <div className={`${mobileView === 'table' ? 'block' : 'hidden md:block'} bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden`}>
-          <div className="overflow-x-auto min-h-[400px] pb-16">
+          <div ref={parentRefDesktop} className="overflow-x-auto overflow-y-auto max-h-[75vh] min-h-[400px] pb-16 scrollbar-thin scrollbar-thumb-stone-300 scrollbar-track-transparent">
           <table className="w-full text-left text-sm align-top">
-            <thead className="bg-[#cd5c24] text-white">
+            <thead className="bg-[#cd5c24] text-white sticky top-0 z-[60]">
               <tr>
                 <th className="px-2 py-3 font-semibold border-r border-white/20 text-center w-12 shrink-0">Pta.</th>
-                <th className="px-2 py-3 font-semibold border-r border-white/20 text-center w-28 shrink-0">Fecha sol.</th>
-                <th className="p-0 border-r border-white/20">
-                  <div className="px-3 py-3 font-semibold text-center min-w-[150px] w-[250px] max-w-[800px] resize-x overflow-hidden h-full">Servicio / Producto</div>
+                
+                <th className="px-2 py-3 font-semibold border-r border-white/20 text-center w-28 shrink-0 relative">
+                  Fecha sol.
+                  <div className="absolute right-0 top-1/2 -translate-y-1/2"><ColumnFilter columnName="Fecha_Sol" options={registros.map(r => r.Fecha_Sol)} selectedValues={columnFilters['Fecha_Sol'] || []} onChange={(vals) => setColumnFilters(prev => ({...prev, Fecha_Sol: vals}))} /></div>
                 </th>
-                <th className="px-2 py-3 font-semibold border-r border-white/20 text-center w-24 shrink-0">Monto</th>
-                <th className="p-0 border-r border-white/20">
-                  <div className="px-3 py-3 font-semibold text-center min-w-[150px] w-[200px] max-w-[500px] resize-x overflow-hidden h-full">Proveedor</div>
+                
+                <th className="p-0 border-r border-white/20 relative">
+                  <div className="px-3 py-3 pr-8 font-semibold text-center min-w-[150px] w-[250px] max-w-[800px] resize-x overflow-hidden h-full">
+                    Servicio / Producto
+                  </div>
+                  <div className="absolute right-1 top-1/2 -translate-y-1/2"><ColumnFilter columnName="Servicio_Producto" options={registros.map(r => r.Servicio_Producto)} selectedValues={columnFilters['Servicio_Producto'] || []} onChange={(vals) => setColumnFilters(prev => ({...prev, Servicio_Producto: vals}))} /></div>
                 </th>
-                <th className="px-2 py-3 font-semibold border-r border-white/20 text-center w-24 shrink-0">Empresa</th>
-                <th className="px-2 py-3 font-semibold border-r border-white/20 text-center w-28 shrink-0">Fecha pago</th>
-                <th className="p-0 border-r border-white/20">
-                  <div className="px-3 py-3 font-semibold text-center min-w-[120px] w-[180px] max-w-[400px] resize-x overflow-hidden h-full">Factura/Folio</div>
+                
+                <th className="px-2 py-3 font-semibold border-r border-white/20 text-center w-24 shrink-0 relative">
+                  Monto
+                  <div className="absolute right-0 top-1/2 -translate-y-1/2"><ColumnFilter columnName="Monto" options={registros.map(r => r.Monto?.toString() || '')} selectedValues={columnFilters['Monto'] || []} onChange={(vals) => setColumnFilters(prev => ({...prev, Monto: vals}))} /></div>
                 </th>
+                
+                <th className="p-0 border-r border-white/20 relative">
+                  <div className="px-3 py-3 pr-8 font-semibold text-center min-w-[150px] w-[200px] max-w-[500px] resize-x overflow-hidden h-full">
+                    Proveedor
+                  </div>
+                  <div className="absolute right-1 top-1/2 -translate-y-1/2"><ColumnFilter columnName="Proveedor" options={registros.map(r => r.Proveedor)} selectedValues={columnFilters['Proveedor'] || []} onChange={(vals) => setColumnFilters(prev => ({...prev, Proveedor: vals}))} /></div>
+                </th>
+                
+                <th className="px-2 py-3 font-semibold border-r border-white/20 text-center w-24 shrink-0 relative">
+                  Empresa
+                  <div className="absolute right-0 top-1/2 -translate-y-1/2"><ColumnFilter columnName="Empresa" options={registros.map(r => r.Empresa)} selectedValues={columnFilters['Empresa'] || []} onChange={(vals) => setColumnFilters(prev => ({...prev, Empresa: vals}))} /></div>
+                </th>
+                
+                <th className="px-2 py-3 font-semibold border-r border-white/20 text-center w-28 shrink-0 relative">
+                  Fecha pago
+                  <div className="absolute right-0 top-1/2 -translate-y-1/2"><ColumnFilter columnName="Fecha_Pago" options={registros.map(r => r.Fecha_Pago)} selectedValues={columnFilters['Fecha_Pago'] || []} onChange={(vals) => setColumnFilters(prev => ({...prev, Fecha_Pago: vals}))} /></div>
+                </th>
+                
+                <th className="p-0 border-r border-white/20 relative">
+                  <div className="px-3 py-3 pr-8 font-semibold text-center min-w-[120px] w-[180px] max-w-[400px] resize-x overflow-hidden h-full">
+                    Factura/Folio
+                  </div>
+                  <div className="absolute right-1 top-1/2 -translate-y-1/2"><ColumnFilter columnName="Factura_Comprobacion" options={registros.map(r => r.Factura_Comprobacion)} selectedValues={columnFilters['Factura_Comprobacion'] || []} onChange={(vals) => setColumnFilters(prev => ({...prev, Factura_Comprobacion: vals}))} /></div>
+                </th>
+                
                 <th className="px-2 py-3 font-semibold border-r border-white/20 text-center w-16 shrink-0">Ticket</th>
-                <th className="p-0 border-r border-white/20">
-                  <div className="px-3 py-3 font-semibold text-center min-w-[100px] w-[140px] max-w-[300px] resize-x overflow-hidden h-full">Usuario</div>
+                
+                <th className="p-0 border-r border-white/20 relative">
+                  <div className="px-3 py-3 pr-8 font-semibold text-center min-w-[100px] w-[140px] max-w-[300px] resize-x overflow-hidden h-full">
+                    Usuario
+                  </div>
+                  <div className="absolute right-1 top-1/2 -translate-y-1/2"><ColumnFilter columnName="Usuario" options={registros.map(r => r.Usuario)} selectedValues={columnFilters['Usuario'] || []} onChange={(vals) => setColumnFilters(prev => ({...prev, Usuario: vals}))} /></div>
                 </th>
-                <th className="px-2 py-3 font-semibold border-r border-white/20 text-center w-28 shrink-0">Estatus</th>
+                
+                <th className="px-2 py-3 pr-6 font-semibold border-r border-white/20 text-center w-28 shrink-0 relative">
+                  Estatus
+                  <div className="absolute right-0 top-1/2 -translate-y-1/2"><ColumnFilter columnName="Estatus" options={registros.map(r => r.Estatus)} selectedValues={columnFilters['Estatus'] || []} onChange={(vals) => setColumnFilters(prev => ({...prev, Estatus: vals}))} /></div>
+                </th>
+                
                 <th className="px-3 py-3 font-semibold w-12 text-center shrink-0"></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-stone-200">
-              {registros.map((row, index) => {
-                const isCurrentWeekStart = viewMode === 'completa' && row.Semana === currentWeekNumber && (index === 0 || registros[index - 1].Semana !== currentWeekNumber);
+            <tbody className="divide-y divide-stone-200 relative">
+              {(() => {
+                const virtualItems = rowVirtualizerDesktop.getVirtualItems();
+                const paddingTop = virtualItems.length > 0 ? virtualItems[0]?.start || 0 : 0;
+                const paddingBottom = virtualItems.length > 0 ? rowVirtualizerDesktop.getTotalSize() - (virtualItems[virtualItems.length - 1]?.end || 0) : 0;
                 
                 return (
-                <tr key={index} id={isCurrentWeekStart ? `row-week-${currentWeekNumber}` : undefined} className={`transition-colors group
-                  ${isCurrentWeekStart ? 'border-t-4 border-t-orange-500 ' : ''}
-                  ${row.Estatus === 'Pagado' ? 'bg-emerald-200 hover:bg-emerald-300 focus-within:bg-emerald-300' : 
-                    row.Estatus === 'Cancelado' ? 'bg-red-200 hover:bg-red-300 focus-within:bg-red-300' : 
-                    row.Estatus === 'Pago Parcial' ? 'bg-yellow-200 hover:bg-yellow-300 focus-within:bg-yellow-300' : 
-                    'hover:bg-orange-50/30 focus-within:bg-orange-50/50'}
-                `}>
-                  <td className="px-2 py-1.5 border-r border-stone-100 text-center align-top">
-                    <input
-                      type="number"
-                      min="1"
-                      max="100"
-                      placeholder="1"
-                      value={row.Partida || ''}
-                      onChange={(e) => handleCellChange(index, 'Partida', e.target.value)}
-                      className="w-10 text-center bg-transparent border border-transparent hover:border-stone-200 focus:bg-white focus:border-orange-400 rounded px-1 py-1.5 outline-none text-stone-700 text-sm font-semibold mt-1"
-                    />
-                  </td>
-                  <td className="px-2 py-1.5 border-r border-stone-100 align-top">
-                    <input
-                      type="date"
-                      value={row.Fecha_Sol || ''}
-                      onChange={(e) => handleCellChange(index, 'Fecha_Sol', e.target.value)}
-                      className="w-28 bg-transparent border border-transparent hover:border-stone-200 focus:bg-white focus:border-orange-400 rounded px-1 py-1.5 outline-none text-stone-700 text-sm mt-1"
-                    />
-                  </td>
-                  <td className="px-3 py-1.5 border-r border-stone-100 align-top relative group/textarea">
-                    <textarea
-                      rows={1}
-                      placeholder="Descripción..."
-                      title={row.Servicio_Producto || ''}
-                      value={row.Servicio_Producto || ''}
-                      onChange={(e) => handleCellChange(index, 'Servicio_Producto', e.target.value)}
-                      style={{ fieldSizing: 'content' } as React.CSSProperties}
-                      className="w-full min-h-[34px] bg-transparent border border-transparent hover:border-stone-200 focus:bg-white focus:border-orange-400 rounded px-2 py-1.5 outline-none text-stone-700 text-sm resize-none overflow-hidden block leading-relaxed"
-                    />
-                  </td>
-                  <td className="px-2 py-1.5 border-r border-stone-100 align-top">
-                    <div className="relative w-24 group/input mt-1 mx-auto">
-                      <input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        placeholder="0.00"
-                        value={row.Monto || ''}
-                        onChange={(e) => handleCellChange(index, 'Monto', parseFloat(e.target.value) || 0)}
-                        className="w-full text-right bg-transparent border border-transparent hover:border-stone-200 focus:bg-white focus:border-orange-400 rounded px-2 py-1.5 outline-none text-stone-700 text-sm font-semibold opacity-0 focus:opacity-100 absolute inset-0 z-10"
-                      />
-                      <div className="w-full text-right bg-transparent border border-transparent rounded px-2 py-1.5 text-stone-700 text-sm font-semibold group-focus-within/input:opacity-0 flex items-center justify-between">
-                        <span className="text-stone-400 select-none">$</span>
-                        <span>{row.Monto ? new Intl.NumberFormat('es-MX', { minimumFractionDigits: 2 }).format(row.Monto) : '0.00'}</span>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-3 py-1.5 border-r border-stone-100 align-top">
-                    <textarea
-                      rows={1}
-                      placeholder="Proveedor..."
-                      title={row.Proveedor || ''}
-                      value={row.Proveedor || ''}
-                      onChange={(e) => handleCellChange(index, 'Proveedor', e.target.value)}
-                      style={{ fieldSizing: 'content' } as React.CSSProperties}
-                      className="w-full min-h-[34px] bg-transparent border border-transparent hover:border-stone-200 focus:bg-white focus:border-orange-400 rounded px-2 py-1.5 outline-none text-stone-700 text-sm resize-none overflow-hidden block leading-relaxed"
-                    />
-                  </td>
-                  <td className="px-2 py-1.5 border-r border-stone-100 text-center align-top">
-                    <div className="mt-1">
-                      <PremiumSelect
-                        value={row.Empresa || ''}
-                        onChange={(val) => handleCellChange(index, 'Empresa', val)}
-                        options={[
-                          { value: 'AVH', label: 'AVH' },
-                          { value: 'SIFYGSA', label: 'SIFYGSA' },
-                          { value: 'SIAVSA', label: 'SIAVSA' },
-                          { value: 'VIPSA', label: 'VIPSA' },
-                        ]}
-                        placeholder="Empresa..."
-                        accent="orange"
-                        compact={true}
-                        className="w-24"
-                      />
-                    </div>
-                  </td>
-                  <td className="px-2 py-1.5 border-r border-stone-100">
-                    <input
-                      type="date"
-                      value={row.Fecha_Pago || ''}
-                      onChange={(e) => handleCellChange(index, 'Fecha_Pago', e.target.value)}
-                      className="w-28 bg-transparent border border-transparent hover:border-stone-200 focus:bg-white focus:border-orange-400 rounded px-1 py-1.5 outline-none text-stone-700 text-sm mt-1"
-                    />
-                  </td>
-                  <td className="px-1 py-1.5 border-r border-stone-100 align-top">
-                    <div className="flex items-center gap-1 mt-1">
-                      <input
-                        type="text"
-                        placeholder="Folio/Factura..."
-                        value={row.Factura_Comprobacion || ''}
-                        onChange={(e) => handleCellChange(index, 'Factura_Comprobacion', e.target.value)}
-                        onBlur={(e) => checkFolio(index, e.target.value, row.Id)}
-                        className="w-32 bg-transparent border border-transparent hover:border-stone-200 focus:bg-white focus:border-orange-400 rounded px-1 py-1.5 outline-none text-stone-700 text-sm font-mono mt-1"
-                      />
-                      <button 
-                        onClick={() => generateNoFacturable(index)}
-                        title="Generar Folio No Facturable"
-                        className="p-1.5 text-stone-300 hover:text-orange-500 hover:bg-orange-50 rounded transition-colors"
-                      >
-                        <Wand2 size={14} />
-                      </button>
-                    </div>
-                  </td>
-                  <td className="px-3 py-1.5 border-r border-stone-100 text-center align-top">
-                    <div className="mt-1">
-                    {row.Comprobante_URL ? (
-                      <div className="flex items-center justify-center gap-1.5">
-                        <button
-                          type="button"
-                          onClick={() => setPreviewFile({ url: row.Comprobante_URL!, title: row.Factura_Comprobacion || `Partida #${row.Partida || (index + 1)}` })}
-                          title="Ver Comprobante / Ticket"
-                          className="p-1.5 bg-orange-50 text-[#cd5c24] hover:bg-orange-100 rounded-lg transition-colors flex items-center gap-1 text-xs font-semibold"
-                        >
-                          <Eye size={14} />
-                          <span>Ver</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            if (window.confirm('¿Estás seguro de quitar este comprobante de la fila? (El archivo no se borrará del servidor)')) {
-                              handleCellChange(index, 'Comprobante_URL', '');
-                            }
-                          }}
-                          title="Eliminar Comprobante"
-                          className="p-1.5 text-stone-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                        >
-                          <Trash2 size={13} />
-                        </button>
-                      </div>
-                    ) : (
-                      <label className="cursor-pointer inline-flex items-center justify-center gap-1 px-2.5 py-1.5 bg-stone-50 border border-stone-200 hover:bg-orange-50 hover:border-orange-200 text-stone-600 hover:text-[#cd5c24] rounded-lg transition-all text-xs font-medium">
-                        {uploadingIndex === index ? (
-                          <Loader2 size={14} className="animate-spin text-[#cd5c24]" />
-                        ) : (
-                          <>
-                            <Paperclip size={13} />
-                            <span>Subir</span>
-                          </>
-                        )}
-                        <input
-                          type="file"
-                          accept="image/*,application/pdf"
-                          className="hidden"
-                          disabled={uploadingIndex === index}
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) handleFileUpload(index, file);
-                          }}
-                        />
-                      </label>
-                    )}
-                    </div>
-                  </td>
-                  <td className="px-2 py-1.5 border-r border-stone-100 align-top">
-                    <textarea
-                      rows={1}
-                      placeholder="Usuario..."
-                      title={row.Usuario || ''}
-                      value={row.Usuario || ''}
-                      onChange={(e) => handleCellChange(index, 'Usuario', e.target.value)}
-                      style={{ fieldSizing: 'content' } as React.CSSProperties}
-                      className="w-full min-h-[34px] bg-transparent border border-transparent hover:border-stone-200 focus:bg-white focus:border-orange-400 rounded px-2 py-1.5 outline-none text-stone-700 text-sm resize-none overflow-hidden block leading-relaxed"
-                    />
-                  </td>
-                  <td className="px-2 py-1.5 border-r border-stone-100 align-top">
-                    <div className="flex flex-col gap-1 mt-1">
-                      <PremiumSelect
-                        value={row.Estatus || 'Pendiente'}
-                        onChange={(val) => handleCellChange(index, 'Estatus', val)}
-                        options={[
-                          { value: 'Pendiente', label: 'Pendiente' },
-                          { value: 'Pagado', label: 'Pagado' },
-                          { value: 'Pago Parcial', label: 'Parcial' },
-                          { value: 'Cancelado', label: 'Cancelado' },
-                        ]}
-                        accent="orange"
-                        compact={true}
-                        className="w-28"
-                      />
+                  <>
+                    {paddingTop > 0 && <tr><td style={{height: paddingTop}} colSpan={12} /></tr>}
+                    
+                    {virtualItems.map((virtualRow) => {
+                      const [row, index] = registrosFiltrados[virtualRow.index];
+                      const isCurrentWeekStart = viewMode === 'completa' && row.Semana === semana && (virtualRow.index === 0 || registrosFiltrados[virtualRow.index - 1][0].Semana !== semana);
                       
-                      {row.Estatus === 'Pago Parcial' && (
-                        <div className="flex flex-col gap-1 mt-1 bg-sky-50 p-1.5 rounded border border-sky-100">
-                          <div className="flex items-center gap-1">
-                            <span className="text-[10px] font-semibold text-sky-700 w-12">Pagado:</span>
-                            <input
-                              type="number"
-                              min="0"
-                              step="0.01"
-                              placeholder="0.00"
-                              value={row.Monto_Pagado || ''}
-                              onChange={(e) => handleCellChange(index, 'Monto_Pagado', parseFloat(e.target.value) || 0)}
-                              className="w-full text-right bg-white border border-sky-200 focus:border-sky-400 rounded px-1.5 py-1 outline-none text-sky-800 text-xs font-semibold"
-                            />
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <span className="text-[10px] font-semibold text-stone-500 w-12">Resta:</span>
-                            <div className="w-full text-right px-1.5 py-1 text-xs font-bold text-stone-600">
-                              {new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format((row.Monto || 0) - (row.Monto_Pagado || 0))}
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </td>
-                  <td className="px-3 py-1.5 text-center align-top">
-                    <button
-                      onClick={() => removeRow(index)}
-                      className="p-1.5 text-stone-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100 mt-1"
-                      title="Eliminar fila"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </td>
-                </tr>
-              )})}
+                      return (
+                        <DesktopRow 
+                          key={index}
+                          virtualIndex={virtualRow.index}
+                          measureRef={measureElementDesktop}
+                          row={row}
+                          index={index}
+                          isCurrentWeekStart={isCurrentWeekStart}
+                          currentWeekNumber={semana}
+                          uploadingIndex={uploadingIndex}
+                          handleCellChange={handleCellChange}
+                          removeRow={removeRow}
+                          checkFolio={checkFolio}
+                          generateNoFacturable={generateNoFacturable}
+                          handleFileUpload={handleFileUpload}
+                          setPreviewFile={setPreviewFile}
+                        />
+                      );
+                    })}
+                    
+                    {paddingBottom > 0 && <tr><td style={{height: paddingBottom}} colSpan={12} /></tr>}
+                  </>
+                );
+              })()}
             </tbody>
           </table>
         </div>
@@ -679,199 +815,32 @@ export default function ProgramacionClient() {
         </div>
 
         {/* VISTA MÓVIL (TARJETAS) */}
-        <div className={`md:hidden flex-col gap-4 mt-2 pb-28 ${mobileView === 'cards' ? 'flex' : 'hidden'}`}>
-          {registros.map((row, index) => {
-            const getBorderColor = () => {
-              if (row.Estatus === 'Pagado') return 'border-emerald-400';
-              if (row.Estatus === 'Cancelado') return 'border-red-400';
-              if (row.Estatus === 'Pago Parcial') return 'border-yellow-400';
-              return 'border-orange-300';
-            };
-            const getBgColor = () => {
-              if (row.Estatus === 'Pagado') return 'bg-emerald-50';
-              if (row.Estatus === 'Cancelado') return 'bg-red-50';
-              if (row.Estatus === 'Pago Parcial') return 'bg-yellow-50';
-              return 'bg-white';
-            };
-
-            return (
-              <div key={index} className={`rounded-2xl border-l-4 shadow-sm p-4 relative flex flex-col gap-3 ${getBorderColor()} ${getBgColor()}`}>
-                <button 
-                  onClick={() => removeRow(index)} 
-                  className="absolute top-3 right-3 p-1.5 text-stone-400 hover:text-red-500 hover:bg-red-100 rounded-md transition-colors"
+        <div ref={parentRefMobile} className={`md:hidden flex-col gap-4 mt-2 pb-28 overflow-y-auto max-h-[85vh] ${mobileView === 'cards' ? 'flex' : 'hidden'}`}>
+          <div style={{ height: `${rowVirtualizerMobile.getTotalSize()}px`, width: '100%', position: 'relative' }}>
+            {rowVirtualizerMobile.getVirtualItems().map((virtualRow) => {
+              const [row, index] = registrosFiltrados[virtualRow.index];
+              return (
+                <div 
+                  key={index} 
+                  data-index={virtualRow.index}
+                  ref={measureElementMobile}
+                  style={{ position: 'absolute', top: 0, left: 0, width: '100%', transform: `translateY(${virtualRow.start}px)` }}
                 >
-                  <Trash2 size={16} />
-                </button>
-
-                <div className="flex items-center justify-between mb-1 pr-8 border-b border-stone-200 pb-3">
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-stone-500 text-sm">Pta.</span>
-                    <input
-                      type="number"
-                      placeholder="Pta"
-                      value={row.Partida || ''}
-                      onChange={(e) => handleCellChange(index, 'Partida', e.target.value)}
-                      className="w-16 text-center bg-white border border-stone-200 focus:border-orange-400 rounded px-1 py-1 outline-none text-stone-700 text-xs font-bold shadow-inner"
-                    />
-                  </div>
-                  <PremiumSelect
-                    value={row.Estatus || 'Pendiente'}
-                    onChange={(val) => handleCellChange(index, 'Estatus', val)}
-                    options={[
-                      { value: 'Pendiente', label: 'Pendiente' },
-                      { value: 'Pagado', label: 'Pagado' },
-                      { value: 'Pago Parcial', label: 'Parcial' },
-                      { value: 'Cancelado', label: 'Cancelado' },
-                    ]}
-                    accent="orange"
-                    compact={true}
-                    className="w-28"
+                  <MobileRow 
+                    row={row}
+                    index={index}
+                    uploadingIndex={uploadingIndex}
+                    handleCellChange={handleCellChange}
+                    removeRow={removeRow}
+                    checkFolio={checkFolio}
+                    generateNoFacturable={generateNoFacturable}
+                    handleFileUpload={handleFileUpload}
+                    setPreviewFile={setPreviewFile}
                   />
                 </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="flex flex-col gap-1">
-                    <label className="text-[9px] uppercase font-bold text-stone-400 tracking-wider">Fecha Solicitud</label>
-                    <input type="date" value={row.Fecha_Sol || ''} onChange={(e) => handleCellChange(index, 'Fecha_Sol', e.target.value)} className="w-full bg-white border border-stone-200 focus:border-orange-400 rounded-lg px-2 py-2 outline-none text-sm" />
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-[9px] uppercase font-bold text-stone-400 tracking-wider">Fecha Pago</label>
-                    <input type="date" value={row.Fecha_Pago || ''} onChange={(e) => handleCellChange(index, 'Fecha_Pago', e.target.value)} className="w-full bg-white border border-stone-200 focus:border-orange-400 rounded-lg px-2 py-2 outline-none text-sm" />
-                  </div>
-                </div>
-
-                <div className="flex flex-col gap-1">
-                  <label className="text-[9px] uppercase font-bold text-stone-400 tracking-wider">Servicio / Producto</label>
-                  <input type="text" list="servicios-list" placeholder="Descripción..." value={row.Servicio_Producto || ''} onChange={(e) => handleCellChange(index, 'Servicio_Producto', e.target.value)} className="w-full bg-white border border-stone-200 focus:border-orange-400 rounded-lg px-3 py-2 outline-none text-sm font-medium" />
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="flex flex-col gap-1">
-                    <label className="text-[9px] uppercase font-bold text-stone-400 tracking-wider">Proveedor</label>
-                    <input type="text" list="proveedores-list" placeholder="Proveedor" value={row.Proveedor || ''} onChange={(e) => handleCellChange(index, 'Proveedor', e.target.value)} className="w-full bg-white border border-stone-200 focus:border-orange-400 rounded-lg px-2 py-2 outline-none text-sm" />
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-[9px] uppercase font-bold text-stone-400 tracking-wider">Empresa</label>
-                    <PremiumSelect
-                      value={row.Empresa || ''}
-                      onChange={(val) => handleCellChange(index, 'Empresa', val)}
-                      options={[{ value: 'AVH', label: 'AVH' }, { value: 'SIFYGSA', label: 'SIFYGSA' }, { value: 'SIAVSA', label: 'SIAVSA' }, { value: 'VIPSA', label: 'VIPSA' }]}
-                      accent="orange"
-                      compact={true}
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="flex flex-col gap-1">
-                    <label className="text-[9px] uppercase font-bold text-stone-400 tracking-wider">Monto $</label>
-                    <div className="relative">
-                      <span className="absolute left-2.5 top-2 text-orange-500 text-sm font-bold">$</span>
-                      <input type="number" min="0" step="0.01" placeholder="0.00" value={row.Monto || ''} onChange={(e) => handleCellChange(index, 'Monto', parseFloat(e.target.value) || 0)} className="w-full bg-white border border-stone-200 focus:border-orange-400 rounded-lg pl-6 pr-2 py-2 outline-none text-sm font-black text-stone-800 shadow-inner" />
-                    </div>
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-[9px] uppercase font-bold text-stone-400 tracking-wider">Solicitante</label>
-                    <input type="text" placeholder="Usuario" value={row.Usuario || ''} onChange={(e) => handleCellChange(index, 'Usuario', e.target.value)} className="w-full bg-white border border-stone-200 focus:border-orange-400 rounded-lg px-2 py-2 outline-none text-sm" />
-                  </div>
-                </div>
-
-                <div className="flex flex-col gap-1">
-                  <label className="text-[9px] uppercase font-bold text-stone-400 tracking-wider">Factura / Folio</label>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="text"
-                      placeholder="Folio/Factura..."
-                      value={row.Factura_Comprobacion || ''}
-                      onChange={(e) => handleCellChange(index, 'Factura_Comprobacion', e.target.value)}
-                      onBlur={(e) => checkFolio(index, e.target.value, row.Id)}
-                      className="w-full bg-white border border-stone-200 focus:border-orange-400 rounded-lg px-3 py-2 outline-none text-sm font-mono shadow-inner"
-                    />
-                    <button 
-                      onClick={() => generateNoFacturable(index)}
-                      title="Generar Folio NBF"
-                      className="p-2.5 text-orange-600 bg-orange-50 border border-orange-200 hover:text-white hover:bg-orange-500 rounded-lg transition-colors flex shrink-0 shadow-sm"
-                    >
-                      <Wand2 size={16} />
-                    </button>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between border-t border-stone-200 pt-3 mt-1">
-                  <span className="text-[9px] uppercase font-black text-stone-500 tracking-widest">Evidencia</span>
-                  {row.Comprobante_URL ? (
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setPreviewFile({ url: row.Comprobante_URL!, title: row.Factura_Comprobacion || `Partida #${row.Partida || (index + 1)}` })}
-                        className="px-3 py-1.5 bg-orange-100 text-[#cd5c24] hover:bg-orange-200 rounded-lg transition-colors flex items-center gap-1.5 text-xs font-bold shadow-sm"
-                      >
-                        <Eye size={14} /> Ver
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (window.confirm('¿Estás seguro de quitar este comprobante?')) {
-                            handleCellChange(index, 'Comprobante_URL', '');
-                          }
-                        }}
-                        className="px-2.5 py-1.5 text-stone-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                  ) : (
-                    <label className="cursor-pointer inline-flex items-center justify-center gap-1.5 px-4 py-1.5 bg-white border border-stone-200 hover:bg-orange-50 hover:border-orange-200 text-stone-600 hover:text-[#cd5c24] rounded-lg transition-all text-xs font-bold shadow-sm active:scale-95">
-                      {uploadingIndex === index ? (
-                        <Loader2 size={14} className="animate-spin text-[#cd5c24]" />
-                      ) : (
-                        <>
-                          <Paperclip size={13} />
-                          <span>Adjuntar</span>
-                        </>
-                      )}
-                      <input
-                        type="file"
-                        accept="image/*,application/pdf"
-                        className="hidden"
-                        disabled={uploadingIndex === index}
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) handleFileUpload(index, file);
-                        }}
-                      />
-                    </label>
-                  )}
-                </div>
-
-                {row.Estatus === 'Pago Parcial' && (
-                  <div className="flex flex-col gap-2 mt-2 bg-sky-50 p-3 rounded-xl border border-sky-200 shadow-inner">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-sky-800">Monto Pagado:</span>
-                      <div className="relative w-32">
-                        <span className="absolute left-2.5 top-1.5 text-sky-600 text-sm font-bold">$</span>
-                        <input
-                          type="number"
-                          min="0"
-                          step="0.01"
-                          placeholder="0.00"
-                          value={row.Monto_Pagado || ''}
-                          onChange={(e) => handleCellChange(index, 'Monto_Pagado', parseFloat(e.target.value) || 0)}
-                          className="w-full bg-white border border-sky-300 focus:border-sky-500 rounded-lg pl-7 pr-2 py-1.5 text-sm font-black text-sky-900 outline-none shadow-sm"
-                        />
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between pt-2 border-t border-sky-100">
-                      <span className="text-xs font-bold text-stone-500">Monto Restante:</span>
-                      <span className="text-sm font-black text-stone-700">
-                        {new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format((row.Monto || 0) - (row.Monto_Pagado || 0))}
-                      </span>
-                    </div>
-                  </div>
-                )}
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
 
       </div>

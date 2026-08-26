@@ -123,10 +123,10 @@ export default function PremiumSelect({
       {/* Dropdown menu */}
       {isOpen && !disabled && (
         <div 
-          className={`absolute z-30 w-full ${direction === 'up' ? 'bottom-full mb-2' : 'mt-2'} 
+          className={`absolute z-[100] min-w-full w-max max-w-[280px] left-0 ${direction === 'up' ? 'bottom-full mb-2' : 'mt-2'} 
             ${dark ? 'bg-[#0f0f0f] border border-white/10' : 'bg-[var(--bg-floating)] border border-[var(--border-cream)]'} 
-            rounded-xl ${colors.shadow} max-h-56 overflow-y-auto scrollbar-thin animate-in fade-in 
-            ${direction === 'up' ? 'slide-in-from-bottom-2' : 'slide-in-from-top-2'} duration-200`}
+            rounded-xl ${colors.shadow} max-h-56 overflow-y-auto overflow-x-hidden scrollbar-thin animate-in fade-in 
+            ${direction === 'up' ? 'slide-in-from-bottom-2' : 'slide-in-from-top-2'} duration-200 shadow-xl`}
         >
           <div className={`p-2 border-b ${dark ? 'border-white/5 bg-[#161616]' : 'border-b border-[var(--border-cream)] bg-[var(--bg-screen)]'} sticky top-0 z-10 flex items-center`}>
             {searchable ? (
@@ -140,22 +140,22 @@ export default function PremiumSelect({
                 autoFocus
               />
             ) : (
-              <span className="text-[10px] uppercase font-black text-stone-400 tracking-wider px-2">{placeholder}</span>
+              <span className="text-[10px] uppercase font-black text-stone-400 tracking-wider px-2 truncate block w-full">{placeholder}</span>
             )}
           </div>
           {filteredOptions.length === 0 ? (
-            <div className="py-4 text-center text-xs text-stone-400 font-semibold">No hay resultados</div>
+            <div className="py-4 text-center text-xs text-stone-400 font-semibold px-4">No hay resultados</div>
           ) : (
             filteredOptions.map(opt => (
             <div
               key={opt.value}
-              className={`px-4 ${compact ? 'py-2' : 'py-2.5'} text-xs font-semibold cursor-pointer transition-all duration-300 border-b 
-                ${dark ? 'border-white/5' : 'border-[var(--border-cream)]/30'} last:border-none 
+              className={`px-4 ${compact ? 'py-2' : 'py-2.5'} text-xs font-semibold cursor-pointer transition-all duration-200 border-b 
+                ${dark ? 'border-white/5' : 'border-[var(--border-cream)]/30'} last:border-none whitespace-nowrap
                 ${opt.disabled 
                   ? 'opacity-30 cursor-not-allowed' 
                   : (dark 
-                      ? 'hover:bg-white/5 hover:pl-6 hover:text-white' 
-                      : 'hover:bg-[var(--bg-hover)] hover:pl-6 hover:text-[var(--text-main)]'
+                      ? 'hover:bg-white/5 hover:text-white' 
+                      : 'hover:bg-[var(--bg-hover)] hover:text-[var(--text-main)]'
                     )
                 } 
                 ${value === opt.value 

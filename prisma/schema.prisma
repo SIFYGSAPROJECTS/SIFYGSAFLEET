@@ -581,3 +581,10 @@ model Movimiento_Consumible {
   
   consumible         Consumible @relation(fields: [Id_Consumible], references: [Id_Consumible], onDelete: Cascade)
 }
+
+model Catalogo_Proveedores {
+  Id_Proveedor Int      @id @default(autoincrement())
+  Nombre       String   @unique @db.VarChar(150)
+  Estatus      String   @default("Activo")
+  Fecha_Alta   DateTime @default(now())
+}

@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, memo, useCallback, useRef } from 'react';
 import { Car, Plus, X, Pencil, ArrowLeft, ShieldCheck, AlertTriangle, Wrench, CheckCircle2, Archive, RotateCcw, AlertCircle, User, FileText, Download, DollarSign, Filter, FolderOpen , CalendarCheck } from 'lucide-react';
 import Link from 'next/link';
 import SystemModal, { ModalType } from '@/components/ui/SystemModal';
 import PremiumSelect from '@/components/ui/PremiumSelect';
+import { useWindowVirtualizer } from '@tanstack/react-virtual';
 
 interface Vehiculo {
   Consecutivo: string;
@@ -31,6 +32,51 @@ interface Vehiculo {
 
 type TipoFiltroActivo = 'Activo en flota' | 'Siniestrado' | 'En Reparación' | 'Disponibles';
 type TabPrincipal = 'activos' | 'bajas';
+
+const DesktopRow = memo(({ auto, abrirModalEditar }: any) => (
+  <tr className="hover:bg-[var(--bg-hover)] even:bg-[var(--bg-screen)] transition-colors border-b border-[var(--border-cream)] last:border-0">
+    <td className="p-4">
+      <div className="font-bold text-[var(--text-main)] text-lg flex items-center gap-2 font-serif">
+        {auto.Consecutivo}
+        {auto.Estatus_Operativo === 'Siniestrado' && <AlertTriangle size={16} className="text-red-500" />}
+        {auto.Estatus_Operativo === 'En Reparación' && <Wrench size={16} className="text-yellow-500" />}
+      </div>
+      <span className={`inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-bold border uppercase ${auto.Estatus_Operativo === 'Activo en flota' ? 'bg-[#71717a]/10 text-[#71717a] border-[#71717a]/30' :
+          auto.Estatus_Operativo === 'En Reparación' ? 'bg-yellow-500/10 text-yellow-600 border-yellow-500/30' :
+            'bg-red-500/10 text-red-600 border-red-500/30'
+        }`}>{auto.Estatus_Operativo}</span>
+    </td>
+    <td className="p-4">
+      <div className="font-medium text-[var(--text-main)]">
+        {auto.Linea ? `(${auto.Linea}) ` : ''}{auto.Marca} {auto.Modelo}
+      </div>
+      <div className="text-sm text-[var(--text-muted)]">Placa: <span className="font-mono text-[var(--text-main)] font-bold">{auto.Placa}</span> • Color: {auto.Color}</div>
+    </td>
+    <td className="p-4">
+      <div className="text-sm text-[var(--text-muted)]"><span className="font-semibold text-stone-400">VIN:</span> {auto.Numero_Serie || 'N/A'}</div>
+      <div className="text-sm text-[var(--text-muted)]"><span className="font-semibold text-stone-400">Póliza:</span> {auto.Poliza_Seguro || 'N/A'}</div>
+    </td>
+    <td className="p-4 text-center">
+      <div className="font-mono font-bold text-[var(--text-main)] bg-stone-100 py-1 px-2 rounded-lg border border-[var(--border-cream)] inline-block">
+        {auto.Kilometraje_Actual ? `${Number(auto.Kilometraje_Actual).toLocaleString()} km` : <span className="text-stone-400 text-xs">Sin registro</span>}
+      </div>
+    </td>
+    <td className="p-4">
+      <div className="text-sm font-medium text-[var(--text-main)]">
+        {auto.encargado ? `${auto.encargado.Nombre_Empleado} ${auto.encargado.A_Paterno}` : <span className="text-stone-400 font-bold bg-stone-100 px-2 py-0.5 rounded border border-[var(--border-cream)]">Sin Asignar</span>}
+      </div>
+      <div className="text-xs text-[var(--text-muted)] mt-0.5">
+        {auto.Departamento ? `Depto: ${auto.Departamento}` : ''} {auto.Ubicacion ? `| Ubic: ${auto.Ubicacion}` : ''}
+      </div>
+    </td>
+    <td className="p-4 text-center">
+      <button onClick={() => abrirModalEditar(auto)} className="p-2 text-slate-500 hover:text-[#71717a] hover:bg-[#71717a]/10 rounded-lg transition-colors" title="Editar Unidad">
+        <Pencil className="w-5 h-5" />
+      </button>
+    </td>
+  </tr>
+));
+DesktopRow.displayName = 'DesktopRow';
 
 export default function InventarioMaestroPage() {
   const [vehiculos, setVehiculos] = useState<Vehiculo[]>([]);
@@ -139,7 +185,14 @@ export default function InventarioMaestroPage() {
     return v.Estatus_Operativo === filtroActivo;
   });
 
-  const abrirModalNuevo = () => {
+  const parentRef = useRef<HTMLDivElement>(null);
+  const rowVirtualizer = useWindowVirtualizer({
+    count: vehiculosFiltrados.length,
+    estimateSize: () => 90, 
+    overscan: 10,
+  });
+
+  const abrirModalNuevo = useCallback(() => {
     setModoEdicion(false);
     setFormData({
       Consecutivo: '', Placa: '', Marca: '', Modelo: '', Color: '', Linea: '',
@@ -147,9 +200,9 @@ export default function InventarioMaestroPage() {
       Email_encargado: '', Estado_Unidad: true, Estatus_Operativo: 'Activo en flota', Kilometraje_Actual: ''
     });
     setModalAbierto(true);
-  };
+  }, []);
 
-  const abrirModalEditar = (auto: Vehiculo) => {
+  const abrirModalEditar = useCallback((auto: Vehiculo) => {
     setModoEdicion(true);
     setFormData({
       Consecutivo: auto.Consecutivo,
@@ -170,7 +223,7 @@ export default function InventarioMaestroPage() {
       Kilometraje_Actual: auto.Kilometraje_Actual ? auto.Kilometraje_Actual.toString() : ''
     });
     setModalAbierto(true);
-  };
+  }, []);
 
   const guardarVehiculo = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -411,56 +464,34 @@ export default function InventarioMaestroPage() {
                       <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 text-center bg-stone-50" style={{ top: 'var(--fleet-header-height, 282px)' }}>Editar</th>
                     </tr>
                   </thead>
-                  <tbody className="">
-                    {cargando ? (
-                      <tr><td colSpan={6} className="text-center p-8 text-[var(--text-muted)] font-bold">Cargando flota activa... </td></tr>
-                    ) : vehiculosFiltrados.length === 0 ? (
-                      <tr><td colSpan={6} className="text-center p-8 text-[var(--text-muted)]">No hay vehículos en esta categoría.</td></tr>
-                    ) : (
-                      vehiculosFiltrados.map((auto) => (
-                        <tr key={auto.Consecutivo} className="hover:bg-[var(--bg-hover)] even:bg-[var(--bg-screen)] transition-colors">
-                          <td className="p-4">
-                            <div className="font-bold text-[var(--text-main)] text-lg flex items-center gap-2 font-serif">
-                              {auto.Consecutivo}
-                              {auto.Estatus_Operativo === 'Siniestrado' && <AlertTriangle size={16} className="text-red-500" />}
-                              {auto.Estatus_Operativo === 'En Reparación' && <Wrench size={16} className="text-yellow-500" />}
-                            </div>
-                            <span className={`inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-bold border uppercase ${auto.Estatus_Operativo === 'Activo en flota' ? 'bg-[#71717a]/10 text-[#71717a] border-[#71717a]/30' :
-                                auto.Estatus_Operativo === 'En Reparación' ? 'bg-yellow-500/10 text-yellow-600 border-yellow-500/30' :
-                                  'bg-red-500/10 text-red-600 border-red-500/30'
-                              }`}>{auto.Estatus_Operativo}</span>
-                          </td>
-                          <td className="p-4">
-                            <div className="font-medium text-[var(--text-main)]">
-                              {auto.Linea ? `(${auto.Linea}) ` : ''}{auto.Marca} {auto.Modelo}
-                            </div>
-                            <div className="text-sm text-[var(--text-muted)]">Placa: <span className="font-mono text-[var(--text-main)] font-bold">{auto.Placa}</span> • Color: {auto.Color}</div>
-                          </td>
-                          <td className="p-4">
-                            <div className="text-sm text-[var(--text-muted)]"><span className="font-semibold text-stone-400">VIN:</span> {auto.Numero_Serie || 'N/A'}</div>
-                            <div className="text-sm text-[var(--text-muted)]"><span className="font-semibold text-stone-400">Póliza:</span> {auto.Poliza_Seguro || 'N/A'}</div>
-                          </td>
-                          <td className="p-4 text-center">
-                            <div className="font-mono font-bold text-[var(--text-main)] bg-stone-100 py-1 px-2 rounded-lg border border-[var(--border-cream)] inline-block">
-                              {auto.Kilometraje_Actual ? `${Number(auto.Kilometraje_Actual).toLocaleString()} km` : <span className="text-stone-400 text-xs">Sin registro</span>}
-                            </div>
-                          </td>
-                          <td className="p-4">
-                            <div className="text-sm font-medium text-[var(--text-main)]">
-                              {auto.encargado ? `${auto.encargado.Nombre_Empleado} ${auto.encargado.A_Paterno}` : <span className="text-stone-400 font-bold bg-stone-100 px-2 py-0.5 rounded border border-[var(--border-cream)]">Sin Asignar</span>}
-                            </div>
-                            <div className="text-xs text-[var(--text-muted)] mt-0.5">
-                              {auto.Departamento ? `Depto: ${auto.Departamento}` : ''} {auto.Ubicacion ? `| Ubic: ${auto.Ubicacion}` : ''}
-                            </div>
-                          </td>
-                          <td className="p-4 text-center">
-                            <button onClick={() => abrirModalEditar(auto)} className="p-2 text-slate-500 hover:text-[#71717a] hover:bg-[#71717a]/10 rounded-lg transition-colors" title="Editar Unidad">
-                              <Pencil className="w-5 h-5" />
-                            </button>
-                          </td>
-                        </tr>
-                      ))
-                    )}
+                  <tbody className="relative">
+                    {(() => {
+                      const virtualItems = rowVirtualizer.getVirtualItems();
+                      const paddingTop = virtualItems.length > 0 ? virtualItems[0]?.start || 0 : 0;
+                      const paddingBottom = virtualItems.length > 0 ? rowVirtualizer.getTotalSize() - (virtualItems[virtualItems.length - 1]?.end || 0) : 0;
+                      
+                      if (cargando) return <tr><td colSpan={6} className="text-center p-8 text-[var(--text-muted)] font-bold">Cargando flota activa... </td></tr>;
+                      if (vehiculosFiltrados.length === 0) return <tr><td colSpan={6} className="text-center p-8 text-[var(--text-muted)]">No hay vehículos en esta categoría.</td></tr>;
+
+                      return (
+                        <>
+                          {paddingTop > 0 && <tr><td style={{height: paddingTop}} colSpan={6} /></tr>}
+                          
+                          {virtualItems.map((virtualRow) => {
+                            const auto = vehiculosFiltrados[virtualRow.index];
+                            return (
+                              <DesktopRow 
+                                key={virtualRow.index} 
+                                auto={auto} 
+                                abrirModalEditar={abrirModalEditar} 
+                              />
+                            );
+                          })}
+                          
+                          {paddingBottom > 0 && <tr><td style={{height: paddingBottom}} colSpan={6} /></tr>}
+                        </>
+                      );
+                    })()}
                   </tbody>
                 </table>
               </div>

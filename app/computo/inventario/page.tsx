@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, memo, useCallback } from 'react';
 import { Laptop, Plus, X, Pencil, ArrowLeft, ShieldCheck, AlertTriangle, Wrench, CheckCircle2, Archive, Download, Filter, UploadCloud, Search, FileText } from 'lucide-react';
 import Link from 'next/link';
 import SystemModal, { ModalType } from '@/components/ui/SystemModal';
 import { generarCartaResponsiva } from '@/lib/pdf/generarCartaComputo';
 import PremiumSelect from '@/components/ui/PremiumSelect';
+import { useWindowVirtualizer } from '@tanstack/react-virtual';
 
 interface EquipoComputo {
   C_Interno: string;
@@ -25,6 +26,105 @@ interface EquipoComputo {
   Proveedor: string | null;
   Email_Empleado: string | null;
 }
+
+const DesktopRow = memo(({ equipo, esAsignado, esRevision, esBaja, generarCartaResponsiva, abrirModalEditar }: any) => (
+  <tr className="hover:bg-[var(--bg-hover)] even:bg-[var(--bg-screen)] transition-colors border-b border-[var(--border-cream)] last:border-0">
+    <td className="p-4">
+      <div className="font-bold text-[var(--text-main)] text-base font-serif">{equipo.C_Interno}</div>
+      <div className="text-xs text-[var(--text-muted)] mt-1 font-mono">{equipo.Empresa}</div>
+    </td>
+    <td className="p-4">
+      <div className="font-medium text-[var(--text-main)]">{equipo.Tipo} {equipo.Marca}</div>
+      <div className="text-sm text-[var(--text-muted)]">{equipo.Modelo}</div>
+    </td>
+    <td className="p-4">
+      <div className="text-sm text-[var(--text-muted)]"><span className="font-semibold text-stone-400">ST:</span> {equipo.Service_Tag || 'N/A'}</div>
+      <div className="text-sm text-[var(--text-muted)]"><span className="font-semibold text-stone-400">Cargador:</span> {equipo.Cargador || 'N/A'}</div>
+    </td>
+    <td className="p-4">
+      <div className="text-sm font-medium text-[var(--text-main)]">{equipo.Usuario || <span className="text-stone-400 italic">Sin asignar</span>}</div>
+      <div className="text-xs text-[var(--text-muted)]">{equipo.Departamento} {equipo.N_EMP ? `(#${equipo.N_EMP})` : ''}</div>
+    </td>
+    <td className="p-4">
+      <div className="text-sm text-[var(--text-main)] font-medium">{equipo.Puesto_Proyecto || <span className="text-stone-400 italic">N/A</span>}</div>
+    </td>
+    <td className="p-4">
+      <div className="text-sm text-[var(--text-main)]">{equipo.Proveedor || <span className="text-stone-400 italic">N/A</span>}</div>
+    </td>
+    <td className="p-4 text-center">
+      <button onClick={() => generarCartaResponsiva(equipo)} className="p-2 text-indigo-500 hover:text-white hover:bg-indigo-500 rounded-lg transition-colors border border-indigo-200 shadow-sm" title="Descargar PDF Carta Responsiva">
+        <FileText className="w-5 h-5" />
+      </button>
+    </td>
+    <td className="p-4 text-center">
+      <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase mb-1 ${esAsignado ? 'bg-emerald-100 text-emerald-700' : esRevision ? 'bg-amber-100 text-amber-700' : esBaja ? 'bg-red-100 text-red-700' : 'bg-stone-200 text-stone-700'}`}>{equipo.Estatus}</span>
+      <div className="text-xs text-[var(--text-muted)]"><span className="font-bold text-stone-500">CR:</span> {equipo.CR === 'SI' ? '✅ SI' : '❌ NO'}</div>
+    </td>
+    <td className="p-4 text-center">
+      <button onClick={() => abrirModalEditar(equipo)} className="p-2 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors" title="Editar Equipo">
+        <Pencil className="w-5 h-5" />
+      </button>
+    </td>
+  </tr>
+));
+DesktopRow.displayName = 'DesktopRow';
+
+const MobileCard = memo(({ equipo, tabPrincipal, generarCartaResponsiva, abrirModalEditar }: any) => (
+  <div className={`bg-[var(--bg-floating)] rounded-xl shadow-lg border border-[var(--border-cream)] border-t-4 ${tabPrincipal === 'revision' ? 'border-t-amber-500' : 'border-t-red-500'} overflow-hidden hover:shadow-xl transition-all flex flex-col`}>
+    <div className="p-5 flex-grow">
+      <div className="flex justify-between items-start mb-4">
+        <div>
+          <h3 className="font-bold text-[var(--text-main)] text-lg font-serif">{equipo.C_Interno}</h3>
+          <p className="text-xs text-[var(--text-muted)] font-mono mt-0.5">{equipo.Empresa}</p>
+        </div>
+        <span className={`${tabPrincipal === 'revision' ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'} px-2 py-0.5 rounded text-[10px] font-bold uppercase shrink-0 ml-2`}>{equipo.Estatus}</span>
+      </div>
+
+      <div className="space-y-4 mb-2">
+        <div>
+          <p className="text-[10px] text-stone-500 uppercase font-bold tracking-wider mb-1">Equipo</p>
+          <p className="font-medium text-sm text-[var(--text-main)]">{equipo.Tipo} {equipo.Marca}</p>
+          <p className="text-xs text-[var(--text-muted)]">{equipo.Modelo}</p>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <div className="bg-[var(--bg-screen)] p-2 rounded-lg border border-[var(--border-cream)]">
+            <p className="text-[10px] text-stone-500 uppercase font-bold mb-1">Service Tag</p>
+            <p className="text-xs font-medium text-[var(--text-main)] truncate" title={equipo.Service_Tag || 'N/A'}>{equipo.Service_Tag || 'N/A'}</p>
+          </div>
+          <div className="bg-[var(--bg-screen)] p-2 rounded-lg border border-[var(--border-cream)]">
+            <p className="text-[10px] text-stone-500 uppercase font-bold mb-1">Cargador</p>
+            <p className="text-xs font-medium text-[var(--text-main)] truncate" title={equipo.Cargador || 'N/A'}>{equipo.Cargador || 'N/A'}</p>
+          </div>
+        </div>
+
+        <div>
+          <p className="text-[10px] text-stone-500 uppercase font-bold tracking-wider mb-1">Último Asignado</p>
+          <p className="font-medium text-sm text-[var(--text-main)] truncate" title={equipo.Usuario || 'N/A'}>{equipo.Usuario || <span className="text-stone-400 italic">Sin asignar</span>}</p>
+          <p className="text-xs text-[var(--text-muted)] truncate" title={equipo.Departamento || ''}>{equipo.Departamento} {equipo.N_EMP ? `(#${equipo.N_EMP})` : ''}</p>
+        </div>
+
+        <div className="bg-[var(--bg-screen)] p-2 rounded-lg border border-[var(--border-cream)] mt-1">
+          <p className="text-[10px] text-stone-500 uppercase font-bold mb-1">Proveedor / Rentadora</p>
+          <p className="text-xs font-medium text-[var(--text-main)] truncate" title={equipo.Proveedor || 'N/A'}>{equipo.Proveedor || <span className="text-stone-400 italic">N/A</span>}</p>
+        </div>
+      </div>
+    </div>
+
+    <div className="bg-[var(--bg-screen)] border-t border-[var(--border-cream)] p-3 flex justify-between items-center px-5 mt-auto">
+      <div className="text-xs text-[var(--text-muted)]"><span className="font-bold text-stone-500">CR:</span> {equipo.CR === 'SI' ? '✅ SI' : '❌ NO'}</div>
+      <div className="flex gap-1">
+        <button onClick={() => generarCartaResponsiva(equipo)} className="p-2 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="Generar Carta Responsiva">
+          <FileText className="w-4 h-4" />
+        </button>
+        <button onClick={() => abrirModalEditar(equipo)} className="p-2 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors" title="Editar Equipo">
+          <Pencil className="w-4 h-4" />
+        </button>
+      </div>
+    </div>
+  </div>
+));
+MobileCard.displayName = 'MobileCard';
 
 type TabPrincipal = 'activos' | 'bajas' | 'revision';
 
@@ -49,6 +149,8 @@ export default function ComputoInventarioPage() {
     Estatus: 'Asignado', CR: 'NO', Fecha_CR: '', Proveedor: ''
   });
 
+  // Limite de equipos mantenido sólo para fallback de vista Grid (MobileCard), 
+  // la tabla Desktop usará virtualización.
   const [limiteEquipos, setLimiteEquipos] = useState(50);
 
   useEffect(() => {
@@ -158,7 +260,14 @@ export default function ComputoInventarioPage() {
     return e.Estatus === filtroEstatus;
   });
 
-  const abrirModalNuevo = () => {
+  const parentRef = useRef<HTMLDivElement>(null);
+  const rowVirtualizer = useWindowVirtualizer({
+    count: equiposFiltrados.length,
+    estimateSize: () => 100, // Alto estimado de la fila
+    overscan: 10,
+  });
+
+  const abrirModalNuevo = useCallback(() => {
     setModoEdicion(false);
     setFormData({
       C_Interno: '', Empresa: '', Tipo: 'Laptop', Marca: '', Modelo: '', Service_Tag: '', Cargador: '',
@@ -166,9 +275,9 @@ export default function ComputoInventarioPage() {
       Estatus: 'Asignado', CR: 'NO', Fecha_CR: '', Proveedor: ''
     });
     setModalAbierto(true);
-  };
+  }, []);
 
-  const abrirModalEditar = (equipo: EquipoComputo) => {
+  const abrirModalEditar = useCallback((equipo: EquipoComputo) => {
     setModoEdicion(true);
     setFormData({
       C_Interno: equipo.C_Interno,
@@ -188,7 +297,11 @@ export default function ComputoInventarioPage() {
       Proveedor: equipo.Proveedor || ''
     });
     setModalAbierto(true);
-  };
+  }, []);
+
+  const memoGenerarCartaResponsiva = useCallback((equipo: any) => {
+    generarCartaResponsiva(equipo);
+  }, []);
 
   const guardarEquipo = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -491,59 +604,13 @@ export default function ComputoInventarioPage() {
                   <div className="col-span-full p-8 text-center text-[var(--text-muted)] bg-[var(--bg-floating)] rounded-xl shadow border border-[var(--border-cream)]">No hay equipos que coincidan con los filtros.</div>
                 ) : (
                   equiposFiltrados.slice(0, limiteEquipos).map((equipo) => (
-                    <div key={equipo.C_Interno} className={`bg-[var(--bg-floating)] rounded-xl shadow-lg border border-[var(--border-cream)] border-t-4 ${tabPrincipal === 'revision' ? 'border-t-amber-500' : 'border-t-red-500'} overflow-hidden hover:shadow-xl transition-all flex flex-col`}>
-                      <div className="p-5 flex-grow">
-                        <div className="flex justify-between items-start mb-4">
-                          <div>
-                            <h3 className="font-bold text-[var(--text-main)] text-lg font-serif">{equipo.C_Interno}</h3>
-                            <p className="text-xs text-[var(--text-muted)] font-mono mt-0.5">{equipo.Empresa}</p>
-                          </div>
-                          <span className={`${tabPrincipal === 'revision' ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'} px-2 py-0.5 rounded text-[10px] font-bold uppercase shrink-0 ml-2`}>{equipo.Estatus}</span>
-                        </div>
-
-                        <div className="space-y-4 mb-2">
-                          <div>
-                            <p className="text-[10px] text-stone-500 uppercase font-bold tracking-wider mb-1">Equipo</p>
-                            <p className="font-medium text-sm text-[var(--text-main)]">{equipo.Tipo} {equipo.Marca}</p>
-                            <p className="text-xs text-[var(--text-muted)]">{equipo.Modelo}</p>
-                          </div>
-
-                          <div className="grid grid-cols-2 gap-3">
-                            <div className="bg-[var(--bg-screen)] p-2 rounded-lg border border-[var(--border-cream)]">
-                              <p className="text-[10px] text-stone-500 uppercase font-bold mb-1">Service Tag</p>
-                              <p className="text-xs font-medium text-[var(--text-main)] truncate" title={equipo.Service_Tag || 'N/A'}>{equipo.Service_Tag || 'N/A'}</p>
-                            </div>
-                            <div className="bg-[var(--bg-screen)] p-2 rounded-lg border border-[var(--border-cream)]">
-                              <p className="text-[10px] text-stone-500 uppercase font-bold mb-1">Cargador</p>
-                              <p className="text-xs font-medium text-[var(--text-main)] truncate" title={equipo.Cargador || 'N/A'}>{equipo.Cargador || 'N/A'}</p>
-                            </div>
-                          </div>
-
-                          <div>
-                            <p className="text-[10px] text-stone-500 uppercase font-bold tracking-wider mb-1">Último Asignado</p>
-                            <p className="font-medium text-sm text-[var(--text-main)] truncate" title={equipo.Usuario || 'N/A'}>{equipo.Usuario || <span className="text-stone-400 italic">Sin asignar</span>}</p>
-                            <p className="text-xs text-[var(--text-muted)] truncate" title={equipo.Departamento || ''}>{equipo.Departamento} {equipo.N_EMP ? `(#${equipo.N_EMP})` : ''}</p>
-                          </div>
-
-                          <div className="bg-[var(--bg-screen)] p-2 rounded-lg border border-[var(--border-cream)] mt-1">
-                            <p className="text-[10px] text-stone-500 uppercase font-bold mb-1">Proveedor / Rentadora</p>
-                            <p className="text-xs font-medium text-[var(--text-main)] truncate" title={equipo.Proveedor || 'N/A'}>{equipo.Proveedor || <span className="text-stone-400 italic">N/A</span>}</p>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="bg-[var(--bg-screen)] border-t border-[var(--border-cream)] p-3 flex justify-between items-center px-5 mt-auto">
-                        <div className="text-xs text-[var(--text-muted)]"><span className="font-bold text-stone-500">CR:</span> {equipo.CR === 'SI' ? '✅ SI' : '❌ NO'}</div>
-                        <div className="flex gap-1">
-                          <button onClick={() => generarCartaResponsiva(equipo as any)} className="p-2 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="Generar Carta Responsiva">
-                            <FileText className="w-4 h-4" />
-                          </button>
-                          <button onClick={() => abrirModalEditar(equipo)} className="p-2 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors" title="Editar Equipo">
-                            <Pencil className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
+                    <MobileCard 
+                      key={equipo.C_Interno}
+                      equipo={equipo}
+                      tabPrincipal={tabPrincipal}
+                      generarCartaResponsiva={memoGenerarCartaResponsiva}
+                      abrirModalEditar={abrirModalEditar}
+                    />
                   ))
                 )}
               </div>
@@ -578,66 +645,41 @@ export default function ComputoInventarioPage() {
                       <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 text-center bg-stone-50" style={{ top: 'var(--computo-header-height, 210px)' }}>Editar</th>
                     </tr>
                   </thead>
-                  <tbody>
-                    {cargando ? (
-                      <tr><td colSpan={9} className="text-center p-8 text-[var(--text-muted)] font-bold">Cargando inventario...</td></tr>
-                    ) : equiposFiltrados.length === 0 ? (
-                      <tr><td colSpan={9} className="text-center p-8 text-[var(--text-muted)]">No hay equipos que coincidan con los filtros.</td></tr>
-                    ) : (
-                      equiposFiltrados.slice(0, limiteEquipos).map((equipo) => (
-                        <tr key={equipo.C_Interno} className="hover:bg-[var(--bg-hover)] even:bg-[var(--bg-screen)] transition-colors border-b border-[var(--border-cream)] last:border-0">
-                          <td className="p-4">
-                            <div className="font-bold text-[var(--text-main)] text-base font-serif">{equipo.C_Interno}</div>
-                            <div className="text-xs text-[var(--text-muted)] mt-1 font-mono">{equipo.Empresa}</div>
-                          </td>
-                          <td className="p-4">
-                            <div className="font-medium text-[var(--text-main)]">{equipo.Tipo} {equipo.Marca}</div>
-                            <div className="text-sm text-[var(--text-muted)]">{equipo.Modelo}</div>
-                          </td>
-                          <td className="p-4">
-                            <div className="text-sm text-[var(--text-muted)]"><span className="font-semibold text-stone-400">ST:</span> {equipo.Service_Tag || 'N/A'}</div>
-                            <div className="text-sm text-[var(--text-muted)]"><span className="font-semibold text-stone-400">Cargador:</span> {equipo.Cargador || 'N/A'}</div>
-                          </td>
-                          <td className="p-4">
-                            <div className="text-sm font-medium text-[var(--text-main)]">{equipo.Usuario || <span className="text-stone-400 italic">Sin asignar</span>}</div>
-                            <div className="text-xs text-[var(--text-muted)]">{equipo.Departamento} {equipo.N_EMP ? `(#${equipo.N_EMP})` : ''}</div>
-                          </td>
-                          <td className="p-4">
-                            <div className="text-sm text-[var(--text-main)] font-medium">{equipo.Puesto_Proyecto || <span className="text-stone-400 italic">N/A</span>}</div>
-                          </td>
-                          <td className="p-4">
-                            <div className="text-sm text-[var(--text-main)]">{equipo.Proveedor || <span className="text-stone-400 italic">N/A</span>}</div>
-                          </td>
-                          <td className="p-4 text-center">
-                            <button onClick={() => generarCartaResponsiva(equipo as any)} className="p-2 text-indigo-500 hover:text-white hover:bg-indigo-500 rounded-lg transition-colors border border-indigo-200 shadow-sm" title="Descargar PDF Carta Responsiva">
-                              <FileText className="w-5 h-5" />
-                            </button>
-                          </td>
-                          <td className="p-4 text-center">
-                            <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase mb-1 ${esAsignado(equipo) ? 'bg-emerald-100 text-emerald-700' : esRevision(equipo) ? 'bg-amber-100 text-amber-700' : esBaja(equipo) ? 'bg-red-100 text-red-700' : 'bg-stone-200 text-stone-700'}`}>{equipo.Estatus}</span>
-                            <div className="text-xs text-[var(--text-muted)]"><span className="font-bold text-stone-500">CR:</span> {equipo.CR === 'SI' ? '✅ SI' : '❌ NO'}</div>
-                          </td>
-                          <td className="p-4 text-center">
-                            <button onClick={() => abrirModalEditar(equipo)} className="p-2 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors" title="Editar Equipo">
-                              <Pencil className="w-5 h-5" />
-                            </button>
-                          </td>
-                        </tr>
-                      ))
-                    )}
+                  <tbody className="relative">
+                    {(() => {
+                      const virtualItems = rowVirtualizer.getVirtualItems();
+                      const paddingTop = virtualItems.length > 0 ? virtualItems[0]?.start || 0 : 0;
+                      const paddingBottom = virtualItems.length > 0 ? rowVirtualizer.getTotalSize() - (virtualItems[virtualItems.length - 1]?.end || 0) : 0;
+                      
+                      if (cargando) return <tr><td colSpan={9} className="text-center p-8 text-[var(--text-muted)] font-bold">Cargando inventario...</td></tr>;
+                      if (equiposFiltrados.length === 0) return <tr><td colSpan={9} className="text-center p-8 text-[var(--text-muted)]">No hay equipos que coincidan con los filtros.</td></tr>;
+
+                      return (
+                        <>
+                          {paddingTop > 0 && <tr><td style={{height: paddingTop}} colSpan={9} /></tr>}
+                          
+                          {virtualItems.map((virtualRow) => {
+                            const equipo = equiposFiltrados[virtualRow.index];
+                            return (
+                              <DesktopRow
+                                key={virtualRow.index}
+                                equipo={equipo}
+                                esAsignado={esAsignado(equipo)}
+                                esRevision={esRevision(equipo)}
+                                esBaja={esBaja(equipo)}
+                                generarCartaResponsiva={memoGenerarCartaResponsiva}
+                                abrirModalEditar={abrirModalEditar}
+                              />
+                            );
+                          })}
+                          
+                          {paddingBottom > 0 && <tr><td style={{height: paddingBottom}} colSpan={9} /></tr>}
+                        </>
+                      );
+                    })()}
                   </tbody>
                 </table>
               </div>
-              {equiposFiltrados.length > limiteEquipos && (
-                <div className="p-4 border-t border-[var(--border-cream)] text-center bg-stone-50/50 rounded-b-xl">
-                  <button
-                    onClick={() => setLimiteEquipos(prev => prev + 50)}
-                    className="px-6 py-2.5 bg-white hover:bg-[var(--bg-hover)] border border-[var(--border-cream)] text-[var(--text-main)] rounded-xl font-bold transition-all shadow-sm text-sm active:scale-95"
-                  >
-                    Mostrar más equipos (+{equiposFiltrados.length - limiteEquipos} restantes)
-                  </button>
-                </div>
-              )}
             </div>
           )}
         </div>

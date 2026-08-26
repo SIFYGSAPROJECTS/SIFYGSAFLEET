@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, memo, useRef, useCallback } from 'react';
 import { UserPlus, X, Pencil, ShieldAlert, ShieldCheck, UserMinus, UserCheck, Loader2, AlertTriangle, Car, PlusCircle, Download } from 'lucide-react';
 import SystemModal, { ModalType } from '@/components/ui/SystemModal';
 import PremiumSelect from '@/components/ui/PremiumSelect';
+import { useWindowVirtualizer } from '@tanstack/react-virtual';
 
 interface Empleado {
   Email: string;
@@ -24,6 +25,78 @@ interface Vehiculo {
   Modelo: string;
   Email_encargado: string | null;
 }
+
+const DesktopRow = memo(({ emp, filtroTab, abrirModalEditar, solicitarCambioAcceso }: any) => (
+  <tr className="hover:bg-[var(--bg-hover)] even:bg-[var(--bg-screen)] transition-colors">
+    <td className="p-4">
+      <div className="flex items-center gap-3">
+        <div className={`w-10 h-10 rounded-full flex items-center justify-center font-black text-xs border shadow-sm transition-transform group-hover:scale-110 ${['ADMIN', 'GERENCIAL'].includes(emp.Rol) ? 'bg-[#71717a] border-[#52525b] text-white shadow-[#71717a]/20' : 'bg-white border-[var(--border-cream)] text-[#71717a] shadow-md shadow-stone-200/50'}`}>
+          {emp.Nombre_Empleado.charAt(0)}{emp.A_Paterno.charAt(0)}
+        </div>
+        <div>
+          <div className="font-bold text-[var(--text-main)] leading-tight">{emp.Nombre_Empleado} {emp.A_Paterno}</div>
+          <div className="text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-tighter">{emp.A_Materno}</div>
+        </div>
+      </div>
+    </td>
+    <td className="p-4 text-sm text-[var(--text-muted)] font-mono italic">{emp.Email}</td>
+    <td className="p-4 text-sm text-[var(--text-muted)]">
+      <div className="font-bold text-[var(--text-main)]">{emp.Cargo || 'Sin cargo'}</div>
+      <div className="text-xs text-[var(--text-muted)]">{emp.Departamento || 'General'}</div>
+    </td>
+    <td className="p-4 text-center">
+      <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-black tracking-widest border ${['ADMIN', 'GERENCIAL'].includes(emp.Rol) ? 'bg-blue-50 text-blue-600 border-blue-200' : 'bg-stone-50 text-[var(--text-muted)] border-[var(--border-cream)]'}`}>
+        {emp.Rol}
+      </span>
+    </td>
+    <td className="p-4 text-center flex justify-center gap-2">
+      <button onClick={() => abrirModalEditar(emp)} className="p-2 text-[var(--text-muted)] hover:text-[#71717a] hover:bg-[var(--bg-hover)] rounded-lg transition-colors" title="Editar">
+        <Pencil className="w-4 h-4" />
+      </button>
+      <button onClick={() => solicitarCambioAcceso(emp)} className={`p-2 rounded-lg transition-colors ${filtroTab === 'Activo' ? 'text-[var(--text-muted)] hover:text-red-500 hover:bg-red-500/10' : 'text-[var(--text-muted)] hover:text-stone-600 hover:bg-[var(--bg-hover)]'}`} title={filtroTab === 'Activo' ? "Revocar Acceso" : "Restaurar Acceso"}>
+        {filtroTab === 'Activo' ? <UserMinus className="w-5 h-5" /> : <UserCheck className="w-5 h-5" />}
+      </button>
+    </td>
+  </tr>
+));
+DesktopRow.displayName = 'DesktopRow';
+
+const MobileCard = memo(({ emp, filtroTab, abrirModalEditar, solicitarCambioAcceso }: any) => (
+  <div className="p-5 flex flex-col gap-4 active:bg-[var(--bg-hover)] transition-colors border-b border-[var(--border-cream)] last:border-0">
+    <div className="flex justify-between items-start">
+      <div className="flex items-center gap-3">
+        <div className={`w-12 h-12 rounded-full flex items-center justify-center font-black text-base border shrink-0 shadow-lg ${['ADMIN', 'GERENCIAL'].includes(emp.Rol) ? 'bg-[#71717a] border-[#52525b] text-white' : 'bg-white border-[var(--border-cream)] text-[#71717a]'} font-serif`}>
+          {emp.Nombre_Empleado.charAt(0)}{emp.A_Paterno.charAt(0)}
+        </div>
+        <div className="overflow-hidden">
+          <div className="font-bold text-[var(--text-main)] text-lg truncate font-serif">{emp.Nombre_Empleado} {emp.A_Paterno}</div>
+          <div className="text-xs text-[var(--text-muted)] font-mono truncate">{emp.Email}</div>
+        </div>
+      </div>
+    </div>
+
+    <div className="grid grid-cols-2 gap-3 bg-stone-50 p-3 rounded-xl border border-[var(--border-cream)]">
+      <div className="flex flex-col gap-1">
+        <span className="text-[9px] text-[var(--text-muted)] font-black uppercase tracking-widest">Cargo</span>
+        <span className="text-xs text-[var(--text-main)] font-medium truncate">{emp.Cargo || 'S/N'}</span>
+      </div>
+      <div className="flex flex-col gap-1 border-l border-[var(--border-cream)] pl-3">
+        <span className="text-[9px] text-[var(--text-muted)] font-black uppercase tracking-widest">Rol</span>
+        <span className={`text-[10px] font-black tracking-widest uppercase ${['ADMIN', 'GERENCIAL'].includes(emp.Rol) ? 'text-blue-600' : 'text-stone-500'}`}>{emp.Rol}</span>
+      </div>
+    </div>
+
+    <div className="flex gap-2 mt-2">
+      <button onClick={() => abrirModalEditar(emp)} className="flex-1 flex items-center justify-center gap-2 bg-white border border-[var(--border-cream)] hover:bg-[var(--bg-hover)] text-[var(--text-main)] p-3 rounded-xl transition-colors text-sm font-bold shadow-sm">
+        <Pencil size={16} /> Editar
+      </button>
+      <button onClick={() => solicitarCambioAcceso(emp)} className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-xl font-bold transition-colors text-sm ${filtroTab === 'Activo' ? 'bg-red-500/10 text-red-600 hover:bg-red-500/20' : 'bg-stone-200 text-stone-600 hover:bg-[var(--bg-hover)]'}`}>
+        {filtroTab === 'Activo' ? <><UserMinus size={16} /> Bloquear</> : <><UserCheck size={16} /> Activar</>}
+      </button>
+    </div>
+  </div>
+));
+MobileCard.displayName = 'MobileCard';
 
 export default function PersonalPage() {
   const [empleados, setEmpleados] = useState<Empleado[]>([]);
@@ -106,15 +179,22 @@ export default function PersonalPage() {
   const totalActivos = empleados.filter(e => (e.Estatus_Acceso || 'Activo') === 'Activo').length;
   const totalInactivos = empleados.filter(e => e.Estatus_Acceso === 'Inactivo').length;
 
-  const abrirModalNuevo = () => {
+  const parentRef = useRef<HTMLDivElement>(null);
+  const rowVirtualizer = useWindowVirtualizer({
+    count: empleadosFiltrados.length,
+    estimateSize: () => 80, 
+    overscan: 10,
+  });
+
+  const abrirModalNuevo = useCallback(() => {
     setModoEdicion(false);
     setBusquedaVehiculo(''); // Limpiamos el buscador
     setVehiculoSeleccionado(null);
     setFormData({ Email: '', Nombre_Empleado: '', A_Paterno: '', A_Materno: '', Cargo: '', Departamento: '', Rol: 'USER', Admin_TI: false, Estatus_Acceso: 'Activo' });
     setModalAbierto(true);
-  };
+  }, []);
 
-  const abrirModalEditar = (emp: Empleado) => {
+  const abrirModalEditar = useCallback((emp: Empleado) => {
     setModoEdicion(true);
     
     //  Buscamos si el empleado tiene unidad y la ponemos en el buscador
@@ -127,7 +207,7 @@ export default function PersonalPage() {
       Cargo: emp.Cargo || '', Departamento: emp.Departamento || '', Rol: emp.Rol, Admin_TI: emp.Admin_TI || false, Estatus_Acceso: emp.Estatus_Acceso || 'Activo'
     });
     setModalAbierto(true);
-  };
+  }, [vehiculos]);
 
   //  FILTRO DEL BUSCADOR: Muestra coincidencias por Consecutivo
   const sugerenciasVehiculos = vehiculos.filter(v => {
@@ -135,10 +215,10 @@ export default function PersonalPage() {
     return v.Consecutivo.toLowerCase().includes(busquedaVehiculo.toLowerCase());
   });
 
-  const solicitarCambioAcceso = (emp: Empleado) => {
+  const solicitarCambioAcceso = useCallback((emp: Empleado) => {
     setEmpleadoSeleccionado(emp);
     setModalAccesoAbierto(true);
-  };
+  }, []);
 
   const confirmarCambioAcceso = async () => {
     if (!empleadoSeleccionado) return;
@@ -289,46 +369,36 @@ export default function PersonalPage() {
                 <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 text-center bg-stone-50" style={{ top: 'var(--empleados-header-height, 136px)' }}>Acciones</th>
               </tr>
             </thead>
-            <tbody className="">
-              {cargando ? (
-                <tr><td colSpan={5} className="text-center p-8 text-[var(--text-muted)]">Cargando personal... 👥</td></tr>
-              ) : empleadosFiltrados.length === 0 ? (
-                <tr><td colSpan={5} className="text-center p-8 text-[var(--text-muted)] uppercase font-bold tracking-widest">No hay usuarios en esta lista</td></tr>
-              ) : (
-                empleadosFiltrados.map((emp) => (
-                  <tr key={emp.Email} className="hover:bg-[var(--bg-hover)] even:bg-[var(--bg-screen)] transition-colors">
-                    <td className="p-4">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center font-black text-xs border shadow-sm transition-transform group-hover:scale-110 ${['ADMIN', 'GERENCIAL'].includes(emp.Rol) ? 'bg-[#71717a] border-[#52525b] text-white shadow-[#71717a]/20' : 'bg-white border-[var(--border-cream)] text-[#71717a] shadow-md shadow-stone-200/50'}`}>
-                          {emp.Nombre_Empleado.charAt(0)}{emp.A_Paterno.charAt(0)}
-                        </div>
-                        <div>
-                          <div className="font-bold text-[var(--text-main)] leading-tight">{emp.Nombre_Empleado} {emp.A_Paterno}</div>
-                          <div className="text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-tighter">{emp.A_Materno}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="p-4 text-sm text-[var(--text-muted)] font-mono italic">{emp.Email}</td>
-                    <td className="p-4 text-sm text-[var(--text-muted)]">
-                      <div className="font-bold text-[var(--text-main)]">{emp.Cargo || 'Sin cargo'}</div>
-                      <div className="text-xs text-[var(--text-muted)]">{emp.Departamento || 'General'}</div>
-                    </td>
-                    <td className="p-4 text-center">
-                      <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-black tracking-widest border ${['ADMIN', 'GERENCIAL'].includes(emp.Rol) ? 'bg-blue-50 text-blue-600 border-blue-200' : 'bg-stone-50 text-[var(--text-muted)] border-[var(--border-cream)]'}`}>
-                        {emp.Rol}
-                      </span>
-                    </td>
-                    <td className="p-4 text-center flex justify-center gap-2">
-                      <button onClick={() => abrirModalEditar(emp)} className="p-2 text-[var(--text-muted)] hover:text-[#71717a] hover:bg-[var(--bg-hover)] rounded-lg transition-colors" title="Editar">
-                        <Pencil className="w-4 h-4" />
-                      </button>
-                      <button onClick={() => solicitarCambioAcceso(emp)} className={`p-2 rounded-lg transition-colors ${filtroTab === 'Activo' ? 'text-[var(--text-muted)] hover:text-red-500 hover:bg-red-500/10' : 'text-[var(--text-muted)] hover:text-stone-600 hover:bg-[var(--bg-hover)]'}`} title={filtroTab === 'Activo' ? "Revocar Acceso" : "Restaurar Acceso"}>
-                        {filtroTab === 'Activo' ? <UserMinus className="w-5 h-5" /> : <UserCheck className="w-5 h-5" />}
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              )}
+            <tbody className="relative">
+              {(() => {
+                const virtualItems = rowVirtualizer.getVirtualItems();
+                const paddingTop = virtualItems.length > 0 ? virtualItems[0]?.start || 0 : 0;
+                const paddingBottom = virtualItems.length > 0 ? rowVirtualizer.getTotalSize() - (virtualItems[virtualItems.length - 1]?.end || 0) : 0;
+                
+                if (cargando) return <tr><td colSpan={5} className="text-center p-8 text-[var(--text-muted)]">Cargando personal... 👥</td></tr>;
+                if (empleadosFiltrados.length === 0) return <tr><td colSpan={5} className="text-center p-8 text-[var(--text-muted)] uppercase font-bold tracking-widest">No hay usuarios en esta lista</td></tr>;
+
+                return (
+                  <>
+                    {paddingTop > 0 && <tr><td style={{height: paddingTop}} colSpan={5} /></tr>}
+                    
+                    {virtualItems.map((virtualRow) => {
+                      const emp = empleadosFiltrados[virtualRow.index];
+                      return (
+                        <DesktopRow
+                          key={virtualRow.index}
+                          emp={emp}
+                          filtroTab={filtroTab}
+                          abrirModalEditar={abrirModalEditar}
+                          solicitarCambioAcceso={solicitarCambioAcceso}
+                        />
+                      );
+                    })}
+                    
+                    {paddingBottom > 0 && <tr><td style={{height: paddingBottom}} colSpan={5} /></tr>}
+                  </>
+                );
+              })()}
             </tbody>
           </table>
         </div>
@@ -340,41 +410,28 @@ export default function PersonalPage() {
           ) : empleadosFiltrados.length === 0 ? (
              <div className="p-10 text-center text-[var(--text-muted)] text-xs uppercase font-bold tracking-widest">No hay usuarios aquí</div>
           ) : (
-             empleadosFiltrados.map((emp) => (
-               <div key={emp.Email} className="p-5 flex flex-col gap-4 active:bg-[var(--bg-hover)] transition-colors">
-                 <div className="flex justify-between items-start">
-                   <div className="flex items-center gap-3">
-                      <div className={`w-12 h-12 rounded-full flex items-center justify-center font-black text-base border shrink-0 shadow-lg ${['ADMIN', 'GERENCIAL'].includes(emp.Rol) ? 'bg-[#71717a] border-[#52525b] text-white' : 'bg-white border-[var(--border-cream)] text-[#71717a]'} font-serif`}>
-                        {emp.Nombre_Empleado.charAt(0)}{emp.A_Paterno.charAt(0)}
-                      </div>
-                      <div className="overflow-hidden">
-                        <div className="font-bold text-[var(--text-main)] text-lg truncate font-serif">{emp.Nombre_Empleado} {emp.A_Paterno}</div>
-                        <div className="text-xs text-[var(--text-muted)] font-mono truncate">{emp.Email}</div>
-                      </div>
-                   </div>
-                 </div>
-
-                 <div className="grid grid-cols-2 gap-3 bg-stone-50 p-3 rounded-xl border border-[var(--border-cream)]">
-                    <div className="flex flex-col gap-1">
-                      <span className="text-[9px] text-[var(--text-muted)] font-black uppercase tracking-widest">Cargo</span>
-                      <span className="text-xs text-[var(--text-main)] font-medium truncate">{emp.Cargo || 'S/N'}</span>
-                    </div>
-                    <div className="flex flex-col gap-1 border-l border-[var(--border-cream)] pl-3">
-                      <span className="text-[9px] text-[var(--text-muted)] font-black uppercase tracking-widest">Rol</span>
-                      <span className={`text-[10px] font-black tracking-widest uppercase ${['ADMIN', 'GERENCIAL'].includes(emp.Rol) ? 'text-blue-600' : 'text-stone-500'}`}>{emp.Rol}</span>
-                    </div>
-                 </div>
-
-                 <div className="flex gap-2 mt-2">
-                   <button onClick={() => abrirModalEditar(emp)} className="flex-1 flex items-center justify-center gap-2 bg-white border border-[var(--border-cream)] hover:bg-[var(--bg-hover)] text-[var(--text-main)] p-3 rounded-xl transition-colors text-sm font-bold shadow-sm">
-                     <Pencil size={16} /> Editar
-                   </button>
-                   <button onClick={() => solicitarCambioAcceso(emp)} className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-xl font-bold transition-colors text-sm ${filtroTab === 'Activo' ? 'bg-red-500/10 text-red-600 hover:bg-red-500/20' : 'bg-stone-200 text-stone-600 hover:bg-[var(--bg-hover)]'}`}>
-                     {filtroTab === 'Activo' ? <><UserMinus size={16} /> Bloquear</> : <><UserCheck size={16} /> Activar</>}
-                   </button>
-                 </div>
-               </div>
-             ))
+            <div className="relative h-screen">
+              {(() => {
+                const virtualItems = rowVirtualizer.getVirtualItems();
+                return (
+                  <div style={{ position: 'relative', height: `${rowVirtualizer.getTotalSize()}px`, width: '100%' }}>
+                    {virtualItems.map((virtualRow) => {
+                      const emp = empleadosFiltrados[virtualRow.index];
+                      return (
+                        <div key={virtualRow.index} style={{ position: 'absolute', top: 0, left: 0, width: '100%', transform: `translateY(${virtualRow.start}px)` }}>
+                          <MobileCard
+                            emp={emp}
+                            filtroTab={filtroTab}
+                            abrirModalEditar={abrirModalEditar}
+                            solicitarCambioAcceso={solicitarCambioAcceso}
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })()}
+            </div>
           )}
         </div>
       </div>

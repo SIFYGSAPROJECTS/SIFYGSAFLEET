@@ -11,23 +11,19 @@ export default function ScrollToTop() {
     const toggleVisibility = () => {
       if (window.scrollY > 300) {
         setIsVisible(true);
-      } else {
-        setIsVisible(false);
+        return;
       }
+      const scrollables = document.querySelectorAll('main, .overflow-y-auto, [data-scroll-container]');
+      for (const el of Array.from(scrollables)) {
+        if (el.scrollTop > 300) {
+          setIsVisible(true);
+          return;
+        }
+      }
+      setIsVisible(false);
     };
 
-    window.addEventListener('scroll', toggleVisibility, { passive: true });
-
-    const mainContainer = document.querySelector('main');
-    if (mainContainer) {
-      mainContainer.addEventListener('scroll', () => {
-        if (mainContainer.scrollTop > 300) {
-          setIsVisible(true);
-        } else {
-          setIsVisible(false);
-        }
-      }, { passive: true });
-    }
+    window.addEventListener('scroll', toggleVisibility, { passive: true, capture: true });
 
     // Escuchar el estado del SIFY Copilot
     const handleCopilotToggle = (e: Event) => {
@@ -37,10 +33,7 @@ export default function ScrollToTop() {
     window.addEventListener('copilot-toggle', handleCopilotToggle);
 
     return () => {
-      window.removeEventListener('scroll', toggleVisibility);
-      if (mainContainer) {
-        mainContainer.removeEventListener('scroll', toggleVisibility);
-      }
+      window.removeEventListener('scroll', toggleVisibility, { capture: true } as any);
       window.removeEventListener('copilot-toggle', handleCopilotToggle);
     };
   }, []);
@@ -51,6 +44,10 @@ export default function ScrollToTop() {
     if (mainContainer) {
       mainContainer.scrollTo({ top: 0, behavior: 'smooth' });
     }
+    const scrollables = document.querySelectorAll('.overflow-y-auto, [data-scroll-container]');
+    scrollables.forEach((el) => {
+      el.scrollTo({ top: 0, behavior: 'smooth' });
+    });
   };
 
   return (
