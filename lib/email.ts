@@ -13,12 +13,35 @@ interface EnviarCorreoParams {
   subject: string;
   react?: React.ReactElement | React.ReactNode | null;
   html?: string;
+  /** Módulo de origen: si es 'computo', respeta el switch de modo pruebas de Cómputo/TI */
+  modulo?: 'computo' | 'vehiculos' | 'seguridad' | 'auth' | 'general';
+}
+
+// Variable global en el servidor para activar/desactivar envío de correos EXCLUSIVAMENTE de Cómputo (Modo Pruebas)
+declare global {
+  // eslint-disable-next-line no-var
+  var __DISABLE_COMPUTO_EMAILS__: boolean | undefined;
+}
+
+export function isComputoEmailDisabled(): boolean {
+  if (process.env.DISABLE_COMPUTO_EMAILS === 'true') return true;
+  return globalThis.__DISABLE_COMPUTO_EMAILS__ === true;
+}
+
+export function setComputoEmailDisabled(disabled: boolean) {
+  globalThis.__DISABLE_COMPUTO_EMAILS__ = disabled;
 }
 
 /**
  * Función centralizada para enviar correos usando Resend
  */
-export async function enviarCorreo({ to, subject, react, html }: EnviarCorreoParams) {
+export async function enviarCorreo({ to, subject, react, html, modulo }: EnviarCorreoParams) {
+  // Si el correo pertenece al módulo de Cómputo y los correos de Cómputo están pausados, se omite
+  if (modulo === 'computo' && isComputoEmailDisabled()) {
+    console.log(`[EMAILS CÓMPUTO DESACTIVADOS / MODO PRUEBAS] Correo omitido a: ${to}, Asunto: ${subject}`);
+    return { success: true, skipped: true, message: 'Envío de correos de Cómputo desactivado por modo pruebas' };
+  }
+
   try {
     const { data, error } = await resend.emails.send({
       from: EMAIL_FROM,

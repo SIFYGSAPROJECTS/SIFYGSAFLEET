@@ -34,7 +34,7 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Rutas que requieren autenticación
-  const protectedPaths = ['/portal', '/dashboard', '/computo', '/programa-anual', '/verificaciones', '/auditoria', '/gastos', '/edificios'];
+  const protectedPaths = ['/portal', '/dashboard', '/computo', '/programa-anual', '/verificaciones', '/auditoria', '/gastos', '/edificios', '/clima', '/telefonia', '/mobiliario', '/vigilancia'];
   const isProtectedPath = protectedPaths.some(path => pathname === path || pathname.startsWith(path + '/'));
 
   if (isProtectedPath) {
@@ -49,13 +49,14 @@ export function middleware(request: NextRequest) {
     // Comprobación de roles y áreas
     const userRoleCookie = request.cookies.get('user_role');
     const userRole = userRoleCookie?.value || 'USER';
-    const isAdmin = ['ADMIN', 'GERENCIAL'].includes(userRole);
+    const userAdminTi = request.cookies.get('user_admin_ti')?.value === 'true';
+    const isAdmin = ['ADMIN', 'GERENCIAL'].includes(userRole) || userAdminTi;
 
     const userAreasCookie = request.cookies.get('user_areas');
     const userAreas = userAreasCookie?.value ? JSON.parse(userAreasCookie.value) : [];
 
     // Módulos raíz o páginas completas exclusivas para administrador
-    const adminOnlyPaths = ['/programa-anual', '/verificaciones', '/auditoria'];
+    const adminOnlyPaths = ['/programa-anual', '/verificaciones', '/auditoria', '/mobiliario', '/vigilancia'];
     const isAdminOnlyPath = adminOnlyPaths.some(path => pathname === path || pathname.startsWith(path + '/'));
 
     // Sub-rutas de /dashboard exclusivas para administrador

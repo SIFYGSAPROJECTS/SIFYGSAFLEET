@@ -60,6 +60,9 @@ export default function NotificationBell({ isAdmin, moduleType = 'computo' }: { 
   };
 
   useEffect(() => {
+    let isMounted = true;
+    const controller = new AbortController();
+
     const fetchNotifications = async () => {
       try {
         let url = '';
@@ -68,24 +71,31 @@ export default function NotificationBell({ isAdmin, moduleType = 'computo' }: { 
         } else if (moduleType === 'computo') {
           url = '/api/mantenimientos/reportes?estado=PENDIENTE';
         } else {
-          setReportes([]);
+          if (isMounted) setReportes([]);
           return;
         }
           
-        const res = await fetch(url);
-        if (res.ok) {
-          const data = await res.json();
-          setReportes(data);
+        const res = await fetch(url, { signal: controller.signal }).catch(() => null);
+        if (res && res.ok) {
+          const data = await res.json().catch(() => []);
+          if (isMounted && Array.isArray(data)) {
+            setReportes(data);
+          }
         }
       } catch (e) {
-        console.error('Error fetching notifications', e);
+        // Silenciar errores de abort/red en desarrollo
       }
     };
+
     fetchNotifications();
-    // Polling cada X minutos si se desea
     const interval = setInterval(fetchNotifications, 60000);
-    return () => clearInterval(interval);
-  }, []);
+
+    return () => {
+      isMounted = false;
+      controller.abort();
+      clearInterval(interval);
+    };
+  }, [moduleType]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {

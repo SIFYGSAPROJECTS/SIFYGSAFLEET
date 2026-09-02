@@ -89,6 +89,7 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
           await enviarCorreo({
             to: previousReporte.equipo.empleado.Email,
             subject: `Reagendado: Mantenimiento ${updatedReporte.Tipo_Mtto} de tu equipo ${updatedReporte.C_Interno}`,
+            modulo: 'computo',
             html: emailHtml,
           });
         } catch (emailError) {

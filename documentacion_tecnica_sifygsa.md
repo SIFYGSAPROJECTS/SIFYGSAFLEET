@@ -32,10 +32,10 @@
 | 📅 Programa Anual | ✅ Activo | `/programa-anual` | Calendario de actividades |
 | ✅ Verificaciones | ✅ Activo | `/verificaciones` | Verificación vehicular semestral |
 | 📋 Auditoría | ✅ Activo | `/auditoria` | Bitácora inteligente del sistema |
-| 📞 Telefonía | 🔜 Próximamente | — | — |
-| 📹 Video y Vigilancia | 🔜 Próximamente | — | — |
-| ❄️ Aires Acondicionados | 🔜 Próximamente | — | — |
-| 🪑 Mobiliario | 🔜 Próximamente | — | — |
+| 📞 Telefonía | ✅ Activo | `/telefonia/inventario` | Control de líneas y dispositivos móviles |
+| 📹 Video y Vigilancia | ✅ Activo | `/vigilancia/inventario` | Centro de monitoreo CCTV, NVRs y cámaras |
+| ❄️ Aires Acondicionados | ✅ Activo | `/clima/inventario` | Equipos de refrigeración y climatización |
+| 🪑 Mobiliario | ✅ Activo | `/mobiliario/inventario` | Muebles, silletería y equipo de oficina |
 
 ---
 

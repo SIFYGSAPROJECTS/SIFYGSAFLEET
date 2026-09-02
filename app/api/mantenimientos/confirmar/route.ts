@@ -71,6 +71,7 @@ export async function POST(request: Request) {
         await enviarCorreo({
           to: adminEmail,
           subject: `⚠️ Reprogramación solicitada: Mantenimiento de ${reporte.C_Interno}`,
+          modulo: 'computo',
           html: emailHtml
         });
       } catch (emailError) {

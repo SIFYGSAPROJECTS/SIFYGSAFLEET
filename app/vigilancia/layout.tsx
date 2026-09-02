@@ -1,0 +1,52 @@
+import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
+import IdleTimer from '@/components/security/IdleTimer';
+import RoleGuard from '@/components/security/RoleGuard';
+import ScrollToTop from '@/components/ui/ScrollToTop';
+import Navbar from '@/components/ui/Navbar';
+
+export const metadata = {
+  title: 'Video y Vigilancia CCTV | SIFYGSA',
+  description: 'Centro de control de monitoreo, NVRs y catálogo de cámaras de circuito cerrado.',
+};
+
+export default async function VigilanciaLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const cookieStore = await cookies();
+  const userEmail = cookieStore.get('user_email')?.value;
+
+  if (!userEmail) {
+    redirect('/');
+  }
+
+  const userRole = cookieStore.get('user_role')?.value || 'USER';
+  const userName = cookieStore.get('user_name')?.value || 'Usuario';
+  const userAdminTi = cookieStore.get('user_admin_ti')?.value === 'true';
+  const isAdmin = ['ADMIN', 'GERENCIAL'].includes(userRole) || userAdminTi;
+
+  if (!isAdmin) {
+    redirect('/portal');
+  }
+
+  return (
+    <>
+      <div className="fixed inset-0 pointer-events-none z-[9999] animate-entrance-overlay" />
+      <div className="min-h-screen bg-transparent">
+        <IdleTimer />
+        <RoleGuard />
+        
+        {/* HEADER GLOBAL DEL MÓDULO */}
+        <Navbar type="vigilancia" userName={userName} userRole={userRole} isAdmin={isAdmin} maxWidth="max-w-[95%]" />
+
+        <main className="flex-1 w-full bg-rose-50/5 pt-24">
+          {children}
+        </main>
+      </div>
+
+      <ScrollToTop />
+    </>
+  );
+}

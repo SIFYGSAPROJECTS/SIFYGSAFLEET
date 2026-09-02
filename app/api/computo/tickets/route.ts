@@ -91,6 +91,7 @@ export async function POST(request: Request) {
       await enviarCorreo({
         to: userEmail,
         subject: `Confirmación de Solicitud de Cómputo: ${folioGenerado}`,
+        modulo: 'computo',
         react: TicketComputoEmail({
           consecutivo: c_interno,
           responsable: responsableNombre,
@@ -105,6 +106,7 @@ export async function POST(request: Request) {
       await enviarCorreo({
         to: 'mike.mendez2908@gmail.com',
         subject: `NUEVA Solicitud de Cómputo: ${folioGenerado}`,
+        modulo: 'computo',
         react: TicketComputoAdminEmail({
           solicitante: responsableNombre,
           departamento: departamento,

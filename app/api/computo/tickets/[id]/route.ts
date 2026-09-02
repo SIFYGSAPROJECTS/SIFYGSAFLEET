@@ -52,6 +52,7 @@ export async function PUT(
         await enviarCorreo({
           to: asesorInfo.Email,
           subject: `Nuevo Ticket Asignado: ${id}`,
+          modulo: 'computo',
           react: TicketUpdateEmail({
             folio: id,
             tipo: 'NUEVO_ASESOR',
@@ -67,6 +68,7 @@ export async function PUT(
       await enviarCorreo({
         to: ticketActualizado.empleado.Email,
         subject: `Asesor Asignado: ${id}`,
+        modulo: 'computo',
         react: TicketUpdateEmail({
           folio: id,
           tipo: 'NUEVO_ASESOR',
@@ -83,6 +85,7 @@ export async function PUT(
       await enviarCorreo({
         to: ticketActualizado.empleado.Email,
         subject: `Actualización de Estatus Ticket: ${id}`,
+        modulo: 'computo',
         react: TicketUpdateEmail({
           folio: id,
           tipo: 'NUEVO_ESTATUS',

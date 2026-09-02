@@ -12,8 +12,8 @@ const modules = [
   { id: 'clima', name: 'A / A', icon: AirVent, route: '/clima/inventario', color: 'text-cyan-400', bg: 'bg-cyan-400/10' },
   { id: 'edificios', name: 'Edificios', icon: Building, route: '/edificios', color: 'text-amber-400', bg: 'bg-amber-400/10' },
   { id: 'gastos', name: 'Gastos Generales', icon: Wallet, route: '/gastos', color: 'text-teal-400', bg: 'bg-teal-400/10' },
-  { id: 'mobiliario', name: 'Mobiliario', icon: Package, route: null, color: 'text-orange-400', bg: 'bg-orange-400/10' },
-  { id: 'video', name: 'Video y vigilancia', icon: Cctv, route: null, color: 'text-rose-400', bg: 'bg-rose-400/10' },
+  { id: 'mobiliario', name: 'Mobiliario', icon: Package, route: '/mobiliario/inventario', color: 'text-orange-400', bg: 'bg-orange-400/10' },
+  { id: 'video', name: 'Video y vigilancia', icon: Cctv, route: '/vigilancia/inventario', color: 'text-rose-400', bg: 'bg-rose-400/10' },
   { id: 'programa', name: 'Programa Anual', icon: CalendarDays, route: '/programa-anual', color: 'text-indigo-400', bg: 'bg-indigo-400/10' },
 ];
 
@@ -43,6 +43,8 @@ export default function PortalClient({ isAdmin, userAreas, userName }: { isAdmin
     if (moduleId === 'clima') return userAreas.includes('CLIMA') || isAdmin;
     if (moduleId === 'telefonia') return userAreas.includes('TELEFONIA') || isAdmin;
     if (moduleId === 'edificios') return userAreas.includes('EDIFICIOS') || isAdmin;
+    if (moduleId === 'mobiliario') return isAdmin;
+    if (moduleId === 'video') return isAdmin;
     return false;
   };
 

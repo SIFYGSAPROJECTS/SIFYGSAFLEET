@@ -506,6 +506,19 @@ model Inventario_Aires_Acondicionados {
   Fecha_Alta   DateTime @default(now())
 }
 
+model Inventario_Mobiliario {
+  N_Interno    String   @id @db.VarChar(100)
+  Empresa      String?  @db.VarChar(100)
+  Tipo         String?  @db.VarChar(100)
+  Descripcion  String?
+  Modelo       String?  @db.VarChar(100)
+  Departamento String?  @db.VarChar(100)
+  Ubicacion    String?  @db.VarChar(100)
+  Proveedor    String?  @db.VarChar(100)
+  Estatus      String?  @default("Activo") @db.VarChar(100)
+  Fecha_Alta   DateTime @default(now())
+}
+
 model Inventario_Telefonia {
   N_Interno    String   @id @db.VarChar(100)
   Empresa      String?  @db.VarChar(100)
@@ -588,3 +601,22 @@ model Catalogo_Proveedores {
   Estatus      String   @default("Activo")
   Fecha_Alta   DateTime @default(now())
 }
+
+model Inventario_Vigilancia {
+  Consecutivo          String    @id @db.VarChar(100)
+  Equipo_NVR           String?   @db.VarChar(100)
+  Servidor_Datos       String?   @db.VarChar(150)
+  Tipo_Camara          String?   @db.VarChar(100)
+  Tipo_Canon           String?   @db.VarChar(100)
+  Marca_Modelo         String?   @db.VarChar(150)
+  Ubicacion            String?   @db.VarChar(150)
+  Zona_Area            String?   @db.VarChar(100)
+  Direccion_IP         String?   @db.VarChar(50)
+  Canal_NVR            String?   @db.VarChar(50)
+  Resolucion           String?   @db.VarChar(50)
+  Estatus              String?   @default("En Línea") @db.VarChar(50)
+  Ultimo_Mantenimiento DateTime?
+  Notas                String?   @db.Text
+  Fecha_Alta           DateTime  @default(now())
+}
+

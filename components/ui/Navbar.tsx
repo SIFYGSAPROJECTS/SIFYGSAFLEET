@@ -4,12 +4,12 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import Image from 'next/image';
-import { Menu, X, Car, Server, LayoutGrid, LogOut, CalendarDays, Laptop, Wrench, FolderOpen, User, DollarSign, CalendarCheck, FileText, Wallet, Settings, CalendarClock, Building, Wind, Home, Phone } from 'lucide-react';
+import { Menu, X, Car, Server, LayoutGrid, LogOut, CalendarDays, Laptop, Wrench, FolderOpen, User, DollarSign, CalendarCheck, FileText, Wallet, Settings, CalendarClock, Building, Wind, Home, Phone, Package, Cctv } from 'lucide-react';
 import LogoutButton from '@/app/dashboard/LogoutButton';
 import NotificationBell from './NotificationBell';
 
 interface NavbarProps {
-  type: 'portal' | 'dashboard' | 'computo' | 'programa' | 'gastos' | 'auditoria' | 'edificios' | 'clima' | 'telefonia';
+  type: 'portal' | 'dashboard' | 'computo' | 'programa' | 'gastos' | 'auditoria' | 'edificios' | 'clima' | 'telefonia' | 'mobiliario' | 'vigilancia';
   userName?: string;
   userRole?: string;
   isAdmin?: boolean;
@@ -278,6 +278,24 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                   <Phone size={14} className="text-[#FF7420]" /> Telefonía Celular
                 </Link>
               )}
+              {localIsAdmin && (
+                <Link
+                  href="/mobiliario/inventario"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="bg-white/5 hover:bg-white/10 border border-white/5 text-white/90 px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold"
+                >
+                  <Package size={14} className="text-[#FF7420]" /> Mobiliario
+                </Link>
+              )}
+              {localIsAdmin && (
+                <Link
+                  href="/vigilancia/inventario"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="bg-white/5 hover:bg-white/10 border border-white/5 text-white/90 px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold"
+                >
+                  <Cctv size={14} className="text-rose-400" /> Video y Vigilancia
+                </Link>
+              )}
 
 
               <div className="h-px bg-white/5 my-2"></div>
@@ -312,6 +330,8 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
     if (type === 'programa') return 'Programa Anual';
     if (type === 'clima') return 'Aires Acondicionados';
     if (type === 'telefonia') return 'Telefonía Celular';
+    if (type === 'mobiliario') return 'Inventario de Mobiliario';
+    if (type === 'vigilancia') return 'Video y Vigilancia CCTV';
     if (pathname.includes('/inventario')) return 'Gestión de Flota';
     if (pathname.includes('/servicios')) return 'Central de Servicios';
     if (pathname.includes('/empleados') || pathname.includes('/usuarios')) return 'Gestión de Personal';
@@ -398,6 +418,24 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                 </div>
                 <span className="hidden sm:block font-serif font-medium text-lg tracking-wide text-white transition-colors group-hover:text-purple-400">
                   SIFYGSA <span className="text-purple-400 font-serif">Tel</span>
+                </span>
+              </Link>
+            ) : type === 'mobiliario' ? (
+              <Link href="/mobiliario/inventario" className={`flex items-center space-x-3 group px-2 transition-all`}>
+                <div className="bg-orange-500 p-1.5 rounded-lg shadow-lg shadow-orange-500/20 group-hover:scale-105 transition-transform duration-300">
+                  <Package className="text-white h-4 w-4" />
+                </div>
+                <span className="hidden sm:block font-serif font-medium text-lg tracking-wide text-white transition-colors group-hover:text-orange-400">
+                  SIFYGSA <span className="text-orange-400 font-serif">Mobiliario</span>
+                </span>
+              </Link>
+            ) : type === 'vigilancia' ? (
+              <Link href="/vigilancia/inventario" className={`flex items-center space-x-3 group px-2 transition-all`}>
+                <div className="bg-rose-500 p-1.5 rounded-lg shadow-lg shadow-rose-500/20 group-hover:scale-105 transition-transform duration-300">
+                  <Cctv className="text-white h-4 w-4" />
+                </div>
+                <span className="hidden sm:block font-serif font-medium text-lg tracking-wide text-white transition-colors group-hover:text-rose-400">
+                  SIFYGSA <span className="text-rose-400 font-serif">CCTV</span>
                 </span>
               </Link>
             ) : (
@@ -654,6 +692,24 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                       >
                         <Phone size={14} className="text-[#FF7420] transition-transform duration-300 ease-out group-hover/item:scale-125 group-hover/item:-rotate-12" />
                         <span>Telefonía</span>
+                      </Link>
+                    )}
+                    {localIsAdmin && (
+                      <Link
+                        href="/mobiliario/inventario"
+                        className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-white/80 hover:text-white hover:bg-white/5 transition-all group/item"
+                      >
+                        <Package size={14} className="text-[#FF7420] transition-transform duration-300 ease-out group-hover/item:scale-125 group-hover/item:-translate-y-1" />
+                        <span>Mobiliario</span>
+                      </Link>
+                    )}
+                    {localIsAdmin && (
+                      <Link
+                        href="/vigilancia/inventario"
+                        className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-white/80 hover:text-white hover:bg-white/5 transition-all group/item"
+                      >
+                        <Cctv size={14} className="text-rose-400 transition-transform duration-300 ease-out group-hover/item:scale-125 group-hover/item:-translate-y-1" />
+                        <span>Vigilancia</span>
                       </Link>
                     )}
                   </div>
@@ -977,6 +1033,24 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                     className="bg-white/5 hover:bg-white/10 border border-white/5 text-white/90 px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold"
                   >
                     <Building size={14} className="text-[#FF7420]" /> Edificios
+                  </Link>
+                )}
+                {localIsAdmin && (
+                  <Link
+                    href="/mobiliario/inventario"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="bg-white/5 hover:bg-white/10 border border-white/5 text-white/90 px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold"
+                  >
+                    <Package size={14} className="text-[#FF7420]" /> Mobiliario
+                  </Link>
+                )}
+                {localIsAdmin && (
+                  <Link
+                    href="/vigilancia/inventario"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="bg-white/5 hover:bg-white/10 border border-white/5 text-white/90 px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold"
+                  >
+                    <Cctv size={14} className="text-rose-400" /> Video y Vigilancia
                   </Link>
                 )}
 

@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import SoporteMantenimientoClient from "./SoporteMantenimientoClient";
+import EmailStatusToggle from "./EmailStatusToggle";
 
 export const metadata = {
   title: "Soporte y Mantenimientos TI | SIFYGSA",
@@ -61,13 +62,20 @@ export default async function SoporteMantenimientoPage() {
   return (
     <div className="min-h-screen bg-transparent">
       <div className="pt-2 pb-8 sm:pt-4 sm:pb-8 relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col gap-2 mb-6 animate-in fade-in slide-in-from-top-4 duration-700">
-          <h1 className="text-3xl font-serif font-medium text-[var(--text-main)] tracking-tight">
-            Soporte y Mantenimientos <span className="text-emerald-600 text-lg font-bold">TI</span>
-          </h1>
-          <p className="text-[var(--text-muted)] mt-1 max-w-2xl">
-            Centro unificado para levantar tickets de soporte rápido y gestionar los mantenimientos preventivos del inventario.
-          </p>
+        <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-6 animate-in fade-in slide-in-from-top-4 duration-700">
+          <div>
+            <h1 className="text-3xl font-serif font-medium text-[var(--text-main)] tracking-tight">
+              Soporte y Mantenimientos <span className="text-emerald-600 text-lg font-bold">TI</span>
+            </h1>
+            <p className="text-[var(--text-muted)] mt-1 max-w-2xl text-sm">
+              Centro unificado para levantar tickets de soporte rápido y gestionar los mantenimientos preventivos del inventario.
+            </p>
+          </div>
+          {isAdmin && (
+            <div className="shrink-0 self-start sm:self-center">
+              <EmailStatusToggle isAdmin={isAdmin} />
+            </div>
+          )}
         </div>
 
         <SoporteMantenimientoClient 
