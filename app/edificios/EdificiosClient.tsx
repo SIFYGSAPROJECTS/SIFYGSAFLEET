@@ -62,7 +62,7 @@ export default function EdificiosClient({ initialEdificios, currentUserEmail }: 
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-180px)] gap-6">
+    <div className="flex flex-col w-full min-h-[calc(100vh-220px)] gap-6">
       
       {/* Tabs */}
       <div className="flex flex-wrap bg-[var(--bg-floating)] p-1 rounded-2xl border border-[var(--border-cream)] shadow-md w-full sm:w-fit">
@@ -108,7 +108,7 @@ export default function EdificiosClient({ initialEdificios, currentUserEmail }: 
       </div>
 
       {/* Grid of Buildings */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar">
+      <div className="w-full">
         {edificios.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center opacity-40 text-center">
             <Building2 size={64} className="mb-4" />

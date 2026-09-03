@@ -577,6 +577,8 @@ model Consumible {
   Cantidad_Actual    Float    @default(0)
   Capacidad_Maxima   Float    @default(0)
   Umbral_Alerta      Float    @default(0)
+  Ruta_Ficha_Tecnica String?
+  Categoria          String?  @db.VarChar(100)
   Fecha_Actualizacion DateTime @default(now()) @updatedAt
   
   edificio           Edificio @relation(fields: [Id_Edificio], references: [Id_Edificio], onDelete: Cascade)

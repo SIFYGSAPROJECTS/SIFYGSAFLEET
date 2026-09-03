@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { Package, Plus, Search, MapPin, Box, Droplets, PenTool, Coffee, Loader2, X, LayoutGrid, List } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Package, Plus, Search, MapPin, Box, Droplets, PenTool, Coffee, Loader2, X, LayoutGrid, List, FileText, Pencil, Trash2 } from 'lucide-react';
 import Image from 'next/image';
 import SystemModal from '@/components/ui/SystemModal';
 import PremiumSelect from '@/components/ui/PremiumSelect';
@@ -16,6 +16,18 @@ export default function ConsumiblesClient({ currentUserEmail, edificios }: any) 
   const [nuevoForm, setNuevoForm] = useState({ Nombre: '', Tipo: 'Limpieza', Unidad_Medida: 'Piezas (pza)', Id_Edificio: '', Cantidad_Actual: 0, Capacidad_Maxima: 100, Umbral_Alerta: 10 });
   const [isSaving, setIsSaving] = useState(false);
 
+  // Edit modal state
+  const [editingConsumible, setEditingConsumible] = useState<any | null>(null);
+  const [editForm, setEditForm] = useState({ 
+    Nombre: '', 
+    Tipo: 'Limpieza', 
+    Unidad_Medida: 'Piezas (pza)', 
+    Id_Edificio: '', 
+    Cantidad_Actual: 0, 
+    Capacidad_Maxima: 100, 
+    Umbral_Alerta: 10 
+  });
+
   const [movimientoModal, setMovimientoModal] = useState<{item: any, tipo: 'ENTRADA' | 'SALIDA'} | null>(null);
   const [movimientoForm, setMovimientoForm] = useState({ Cantidad: 0, Observaciones: '' });
 
@@ -25,6 +37,21 @@ export default function ConsumiblesClient({ currentUserEmail, edificios }: any) 
   // Estado para edición directa e in-situ del número de stock
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editingValue, setEditingValue] = useState<string>('');
+
+  // Estado y ref para subida de fichas técnicas
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploadingId, setUploadingId] = useState<number | null>(null);
+
+  // Control de scroll para compactar la barra sticky y dar el 75%+ de pantalla al inventario
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 60);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   
   useEffect(() => {
@@ -99,6 +126,71 @@ export default function ConsumiblesClient({ currentUserEmail, edificios }: any) 
     }
   };
 
+  const handleOpenEdit = (item: any) => {
+    setEditingConsumible(item);
+    setEditForm({
+      Nombre: item.Nombre || '',
+      Tipo: item.Tipo || 'Limpieza',
+      Unidad_Medida: item.Unidad_Medida || 'Piezas (pza)',
+      Id_Edificio: item.Id_Edificio?.toString() || '',
+      Cantidad_Actual: item.Cantidad_Actual ?? 0,
+      Capacidad_Maxima: item.Capacidad_Maxima ?? 100,
+      Umbral_Alerta: item.Umbral_Alerta ?? 10
+    });
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingConsumible || !editForm.Nombre.trim() || !editForm.Id_Edificio) {
+      setSysModal({ isOpen: true, type: 'error', title: 'Error', message: 'Nombre y Sucursal son obligatorios.' });
+      return;
+    }
+    setIsSaving(true);
+    try {
+      const res = await fetch(`/api/edificios/consumibles/${editingConsumible.Id_Consumible}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editForm)
+      });
+      if (res.ok) {
+        setSysModal({ isOpen: true, type: 'success', title: 'Éxito', message: 'Consumible actualizado correctamente en la base de datos.' });
+        setEditingConsumible(null);
+        fetchConsumibles();
+      } else {
+        const err = await res.json();
+        setSysModal({ isOpen: true, type: 'error', title: 'Error', message: err.error || 'No se pudo actualizar.' });
+      }
+    } catch (e) {
+      setSysModal({ isOpen: true, type: 'error', title: 'Error', message: 'Error de conexión con el servidor.' });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDeleteConsumible = async () => {
+    if (!editingConsumible) return;
+    if (!confirm(`¿Estás seguro de eliminar el consumible "${editingConsumible.Nombre}"? Esta acción no se puede deshacer.`)) {
+      return;
+    }
+    setIsSaving(true);
+    try {
+      const res = await fetch(`/api/edificios/consumibles/${editingConsumible.Id_Consumible}`, {
+        method: 'DELETE'
+      });
+      if (res.ok) {
+        setSysModal({ isOpen: true, type: 'success', title: 'Eliminado', message: 'Consumible eliminado correctamente de la base de datos.' });
+        setEditingConsumible(null);
+        fetchConsumibles();
+      } else {
+        const err = await res.json();
+        setSysModal({ isOpen: true, type: 'error', title: 'Error', message: err.error || 'No se pudo eliminar.' });
+      }
+    } catch (e) {
+      setSysModal({ isOpen: true, type: 'error', title: 'Error', message: 'Error de red.' });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const handleSaveMovimiento = async () => {
     if (!movimientoModal || movimientoForm.Cantidad <= 0) {
       setSysModal({ isOpen: true, type: 'error', title: 'Error', message: 'Ingresa una cantidad válida mayor a 0.' });
@@ -129,6 +221,59 @@ export default function ConsumiblesClient({ currentUserEmail, edificios }: any) 
       setSysModal({ isOpen: true, type: 'error', title: 'Error', message: 'Error de red.' });
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const triggerFileUpload = (id: number) => {
+    setUploadingId(id);
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleFichaUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || uploadingId === null) return;
+    
+    // Validar tipo
+    const validTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      setSysModal({ isOpen: true, type: 'error', title: 'Error', message: 'Solo se permiten archivos PDF o imágenes (JPG, PNG, WEBP).' });
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      setUploadingId(null);
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      // 1. Subir archivo
+      const uploadRes = await fetch('/api/edificios/consumibles/upload', {
+        method: 'POST',
+        body: formData
+      });
+      
+      if (!uploadRes.ok) throw new Error('Error al subir el archivo');
+      const { url } = await uploadRes.json();
+
+      // 2. Actualizar consumible
+      const patchRes = await fetch(`/api/edificios/consumibles/${uploadingId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ Ruta_Ficha_Tecnica: url })
+      });
+
+      if (!patchRes.ok) throw new Error('Error al enlazar el archivo al consumible');
+      
+      setSysModal({ isOpen: true, type: 'success', title: 'Ficha Técnica Subida', message: 'El documento se subió correctamente.' });
+      fetchConsumibles();
+    } catch (err) {
+      console.error(err);
+      setSysModal({ isOpen: true, type: 'error', title: 'Error', message: 'Ocurrió un error en la subida. Revisa los logs.' });
+    } finally {
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      setUploadingId(null);
     }
   };
 
@@ -200,60 +345,90 @@ export default function ConsumiblesClient({ currentUserEmail, edificios }: any) 
   }
 
   return (
-    <div className="flex flex-col h-full gap-6">
-      {/* Top Action Bar */}
-      <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4 bg-[var(--bg-floating)] p-4 rounded-2xl border border-[var(--border-cream)] shadow-lg">
-        <h2 className="text-xl font-bold text-[var(--text-main)] flex items-center gap-2 shrink-0">
-          <Package className="text-amber-500" /> Inventario de Consumibles
-        </h2>
-        <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center w-full md:w-auto">
+    <div className="flex flex-col w-full gap-6">
+      {/* Top Action Bar - Sticky y Ultra-Compacta al scrollear para liberar 75%+ de pantalla */}
+      <div 
+        className={`sticky top-[72px] z-30 transition-all duration-200 bg-[var(--bg-floating)]/95 backdrop-blur-xl border border-[var(--border-cream)] rounded-2xl shadow-xl flex flex-col md:flex-row justify-between items-stretch md:items-center gap-3 ${
+          scrolled ? 'py-2 px-3 sm:px-5 border-amber-500/30 shadow-2xl' : 'p-4'
+        }`}
+      >
+        <div className="flex items-center gap-2 shrink-0">
+          <div className={`rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-500 flex items-center justify-center transition-all ${
+            scrolled ? 'p-1.5' : 'p-2'
+          }`}>
+            <Package size={scrolled ? 18 : 22} />
+          </div>
+          <div className="flex items-center gap-2">
+            <h2 className={`font-bold text-[var(--text-main)] tracking-tight transition-all ${
+              scrolled ? 'text-sm sm:text-base' : 'text-xl'
+            }`}>
+              {scrolled ? 'Consumibles' : 'Inventario de Consumibles'}
+            </h2>
+            {filteredConsumibles.length > 0 && (
+              <span className="text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                {filteredConsumibles.length} items
+              </span>
+            )}
+          </div>
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 items-stretch sm:items-center w-full md:w-auto">
           {/* Switcher de Vista */}
-          <div className="flex bg-[var(--bg-screen)] border border-[var(--border-cream)] p-1 rounded-xl shadow-sm self-start sm:self-auto">
+          <div className="flex bg-[var(--bg-screen)] border border-[var(--border-cream)] p-0.5 rounded-xl shadow-sm self-start sm:self-auto">
             <button
               onClick={() => setViewMode('cards')}
               title="Vista de Tarjetas"
-              className={`p-1.5 rounded-lg transition-all ${
+              className={`rounded-lg transition-all ${scrolled ? 'p-1' : 'p-1.5'} ${
                 viewMode === 'cards' 
                   ? 'bg-amber-500 text-[#0F1115] shadow-sm font-bold' 
                   : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
               }`}
             >
-              <LayoutGrid size={18} />
+              <LayoutGrid size={scrolled ? 15 : 18} />
             </button>
             <button
               onClick={() => setViewMode('compact')}
               title="Vista Compacta (Inventariado Rápido)"
-              className={`p-1.5 rounded-lg transition-all ${
+              className={`rounded-lg transition-all ${scrolled ? 'p-1' : 'p-1.5'} ${
                 viewMode === 'compact' 
                   ? 'bg-amber-500 text-[#0F1115] shadow-sm font-bold' 
                   : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
               }`}
             >
-              <List size={18} />
+              <List size={scrolled ? 15 : 18} />
             </button>
           </div>
 
           <div className="relative flex items-center flex-1 sm:w-64">
-            <Search size={16} className="absolute left-3.5 text-amber-500 font-bold pointer-events-none" />
+            <Search size={scrolled ? 14 : 16} className="absolute left-3 text-amber-500 font-bold pointer-events-none" />
             <input 
               type="text" 
-              placeholder="Buscar consumibles..." 
+              placeholder={scrolled ? "Buscar..." : "Buscar consumibles..."} 
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="h-10 w-full pl-10 pr-4 bg-[var(--bg-screen)] border border-[var(--border-cream)] rounded-xl text-sm focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 text-[var(--text-main)] placeholder:text-[var(--text-muted)] font-medium shadow-sm transition-all"
+              className={`w-full pl-9 pr-8 bg-[var(--bg-screen)] border border-[var(--border-cream)] rounded-xl focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 text-[var(--text-main)] placeholder:text-[var(--text-muted)] font-medium shadow-sm transition-all ${
+                scrolled ? 'h-8 text-xs' : 'h-10 text-sm'
+              }`}
             />
+            {search && (
+              <button onClick={() => setSearch('')} className="absolute right-2.5 text-[var(--text-muted)] hover:text-[var(--text-main)]">
+                <X size={13} />
+              </button>
+            )}
           </div>
           <button 
             onClick={() => setShowNuevo(true)}
-            className="h-10 flex items-center justify-center gap-2 px-5 rounded-xl bg-amber-500 text-[#0F1115] text-sm font-bold hover:bg-amber-400 transition-all shadow-[0_0_20px_rgba(245,158,11,0.3)] whitespace-nowrap shrink-0"
+            className={`flex items-center justify-center gap-1.5 rounded-xl bg-amber-500 text-[#0F1115] font-bold hover:bg-amber-400 transition-all shadow-[0_0_20px_rgba(245,158,11,0.3)] whitespace-nowrap shrink-0 ${
+              scrolled ? 'h-8 text-xs px-3.5' : 'h-10 text-sm px-5'
+            }`}
           >
-            <Plus size={16} /> Nuevo Consumible
+            <Plus size={scrolled ? 14 : 16} /> Nuevo Consumible
           </button>
         </div>
       </div>
 
       {viewMode === 'cards' && (
-        <div className="flex flex-col gap-8 pb-20 overflow-y-auto custom-scrollbar">
+        <div className="flex flex-col gap-8 pb-24 w-full">
           {Object.entries(groupedConsumibles).map(([sucursal, items]: [string, any]) => (
             <div key={sucursal}>
               <h3 className="text-lg font-bold text-[var(--text-main)] mb-4 flex items-center gap-2 border-b border-[var(--border-cream)] pb-2">
@@ -287,6 +462,37 @@ export default function ConsumiblesClient({ currentUserEmail, edificios }: any) 
                             <p className="text-xs text-[var(--text-muted)] flex items-center gap-1 mt-1 truncate">
                               <span className="text-[9px] uppercase font-bold tracking-wider">{item.Tipo}</span>
                             </p>
+                          </div>
+                        </div>
+                        {/* Acciones de Tarjeta */}
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          {/* Botón Editar */}
+                          <button
+                            onClick={() => handleOpenEdit(item)}
+                            className="w-8 h-8 rounded-lg flex items-center justify-center bg-[var(--bg-screen)] text-[var(--text-muted)] hover:text-amber-500 hover:bg-amber-500/10 border border-[var(--border-cream)] hover:border-amber-500/30 transition-all shadow-sm"
+                            title="Editar consumible"
+                          >
+                            <Pencil size={14} />
+                          </button>
+
+                          {/* Indicador Ficha Técnica */}
+                          <div 
+                            onClick={() => {
+                              if (item.Ruta_Ficha_Tecnica) {
+                                window.open(item.Ruta_Ficha_Tecnica, '_blank');
+                              } else {
+                                triggerFileUpload(item.Id_Consumible);
+                              }
+                            }}
+                            className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 shadow-sm border transition-all cursor-pointer ${
+                              uploadingId === item.Id_Consumible ? 'bg-amber-500/20 text-amber-500 border-amber-500 animate-pulse' :
+                              item.Ruta_Ficha_Tecnica 
+                                ? 'bg-blue-500/10 text-blue-500 border-blue-500/20 hover:bg-blue-500/20' 
+                                : 'bg-stone-500/10 text-stone-400 border-stone-500/20 border-dashed hover:bg-stone-500/20 hover:text-white'
+                            }`}
+                            title={item.Ruta_Ficha_Tecnica ? 'Ver Ficha Técnica' : 'Subir Ficha Técnica'}
+                          >
+                            {uploadingId === item.Id_Consumible ? <Loader2 size={16} className="animate-spin" /> : <FileText size={16} />}
                           </div>
                         </div>
                       </div>
@@ -337,7 +543,7 @@ export default function ConsumiblesClient({ currentUserEmail, edificios }: any) 
       )}
 
       {viewMode === 'compact' && (
-        <div className="flex flex-col gap-6 pb-20 overflow-y-auto custom-scrollbar">
+        <div className="flex flex-col gap-6 pb-24 w-full">
           {Object.entries(groupedConsumibles).map(([sucursal, items]: [string, any]) => (
             <div key={sucursal} className="flex flex-col gap-2.5">
               <h3 className="text-sm font-bold text-[var(--text-main)] mb-1 flex items-center gap-2 border-b border-[var(--border-cream)] pb-1.5">
@@ -374,6 +580,35 @@ export default function ConsumiblesClient({ currentUserEmail, edificios }: any) 
                         <p className="text-xs text-[var(--text-muted)] truncate flex items-center gap-1.5 mt-0.5">
                           <span className="font-medium text-amber-600 dark:text-amber-400">{item.Unidad_Medida}</span>
                         </p>
+                      </div>
+                      
+                      {/* Botón Editar Compacto */}
+                      <button
+                        onClick={() => handleOpenEdit(item)}
+                        className="w-8 h-8 rounded-lg flex items-center justify-center bg-[var(--bg-screen)] text-[var(--text-muted)] hover:text-amber-500 hover:bg-amber-500/10 border border-[var(--border-cream)] hover:border-amber-500/30 transition-all shadow-sm shrink-0 mr-1"
+                        title="Editar consumible"
+                      >
+                        <Pencil size={14} />
+                      </button>
+
+                      {/* Indicador Ficha Técnica */}
+                      <div 
+                        onClick={() => {
+                          if (item.Ruta_Ficha_Tecnica) {
+                            window.open(item.Ruta_Ficha_Tecnica, '_blank');
+                          } else {
+                            triggerFileUpload(item.Id_Consumible);
+                          }
+                        }}
+                        className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 shadow-sm border mr-1 transition-all cursor-pointer ${
+                          uploadingId === item.Id_Consumible ? 'bg-amber-500/20 text-amber-500 border-amber-500 animate-pulse' :
+                          item.Ruta_Ficha_Tecnica 
+                            ? 'bg-blue-500/10 text-blue-500 border-blue-500/20 hover:bg-blue-500/20' 
+                            : 'bg-stone-500/10 text-stone-400 border-stone-500/20 border-dashed hover:bg-stone-500/20 hover:text-white'
+                        }`}
+                        title={item.Ruta_Ficha_Tecnica ? 'Ver Ficha Técnica' : 'Subir Ficha Técnica'}
+                      >
+                        {uploadingId === item.Id_Consumible ? <Loader2 size={16} className="animate-spin" /> : <FileText size={16} />}
                       </div>
                     </div>
 
@@ -545,6 +780,16 @@ export default function ConsumiblesClient({ currentUserEmail, edificios }: any) 
                   />
                 </div>
               </div>
+
+              {/* Ficha Técnica Subida de Archivos (Preparación) */}
+              <div className="mt-2 border-t border-[var(--border-cream)] pt-4">
+                <label className="block text-xs font-bold text-[var(--text-muted)] uppercase mb-2">Ficha Técnica (Próximamente)</label>
+                <div className="w-full border-2 border-dashed border-[var(--border-cream)] rounded-xl p-4 flex flex-col items-center justify-center text-[var(--text-muted)] bg-[var(--bg-screen)] hover:bg-[var(--bg-hover)] transition-colors cursor-not-allowed opacity-60">
+                  <FileText size={24} className="mb-2" />
+                  <span className="text-sm font-semibold">Subir documento PDF (En desarrollo)</span>
+                  <span className="text-xs">Este espacio estará listo para fichas técnicas o facturas</span>
+                </div>
+              </div>
             </div>
 
             <div className="p-5 border-t border-[var(--border-cream)] flex justify-end gap-3 bg-[var(--bg-screen)]">
@@ -561,6 +806,192 @@ export default function ConsumiblesClient({ currentUserEmail, edificios }: any) 
               >
                 {isSaving ? 'Guardando...' : 'Guardar Consumible'}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Editar Consumible */}
+      {editingConsumible && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-3 sm:p-6 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-[var(--bg-floating)] border border-[var(--border-cream)] rounded-2xl w-full max-w-2xl shadow-2xl flex flex-col max-h-[92vh] sm:max-h-[90vh] overflow-hidden">
+            <div className="p-5 border-b border-[var(--border-cream)] flex justify-between items-center bg-white/[0.02]">
+              <h2 className="text-xl font-bold text-amber-500 flex items-center gap-2">
+                <Pencil size={20} /> Editar Consumible
+              </h2>
+              <button onClick={() => setEditingConsumible(null)} className="p-2 bg-[var(--bg-hover)] text-[var(--text-muted)] hover:text-white rounded-lg transition-colors">
+                <X size={18} />
+              </button>
+            </div>
+            
+            <div className="p-6 overflow-y-auto custom-scrollbar flex flex-col gap-4">
+              <div>
+                <label className="block text-xs font-bold text-[var(--text-muted)] uppercase mb-2">Nombre del Producto *</label>
+                <div className="relative">
+                  <Package className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" size={16} />
+                  <input 
+                    type="text" 
+                    value={editForm.Nombre}
+                    onChange={(e) => setEditForm({...editForm, Nombre: e.target.value})}
+                    className="w-full bg-[var(--bg-screen)] border border-[var(--border-cream)] rounded-xl py-2.5 pl-10 pr-4 text-sm text-[var(--text-main)] placeholder:text-[var(--text-muted)] focus:border-amber-500 outline-none transition-colors"
+                    placeholder="Ej. Papel Higiénico"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest mb-1.5">Tipo / Categoría</label>
+                  <PremiumSelect
+                    value={editForm.Tipo}
+                    onChange={(val) => setEditForm({...editForm, Tipo: val})}
+                    options={[
+                      {value: 'Limpieza', label: 'Limpieza'},
+                      {value: 'Limpieza y Despensa', label: 'Limpieza y Despensa'},
+                      {value: 'Papelería', label: 'Papelería'},
+                      {value: 'Cafetería', label: 'Cafetería'},
+                      {value: 'Botiquín / Seguridad', label: 'Botiquín / Seguridad'},
+                      {value: 'Otros', label: 'Otros'}
+                    ]}
+                    accent="amber"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest mb-1.5">Sucursal / Oficina</label>
+                  <PremiumSelect
+                    value={editForm.Id_Edificio}
+                    onChange={(val) => setEditForm({...editForm, Id_Edificio: val})}
+                    options={edificios.map((e: any) => ({ value: e.Id_Edificio.toString(), label: e.Sucursal }))}
+                    placeholder="Seleccionar..."
+                    accent="amber"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-[var(--text-muted)] uppercase mb-2">Unidad de Medida</label>
+                  <PremiumSelect
+                    value={editForm.Unidad_Medida}
+                    onChange={(val) => setEditForm({...editForm, Unidad_Medida: val})}
+                    options={[
+                      {value: 'Piezas (pza)', label: 'Piezas (pza)'},
+                      {value: 'Litros (L)', label: 'Litros (L)'},
+                      {value: 'Mililitros (ml)', label: 'Mililitros (ml)'},
+                      {value: 'Kilogramos (kg)', label: 'Kilogramos (kg)'},
+                      {value: 'Gramos (g)', label: 'Gramos (g)'},
+                      {value: 'Metros (m)', label: 'Metros (m)'},
+                      {value: 'Galones (gal)', label: 'Galones (gal)'},
+                      {value: 'Cajas (cj)', label: 'Cajas (cj)'},
+                      {value: 'Paquetes (pqt)', label: 'Paquetes (pqt)'},
+                      {value: 'Rollos (rlo)', label: 'Rollos (rlo)'},
+                      {value: 'Bidones (bdn)', label: 'Bidones / Garrafones'},
+                      {value: 'Cubetas (cbt)', label: 'Cubetas'}
+                    ]}
+                    accent="amber"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-[var(--text-muted)] uppercase mb-2">Stock Actual (Unidades)</label>
+                  <input 
+                    type="number" 
+                    min="0"
+                    step="any"
+                    value={editForm.Cantidad_Actual}
+                    onChange={(e) => setEditForm({...editForm, Cantidad_Actual: parseFloat(e.target.value) || 0})}
+                    className="w-full bg-[var(--bg-screen)] border border-[var(--border-cream)] rounded-xl py-2.5 px-4 text-sm text-[var(--text-main)] focus:border-amber-500 outline-none transition-colors font-bold"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-[var(--text-muted)] uppercase mb-2">Capacidad Max (Para barra)</label>
+                  <input 
+                    type="number" 
+                    min="0"
+                    value={editForm.Capacidad_Maxima}
+                    onChange={(e) => setEditForm({...editForm, Capacidad_Maxima: parseFloat(e.target.value) || 0})}
+                    className="w-full bg-[var(--bg-screen)] border border-[var(--border-cream)] rounded-xl py-2.5 px-4 text-sm text-[var(--text-main)] focus:border-amber-500 outline-none transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-[var(--text-muted)] uppercase mb-2">Alerta Mínima (Bajo Stock)</label>
+                  <input 
+                    type="number" 
+                    min="0"
+                    value={editForm.Umbral_Alerta}
+                    onChange={(e) => setEditForm({...editForm, Umbral_Alerta: parseFloat(e.target.value) || 0})}
+                    className="w-full bg-[var(--bg-screen)] border border-[var(--border-cream)] rounded-xl py-2.5 px-4 text-sm text-[var(--text-main)] focus:border-amber-500 outline-none transition-colors"
+                  />
+                </div>
+              </div>
+
+              {/* Ficha Técnica / Documento */}
+              <div className="border-t border-[var(--border-cream)] pt-4">
+                <label className="block text-xs font-bold text-[var(--text-muted)] uppercase mb-2">Ficha Técnica / Documento</label>
+                {editingConsumible.Ruta_Ficha_Tecnica ? (
+                  <div className="flex items-center justify-between p-3 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <FileText size={18} className="shrink-0" />
+                      <span className="text-xs font-medium truncate">Documento vinculado</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => window.open(editingConsumible.Ruta_Ficha_Tecnica, '_blank')}
+                        className="px-2.5 py-1 rounded-lg bg-blue-500/20 hover:bg-blue-500/30 text-xs font-bold text-blue-300 transition-colors"
+                      >
+                        Ver Documento
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => triggerFileUpload(editingConsumible.Id_Consumible)}
+                        className="px-2.5 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-xs font-bold text-amber-400 transition-colors"
+                      >
+                        Reemplazar
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => triggerFileUpload(editingConsumible.Id_Consumible)}
+                    className="w-full border-2 border-dashed border-[var(--border-cream)] hover:border-amber-500/50 rounded-xl p-3 flex items-center justify-center gap-2 text-xs font-bold text-[var(--text-muted)] hover:text-amber-500 bg-[var(--bg-screen)] hover:bg-[var(--bg-hover)] transition-all"
+                  >
+                    <FileText size={16} /> Subir Ficha Técnica (PDF o Imagen)
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div className="p-5 border-t border-[var(--border-cream)] flex justify-between items-center gap-3 bg-[var(--bg-screen)]">
+              <button 
+                type="button"
+                onClick={handleDeleteConsumible}
+                disabled={isSaving}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-red-500/10 text-red-500 hover:bg-red-500/20 border border-red-500/20 transition-colors disabled:opacity-50"
+              >
+                <Trash2 size={15} /> Eliminar
+              </button>
+
+              <div className="flex items-center gap-3">
+                <button 
+                  type="button"
+                  onClick={() => setEditingConsumible(null)}
+                  className="px-5 py-2 rounded-xl text-sm font-bold bg-[var(--bg-hover)] hover:bg-white text-[var(--text-main)] shadow-md transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button 
+                  type="button"
+                  onClick={handleSaveEdit}
+                  disabled={isSaving}
+                  className="flex items-center gap-2 px-6 py-2 rounded-xl text-sm font-bold bg-amber-500 text-[#0F1115] hover:bg-amber-400 transition-all shadow-[0_0_20px_rgba(245,158,11,0.3)] disabled:opacity-50"
+                >
+                  {isSaving ? 'Guardando...' : 'Guardar Cambios'}
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -638,6 +1069,14 @@ export default function ConsumiblesClient({ currentUserEmail, edificios }: any) 
         title={sysModal.title}
         message={sysModal.message}
         onConfirm={() => setSysModal({ ...sysModal, isOpen: false })}
+      />
+
+      <input
+        type="file"
+        ref={fileInputRef}
+        className="hidden"
+        accept=".pdf,image/jpeg,image/png,image/webp"
+        onChange={handleFichaUpload}
       />
     </div>
   );
