@@ -64,24 +64,26 @@ export async function PUT(
         });
       }
 
-      // 2. Notificar al Solicitante sobre su nuevo asesor
-      await enviarCorreo({
-        to: ticketActualizado.empleado.Email,
-        subject: `Asesor Asignado: ${id}`,
-        modulo: 'computo',
-        react: TicketUpdateEmail({
-          folio: id,
-          tipo: 'NUEVO_ASESOR',
-          esParaAsesor: false,
-          destinatarioNombre: ticketActualizado.empleado.Nombre_Empleado,
-          ticketDescripcion: ticketActualizado.Descripcion || 'Sin descripción detallada',
-          nuevoValor: Asesor,
-        })
-      });
+      // 2. Notificar al Solicitante sobre su nuevo asesor (si tiene cuenta registrada)
+      if (ticketActualizado.empleado?.Email) {
+        await enviarCorreo({
+          to: ticketActualizado.empleado.Email,
+          subject: `Asesor Asignado: ${id}`,
+          modulo: 'computo',
+          react: TicketUpdateEmail({
+            folio: id,
+            tipo: 'NUEVO_ASESOR',
+            esParaAsesor: false,
+            destinatarioNombre: ticketActualizado.empleado.Nombre_Empleado,
+            ticketDescripcion: ticketActualizado.Descripcion || 'Sin descripción detallada',
+            nuevoValor: Asesor,
+          })
+        });
+      }
     }
 
-    if (Estado !== undefined) {
-      // 3. Notificar al Solicitante sobre el cambio de estado
+    if (Estado !== undefined && ticketActualizado.empleado?.Email) {
+      // 3. Notificar al Solicitante sobre el cambio de estado (si tiene cuenta)
       await enviarCorreo({
         to: ticketActualizado.empleado.Email,
         subject: `Actualización de Estatus Ticket: ${id}`,

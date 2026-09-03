@@ -265,16 +265,25 @@ model Documentos_Computo {
 }
 
 model Solicitud_Computo {
-  Pk_folio_ticket   String             @id @db.VarChar(100)
-  Email_Empleado    String             @db.VarChar(100)
-  Asesor            String?            @db.VarChar(100)
-  Tipo_Servicio     String?            @db.VarChar(100)
-  Descripcion       String?
-  Fecha_Realizacion DateTime           @default(now()) @db.Date
-  Estado            String             @default("PENDIENTE")
-  C_Interno         String             @db.VarChar(100)
-  equipo            Inventario_Computo @relation(fields: [C_Interno], references: [C_Interno])
-  empleado          Empleados          @relation(fields: [Email_Empleado], references: [Email])
+  Pk_folio_ticket      String              @id @db.VarChar(100)
+  Email_Empleado       String?             @db.VarChar(100)
+  Solicitante_Nombre   String?             @db.VarChar(150)
+  Solicitante_Oficina  String?             @db.VarChar(150)
+  Solicitante_Depto    String?             @db.VarChar(150)
+  Solicitante_Telegram String?             @db.VarChar(100)
+  Asesor               String?             @db.VarChar(100)
+  Tipo_Servicio        String?             @db.VarChar(100)
+  Descripcion          String?
+  Prioridad            String?             @default("Normal") @db.VarChar(30)
+  Notas_Resolucion     String?
+  Evidencia_URL        String?
+  Id_Reporte_FRM       Int?
+  Fecha_Realizacion    DateTime            @default(now()) @db.Date
+  Fecha_Cierre         DateTime?           @db.Date
+  Estado               String              @default("PENDIENTE")
+  C_Interno            String              @db.VarChar(100)
+  equipo               Inventario_Computo  @relation(fields: [C_Interno], references: [C_Interno])
+  empleado             Empleados?          @relation(fields: [Email_Empleado], references: [Email])
 }
 
 model Costos_Computo {
@@ -443,7 +452,7 @@ model Plan_Mantenimiento {
 model Reporte_Mantenimiento {
   Id_Reporte         Int                @id @default(autoincrement())
   Consecutivo_FRM    String             @unique @db.VarChar(20)
-  Id_Plan            Int
+  Id_Plan            Int?
   C_Interno          String             @db.VarChar(100)
   Fecha_Programada   DateTime           @db.Date
   Fecha_Ejecucion    DateTime?          @db.Date
@@ -472,7 +481,7 @@ model Reporte_Mantenimiento {
   Datos_Formato      String?
   partes_cambiadas   Historial_Partes[]
   equipo             Inventario_Computo @relation(fields: [C_Interno], references: [C_Interno], onDelete: Cascade)
-  plan               Plan_Mantenimiento @relation(fields: [Id_Plan], references: [Id_Plan], onDelete: Cascade)
+  plan               Plan_Mantenimiento? @relation(fields: [Id_Plan], references: [Id_Plan], onDelete: Cascade)
 }
 
 model Programacion_Semanal {

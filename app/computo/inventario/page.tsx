@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, memo, useCallback } from 'react';
-import { Laptop, Plus, X, Pencil, ArrowLeft, ShieldCheck, AlertTriangle, Wrench, CheckCircle2, Archive, Download, Filter, UploadCloud, Search, FileText } from 'lucide-react';
+import { Laptop, Plus, X, Pencil, ArrowLeft, ShieldCheck, AlertTriangle, Wrench, CheckCircle2, Archive, Download, Filter, UploadCloud, Search, FileText, QrCode } from 'lucide-react';
 import Link from 'next/link';
 import SystemModal, { ModalType } from '@/components/ui/SystemModal';
 import { generarCartaResponsiva } from '@/lib/pdf/generarCartaComputo';
@@ -542,6 +542,12 @@ export default function ComputoInventarioPage() {
                   <button onClick={descargarCSV} className="w-full sm:w-auto bg-white hover:bg-[var(--bg-hover)] border border-[var(--border-cream)] text-[var(--text-main)] px-4 py-2 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors shadow-sm shrink-0">
                     <Download className="w-4 h-4" /> Exportar Excel
                   </button>
+                  <Link
+                    href="/computo/inventario/etiquetas"
+                    className="w-full sm:w-auto bg-white hover:bg-[var(--bg-hover)] border border-[var(--border-cream)] text-[var(--text-main)] px-4 py-2 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors shadow-sm shrink-0"
+                  >
+                    <QrCode className="w-4 h-4 text-emerald-600" /> Imprimir Calcomanías QR
+                  </Link>
                   <button onClick={abrirModalNuevo} className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg active:scale-95 shrink-0">
                     <Plus className="w-5 h-5" /> Registrar Equipo
                   </button>
