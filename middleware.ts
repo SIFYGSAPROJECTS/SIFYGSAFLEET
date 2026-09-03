@@ -107,6 +107,45 @@ export function middleware(request: NextRequest) {
       );
     }
 
+    if (request.method === 'OPTIONS') {
+      const preflightHeaders = new Headers();
+      if (origin) {
+        preflightHeaders.set('Access-Control-Allow-Origin', origin);
+      }
+      preflightHeaders.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+      preflightHeaders.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+      return new NextResponse(null, { status: 200, headers: preflightHeaders });
+    }
+
+    // 🔒 Candado Universal: Exigir sesión activa para TODAS las APIs del sistema
+    // Protege todos los módulos (Vehículos, Gastos, Cómputo, Empleados, Clima, etc.)
+    // contra Forced Browsing o filtración no autenticada.
+    const publicApiPrefixes = [
+      '/api/auth',
+      '/api/logout',
+      '/api/qr',
+      '/api/tickets/rastreo',
+      '/api/clima/upload',
+      '/api/cron',
+    ];
+
+    const isPublicApi = publicApiPrefixes.some(
+      prefix => pathname === prefix || pathname.startsWith(prefix + '/')
+    );
+
+    if (!isPublicApi) {
+      const session = request.cookies.get('user_email');
+      if (!session || !session.value) {
+        return new NextResponse(
+          JSON.stringify({ error: 'No autorizado: Se requiere una sesión activa para acceder a este recurso.' }),
+          {
+            status: 401,
+            headers: { 'Content-Type': 'application/json' }
+          }
+        );
+      }
+    }
+
     const response = NextResponse.next({
       request: { headers: requestHeaders },
     });
@@ -116,10 +155,6 @@ export function middleware(request: NextRequest) {
     }
     response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-
-    if (request.method === 'OPTIONS') {
-      return new NextResponse(null, { status: 200, headers: response.headers });
-    }
 
     response.headers.set('Content-Security-Policy', cspHeader);
     return response;
