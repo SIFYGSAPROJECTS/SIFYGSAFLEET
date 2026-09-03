@@ -147,25 +147,14 @@ export default function ServiciosComputoTabs({ tickets, equipos, isAdmin, rol, e
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          {isAdmin && (
-            <Link
-              href="/computo/inventario/etiquetas"
-              className="flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold bg-white hover:bg-[var(--bg-hover)] text-[var(--text-main)] border border-[var(--border-cream)] shadow-sm transition-all"
-            >
-              <QrCode size={14} className="text-emerald-500" /> Calcomanías QR
-            </Link>
-          )}
-
-          {(activeTab === 'seguimiento' || activeTab === 'historial') && isAdmin && (
-            <button
-              onClick={descargarCSV}
-              className="flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold bg-[var(--bg-screen)] hover:bg-[var(--bg-hover)] text-[var(--text-main)] border border-[var(--border-cream)] shadow-sm transition-all"
-            >
-              <Download size={14} className="text-emerald-500" /> Exportar a Excel
-            </button>
-          )}
-        </div>
+        {(activeTab === 'seguimiento' || activeTab === 'historial') && isAdmin && (
+          <button
+            onClick={descargarCSV}
+            className="flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold bg-[var(--bg-screen)] hover:bg-[var(--bg-hover)] text-[var(--text-main)] border border-[var(--border-cream)] shadow-sm transition-all"
+          >
+            <Download size={14} className="text-emerald-500" /> Exportar a Excel
+          </button>
+        )}
       </div>
 
       <div className="">

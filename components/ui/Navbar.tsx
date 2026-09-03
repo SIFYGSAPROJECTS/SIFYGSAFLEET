@@ -491,15 +491,6 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                         <span>Inventario</span>
                       </Link>
                     )}
-                    {localIsAdmin && (
-                      <Link
-                        href="/computo/inventario/etiquetas"
-                        className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all text-white/80 hover:text-white hover:bg-white/5 group/item"
-                      >
-                        <QrCode size={14} className="text-emerald-400 transition-transform duration-300 ease-in-out group-hover/item:scale-110" />
-                        <span>Calcomanías QR</span>
-                      </Link>
-                    )}
                     <Link
                       href="/computo/soporte-mantenimientos"
                       className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all text-white/80 hover:text-white hover:bg-white/5 group/item"
@@ -937,18 +928,6 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                       }`}
                   >
                     <Laptop size={14} className="text-emerald-400" /> Inventario
-                  </Link>
-                )}
-                {localIsAdmin && (
-                  <Link
-                    href="/computo/inventario/etiquetas"
-                    onClick={() => setIsMenuOpen(false)}
-                    className={`border px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold ${pathname === '/computo/inventario/etiquetas'
-                      ? 'bg-emerald-600 border-emerald-500 text-white'
-                      : 'bg-white/5 border-white/5 text-white/90 hover:bg-white/10'
-                      }`}
-                  >
-                    <QrCode size={14} className="text-emerald-400" /> Calcomanías QR
                   </Link>
                 )}
                 <Link

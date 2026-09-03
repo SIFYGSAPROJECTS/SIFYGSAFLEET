@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect, useRef, memo, useCallback } from 'react';
-import { Laptop, Plus, X, Pencil, ArrowLeft, ShieldCheck, AlertTriangle, Wrench, CheckCircle2, Archive, Download, Filter, UploadCloud, Search, FileText, QrCode } from 'lucide-react';
+import { Laptop, Plus, X, Pencil, ArrowLeft, ShieldCheck, AlertTriangle, Wrench, CheckCircle2, Archive, Download, Filter, UploadCloud, Search, FileText, QrCode, Printer, CheckSquare, Square } from 'lucide-react';
 import Link from 'next/link';
 import SystemModal, { ModalType } from '@/components/ui/SystemModal';
+import ModalCalcomaniasQR from '@/components/computo/ModalCalcomaniasQR';
 import { generarCartaResponsiva } from '@/lib/pdf/generarCartaComputo';
 import PremiumSelect from '@/components/ui/PremiumSelect';
 import { useWindowVirtualizer } from '@tanstack/react-virtual';
@@ -27,8 +28,16 @@ interface EquipoComputo {
   Email_Empleado: string | null;
 }
 
-const DesktopRow = memo(({ equipo, esAsignado, esRevision, esBaja, generarCartaResponsiva, abrirModalEditar }: any) => (
-  <tr className="hover:bg-[var(--bg-hover)] even:bg-[var(--bg-screen)] transition-colors border-b border-[var(--border-cream)] last:border-0">
+const DesktopRow = memo(({ equipo, isSelected, onToggleSelect, esAsignado, esRevision, esBaja, generarCartaResponsiva, abrirModalEditar, abrirModalQR }: any) => (
+  <tr className={`hover:bg-[var(--bg-hover)] even:bg-[var(--bg-screen)] transition-colors border-b border-[var(--border-cream)] last:border-0 ${isSelected ? 'bg-emerald-500/10' : ''}`}>
+    <td className="p-4 text-center w-12">
+      <input
+        type="checkbox"
+        checked={isSelected}
+        onChange={() => onToggleSelect(equipo.C_Interno)}
+        className="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 cursor-pointer accent-emerald-600"
+      />
+    </td>
     <td className="p-4">
       <div className="font-bold text-[var(--text-main)] text-base font-serif">{equipo.C_Interno}</div>
       <div className="text-xs text-[var(--text-muted)] mt-1 font-mono">{equipo.Empresa}</div>
@@ -52,9 +61,14 @@ const DesktopRow = memo(({ equipo, esAsignado, esRevision, esBaja, generarCartaR
       <div className="text-sm text-[var(--text-main)]">{equipo.Proveedor || <span className="text-stone-400 italic">N/A</span>}</div>
     </td>
     <td className="p-4 text-center">
-      <button onClick={() => generarCartaResponsiva(equipo)} className="p-2 text-indigo-500 hover:text-white hover:bg-indigo-500 rounded-lg transition-colors border border-indigo-200 shadow-sm" title="Descargar PDF Carta Responsiva">
-        <FileText className="w-5 h-5" />
-      </button>
+      <div className="flex items-center justify-center gap-1.5">
+        <button onClick={() => abrirModalQR(equipo)} className="p-2 text-emerald-600 hover:text-white hover:bg-emerald-600 rounded-lg transition-colors border border-emerald-200 shadow-sm" title="Imprimir Calcomanía QR de este equipo">
+          <QrCode className="w-5 h-5" />
+        </button>
+        <button onClick={() => generarCartaResponsiva(equipo)} className="p-2 text-indigo-500 hover:text-white hover:bg-indigo-500 rounded-lg transition-colors border border-indigo-200 shadow-sm" title="Descargar PDF Carta Responsiva">
+          <FileText className="w-5 h-5" />
+        </button>
+      </div>
     </td>
     <td className="p-4 text-center">
       <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase mb-1 ${esAsignado ? 'bg-emerald-100 text-emerald-700' : esRevision ? 'bg-amber-100 text-amber-700' : esBaja ? 'bg-red-100 text-red-700' : 'bg-stone-200 text-stone-700'}`}>{equipo.Estatus}</span>
@@ -69,8 +83,8 @@ const DesktopRow = memo(({ equipo, esAsignado, esRevision, esBaja, generarCartaR
 ));
 DesktopRow.displayName = 'DesktopRow';
 
-const MobileCard = memo(({ equipo, tabPrincipal, generarCartaResponsiva, abrirModalEditar }: any) => (
-  <div className={`bg-[var(--bg-floating)] rounded-xl shadow-lg border border-[var(--border-cream)] border-t-4 ${tabPrincipal === 'revision' ? 'border-t-amber-500' : 'border-t-red-500'} overflow-hidden hover:shadow-xl transition-all flex flex-col`}>
+const MobileCard = memo(({ equipo, isSelected, onToggleSelect, tabPrincipal, generarCartaResponsiva, abrirModalEditar, abrirModalQR }: any) => (
+  <div className={`bg-[var(--bg-floating)] rounded-xl shadow-lg border border-[var(--border-cream)] border-t-4 ${tabPrincipal === 'revision' ? 'border-t-amber-500' : 'border-t-red-500'} overflow-hidden hover:shadow-xl transition-all flex flex-col ${isSelected ? 'ring-2 ring-emerald-500' : ''}`}>
     <div className="p-5 flex-grow">
       <div className="flex justify-between items-start mb-4">
         <div>
@@ -112,8 +126,19 @@ const MobileCard = memo(({ equipo, tabPrincipal, generarCartaResponsiva, abrirMo
     </div>
 
     <div className="bg-[var(--bg-screen)] border-t border-[var(--border-cream)] p-3 flex justify-between items-center px-5 mt-auto">
-      <div className="text-xs text-[var(--text-muted)]"><span className="font-bold text-stone-500">CR:</span> {equipo.CR === 'SI' ? '✅ SI' : '❌ NO'}</div>
-      <div className="flex gap-1">
+      <div className="flex items-center gap-2">
+        <input
+          type="checkbox"
+          checked={isSelected}
+          onChange={() => onToggleSelect(equipo.C_Interno)}
+          className="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 cursor-pointer accent-emerald-600"
+        />
+        <div className="text-xs text-[var(--text-muted)]"><span className="font-bold text-stone-500">CR:</span> {equipo.CR === 'SI' ? '✅ SI' : '❌ NO'}</div>
+      </div>
+      <div className="flex items-center gap-1">
+        <button onClick={() => abrirModalQR(equipo)} className="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors border border-emerald-200" title="Imprimir Calcomanía QR">
+          <QrCode className="w-4 h-4" />
+        </button>
         <button onClick={() => generarCartaResponsiva(equipo)} className="p-2 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="Generar Carta Responsiva">
           <FileText className="w-4 h-4" />
         </button>
@@ -152,6 +177,22 @@ export default function ComputoInventarioPage() {
   // Limite de equipos mantenido sólo para fallback de vista Grid (MobileCard), 
   // la tabla Desktop usará virtualización.
   const [limiteEquipos, setLimiteEquipos] = useState(50);
+  const [selectedEquipos, setSelectedEquipos] = useState<string[]>([]);
+  const [modalQREquipos, setModalQREquipos] = useState<any[] | null>(null);
+
+  const toggleSelect = useCallback((cInterno: string) => {
+    setSelectedEquipos(prev => 
+      prev.includes(cInterno) ? prev.filter(c => c !== cInterno) : [...prev, cInterno]
+    );
+  }, []);
+
+  const abrirModalQR = useCallback((equipoOArray: any) => {
+    if (Array.isArray(equipoOArray)) {
+      setModalQREquipos(equipoOArray);
+    } else {
+      setModalQREquipos([equipoOArray]);
+    }
+  }, []);
 
   useEffect(() => {
     setLimiteEquipos(50);
@@ -259,6 +300,14 @@ export default function ComputoInventarioPage() {
     if (filtroEstatus === 'Asignado') return esAsignado(e);
     return e.Estatus === filtroEstatus;
   });
+
+  const toggleSelectAll = useCallback(() => {
+    if (selectedEquipos.length === equiposFiltrados.length) {
+      setSelectedEquipos([]);
+    } else {
+      setSelectedEquipos(equiposFiltrados.map(e => e.C_Interno));
+    }
+  }, [selectedEquipos.length, equiposFiltrados]);
 
   const parentRef = useRef<HTMLDivElement>(null);
   const rowVirtualizer = useWindowVirtualizer({
@@ -542,12 +591,6 @@ export default function ComputoInventarioPage() {
                   <button onClick={descargarCSV} className="w-full sm:w-auto bg-white hover:bg-[var(--bg-hover)] border border-[var(--border-cream)] text-[var(--text-main)] px-4 py-2 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors shadow-sm shrink-0">
                     <Download className="w-4 h-4" /> Exportar Excel
                   </button>
-                  <Link
-                    href="/computo/inventario/etiquetas"
-                    className="w-full sm:w-auto bg-white hover:bg-[var(--bg-hover)] border border-[var(--border-cream)] text-[var(--text-main)] px-4 py-2 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors shadow-sm shrink-0"
-                  >
-                    <QrCode className="w-4 h-4 text-emerald-600" /> Imprimir Calcomanías QR
-                  </Link>
                   <button onClick={abrirModalNuevo} className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg active:scale-95 shrink-0">
                     <Plus className="w-5 h-5" /> Registrar Equipo
                   </button>
@@ -613,9 +656,12 @@ export default function ComputoInventarioPage() {
                     <MobileCard 
                       key={equipo.C_Interno}
                       equipo={equipo}
+                      isSelected={selectedEquipos.includes(equipo.C_Interno)}
+                      onToggleSelect={toggleSelect}
                       tabPrincipal={tabPrincipal}
                       generarCartaResponsiva={memoGenerarCartaResponsiva}
                       abrirModalEditar={abrirModalEditar}
+                      abrirModalQR={abrirModalQR}
                     />
                   ))
                 )}
@@ -640,13 +686,21 @@ export default function ComputoInventarioPage() {
                 <table className="min-w-[1200px] w-full text-left border-collapse">
                   <thead>
                     <tr className="border-b border-[var(--border-cream)] text-stone-500 text-[11px] uppercase tracking-widest font-black">
+                      <th className="sticky z-30 p-4 border-b border-stone-200/50 bg-stone-50 w-12 text-center" style={{ top: 'var(--computo-header-height, 210px)' }}>
+                        <input
+                          type="checkbox"
+                          checked={equiposFiltrados.length > 0 && selectedEquipos.length === equiposFiltrados.length}
+                          onChange={toggleSelectAll}
+                          className="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 cursor-pointer accent-emerald-600"
+                        />
+                      </th>
                       <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50" style={{ top: 'var(--computo-header-height, 210px)' }}>Consecutivo</th>
                       <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50" style={{ top: 'var(--computo-header-height, 210px)' }}>Equipo (Marca / Modelo)</th>
                       <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50" style={{ top: 'var(--computo-header-height, 210px)' }}>Service Tag / Cargador</th>
                       <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50" style={{ top: 'var(--computo-header-height, 210px)' }}>Usuario y Depto.</th>
                       <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50" style={{ top: 'var(--computo-header-height, 210px)' }}>Proyecto Asignado</th>
                       <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 bg-stone-50" style={{ top: 'var(--computo-header-height, 210px)' }}>Proveedor</th>
-                      <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 text-center bg-stone-50" style={{ top: 'var(--computo-header-height, 210px)' }}>Carta</th>
+                      <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 text-center bg-stone-50" style={{ top: 'var(--computo-header-height, 210px)' }}>QR / Carta</th>
                       <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 text-center bg-stone-50" style={{ top: 'var(--computo-header-height, 210px)' }}>Estatus y CR</th>
                       <th className="sticky z-30 p-5 font-bold border-b border-stone-200/50 text-center bg-stone-50" style={{ top: 'var(--computo-header-height, 210px)' }}>Editar</th>
                     </tr>
@@ -657,12 +711,12 @@ export default function ComputoInventarioPage() {
                       const paddingTop = virtualItems.length > 0 ? virtualItems[0]?.start || 0 : 0;
                       const paddingBottom = virtualItems.length > 0 ? rowVirtualizer.getTotalSize() - (virtualItems[virtualItems.length - 1]?.end || 0) : 0;
                       
-                      if (cargando) return <tr><td colSpan={9} className="text-center p-8 text-[var(--text-muted)] font-bold">Cargando inventario...</td></tr>;
-                      if (equiposFiltrados.length === 0) return <tr><td colSpan={9} className="text-center p-8 text-[var(--text-muted)]">No hay equipos que coincidan con los filtros.</td></tr>;
+                      if (cargando) return <tr><td colSpan={10} className="text-center p-8 text-[var(--text-muted)] font-bold">Cargando inventario...</td></tr>;
+                      if (equiposFiltrados.length === 0) return <tr><td colSpan={10} className="text-center p-8 text-[var(--text-muted)]">No hay equipos que coincidan con los filtros.</td></tr>;
 
                       return (
                         <>
-                          {paddingTop > 0 && <tr><td style={{height: paddingTop}} colSpan={9} /></tr>}
+                          {paddingTop > 0 && <tr><td style={{height: paddingTop}} colSpan={10} /></tr>}
                           
                           {virtualItems.map((virtualRow) => {
                             const equipo = equiposFiltrados[virtualRow.index];
@@ -670,16 +724,19 @@ export default function ComputoInventarioPage() {
                               <DesktopRow
                                 key={virtualRow.index}
                                 equipo={equipo}
+                                isSelected={selectedEquipos.includes(equipo.C_Interno)}
+                                onToggleSelect={toggleSelect}
                                 esAsignado={esAsignado(equipo)}
                                 esRevision={esRevision(equipo)}
                                 esBaja={esBaja(equipo)}
                                 generarCartaResponsiva={memoGenerarCartaResponsiva}
                                 abrirModalEditar={abrirModalEditar}
+                                abrirModalQR={abrirModalQR}
                               />
                             );
                           })}
                           
-                          {paddingBottom > 0 && <tr><td style={{height: paddingBottom}} colSpan={9} /></tr>}
+                          {paddingBottom > 0 && <tr><td style={{height: paddingBottom}} colSpan={10} /></tr>}
                         </>
                       );
                     })()}
@@ -813,6 +870,37 @@ export default function ComputoInventarioPage() {
           </div>
         </div>
       )}
+
+      {/* Barra Flotante de Selección para Imprimir QRs */}
+      {selectedEquipos.length > 0 && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-stone-950/95 border border-emerald-500/40 text-white px-5 py-3 rounded-2xl shadow-2xl backdrop-blur-md flex items-center gap-4 animate-in slide-in-from-bottom-5">
+          <span className="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
+            <CheckSquare size={16} /> {selectedEquipos.length} equipo(s) seleccionado(s)
+          </span>
+          <button
+            onClick={() => {
+              const eqs = equipos.filter(e => selectedEquipos.includes(e.C_Interno));
+              abrirModalQR(eqs);
+            }}
+            className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg transition-all flex items-center gap-1.5 active:scale-95"
+          >
+            <Printer size={14} /> Imprimir Calcomanías QR ({selectedEquipos.length})
+          </button>
+          <button
+            onClick={() => setSelectedEquipos([])}
+            className="text-stone-400 hover:text-white text-xs font-semibold px-2 py-1 transition-colors"
+          >
+            ✕ Desmarcar
+          </button>
+        </div>
+      )}
+
+      {/* Modal de Calcomanías QR (Rápido, solo para los seleccionados) */}
+      <ModalCalcomaniasQR
+        equipos={modalQREquipos || []}
+        isOpen={!!modalQREquipos}
+        onClose={() => setModalQREquipos(null)}
+      />
 
       <SystemModal
         isOpen={sysModal.isOpen}
