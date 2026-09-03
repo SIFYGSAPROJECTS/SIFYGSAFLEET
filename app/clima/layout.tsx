@@ -21,7 +21,8 @@ export default async function ClimaLayout({
   const userRole = cookieStore.get('user_role')?.value || 'USER';
   const userName = cookieStore.get('user_name')?.value || 'Usuario';
   const userAdminTi = cookieStore.get('user_admin_ti')?.value === 'true';
-  const isAdmin = ['ADMIN', 'GERENCIAL'].includes(userRole) || userAdminTi;
+  const isInfra = userRole === 'INFRAESTRUCTURA';
+  const isAdmin = ['ADMIN', 'GERENCIAL'].includes(userRole) || userAdminTi || isInfra;
 
   return (
     <>

@@ -1,62 +1,107 @@
 'use client';
 
-import { useState } from 'react';
-import { Laptop, Wrench, AlertCircle, Send, CheckCircle2, Loader2, Info, Phone, Building, Tag, Upload, X } from 'lucide-react';
+import React, { useState } from 'react';
+import { 
+  Laptop, Wrench, AlertCircle, Send, CheckCircle2, Loader2, 
+  Building, Tag, Phone, Camera, X, Check, ShieldAlert, Sparkles 
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import PremiumSelect from '@/components/ui/PremiumSelect';
+
+const SINTOMAS_COMPUTO = [
+  { id: 'Pantalla azul / Reinicios', label: 'Pantalla azul / Se reinicia', icon: '💻', desc: 'Falla crítica de Windows o hardware', tipo: 'Reporte de falla en el equipo' },
+  { id: 'Equipo lento / Congelamiento', label: 'Equipo lento / Se traba', icon: '🐌', desc: 'Demora al abrir programas o archivos', tipo: 'Reporte de falla en el equipo' },
+  { id: 'Falla de red / Sin internet', label: 'Sin internet / Falla de red', icon: '🌐', desc: 'Sin acceso a red local o conexión WiFi', tipo: 'Reporte de falla en el equipo' },
+  { id: 'Falla de impresora / Escáner', label: 'Impresora o escáner', icon: '🖨️', desc: 'Problema para imprimir o escanear', tipo: 'Reporte de falla en el equipo' },
+  { id: 'Contraseña / Bloqueo de cuenta', label: 'Contraseña o cuenta', icon: '🔑', desc: 'Bloqueo de correo, Windows o PIN', tipo: 'Solicitud de atención' },
+  { id: 'Instalación de software / Licencias', label: 'Instalación de software', icon: '💾', desc: 'Office, AutoCAD, Project, Antivirus', tipo: 'Solicitud de atención' },
+  { id: 'Cargador / Batería no carga', label: 'Cargador o batería', icon: '🔌', desc: 'No enciende o no retiene carga', tipo: 'Reporte de falla en el equipo' },
+  { id: 'Sobrecalentamiento / Ruido', label: 'Ruido o calentamiento', icon: '🔊', desc: 'Ventilador forzado o temperatura alta', tipo: 'Reporte de falla en el equipo' },
+  { id: 'Otro soporte técnico', label: 'Otro requerimiento', icon: '📝', desc: 'Especificar en la descripción', tipo: 'Reporte de falla en el equipo' },
+];
+
+const SOFTWARES_RAPIDOS = [
+  'Activación de paquetería de Office',
+  'Firma Electrónica',
+  'Instalación de AutoCAD',
+  'Instalación de Microsoft Project',
+  'Antivirus y Seguridad',
+  'Código y usuario de impresión'
+];
 
 export default function TicketComputoForm({ equipos }: { equipos: any[] }) {
   const router = useRouter();
-  const [formData, setFormData] = useState({
-    c_interno: equipos.length === 1 ? equipos[0].C_Interno : '',
-    departamento: '',
-    service_tag: '',
-    telefono: '',
-    tipo_solicitud: 'Reporte de falla en el equipo', // 'Reporte de falla en el equipo' o 'Solicitud de atención'
-    soporte_requerido: '', // Para Solicitud de atención
-    descripcion: '' // Para Reporte de falla
-  });
+
+  const [selectedEquipo, setSelectedEquipo] = useState(equipos.length === 1 ? equipos[0].C_Interno : '');
+  const [selectedSintoma, setSelectedSintoma] = useState(SINTOMAS_COMPUTO[0].id);
+  const [softwareEspecifico, setSoftwareEspecifico] = useState('');
+  const [prioridad, setPrioridad] = useState<'Normal' | 'Urgente'>('Normal');
+  const [departamento, setDepartamento] = useState('');
+  const [serviceTag, setServiceTag] = useState(equipos.length === 1 ? (equipos[0].Service_Tag || '') : '');
+  const [telefono, setTelefono] = useState('');
+  const [descripcion, setDescripcion] = useState('');
 
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-
   const [cargando, setCargando] = useState(false);
   const [mensaje, setMensaje] = useState({ tipo: '', texto: '' });
   const [exitoGuardado, setExitoGuardado] = useState(false);
 
-  // Auto-fill Service Tag when a computer is selected
-  const handleEquipoChange = (c_interno: string) => {
+  // Al cambiar de equipo, autocompletar Service Tag y departamento si existe
+  const handleEquipoSelect = (c_interno: string) => {
+    setSelectedEquipo(c_interno);
     const eq = equipos.find(e => e.C_Interno === c_interno);
-    setFormData({
-      ...formData,
-      c_interno,
-      service_tag: eq?.Service_Tag || ''
-    });
+    if (eq) {
+      setServiceTag(eq.Service_Tag || '');
+      if (eq.Departamento && !departamento) {
+        setDepartamento(eq.Departamento);
+      }
+    }
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!selectedEquipo) {
+      setMensaje({ tipo: 'error', texto: 'Por favor selecciona la computadora que presenta la falla.' });
+      return;
+    }
+
     setCargando(true);
     setMensaje({ tipo: '', texto: '' });
 
     try {
-      // 1. Construir la descripción combinada
-      let detallesServicio = '';
-      if (formData.tipo_solicitud === 'Solicitud de atención') {
-        detallesServicio = `Requerimiento: ${formData.soporte_requerido}`;
-      } else {
-        detallesServicio = `Reporte de Falla: ${formData.descripcion}`;
+      const sintomaObj = SINTOMAS_COMPUTO.find(s => s.id === selectedSintoma) || SINTOMAS_COMPUTO[0];
+      const tipoServicio = sintomaObj.tipo;
+
+      let detallesServicio = `Síntoma principal: ${selectedSintoma}\nPrioridad: ${prioridad}`;
+      if (softwareEspecifico) {
+        detallesServicio += `\nSoftware requerido: ${softwareEspecifico}`;
+      }
+      if (descripcion) {
+        detallesServicio += `\nDetalles adicionales: ${descripcion}`;
       }
 
-      const descripcionFinal = `Departamento: ${formData.departamento}\nTeléfono: ${formData.telefono}\nService Tag: ${formData.service_tag}\n\n--- DETALLES ---\n${detallesServicio}`;
+      const descripcionFinal = `Departamento: ${departamento}\nTeléfono: ${telefono}\nService Tag: ${serviceTag}\n\n--- DETALLES ---\n${detallesServicio}`;
 
       const payload = {
-        c_interno: formData.c_interno,
-        tipo_servicio: formData.tipo_solicitud,
+        c_interno: selectedEquipo,
+        tipo_servicio: tipoServicio,
         descripcion: descripcionFinal,
-        // Extra fields for the email:
-        departamento: formData.departamento,
-        telefono: formData.telefono,
-        service_tag: formData.service_tag,
+        departamento,
+        telefono,
+        service_tag: serviceTag,
         detalles_reporte: detallesServicio
       };
 
@@ -72,12 +117,12 @@ export default function TicketComputoForm({ equipos }: { equipos: any[] }) {
         throw new Error(result.error || 'Error al generar ticket');
       }
 
-      // 2. Si hay imagen, la subimos a nuestro endpoint de MinIO para Cómputo
-      if (imageFile && formData.tipo_solicitud === 'Reporte de falla en el equipo') {
+      // Si hay imagen adjunta, subirla
+      if (imageFile && result.data?.Pk_folio_ticket) {
         const formDataUpload = new FormData();
         formDataUpload.append('file', imageFile);
         formDataUpload.append('folio', result.data.Pk_folio_ticket);
-        formDataUpload.append('c_interno', formData.c_interno);
+        formDataUpload.append('c_interno', selectedEquipo);
         
         try {
           await fetch('/api/computo/tickets/evidencia', {
@@ -90,25 +135,17 @@ export default function TicketComputoForm({ equipos }: { equipos: any[] }) {
       }
 
       setExitoGuardado(true);
-      
-      // Limpiar formulario excepto el equipo si solo tiene uno
-      setFormData({
-        c_interno: equipos.length === 1 ? equipos[0].C_Interno : '',
-        departamento: '',
-        service_tag: equipos.length === 1 ? equipos[0].Service_Tag || '' : '',
-        telefono: '',
-        tipo_solicitud: 'Reporte de falla en el equipo',
-        soporte_requerido: '',
-        descripcion: ''
-      });
+
+      // Limpiar campos
+      setDescripcion('');
+      setSoftwareEspecifico('');
       setImageFile(null);
       setImagePreview(null);
 
       setTimeout(() => {
         router.refresh();
-        // Redirige o actualiza
         router.push('/computo/soporte-mantenimientos?tab=seguimiento');
-      }, 3000);
+      }, 2500);
 
     } catch (error: any) {
       setMensaje({ tipo: 'error', texto: error.message });
@@ -117,236 +154,266 @@ export default function TicketComputoForm({ equipos }: { equipos: any[] }) {
     }
   };
 
+  const isSoftwareSymptom = selectedSintoma === 'Instalación de software / Licencias' || selectedSintoma === 'Contraseña / Bloqueo de cuenta';
+
   return (
-    <div className="bg-[var(--bg-floating)] border border-[var(--border-cream)] rounded-2xl shadow-xl overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="bg-[var(--bg-floating)] border border-[var(--border-cream)] rounded-3xl shadow-xl overflow-hidden max-w-3xl mx-auto animate-in fade-in duration-300">
       
-      <div className="bg-emerald-600/10 border-b border-emerald-600/20 p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      {/* Cabecera estilizada */}
+      <div className="p-6 sm:p-8 border-b border-[var(--border-cream)] bg-white/[0.02]">
         <div className="flex items-center gap-3">
-          <div className="bg-emerald-600/20 p-2.5 rounded-xl shadow-inner border border-emerald-600/30">
-            <Wrench className="w-6 h-6 text-emerald-600" />
+          <div className="p-2.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 shadow-sm">
+            <Wrench size={22} />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-[var(--text-main)] font-serif">Solicitud de Soporte TI</h2>
-            <p className="text-sm text-[var(--text-muted)] font-medium">Completa el formulario para ser atendido.</p>
+            <h2 className="text-xl font-bold text-[var(--text-main)]">
+              Reportar Falla o Soporte TI
+            </h2>
+            <p className="text-xs sm:text-sm text-[var(--text-muted)] mt-0.5">
+              Indica qué problema presenta tu equipo para que el área de Cómputo te asista rápidamente.
+            </p>
           </div>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="p-6 sm:p-8 space-y-8">
+      <form onSubmit={handleSubmit} className="p-6 sm:p-8 space-y-6">
         
         {mensaje.texto && (
-          <div className={`p-4 rounded-xl flex gap-3 text-sm font-bold border animate-in fade-in ${
-            mensaje.tipo === 'error' ? 'bg-red-50/50 text-red-600 border-red-200' : 'bg-emerald-50/50 text-emerald-600 border-emerald-200'
+          <div className={`p-4 rounded-2xl flex items-center gap-3 text-xs font-bold border ${
+            mensaje.tipo === 'error' ? 'bg-red-500/10 text-red-500 border-red-500/20' : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
           }`}>
-            <AlertCircle className="w-5 h-5 shrink-0" />
+            <AlertCircle size={16} className="shrink-0" />
             <p>{mensaje.texto}</p>
           </div>
         )}
 
         {exitoGuardado && (
-          <div className="p-6 bg-emerald-50/50 border border-emerald-200 rounded-xl flex items-center gap-4 animate-in fade-in scale-in">
-            <CheckCircle2 className="w-8 h-8 text-emerald-500 shrink-0" />
+          <div className="p-5 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-center gap-3 animate-in fade-in">
+            <CheckCircle2 size={24} className="text-emerald-500 shrink-0" />
             <div>
-              <p className="font-bold text-emerald-800 text-lg">¡Ticket generado con éxito!</p>
-              <p className="text-sm text-emerald-600">El departamento de TI ha sido notificado.</p>
+              <p className="font-bold text-emerald-500 text-sm">¡Ticket generado con éxito!</p>
+              <p className="text-xs text-[var(--text-muted)] mt-0.5">El equipo de TI ha recibido tu solicitud. Redirigiendo a seguimiento...</p>
             </div>
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          
-          <div className="space-y-2">
-            <label className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">Equipo Asignado *</label>
-            <div className="relative">
-              <Laptop className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
-              <select
-                required
-                value={formData.c_interno}
-                onChange={(e) => handleEquipoChange(e.target.value)}
-                className="w-full pl-11 pr-4 py-3.5 bg-white border border-[var(--border-cream)] text-[var(--text-main)] rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none text-sm appearance-none font-medium shadow-sm transition-all"
-              >
-                <option value="" disabled>Selecciona un equipo</option>
-                {equipos.map((eq) => (
-                  <option key={eq.C_Interno} value={eq.C_Interno}>
-                    {eq.C_Interno} - {eq.Marca} {eq.Modelo}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">Departamento *</label>
-            <div className="relative">
-              <Building className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
-              <input
-                required
-                type="text"
-                placeholder="Ej. Finanzas, Operaciones, Ventas"
-                value={formData.departamento}
-                onChange={(e) => setFormData({ ...formData, departamento: e.target.value })}
-                className="w-full pl-11 pr-4 py-3.5 bg-white border border-[var(--border-cream)] text-[var(--text-main)] rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none text-sm font-medium shadow-sm transition-all"
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">Service Tag del Equipo *</label>
-            <div className="relative">
-              <Tag className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
-              <input
-                required
-                type="text"
-                placeholder="Ej. 1A2B3C4"
-                value={formData.service_tag}
-                onChange={(e) => setFormData({ ...formData, service_tag: e.target.value })}
-                className="w-full pl-11 pr-4 py-3.5 bg-white border border-[var(--border-cream)] text-[var(--text-main)] rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none text-sm font-medium shadow-sm transition-all"
-              />
-            </div>
-            <p className="text-[10px] text-slate-400 mt-1">Se encuentra abajo del equipo o usa "wmic bios get serialnumber" en CMD.</p>
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">Teléfono de Contacto *</label>
-            <div className="relative">
-              <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
-              <input
-                required
-                type="tel"
-                placeholder="Ingresa tu número telefónico"
-                value={formData.telefono}
-                onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
-                className="w-full pl-11 pr-4 py-3.5 bg-white border border-[var(--border-cream)] text-[var(--text-main)] rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none text-sm font-medium shadow-sm transition-all"
-              />
-            </div>
-          </div>
+        {/* 1. Selector Visual de Computadora */}
+        <div>
+          <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">
+            1. ¿Qué equipo presenta la falla? *
+          </label>
+          <PremiumSelect
+            value={selectedEquipo}
+            onChange={handleEquipoSelect}
+            options={equipos.map(eq => ({
+              value: eq.C_Interno,
+              label: `${eq.C_Interno} - ${eq.Marca || ''} ${eq.Modelo || ''} (${eq.Nombre_Empleado ? `${eq.Nombre_Empleado}` : eq.Departamento || 'TI'})`
+            }))}
+            placeholder="Selecciona o busca tu computadora..."
+            accent="emerald"
+          />
         </div>
 
-        <div className="border-t border-[var(--border-cream)] pt-6 space-y-4">
-          <label className="text-sm font-bold text-[var(--text-main)] uppercase tracking-wider">¿Qué deseas realizar? *</label>
-          <div className="flex flex-col gap-3">
-            <label className="flex items-center gap-3 cursor-pointer p-3 border rounded-xl hover:bg-emerald-50 transition-colors border-[var(--border-cream)]">
-              <input 
-                type="radio" 
-                name="tipo_solicitud" 
-                value="Reporte de falla en el equipo" 
-                checked={formData.tipo_solicitud === 'Reporte de falla en el equipo'}
-                onChange={(e) => setFormData({ ...formData, tipo_solicitud: e.target.value })}
-                className="w-5 h-5 text-emerald-600 focus:ring-emerald-500" 
-              />
-              <span className="font-medium">Reporte de falla en el equipo</span>
-            </label>
-            
-            <label className="flex items-center gap-3 cursor-pointer p-3 border rounded-xl hover:bg-emerald-50 transition-colors border-[var(--border-cream)]">
-              <input 
-                type="radio" 
-                name="tipo_solicitud" 
-                value="Solicitud de atención" 
-                checked={formData.tipo_solicitud === 'Solicitud de atención'}
-                onChange={(e) => setFormData({ ...formData, tipo_solicitud: e.target.value })}
-                className="w-5 h-5 text-emerald-600 focus:ring-emerald-500" 
-              />
-              <span className="font-medium">Solicitud de atención</span>
-            </label>
-          </div>
-        </div>
-
-        {formData.tipo_solicitud === 'Reporte de falla en el equipo' && (
-          <div className="animate-in fade-in slide-in-from-top-2 space-y-6">
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">Describe las fallas o problemas: *</label>
-              <textarea
-                required
-                rows={4}
-                placeholder="Escriba su respuesta..."
-                value={formData.descripcion}
-                onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
-                className="w-full p-4 bg-white border border-[var(--border-cream)] text-[var(--text-main)] rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none text-sm resize-none shadow-sm font-medium transition-all"
-              ></textarea>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">Evidencia Fotográfica (Opcional)</label>
-              {!imagePreview ? (
-                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-[var(--border-cream)] border-dashed rounded-lg cursor-pointer bg-white hover:bg-[var(--bg-hover)] transition-all">
-                  <div className="flex flex-col items-center justify-center pt-5 pb-6 text-slate-500">
-                    <Upload className="w-8 h-8 mb-3 text-slate-400" />
-                    <p className="mb-2 text-sm text-slate-500"><span className="font-semibold text-emerald-600">Haz clic para subir</span> o arrastra y suelta</p>
-                    <p className="text-xs text-slate-400">PNG, JPG o JPEG</p>
+        {/* 2. Chips de Síntomas Frecuentes a 1 Clic */}
+        <div>
+          <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2.5">
+            2. ¿Cuál es el síntoma principal? (Selecciona una opción) *
+          </label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            {SINTOMAS_COMPUTO.map(s => {
+              const isSelected = selectedSintoma === s.id;
+              return (
+                <div
+                  key={s.id}
+                  onClick={() => setSelectedSintoma(s.id)}
+                  className={`p-3 rounded-2xl border cursor-pointer select-none transition-all flex items-start gap-3 ${
+                    isSelected
+                      ? 'bg-emerald-500/10 border-emerald-500 text-[var(--text-main)] shadow-md scale-[1.01]'
+                      : 'bg-[var(--bg-screen)] border-[var(--border-cream)] hover:border-emerald-500/40 text-[var(--text-muted)] hover:text-[var(--text-main)]'
+                  }`}
+                >
+                  <span className="text-2xl shrink-0 mt-0.5">{s.icon}</span>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between">
+                      <h4 className={`text-xs font-bold ${isSelected ? 'text-emerald-600 dark:text-emerald-400' : ''}`}>
+                        {s.label}
+                      </h4>
+                      {isSelected && <Check size={14} className="text-emerald-500 shrink-0" />}
+                    </div>
+                    <p className="text-[11px] text-[var(--text-muted)] mt-0.5 leading-tight">
+                      {s.desc}
+                    </p>
                   </div>
-                  <input 
-                    type="file" 
-                    className="hidden" 
-                    accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        setImageFile(file);
-                        setImagePreview(URL.createObjectURL(file));
-                      }
-                    }}
-                  />
-                </label>
-              ) : (
-                <div className="relative w-full max-w-sm rounded-lg overflow-hidden border border-[var(--border-cream)]">
-                  <img src={imagePreview} alt="Preview" className="w-full h-48 object-cover" />
-                  <button
-                    type="button"
-                    onClick={() => { setImageFile(null); setImagePreview(null); }}
-                    className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white p-1.5 rounded-full shadow-lg"
-                  >
-                    <X size={16} />
-                  </button>
                 </div>
-              )}
-            </div>
+              );
+            })}
           </div>
-        )}
+        </div>
 
-        {formData.tipo_solicitud === 'Solicitud de atención' && (
-          <div className="animate-in fade-in slide-in-from-top-2 space-y-2">
-            <label className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">Seleccione el soporte que requiere: *</label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {[
-                "Activación de paqueteria de Office",
-                "Firma Electronica",
-                "Soporte en aplicaciones de Office",
-                "Usuario y Codigo de impresión",
-                "Instalación de Project",
-                "Instalación de AutoCad",
-                "Antivirus"
-              ].map(opcion => (
-                <label key={opcion} className="flex items-center gap-3 cursor-pointer p-3 border rounded-xl hover:bg-emerald-50 transition-colors border-[var(--border-cream)]">
-                  <input 
-                    required
-                    type="radio" 
-                    name="soporte_requerido" 
-                    value={opcion} 
-                    checked={formData.soporte_requerido === opcion}
-                    onChange={(e) => setFormData({ ...formData, soporte_requerido: e.target.value })}
-                    className="w-5 h-5 text-emerald-600 focus:ring-emerald-500" 
-                  />
-                  <span className="font-medium text-sm">{opcion}</span>
-                </label>
+        {/* 2.1 Sub-opciones de software si aplica */}
+        {isSoftwareSymptom && (
+          <div className="p-4 bg-[var(--bg-screen)] border border-[var(--border-cream)] rounded-2xl space-y-2 animate-in fade-in">
+            <label className="block text-xs font-bold text-[var(--text-main)]">
+              Selecciona el programa o servicio que necesitas:
+            </label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {SOFTWARES_RAPIDOS.map(sw => (
+                <button
+                  type="button"
+                  key={sw}
+                  onClick={() => setSoftwareEspecifico(sw)}
+                  className={`py-2 px-3 rounded-xl text-xs font-semibold text-left border transition-all flex items-center justify-between ${
+                    softwareEspecifico === sw
+                      ? 'bg-emerald-500/15 border-emerald-500 text-emerald-500 font-bold'
+                      : 'border-[var(--border-cream)] bg-[var(--bg-floating)] text-[var(--text-muted)] hover:text-[var(--text-main)]'
+                  }`}
+                >
+                  <span>{sw}</span>
+                  {softwareEspecifico === sw && <Check size={13} />}
+                </button>
               ))}
             </div>
           </div>
         )}
 
-        <div className="pt-6 border-t border-[var(--border-cream)] flex flex-col sm:flex-row items-center justify-end gap-3">
-          <button 
-            type="submit" 
-            disabled={cargando || equipos.length === 0}
-            className="w-full sm:w-auto flex justify-center items-center gap-2 px-8 py-3 text-white font-bold rounded-xl bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-600/30 disabled:opacity-50 disabled:shadow-none transition-all active:scale-95"
-          >
-            {cargando ? (
-              <><Loader2 className="w-5 h-5 animate-spin" /> Enviando...</>
-            ) : (
-              <><Send className="w-5 h-5" /> Generar Ticket</>
-            )}
-          </button>
+        {/* 3. Prioridad de Atención */}
+        <div>
+          <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">
+            3. Nivel de Urgencia
+          </label>
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              type="button"
+              onClick={() => setPrioridad('Normal')}
+              className={`py-2.5 px-4 rounded-xl text-xs font-bold border transition-all flex items-center justify-center gap-2 ${
+                prioridad === 'Normal'
+                  ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500 shadow-sm'
+                  : 'bg-[var(--bg-screen)] border-[var(--border-cream)] text-[var(--text-muted)]'
+              }`}
+            >
+              🟢 Normal (Actividades cotidianas)
+            </button>
+            <button
+              type="button"
+              onClick={() => setPrioridad('Urgente')}
+              className={`py-2.5 px-4 rounded-xl text-xs font-bold border transition-all flex items-center justify-center gap-2 ${
+                prioridad === 'Urgente'
+                  ? 'bg-red-500/10 text-red-500 border-red-500 shadow-sm animate-pulse'
+                  : 'bg-[var(--bg-screen)] border-[var(--border-cream)] text-[var(--text-muted)]'
+              }`}
+            >
+              🔴 Urgente (Afecta facturación / Área crítica)
+            </button>
+          </div>
         </div>
 
+        {/* 4. Datos de Contacto y Equipo */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label className="block text-[11px] font-bold text-[var(--text-muted)] uppercase mb-1">Departamento *</label>
+            <input
+              required
+              type="text"
+              placeholder="Ej. Finanzas / Operaciones"
+              value={departamento}
+              onChange={(e) => setDepartamento(e.target.value)}
+              className="w-full bg-[var(--bg-screen)] border border-[var(--border-cream)] rounded-xl py-2 px-3 text-xs text-[var(--text-main)] focus:border-emerald-500 outline-none"
+            />
+          </div>
+
+          <div>
+            <label className="block text-[11px] font-bold text-[var(--text-muted)] uppercase mb-1">Service Tag *</label>
+            <input
+              required
+              type="text"
+              placeholder="Ej. 1A2B3C4"
+              value={serviceTag}
+              onChange={(e) => setServiceTag(e.target.value)}
+              className="w-full bg-[var(--bg-screen)] border border-[var(--border-cream)] rounded-xl py-2 px-3 text-xs text-[var(--text-main)] focus:border-emerald-500 outline-none"
+            />
+          </div>
+
+          <div>
+            <label className="block text-[11px] font-bold text-[var(--text-muted)] uppercase mb-1">Teléfono de Contacto *</label>
+            <input
+              required
+              type="tel"
+              placeholder="Ej. 921 123 4567"
+              value={telefono}
+              onChange={(e) => setTelefono(e.target.value)}
+              className="w-full bg-[var(--bg-screen)] border border-[var(--border-cream)] rounded-xl py-2 px-3 text-xs text-[var(--text-main)] focus:border-emerald-500 outline-none"
+            />
+          </div>
+        </div>
+
+        {/* 5. Detalles adicionales opcionales */}
+        <div>
+          <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">
+            5. Detalles adicionales o mensaje de error (Opcional)
+          </label>
+          <textarea
+            rows={2}
+            value={descripcion}
+            onChange={(e) => setDescripcion(e.target.value)}
+            placeholder="Ej. Ocurrió después de actualizar Windows, aparece código 0x000000..."
+            className="w-full bg-[var(--bg-screen)] border border-[var(--border-cream)] rounded-xl p-3 text-xs text-[var(--text-main)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-emerald-500 transition-colors"
+          />
+        </div>
+
+        {/* 6. Evidencia Fotográfica o Captura de Pantalla */}
+        <div>
+          <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">
+            6. Captura de pantalla o fotografía del error (Opcional)
+          </label>
+          {imagePreview ? (
+            <div className="flex items-center justify-between p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl">
+              <div className="flex items-center gap-3">
+                <img src={imagePreview} alt="Captura" className="w-12 h-12 object-cover rounded-lg border border-emerald-500/30" />
+                <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">Captura adjuntada con éxito</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setImageFile(null);
+                  setImagePreview(null);
+                }}
+                className="p-1.5 hover:bg-red-500/20 text-red-500 rounded-lg transition-colors"
+              >
+                <X size={16} />
+              </button>
+            </div>
+          ) : (
+            <label className="border-2 border-dashed border-[var(--border-cream)] hover:border-emerald-500/50 rounded-2xl p-4 flex flex-col items-center justify-center gap-2 cursor-pointer bg-[var(--bg-screen)] hover:bg-[var(--bg-hover)] transition-all">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="hidden"
+              />
+              <Camera size={22} className="text-emerald-500" />
+              <span className="text-xs font-semibold text-[var(--text-muted)]">
+                Subir captura de pantalla o foto del error
+              </span>
+            </label>
+          )}
+        </div>
+
+        {/* Botón de Envío */}
+        <button
+          type="submit"
+          disabled={cargando || equipos.length === 0}
+          className="w-full py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm shadow-[0_0_25px_rgba(16,185,129,0.35)] transition-all flex items-center justify-center gap-2 disabled:opacity-50 active:scale-[0.99]"
+        >
+          {cargando ? (
+            <>
+              <Loader2 size={18} className="animate-spin" /> Enviando solicitud a TI...
+            </>
+          ) : (
+            <>
+              <Send size={18} /> Generar Ticket de Soporte TI
+            </>
+          )}
+        </button>
       </form>
     </div>
   );

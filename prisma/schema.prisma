@@ -33,6 +33,7 @@ model Empleados {
   programas_anuales         Programa_Anual[]
   solicitudes               Solicitud[]
   solicitudComputos         Solicitud_Computo[]
+  solicitudesClima          Solicitud_Clima[]
   telefonos                 Telefono[]
   viaticos                  Viaticos[]
 }
@@ -504,6 +505,83 @@ model Inventario_Aires_Acondicionados {
   Proveedor    String?  @db.VarChar(100)
   Estatus      String?  @default("Activo") @db.VarChar(100)
   Fecha_Alta   DateTime @default(now())
+
+  planes       Plan_Mantenimiento_Clima[]
+  reportes     Reporte_Mantenimiento_Clima[]
+  solicitudes  Solicitud_Clima[]
+}
+
+model Plan_Mantenimiento_Clima {
+  Id_Plan          Int                         @id @default(autoincrement())
+  N_Interno        String                      @db.VarChar(100)
+  Tipo_Mtto        String                      @default("Preventivo") @db.VarChar(50)
+  Frecuencia_Meses Int                         @default(3)
+  Fecha_Inicio     DateTime                    @db.Date
+  Fecha_Proximo    DateTime                    @db.Date
+  Activo           Boolean                     @default(true)
+  Observaciones    String?
+  Creado_Por       String?                     @db.VarChar(100)
+  Fecha_Creacion   DateTime                    @default(now())
+
+  equipo           Inventario_Aires_Acondicionados @relation(fields: [N_Interno], references: [N_Interno], onDelete: Cascade)
+  reportes         Reporte_Mantenimiento_Clima[]
+}
+
+model Reporte_Mantenimiento_Clima {
+  Id_Reporte          Int                         @id @default(autoincrement())
+  Consecutivo_FRM     String                      @unique @db.VarChar(30)
+  Id_Plan             Int?
+  N_Interno           String                      @db.VarChar(100)
+  Fecha_Programada    DateTime                    @db.Date
+  Fecha_Ejecucion     DateTime?                   @db.Date
+  Tipo_Mtto           String                      @default("Preventivo") @db.VarChar(50)
+  Tecnico_Proveedor   String?                     @db.VarChar(150)
+  Horario             String?                     @db.VarChar(50)
+  
+  // Checklist técnico específico de climatización
+  Limpieza_Filtros    Boolean                     @default(false)
+  Lavado_Evaporador   Boolean                     @default(false)
+  Lavado_Condensadora Boolean                     @default(false)
+  Desobstruccion_Drenaje Boolean                  @default(false)
+  Revision_Gas        Boolean                     @default(false)
+  Revision_Electrica  Boolean                     @default(false)
+  Revision_Turbina    Boolean                     @default(false)
+
+  // Mediciones opcionales
+  Presion_Gas_PSI     Float?
+  Amperaje_Consumo    Float?
+  Temperatura_Salida  Float?
+
+  Foto_Antes          String?
+  Foto_Despues        String?
+  Observaciones       String?
+  Estado              String                      @default("PENDIENTE") @db.VarChar(30)
+  Confirmado          Boolean?
+  Motivo_Rechazo      String?
+  Firma_Tecnico       String?
+  Firma_Responsable   String?
+  Datos_Formato       String?
+  Fecha_Creacion      DateTime                    @default(now())
+
+  equipo              Inventario_Aires_Acondicionados @relation(fields: [N_Interno], references: [N_Interno], onDelete: Cascade)
+  plan                Plan_Mantenimiento_Clima?   @relation(fields: [Id_Plan], references: [Id_Plan], onDelete: Cascade)
+}
+
+model Solicitud_Clima {
+  Pk_folio_ticket   String                      @id @db.VarChar(30)
+  N_Interno         String                      @db.VarChar(100)
+  Email_Empleado    String                      @db.VarChar(100)
+  Sintoma_Falla     String                      @db.VarChar(100)
+  Descripcion       String?
+  Prioridad         String                      @default("Normal") @db.VarChar(30)
+  Foto_Evidencia    String?
+  Estado            String                      @default("PENDIENTE") @db.VarChar(30)
+  Fecha_Realizacion DateTime                    @default(now())
+  Fecha_Cierre      DateTime?
+  Notas_Resolucion  String?
+
+  equipo            Inventario_Aires_Acondicionados @relation(fields: [N_Interno], references: [N_Interno], onDelete: Cascade)
+  empleado          Empleados                   @relation(fields: [Email_Empleado], references: [Email])
 }
 
 model Inventario_Mobiliario {

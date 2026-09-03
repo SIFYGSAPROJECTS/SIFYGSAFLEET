@@ -520,6 +520,45 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                 </div>
               </div>
             )}
+            {/* Clima Sub-navigation Dropdown */}
+            {type === 'clima' && (
+              <div className="relative group">
+                <button
+                  onClick={(e) => toggleDropdown('menu-clima', e)}
+                  className="hover:bg-white/10 text-white px-4 py-2 rounded-xl text-xs flex items-center gap-2 transition-all font-bold cursor-pointer"
+                >
+                  <Wind size={14} className="text-cyan-400 transition-transform duration-300 ease-in-out group-hover:rotate-180" /> Menú
+                </button>
+
+                <div
+                  className={`absolute top-full left-1/2 pt-2 w-52 transition-all duration-200 z-[120] ${openDropdown === 'menu-clima'
+                    ? 'opacity-100 visible pointer-events-auto'
+                    : 'opacity-0 invisible pointer-events-none group-hover:opacity-100 group-hover:visible group-hover:pointer-events-auto'
+                    }`}
+                  style={{ transform: 'translateX(-50%)' }}
+                >
+                  <div className="bg-zinc-950/95 border border-white/10 rounded-xl shadow-2xl p-1.5 backdrop-blur-md text-left">
+                    <div className="px-3 py-1.5 text-[9px] font-black text-cyan-400/60 tracking-wider uppercase border-b border-white/5 mb-1">
+                      Aires Acondicionados
+                    </div>
+                    <Link
+                      href="/clima/inventario"
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all text-white/80 hover:text-white hover:bg-white/5 group/item"
+                    >
+                      <Wind size={14} className="text-cyan-400 transition-transform duration-300 ease-in-out group-hover/item:scale-110" />
+                      <span>Inventario</span>
+                    </Link>
+                    <Link
+                      href="/clima/soporte-mantenimientos"
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all text-white/80 hover:text-white hover:bg-white/5 group/item"
+                    >
+                      <Wrench size={14} className="text-cyan-400 transition-transform duration-300 ease-in-out group-hover/item:rotate-12" />
+                      <span>Soporte y Mantenimientos</span>
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            )}
             {/* Fleet Sub-navigation Dropdown */}
             {type === 'dashboard' && pathname !== '/dashboard' && (
               <div className="relative group">
@@ -851,6 +890,31 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
           </div>
 
           <nav className="flex flex-col space-y-3">
+            {type === 'clima' && (
+              <>
+                <div className="text-[10px] font-black text-white/30 uppercase tracking-widest pl-2 mb-1">Aires Acondicionados</div>
+                <Link
+                  href="/clima/inventario"
+                  onClick={() => setIsMenuOpen(false)}
+                  className={`border px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold ${pathname === '/clima/inventario'
+                    ? 'bg-cyan-600 border-cyan-500 text-white'
+                    : 'bg-white/5 border-white/5 text-white/90 hover:bg-white/10'
+                    }`}
+                >
+                  <Wind size={14} className="text-cyan-400" /> Inventario
+                </Link>
+                <Link
+                  href="/clima/soporte-mantenimientos"
+                  onClick={() => setIsMenuOpen(false)}
+                  className={`border px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold ${pathname === '/clima/soporte-mantenimientos'
+                    ? 'bg-cyan-600 border-cyan-500 text-white'
+                    : 'bg-white/5 border-white/5 text-white/90 hover:bg-white/10'
+                    }`}
+                >
+                  <Wrench size={14} className="text-cyan-400" /> Soporte y Mantenimientos
+                </Link>
+              </>
+            )}
             {type === 'computo' && pathname !== '/computo' && (
               <>
                 <div className="text-[10px] font-black text-white/30 uppercase tracking-widest pl-2 mb-1">Cómputo TI</div>

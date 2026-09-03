@@ -101,84 +101,60 @@ export default function ServiciosComputoTabs({ tickets, equipos, isAdmin, rol, e
   return (
     <div className="space-y-6">
       
-      <div className="max-w-[95%] mx-auto">
-        <div className="flex flex-col xl:flex-row justify-between items-center gap-5 mb-6">
-          {/* Left Side: Module Switcher (if provided) */}
-          <div className="flex w-full xl:w-auto justify-center xl:justify-start shrink-0">
-            {leftControl}
-          </div>
+      {/* Barra de Control Superior */}
+      <div className="flex flex-col lg:flex-row justify-between items-stretch lg:items-center gap-4 bg-[var(--bg-floating)] p-2.5 rounded-2xl border border-[var(--border-cream)] shadow-md">
+        <div className="flex flex-wrap items-center gap-3">
+          {leftControl}
 
-          {/* Right Side: Inner Tabs and Export Button */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 shrink-0 overflow-x-auto scrollbar-hide">
-            <div className="flex space-x-1 bg-stone-100 p-1 rounded-xl">
-              <button
-                onClick={() => setActiveTab('nueva')}
-                className={`relative flex items-center justify-center gap-1.5 px-4 py-2 font-bold text-xs sm:text-sm rounded-lg transition-colors whitespace-nowrap ${
-                  activeTab === 'nueva' 
-                    ? 'text-emerald-600' 
-                    : 'text-slate-500 hover:text-slate-800'
-                }`}
-              >
-                {activeTab === 'nueva' && (
-                  <motion.div
-                    layoutId="tickets-inner-pill"
-                    className="absolute inset-0 bg-white rounded-lg shadow-sm border border-[var(--border-cream)] z-0"
-                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                  />
-                )}
-                <PlusCircle size={16} className="relative z-10" />
-                <span className="relative z-10">Nuevo Ticket</span>
-              </button>
+          <div className="flex bg-[var(--bg-screen)] p-1 rounded-xl border border-[var(--border-cream)]">
+            <button
+              onClick={() => setActiveTab('nueva')}
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                activeTab === 'nueva'
+                  ? 'bg-emerald-600 text-white shadow-sm'
+                  : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
+              }`}
+            >
+              <PlusCircle size={15} /> Reportar Falla
+            </button>
 
-              <button
-                onClick={() => setActiveTab('seguimiento')}
-                className={`relative flex items-center justify-center gap-1.5 px-4 py-2 font-bold text-xs sm:text-sm rounded-lg transition-colors whitespace-nowrap ${
-                  activeTab === 'seguimiento' 
-                    ? 'text-cyan-600' 
-                    : 'text-slate-500 hover:text-slate-800'
-                }`}
-              >
-                {activeTab === 'seguimiento' && (
-                  <motion.div
-                    layoutId="tickets-inner-pill"
-                    className="absolute inset-0 bg-white rounded-lg shadow-sm border border-[var(--border-cream)] z-0"
-                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                  />
-                )}
-                <Activity size={16} className="relative z-10" />
-                <span className="relative z-10">Seguimiento</span>
-                <span className={`relative z-10 ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-mono transition-colors ${activeTab === 'seguimiento' ? 'bg-cyan-100 text-cyan-800' : 'bg-stone-200 text-slate-600'}`}>
+            <button
+              onClick={() => setActiveTab('seguimiento')}
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                activeTab === 'seguimiento'
+                  ? 'bg-emerald-600 text-white shadow-sm'
+                  : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
+              }`}
+            >
+              <Activity size={15} /> En Seguimiento
+              {activos.length > 0 && (
+                <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-red-500 text-white font-black">
                   {activos.length}
                 </span>
-              </button>
+              )}
+            </button>
 
-              <button
-                onClick={() => setActiveTab('historial')}
-                className={`relative flex items-center justify-center gap-1.5 px-4 py-2 font-bold text-xs sm:text-sm rounded-lg transition-colors whitespace-nowrap ${
-                  activeTab === 'historial' 
-                    ? 'text-purple-600' 
-                    : 'text-slate-500 hover:text-slate-800'
-                }`}
-              >
-                {activeTab === 'historial' && (
-                  <motion.div
-                    layoutId="tickets-inner-pill"
-                    className="absolute inset-0 bg-white rounded-lg shadow-sm border border-[var(--border-cream)] z-0"
-                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                  />
-                )}
-                <History size={16} className="relative z-10" />
-                <span className="relative z-10">Historial</span>
-              </button>
-            </div>
-
-            {(activeTab === 'seguimiento' || activeTab === 'historial') && isAdmin && (
-              <button onClick={descargarCSV} className="bg-white hover:bg-[var(--bg-hover)] border border-[var(--border-cream)] text-[var(--text-main)] px-4 py-2 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors shadow-sm shrink-0 text-xs sm:text-sm">
-                <Download className="w-3.5 h-3.5" /> Exportar Excel
-              </button>
-            )}
+            <button
+              onClick={() => setActiveTab('historial')}
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                activeTab === 'historial'
+                  ? 'bg-emerald-600 text-white shadow-sm'
+                  : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
+              }`}
+            >
+              <History size={15} /> Historial
+            </button>
           </div>
         </div>
+
+        {(activeTab === 'seguimiento' || activeTab === 'historial') && isAdmin && (
+          <button
+            onClick={descargarCSV}
+            className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-[var(--bg-screen)] hover:bg-[var(--bg-hover)] text-[var(--text-main)] border border-[var(--border-cream)] shadow-sm transition-all"
+          >
+            <Download size={14} className="text-emerald-500" /> Exportar a Excel
+          </button>
+        )}
       </div>
 
       <div className="">

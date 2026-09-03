@@ -49,7 +49,7 @@ export default async function SoporteMantenimientoPage() {
     // Inventario para asignar
     prisma.inventario_Computo.findMany({
       where: equipoFilter,
-      select: { C_Interno: true, Marca: true, Modelo: true, Usuario: true, Estatus: true },
+      select: { C_Interno: true, Marca: true, Modelo: true, Usuario: true, Estatus: true, Service_Tag: true, Departamento: true },
       orderBy: { C_Interno: 'asc' },
     }),
     // Asesores TI
