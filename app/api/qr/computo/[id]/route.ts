@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { generarFolioTicketComputo } from '@/lib/folioGenerator';
 
 // Cache ligero en memoria para rate-limiting por IP (Cooldown de 10 segundos)
 const ipCooldownMap = new Map<string, number>();
@@ -150,10 +151,8 @@ export async function POST(
       }, { status: 409 });
     }
 
-    // Generar Folio Único (ej. TKT-2026-XXXX)
-    const anio = new Date().getFullYear();
-    const count = await prisma.solicitud_Computo.count();
-    const folio = `TKT-${anio}-${String(count + 1).padStart(4, '0')}`;
+    // Generar Folio Único (ej. TKT-2026-XXXX) de forma atómica y sin colisiones
+    const folio = await generarFolioTicketComputo();
 
     // Construir descripción legible
     let descFinal = `Reporte generado por QR físico en equipo ${cInterno}.\nSolicitante: ${cleanNombre}\nOficina: ${cleanOficina}\nDepartamento: ${cleanDepto}`;

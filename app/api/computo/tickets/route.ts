@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { cookies } from 'next/headers';
 import { enviarCorreo } from '@/lib/email';
-import { TicketComputoEmail } from '@/components/emails/TicketComputoEmail';
+import TicketComputoEmail from '@/components/emails/TicketComputoEmail';
+import { generarFolioTicketComputo } from '@/lib/folioGenerator';
 import { TicketComputoAdminEmail } from '@/components/emails/TicketComputoAdminEmail';
 import { logAuditoria } from '@/lib/utils/audit';
 
@@ -67,8 +68,8 @@ export async function POST(request: Request) {
       }
     }
 
-    // Genera un folio único y registra el ticket en la base de datos
-    const folioGenerado = `TIC-${c_interno}-${Date.now().toString().slice(-6)}`;
+    // Genera un folio único e infalible y registra el ticket en la base de datos
+    const folioGenerado = await generarFolioTicketComputo();
 
     const nuevoTicket = await prisma.solicitud_Computo.create({
       data: {
