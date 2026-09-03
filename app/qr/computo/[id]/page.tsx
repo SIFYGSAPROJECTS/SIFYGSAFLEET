@@ -74,9 +74,16 @@ export default function QRComputoReportePage() {
     fetchEquipo();
   }, [cInterno]);
 
+  const [honeypot, setHoneypot] = useState('');
+
   const handleFotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Candado de 5MB en el cliente
+      if (file.size > 5 * 1024 * 1024) {
+        alert('La fotografía seleccionada supera el límite máximo de 5 MB. Por favor elige una imagen más ligera.');
+        return;
+      }
       setFotoFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -89,7 +96,7 @@ export default function QRComputoReportePage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validaciones
+    // Validaciones de campos obligatorios
     if (!nombre.trim()) {
       alert('Por favor escribe tu nombre completo.');
       return;
@@ -105,7 +112,7 @@ export default function QRComputoReportePage() {
 
     setSubmitting(true);
     try {
-      // Si hay foto, subirla a MinIO primero
+      // Si hay foto, subirla con validación en backend
       let fotoUrl = null;
       if (fotoFile) {
         const formData = new FormData();
@@ -118,6 +125,11 @@ export default function QRComputoReportePage() {
           if (uploadRes.ok) {
             const uploadData = await uploadRes.json();
             fotoUrl = uploadData.url;
+          } else {
+            const upErr = await uploadRes.json();
+            alert(upErr.error || 'Error al subir la fotografía.');
+            setSubmitting(false);
+            return;
           }
         } catch (e) {
           console.error("Error subiendo foto:", e);
@@ -135,7 +147,8 @@ export default function QRComputoReportePage() {
           sintoma,
           prioridad,
           descripcion: descripcion.trim(),
-          evidencia_url: fotoUrl
+          evidencia_url: fotoUrl,
+          website: honeypot // Señuelo para bots
         })
       });
 
@@ -145,7 +158,15 @@ export default function QRComputoReportePage() {
         router.push(`/tickets/rastreo/${encodeURIComponent(data.ticket.Pk_folio_ticket)}`);
       } else {
         const err = await res.json();
-        alert(err.error || 'Error al registrar el reporte.');
+        if (res.status === 409) {
+          // El equipo ya tiene un ticket activo
+          alert(err.error || 'Este equipo ya tiene un reporte activo en proceso.');
+          if (err.folioActivo) {
+            router.push(`/tickets/rastreo/${encodeURIComponent(err.folioActivo)}`);
+          }
+        } else {
+          alert(err.error || 'Error al registrar el reporte.');
+        }
       }
     } catch (err) {
       alert('Error de red al registrar solicitud.');
@@ -238,6 +259,17 @@ export default function QRComputoReportePage() {
 
         {/* Formulario de Reporte */}
         <form onSubmit={handleSubmit} className="p-5 sm:p-6 rounded-3xl bg-stone-900 border border-stone-800 shadow-xl space-y-5">
+          {/* Campo señuelo Honeypot anti-bots */}
+          <input
+            type="text"
+            name="website"
+            value={honeypot}
+            onChange={(e) => setHoneypot(e.target.value)}
+            tabIndex={-1}
+            autoComplete="off"
+            style={{ display: 'none' }}
+          />
+
           <div className="border-b border-stone-800 pb-3">
             <h3 className="text-sm font-bold text-white flex items-center gap-2">
               <Sparkles size={16} className="text-emerald-400" /> Datos del Reporte
@@ -255,6 +287,7 @@ export default function QRComputoReportePage() {
             <input
               required
               type="text"
+              maxLength={100}
               value={nombre}
               onChange={(e) => setNombre(e.target.value)}
               placeholder="Ej. Juan Carlos Pérez"
@@ -286,6 +319,7 @@ export default function QRComputoReportePage() {
             <input
               required
               type="text"
+              maxLength={100}
               value={oficina}
               onChange={(e) => setOficina(e.target.value)}
               placeholder="O escribe la ubicación exacta (Ej. Edificio A, Sala 3)"
@@ -301,6 +335,7 @@ export default function QRComputoReportePage() {
             <input
               required
               type="text"
+              maxLength={100}
               value={departamento}
               onChange={(e) => setDepartamento(e.target.value)}
               placeholder="Ej. Calidad / Seguridad / Compras / Operaciones"
@@ -384,6 +419,7 @@ export default function QRComputoReportePage() {
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-500 font-bold text-sm">@</span>
               <input
                 type="text"
+                maxLength={50}
                 value={telegram}
                 onChange={(e) => setTelegram(e.target.value.replace('@', ''))}
                 placeholder="tu_usuario_telegram"
@@ -402,6 +438,7 @@ export default function QRComputoReportePage() {
             </label>
             <textarea
               rows={2}
+              maxLength={500}
               value={descripcion}
               onChange={(e) => setDescripcion(e.target.value)}
               placeholder="Ej. Ocurrió después de reiniciar, la pantalla parpadea..."

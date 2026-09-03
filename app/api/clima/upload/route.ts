@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
 import { minioClient } from '@/lib/minio';
+import crypto from 'crypto';
 
 const BUCKET_NAME = 'climas-evidencias';
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB máximo para prevenir ataques de denegación de servicio (DoS)
 
 async function ensureBucketExists() {
   try {
@@ -37,18 +39,48 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'No se envió ningún archivo.' }, { status: 400 });
     }
 
-    const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
-    if (!allowedTypes.includes(file.type)) {
-      return NextResponse.json({ error: 'Formato no soportado. Solo se permiten imágenes (JPG, PNG, WEBP) o PDFs.' }, { status: 400 });
+    // 1. Candado de Tamaño de Archivo (Máx 5MB)
+    if (file.size > MAX_FILE_SIZE) {
+      return NextResponse.json(
+        { error: 'El archivo excede el tamaño máximo permitido de 5 MB.' }, 
+        { status: 413 }
+      );
     }
 
-    const buffer = Buffer.from(await file.arrayBuffer());
-    const fileExt = file.name.split('.').pop() || 'jpg';
-    const cleanExt = fileExt.toLowerCase();
-    const uniqueFilename = `clima_${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${cleanExt}`;
+    // 2. Candado de MIME Type permitido (Solo imágenes y PDFs)
+    const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
+    if (!allowedMimeTypes.includes(file.type)) {
+      return NextResponse.json(
+        { error: 'Tipo de archivo no permitido. Solo se aceptan imágenes JPG, PNG, WEBP o documentos PDF.' }, 
+        { status: 400 }
+      );
+    }
 
+    // 3. Candado de Extensión de Archivo
+    const allowedExtensions = ['jpg', 'jpeg', 'png', 'webp', 'pdf'];
+    const parts = file.name.split('.');
+    if (parts.length < 2) {
+      return NextResponse.json({ error: 'Nombre de archivo inválido.' }, { status: 400 });
+    }
+    const cleanExt = parts[parts.length - 1].toLowerCase().trim();
+
+    if (!allowedExtensions.includes(cleanExt)) {
+      return NextResponse.json(
+        { error: 'Extensión de archivo no permitida.' }, 
+        { status: 400 }
+      );
+    }
+
+    // 4. Renombrado Criptográfico Seguro (UUID + timestamp) para neutralizar inyecciones de ruta
+    const randomHash = crypto.randomUUID().replace(/-/g, '');
+    const uniqueFilename = `evidencia_${Date.now()}_${randomHash}.${cleanExt}`;
+
+    const buffer = Buffer.from(await file.arrayBuffer());
+
+    // 5. Guardado en MinIO (Aislamiento como objeto binario estático, no ejecutable)
     await minioClient.putObject(BUCKET_NAME, uniqueFilename, buffer, file.size, {
       'Content-Type': file.type,
+      'X-Content-Type-Options': 'nosniff', // Prevenir MIME sniffing en el navegador
     });
 
     const protocol = process.env.MINIO_USE_SSL === 'true' ? 'https' : 'http';
@@ -58,7 +90,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ url: publicUrl, filename: uniqueFilename });
   } catch (error: any) {
-    console.error('Error subiendo archivo a MinIO en Climas:', error);
-    return NextResponse.json({ error: 'Error al subir la evidencia a MinIO.' }, { status: 500 });
+    console.error('Error subiendo archivo a MinIO:', error);
+    return NextResponse.json({ error: 'Error interno al procesar el archivo.' }, { status: 500 });
   }
 }
