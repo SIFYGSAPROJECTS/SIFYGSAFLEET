@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { generarFolioTicketComputo } from '@/lib/folioGenerator';
+import { enviarCorreo } from '@/lib/email';
+import { TicketComputoAdminEmail } from '@/components/emails/TicketComputoAdminEmail';
 
 // Cache ligero en memoria para rate-limiting por IP (Cooldown de 10 segundos)
 const ipCooldownMap = new Map<string, number>();
@@ -184,6 +186,33 @@ export async function POST(
         equipo: true
       }
     });
+
+    // 7. Enviar notificación por correo a los técnicos de TI (Alan Montiel, Citlali Sanchez)
+    try {
+      const adminsTI = await prisma.empleados.findMany({
+        where: { Admin_TI: true },
+        select: { Email: true }
+      });
+      const emailsDestino = adminsTI.map(a => a.Email).filter(Boolean);
+      const toEmails = emailsDestino.length > 0 ? emailsDestino : ['alanarmandomontiel@gmail.com', 'citlali.sanchez@sifygsa.com.mx'];
+
+      await enviarCorreo({
+        to: toEmails,
+        subject: `NUEVA Solicitud de Cómputo (QR): ${folio}`,
+        modulo: 'computo',
+        react: TicketComputoAdminEmail({
+          solicitante: cleanNombre,
+          departamento: `${cleanDepto} (${cleanOficina})`,
+          serviceTag: equipo.Service_Tag || 'N/A',
+          telefono: cleanTelegram ? `@${cleanTelegram}` : 'N/A',
+          tipoSolicitud: cleanSintoma,
+          motivo: `${descFinal}${cleanPrioridad === 'Urgente' ? ' [URGENTE]' : ''}`,
+          folio: folio,
+        }),
+      });
+    } catch (emailError) {
+      console.error('Error al enviar correo de notificación TI por QR:', emailError);
+    }
 
     return NextResponse.json({ success: true, ticket });
   } catch (error: any) {

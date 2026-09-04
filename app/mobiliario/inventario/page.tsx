@@ -1,10 +1,15 @@
 "use client";
 
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { Package, Plus, X, Pencil, ArrowLeft, ShieldCheck, AlertTriangle, Download, Filter, UploadCloud, Search, Trash2, CheckCircle2, RefreshCw } from 'lucide-react';
+import { 
+  Package, Plus, X, Pencil, ArrowLeft, ShieldCheck, AlertTriangle, 
+  Download, Filter, UploadCloud, Search, Trash2, CheckCircle2, RefreshCw,
+  QrCode, CheckSquare, Square, Printer, History, Camera, ExternalLink
+} from 'lucide-react';
 import Link from 'next/link';
 import SystemModal, { ModalType } from '@/components/ui/SystemModal';
 import PremiumSelect from '@/components/ui/PremiumSelect';
+import ModalCalcomaniasQRMobiliario from '@/components/mobiliario/ModalCalcomaniasQRMobiliario';
 
 interface MobiliarioItem {
   N_Interno: string;
@@ -17,6 +22,7 @@ interface MobiliarioItem {
   Proveedor: string | null;
   Estatus: string | null;
   Fecha_Alta?: string;
+  Ultima_Revision?: string | null;
 }
 
 export default function MobiliarioInventarioPage() {
@@ -37,6 +43,44 @@ export default function MobiliarioInventarioPage() {
   const [modoEdicion, setModoEdicion] = useState(false);
   const [itemAEliminar, setItemAEliminar] = useState<string | null>(null);
   const [sysModal, setSysModal] = useState<{ isOpen: boolean, type: ModalType, title: string, message: React.ReactNode }>({ isOpen: false, type: 'info', title: '', message: '' });
+  
+  // Selección múltiple e impresión de calcomanías QR (Estilo Cómputo TI)
+  const [selectedEquipos, setSelectedEquipos] = useState<string[]>([]);
+  const [modalQREquipos, setModalQREquipos] = useState<any[] | null>(null);
+
+  // Modal de Historial de Censo Anual
+  const [modalHistorial, setModalHistorial] = useState<{ nInterno: string; tipo: string; revisiones: any[] } | null>(null);
+  const [cargandoHistorial, setCargandoHistorial] = useState(false);
+
+  const toggleSelect = (nInterno: string) => {
+    setSelectedEquipos(prev => 
+      prev.includes(nInterno) ? prev.filter(id => id !== nInterno) : [...prev, nInterno]
+    );
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedEquipos.length === equiposMostrados.length && equiposMostrados.length > 0) {
+      setSelectedEquipos([]);
+    } else {
+      setSelectedEquipos(equiposMostrados.map(e => e.N_Interno));
+    }
+  };
+
+  const verHistorial = async (item: MobiliarioItem) => {
+    setCargandoHistorial(true);
+    setModalHistorial({ nInterno: item.N_Interno, tipo: item.Tipo || 'Mobiliario', revisiones: [] });
+    try {
+      const res = await fetch(`/api/mobiliario/revisiones?nInterno=${encodeURIComponent(item.N_Interno)}`);
+      if (res.ok) {
+        const data = await res.json();
+        setModalHistorial({ nInterno: item.N_Interno, tipo: item.Tipo || 'Mobiliario', revisiones: data });
+      }
+    } catch (e) {
+      console.error('Error al cargar historial:', e);
+    } finally {
+      setCargandoHistorial(false);
+    }
+  };
   
   const [formData, setFormData] = useState({
     N_Interno: '', Empresa: 'SIFYGSA', Tipo: 'Escritorio', Descripcion: '', Modelo: '', 
@@ -78,39 +122,16 @@ export default function MobiliarioInventarioPage() {
       .catch(() => {});
   }, []);
 
-  // Control de scroll para compactar la barra y sincronización matemática exacta de altura sticky
+  // Sincronización matemática de altura para el encabezado sticky
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 80);
+      setScrolled(window.scrollY > 40);
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  useEffect(() => {
-    const header = document.getElementById('sticky-header-mobiliario');
-    if (!header) return;
-
-    const syncStickyHeight = () => {
-      const rect = header.getBoundingClientRect();
-      const height = Math.round(rect.height);
-      // 72px es el borde inferior exacto del Navbar flotante superior
-      document.documentElement.style.setProperty('--mobiliario-sticky-height', `${height + 72}px`);
-    };
-
-    syncStickyHeight();
-
-    const ro = new ResizeObserver(syncStickyHeight);
-    ro.observe(header);
-    window.addEventListener('resize', syncStickyHeight);
-
-    return () => {
-      ro.disconnect();
-      window.removeEventListener('resize', syncStickyHeight);
-    };
-  }, [scrolled, limiteEquipos, busquedaTexto, filtroEstatus, filtroTipo, filtroDepartamento, filtroUbicacion, filtroEmpresa]);
 
   // Extraer listas únicas para los selectores de filtro
   const tiposUnicos = useMemo(() => {
@@ -136,6 +157,26 @@ export default function MobiliarioInventarioPage() {
     equipos.forEach(eq => { if (eq.Empresa) set.add(eq.Empresa.trim()); });
     return Array.from(set).sort();
   }, [equipos]);
+
+  useEffect(() => {
+    const updateHeaderHeight = () => {
+      const header = document.getElementById('sticky-header-mobiliario');
+      if (header) {
+        document.documentElement.style.setProperty('--mobiliario-sticky-height', `${header.offsetHeight + 72}px`);
+      } else {
+        document.documentElement.style.setProperty('--mobiliario-sticky-height', '180px');
+      }
+    };
+
+    updateHeaderHeight();
+    const timer = setTimeout(updateHeaderHeight, 100);
+    window.addEventListener('resize', updateHeaderHeight);
+
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', updateHeaderHeight);
+    };
+  }, [tiposUnicos.length, departamentosUnicos.length, ubicacionesUnicas.length, empresasUnicas.length, cargando, scrolled]);
 
   const abrirModalCrear = () => {
     setFormData({
@@ -629,14 +670,12 @@ export default function MobiliarioInventarioPage() {
         </div>
       </div>
 
-      {/* CONTENEDOR MAESTRO UNIFICADO: FILTROS STICKY + DATOS (CERO ESPACIO / CERO HUECO) */}
-      <div className="relative z-10 bg-stone-900/70 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl">
-        {/* BARRA STICKY COMPACTABLE DE BÚSQUEDA Y FILTROS */}
+      {/* CONTENEDOR MAESTRO UNIFICADO: FILTROS STICKY + DATOS */}
+      <div className="relative z-10 bg-stone-900/90 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl md:overflow-visible overflow-hidden">
+        {/* BARRA STICKY COMPACTA DE BÚSQUEDA Y FILTROS */}
         <div
           id="sticky-header-mobiliario"
-          className={`sticky top-[72px] z-40 transition-all duration-200 bg-stone-900/98 backdrop-blur-2xl border-b border-white/10 rounded-t-2xl shadow-xl ${
-            scrolled ? 'py-2 px-3 sm:px-4' : 'p-3.5 sm:p-5'
-          }`}
+          className="sticky top-[72px] z-40 bg-stone-900/98 backdrop-blur-2xl border-b border-white/10 rounded-t-2xl shadow-xl p-3 sm:p-4"
         >
           <input
             type="file"
@@ -646,32 +685,28 @@ export default function MobiliarioInventarioPage() {
             className="hidden"
           />
 
-          {/* FILA 1: Búsqueda + Límite + Acciones compactas al scrollear */}
-          <div className={`flex flex-col sm:flex-row gap-2 sm:gap-3 justify-between items-stretch sm:items-center ${scrolled ? 'mb-1.5' : 'mb-3'}`}>
-            {/* Logo / Badge de contexto compacto cuando está pegado */}
-            {scrolled && (
-              <div className="flex items-center gap-2 shrink-0 animate-in fade-in duration-200">
-                <div className="bg-orange-500/20 border border-orange-500/40 p-1.5 rounded-lg text-orange-400">
-                  <Package size={14} />
-                </div>
-                <span className="font-serif font-bold text-xs sm:text-sm text-white hidden sm:inline">Mobiliario</span>
-                <span className="text-[10px] font-mono text-orange-400 bg-orange-500/10 border border-orange-500/20 px-1.5 py-0.5 rounded font-bold">
-                  {equiposFiltrados.length}
-                </span>
+          {/* FILA 1: Búsqueda + Límite + Acciones compactas */}
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 justify-between items-stretch sm:items-center mb-2.5">
+            {/* Logo / Badge de contexto */}
+            <div className="flex items-center gap-2 shrink-0">
+              <div className="bg-orange-500/20 border border-orange-500/40 p-1.5 rounded-lg text-orange-400">
+                <Package size={15} />
               </div>
-            )}
+              <span className="font-serif font-bold text-xs sm:text-sm text-white hidden sm:inline">Mobiliario</span>
+              <span className="text-[10px] font-mono text-orange-400 bg-orange-500/10 border border-orange-500/20 px-1.5 py-0.5 rounded font-bold">
+                {equiposFiltrados.length}
+              </span>
+            </div>
 
             {/* Campo de búsqueda */}
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60 w-3.5 h-3.5" />
               <input
                 type="text"
-                placeholder={scrolled ? "Buscar en catálogo..." : "Buscar por N_Interno, tipo, descripción, modelo, departamento, ubicación..."}
+                placeholder="Buscar por N_Interno, tipo, descripción, modelo, departamento, ubicación..."
                 value={busquedaTexto}
                 onChange={(e) => setBusquedaTexto(e.target.value)}
-                className={`w-full pl-9 pr-8 rounded-xl bg-black/40 border border-white/10 text-white placeholder-stone-400 focus:outline-none focus:border-orange-500/50 transition-all ${
-                  scrolled ? 'py-1 sm:py-1.5 text-xs' : 'py-2 sm:py-2.5 text-xs sm:text-sm'
-                }`}
+                className="w-full pl-9 pr-8 py-1.5 rounded-xl bg-black/40 border border-white/10 text-white placeholder-stone-400 focus:outline-none focus:border-orange-500/50 text-xs transition-all"
               />
               {busquedaTexto && (
                 <button
@@ -692,7 +727,7 @@ export default function MobiliarioInventarioPage() {
                     <button
                       key={lim}
                       onClick={() => setLimiteEquipos(lim as any)}
-                      className={`px-2 py-0.5 rounded text-[11px] font-bold transition-colors ${
+                      className={`px-2 py-0.5 rounded text-[11px] font-bold transition-colors cursor-pointer ${
                         limiteEquipos === lim ? 'bg-orange-600 text-white shadow' : 'text-white/70 hover:text-white'
                       }`}
                     >
@@ -702,50 +737,46 @@ export default function MobiliarioInventarioPage() {
                 </div>
               </div>
 
-              {/* Acciones compactas cuando scrolled */}
-              {scrolled && (
-                <div className="flex items-center gap-1.5 animate-in fade-in duration-200">
+              {/* Acciones compactas */}
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={importando}
+                  className="p-1.5 bg-white/5 hover:bg-white/10 text-orange-400 border border-white/10 rounded-lg text-xs transition-colors cursor-pointer"
+                  title="Importar CSV/Excel"
+                >
+                  <UploadCloud size={14} className={importando ? "animate-bounce" : ""} />
+                </button>
+                <button
+                  onClick={exportarExcel}
+                  className="p-1.5 bg-white/5 hover:bg-white/10 text-emerald-400 border border-white/10 rounded-lg text-xs transition-colors cursor-pointer"
+                  title="Exportar Excel"
+                >
+                  <Download size={14} />
+                </button>
+                {isAdmin && (
                   <button
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={importando}
-                    className="p-1.5 bg-white/5 hover:bg-white/10 text-orange-400 border border-white/10 rounded-lg text-xs transition-colors"
-                    title="Importar CSV/Excel"
+                    onClick={abrirModalCrear}
+                    className="flex items-center gap-1 bg-orange-600 hover:bg-orange-500 text-white px-2.5 py-1 rounded-lg text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer"
                   >
-                    <UploadCloud size={14} className={importando ? "animate-bounce" : ""} />
+                    <Plus size={13} />
+                    <span className="hidden sm:inline">Nuevo</span>
                   </button>
-                  <button
-                    onClick={exportarExcel}
-                    className="p-1.5 bg-white/5 hover:bg-white/10 text-emerald-400 border border-white/10 rounded-lg text-xs transition-colors"
-                    title="Exportar Excel"
-                  >
-                    <Download size={14} />
-                  </button>
-                  {isAdmin && (
-                    <button
-                      onClick={abrirModalCrear}
-                      className="flex items-center gap-1 bg-orange-600 hover:bg-orange-500 text-white px-2.5 py-1 rounded-lg text-xs font-bold transition-all shadow-md active:scale-95"
-                    >
-                      <Plus size={13} />
-                      <span className="hidden sm:inline">Nuevo</span>
-                    </button>
-                  )}
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </div>
 
-          {/* FILTROS SECUNDARIOS COMPACTABLES */}
-          <div className={`grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 transition-all ${
-            scrolled ? 'pt-1.5 border-t border-white/10' : 'pt-2 border-t border-white/5'
-          }`}>
+          {/* FILTROS SECUNDARIOS COMPACTOS CON MODO OSCURO */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 pt-2 border-t border-white/10">
             <div className="relative focus-within:z-30 hover:z-20">
-              {!scrolled && <label className="text-[11px] font-bold text-white mb-1 block">Estatus</label>}
               <PremiumSelect
-                compact={scrolled}
+                compact
+                dark
                 value={filtroEstatus}
                 onChange={(val) => setFiltroEstatus(val)}
                 options={[
-                  { value: 'Todos', label: scrolled ? 'Estatus: Todos' : 'Todos los estatus' },
+                  { value: 'Todos', label: 'Estatus: Todos' },
                   { value: 'Activo', label: 'Activo' },
                   { value: 'En Mantenimiento', label: 'En Mantenimiento' },
                   { value: 'En Reparación', label: 'En Reparación' },
@@ -757,13 +788,13 @@ export default function MobiliarioInventarioPage() {
             </div>
 
             <div className="relative focus-within:z-30 hover:z-20">
-              {!scrolled && <label className="text-[11px] font-bold text-white mb-1 block">Tipo de Mueble</label>}
               <PremiumSelect
-                compact={scrolled}
+                compact
+                dark
                 value={filtroTipo}
                 onChange={(val) => setFiltroTipo(val)}
                 options={[
-                  { value: 'Todos', label: scrolled ? 'Tipo: Todos' : 'Todos los tipos' },
+                  { value: 'Todos', label: 'Tipo: Todos' },
                   ...tiposUnicos.map(t => ({ value: t, label: t }))
                 ]}
                 accent="orange"
@@ -772,13 +803,13 @@ export default function MobiliarioInventarioPage() {
             </div>
 
             <div className="relative focus-within:z-30 hover:z-20">
-              {!scrolled && <label className="text-[11px] font-bold text-white mb-1 block">Departamento</label>}
               <PremiumSelect
-                compact={scrolled}
+                compact
+                dark
                 value={filtroDepartamento}
                 onChange={(val) => setFiltroDepartamento(val)}
                 options={[
-                  { value: 'Todos', label: scrolled ? 'Depto: Todos' : 'Todos los deptos' },
+                  { value: 'Todos', label: 'Depto: Todos' },
                   ...departamentosUnicos.map(d => ({ value: d, label: d }))
                 ]}
                 accent="orange"
@@ -787,13 +818,13 @@ export default function MobiliarioInventarioPage() {
             </div>
 
             <div className="relative focus-within:z-30 hover:z-20">
-              {!scrolled && <label className="text-[11px] font-bold text-white mb-1 block">Ubicación</label>}
               <PremiumSelect
-                compact={scrolled}
+                compact
+                dark
                 value={filtroUbicacion}
                 onChange={(val) => setFiltroUbicacion(val)}
                 options={[
-                  { value: 'Todos', label: scrolled ? 'Ubicación: Todas' : 'Todas las ubicaciones' },
+                  { value: 'Todos', label: 'Ubicación: Todas' },
                   ...ubicacionesUnicas.map(u => ({ value: u, label: u }))
                 ]}
                 accent="orange"
@@ -802,13 +833,13 @@ export default function MobiliarioInventarioPage() {
             </div>
 
             <div className="relative focus-within:z-30 hover:z-20 col-span-2 sm:col-span-1">
-              {!scrolled && <label className="text-[11px] font-bold text-white mb-1 block">Empresa</label>}
               <PremiumSelect
-                compact={scrolled}
+                compact
+                dark
                 value={filtroEmpresa}
                 onChange={(val) => setFiltroEmpresa(val)}
                 options={[
-                  { value: 'Todos', label: scrolled ? 'Empresa: Todas' : 'Todas las empresas' },
+                  { value: 'Todos', label: 'Empresa: Todas' },
                   ...empresasUnicas.map(e => ({ value: e, label: e }))
                 ]}
                 accent="orange"
@@ -834,30 +865,49 @@ export default function MobiliarioInventarioPage() {
             equiposMostrados.map((item) => {
               const estatus = (item.Estatus || 'Activo').toLowerCase();
               const isActivo = estatus === 'activo';
-              const isMtto = estatus.includes('mantenimiento');
+              const isMtto = estatus.includes('mantenimiento') || estatus.includes('reparación');
+              const isSelected = selectedEquipos.includes(item.N_Interno);
 
               return (
                 <div
                   key={item.N_Interno}
-                  className="bg-black/40 border border-white/10 hover:border-orange-500/40 rounded-xl p-3.5 space-y-2.5 transition-all shadow-md"
+                  className={`bg-black/40 border rounded-xl p-3.5 space-y-2.5 transition-all shadow-md ${
+                    isSelected ? 'border-orange-500/80 bg-orange-950/20' : 'border-white/10 hover:border-orange-500/40'
+                  }`}
                 >
-                  {/* Fila superior: ID y Estatus */}
+                  {/* Fila superior: Checkbox + ID y Estatus */}
                   <div className="flex items-center justify-between gap-2">
-                    <span className="px-2.5 py-1 rounded-lg bg-orange-500/10 border border-orange-500/20 text-orange-400 font-mono text-xs font-bold">
-                      {item.N_Interno}
-                    </span>
-                    <span
-                      className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
-                        isActivo
-                          ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
-                          : isMtto
-                          ? 'bg-amber-500/10 border-amber-500/30 text-amber-400'
-                          : 'bg-rose-500/10 border-rose-500/30 text-rose-400'
-                      }`}
-                    >
-                      <span className={`w-1.5 h-1.5 rounded-full ${isActivo ? 'bg-emerald-400' : isMtto ? 'bg-amber-400' : 'bg-rose-400'}`} />
-                      {item.Estatus || 'Activo'}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => toggleSelect(item.N_Interno)}
+                        className="w-4 h-4 rounded text-orange-600 focus:ring-orange-500 cursor-pointer accent-orange-600"
+                      />
+                      <span className="px-2.5 py-1 rounded-lg bg-orange-500/10 border border-orange-500/20 text-orange-400 font-mono text-xs font-bold">
+                        {item.N_Interno}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-1.5">
+                      {item.Ultima_Revision && (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-500/15 border border-emerald-500/30 text-emerald-300">
+                          <CheckCircle2 size={10} /> Censo {new Date(item.Ultima_Revision).getFullYear()}
+                        </span>
+                      )}
+                      <span
+                        className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
+                          isActivo
+                            ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                            : isMtto
+                            ? 'bg-amber-500/10 border-amber-500/30 text-amber-400'
+                            : 'bg-rose-500/10 border-rose-500/30 text-rose-400'
+                        }`}
+                      >
+                        <span className={`w-1.5 h-1.5 rounded-full ${isActivo ? 'bg-emerald-400' : isMtto ? 'bg-amber-400' : 'bg-rose-400'}`} />
+                        {item.Estatus || 'Activo'}
+                      </span>
+                    </div>
                   </div>
 
                   {/* Tipo y Descripción */}
@@ -886,107 +936,121 @@ export default function MobiliarioInventarioPage() {
                     </div>
                   </div>
 
-                  {/* Acciones para Administrador */}
-                  {isAdmin && (
-                    <div className="flex items-center gap-2 pt-1 border-t border-white/5">
-                      <button
-                        onClick={() => abrirModalEditar(item)}
-                        className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg bg-white/5 hover:bg-white/10 text-white border border-white/10 text-xs font-semibold transition-colors"
-                      >
-                        <Pencil size={13} />
-                        <span>Editar</span>
-                      </button>
-                      <button
-                        onClick={() => confirmarEliminar(item.N_Interno)}
-                        className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 text-xs font-semibold transition-colors"
-                      >
-                        <Trash2 size={13} />
-                        <span>Eliminar</span>
-                      </button>
-                    </div>
-                  )}
+                  {/* Acciones Móvil */}
+                  <div className="flex items-center gap-1.5 pt-2 border-t border-white/10">
+                    <button
+                      onClick={() => setModalQREquipos([item])}
+                      className="flex-1 flex items-center justify-center gap-1 py-2 px-2.5 rounded-xl bg-orange-500/15 hover:bg-orange-500/25 text-orange-400 border border-orange-500/30 text-xs font-bold transition-all active:scale-95"
+                      title="Imprimir Calcomanía QR"
+                    >
+                      <QrCode size={13} />
+                      <span>QR</span>
+                    </button>
+                    <button
+                      onClick={() => verHistorial(item)}
+                      className="flex-1 flex items-center justify-center gap-1 py-2 px-2.5 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-400 border border-cyan-500/30 text-xs font-bold transition-all active:scale-95"
+                      title="Historial de Censo"
+                    >
+                      <History size={13} />
+                      <span>Censo</span>
+                    </button>
+                    {isAdmin && (
+                      <>
+                        <button
+                          onClick={() => abrirModalEditar(item)}
+                          className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 text-xs transition-all active:scale-95"
+                          title="Editar"
+                        >
+                          <Pencil size={13} />
+                        </button>
+                        <button
+                          onClick={() => confirmarEliminar(item.N_Interno)}
+                          className="p-2 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-400 border border-rose-500/30 text-xs transition-all active:scale-95"
+                          title="Eliminar"
+                        >
+                          <Trash2 size={13} />
+                        </button>
+                      </>
+                    )}
+                  </div>
                 </div>
               );
             })
           )}
         </div>
 
-        {/* VISTA ESCRITORIO / TABLET: TABLA COMPLETA CON ENCABEZADOS STICKY DIRECTAMENTE ABAJO (Pantallas >= 768px) */}
-        <div className="hidden md:block">
-          <table className="w-full text-left border-collapse">
-            <thead
-              className="sticky z-30"
-              style={{ top: 'var(--mobiliario-sticky-height, 160px)' }}
-            >
+        {/* VISTA ESCRITORIO / TABLET: TABLA OPTIMIZADA CON OVERFLOW HORIZONTAL SUAVE Y FONDO OSCURO COMPLETO */}
+        <div id="table-scroll-container-mobiliario" className="hidden md:block w-full overflow-x-auto md:overflow-x-visible transition-all duration-300 bg-stone-900/98 border-t border-white/10">
+          <table className="w-full text-left border-collapse min-w-[980px]">
+            <thead className="border-b border-white/10">
               <tr className="border-b border-white/10 text-white shadow-md">
                 <th
-                  className="sticky z-30 px-4 bg-stone-900/98 backdrop-blur-2xl border-b border-white/10 py-2.5 text-[10px] font-extrabold uppercase tracking-wider text-white"
-                  style={{ top: 'var(--mobiliario-sticky-height, 160px)' }}
+                  className="sticky z-30 px-3 bg-stone-900 border-b border-white/10 py-3 text-center w-12 shadow-sm"
+                  style={{ top: 'var(--mobiliario-sticky-height, 180px)' }}
                 >
-                  N_Interno
+                  <button
+                    type="button"
+                    onClick={toggleSelectAll}
+                    className="text-white hover:text-orange-400 transition-colors inline-flex items-center justify-center cursor-pointer"
+                    title={selectedEquipos.length === equiposMostrados.length && equiposMostrados.length > 0 ? "Desmarcar todos" : "Seleccionar visibles"}
+                  >
+                    {selectedEquipos.length > 0 && selectedEquipos.length === equiposMostrados.length ? (
+                      <CheckSquare size={16} className="text-orange-400" />
+                    ) : (
+                      <Square size={16} className="text-white/40" />
+                    )}
+                  </button>
                 </th>
                 <th
-                  className="sticky z-30 px-4 bg-stone-900/98 backdrop-blur-2xl border-b border-white/10 py-2.5 text-[10px] font-extrabold uppercase tracking-wider text-white"
-                  style={{ top: 'var(--mobiliario-sticky-height, 160px)' }}
+                  className="sticky z-30 px-4 bg-stone-900 border-b border-white/10 py-3 text-[10px] font-extrabold uppercase tracking-wider text-white shadow-sm"
+                  style={{ top: 'var(--mobiliario-sticky-height, 180px)' }}
                 >
-                  Empresa
+                  ID / Empresa
                 </th>
                 <th
-                  className="sticky z-30 px-4 bg-stone-900/98 backdrop-blur-2xl border-b border-white/10 py-2.5 text-[10px] font-extrabold uppercase tracking-wider text-white"
-                  style={{ top: 'var(--mobiliario-sticky-height, 160px)' }}
+                  className="sticky z-30 px-4 bg-stone-900 border-b border-white/10 py-3 text-[10px] font-extrabold uppercase tracking-wider text-white shadow-sm"
+                  style={{ top: 'var(--mobiliario-sticky-height, 180px)' }}
                 >
-                  Tipo
+                  Tipo & Modelo
                 </th>
                 <th
-                  className="sticky z-30 px-4 bg-stone-900/98 backdrop-blur-2xl border-b border-white/10 py-2.5 text-[10px] font-extrabold uppercase tracking-wider text-white"
-                  style={{ top: 'var(--mobiliario-sticky-height, 160px)' }}
+                  className="sticky z-30 px-4 bg-stone-900 border-b border-white/10 py-3 text-[10px] font-extrabold uppercase tracking-wider text-white shadow-sm"
+                  style={{ top: 'var(--mobiliario-sticky-height, 180px)' }}
                 >
                   Descripción
                 </th>
                 <th
-                  className="sticky z-30 px-4 bg-stone-900/98 backdrop-blur-2xl border-b border-white/10 py-2.5 text-[10px] font-extrabold uppercase tracking-wider text-white"
-                  style={{ top: 'var(--mobiliario-sticky-height, 160px)' }}
+                  className="sticky z-30 px-4 bg-stone-900 border-b border-white/10 py-3 text-[10px] font-extrabold uppercase tracking-wider text-white shadow-sm"
+                  style={{ top: 'var(--mobiliario-sticky-height, 180px)' }}
                 >
-                  Modelo
+                  Ubicación & Depto
                 </th>
                 <th
-                  className="sticky z-30 px-4 bg-stone-900/98 backdrop-blur-2xl border-b border-white/10 py-2.5 text-[10px] font-extrabold uppercase tracking-wider text-white"
-                  style={{ top: 'var(--mobiliario-sticky-height, 160px)' }}
-                >
-                  Departamento
-                </th>
-                <th
-                  className="sticky z-30 px-4 bg-stone-900/98 backdrop-blur-2xl border-b border-white/10 py-2.5 text-[10px] font-extrabold uppercase tracking-wider text-white"
-                  style={{ top: 'var(--mobiliario-sticky-height, 160px)' }}
-                >
-                  Ubicación
-                </th>
-                <th
-                  className="sticky z-30 px-4 bg-stone-900/98 backdrop-blur-2xl border-b border-white/10 py-2.5 text-[10px] font-extrabold uppercase tracking-wider text-white"
-                  style={{ top: 'var(--mobiliario-sticky-height, 160px)' }}
+                  className="sticky z-30 px-4 bg-stone-900 border-b border-white/10 py-3 text-[10px] font-extrabold uppercase tracking-wider text-white shadow-sm"
+                  style={{ top: 'var(--mobiliario-sticky-height, 180px)' }}
                 >
                   Proveedor
                 </th>
                 <th
-                  className="sticky z-30 px-4 text-center bg-stone-900/98 backdrop-blur-2xl border-b border-white/10 py-2.5 text-[10px] font-extrabold uppercase tracking-wider text-white"
-                  style={{ top: 'var(--mobiliario-sticky-height, 160px)' }}
+                  className="sticky z-30 px-4 text-center bg-stone-900 border-b border-white/10 py-3 text-[10px] font-extrabold uppercase tracking-wider text-white shadow-sm"
+                  style={{ top: 'var(--mobiliario-sticky-height, 180px)' }}
                 >
-                  Estatus
+                  Estatus & Censo
                 </th>
                 {isAdmin && (
                   <th
-                    className="sticky z-30 px-4 text-right bg-stone-900/98 backdrop-blur-2xl border-b border-white/10 py-2.5 text-[10px] font-extrabold uppercase tracking-wider text-white"
-                    style={{ top: 'var(--mobiliario-sticky-height, 160px)' }}
+                    className="sticky z-30 px-4 text-center bg-stone-900 border-b border-white/10 py-3 text-[10px] font-extrabold uppercase tracking-wider text-white shadow-sm"
+                    style={{ top: 'var(--mobiliario-sticky-height, 180px)' }}
                   >
                     Acciones
                   </th>
                 )}
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5 text-xs text-white font-medium">
+            <tbody className="divide-y divide-white/5 text-xs text-white font-medium bg-stone-900/95">
               {cargando ? (
                 <tr>
-                  <td colSpan={isAdmin ? 10 : 9} className="py-12 text-center text-white">
+                  <td colSpan={isAdmin ? 8 : 7} className="py-12 text-center text-white">
                     <div className="flex flex-col items-center gap-2">
                       <RefreshCw className="animate-spin text-orange-400 w-6 h-6" />
                       <span>Cargando inventario de mobiliario...</span>
@@ -995,7 +1059,7 @@ export default function MobiliarioInventarioPage() {
                 </tr>
               ) : equiposMostrados.length === 0 ? (
                 <tr>
-                  <td colSpan={isAdmin ? 10 : 9} className="py-12 text-center text-white">
+                  <td colSpan={isAdmin ? 8 : 7} className="py-12 text-center text-white">
                     <Package className="w-10 h-10 mx-auto mb-2 opacity-50 text-white" />
                     <p className="font-semibold text-sm text-white">No se encontraron registros de mobiliario.</p>
                     <p className="text-xs text-white/80 mt-0.5">Prueba ajustando los filtros o realiza una búsqueda diferente.</p>
@@ -1005,55 +1069,122 @@ export default function MobiliarioInventarioPage() {
                 equiposMostrados.map((item) => {
                   const estatus = (item.Estatus || 'Activo').toLowerCase();
                   const isActivo = estatus === 'activo';
-                  const isMtto = estatus.includes('mantenimiento');
+                  const isMtto = estatus.includes('mantenimiento') || estatus.includes('reparación');
+                  const isSelected = selectedEquipos.includes(item.N_Interno);
 
                   return (
                     <tr
                       key={item.N_Interno}
-                      className="hover:bg-white/[0.04] transition-colors group"
+                      className={`hover:bg-white/[0.06] transition-colors group ${
+                        isSelected ? 'bg-orange-500/15' : ''
+                      }`}
                     >
-                      <td className="py-3.5 px-4 font-bold text-white whitespace-nowrap">
-                        <span className="px-2.5 py-1 rounded-lg bg-orange-500/10 border border-orange-500/20 text-orange-400 font-mono text-[11px]">
+                      {/* Checkbox */}
+                      <td className="py-3 px-3 text-center">
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => toggleSelect(item.N_Interno)}
+                          className="w-4 h-4 rounded text-orange-600 focus:ring-orange-500 cursor-pointer accent-orange-600"
+                        />
+                      </td>
+
+                      {/* ID / Empresa */}
+                      <td className="py-3 px-4 whitespace-nowrap">
+                        <span className="px-2.5 py-1 rounded-lg bg-orange-500/10 border border-orange-500/25 text-orange-400 font-mono text-xs font-bold inline-block">
                           {item.N_Interno}
                         </span>
+                        <div className="text-[10px] text-stone-400 font-medium mt-1 uppercase tracking-wider">
+                          {item.Empresa || 'SIFYGSA'}
+                        </div>
                       </td>
-                      <td className="py-3.5 px-4 text-white whitespace-nowrap">{item.Empresa || '—'}</td>
-                      <td className="py-3.5 px-4 font-bold text-white whitespace-nowrap">{item.Tipo || '—'}</td>
-                      <td className="py-3.5 px-4 text-white/90 min-w-[200px] max-w-[300px] truncate" title={item.Descripcion || ''}>
+
+                      {/* Tipo & Modelo */}
+                      <td className="py-3 px-4 whitespace-nowrap">
+                        <div className="font-bold text-xs text-white">{item.Tipo || '—'}</div>
+                        <div className="text-[11px] text-stone-400 font-mono mt-0.5">{item.Modelo || 'S/M'}</div>
+                      </td>
+
+                      {/* Descripción */}
+                      <td className="py-3 px-4 text-stone-200 text-xs min-w-[200px] max-w-[320px] truncate" title={item.Descripcion || ''}>
                         {item.Descripcion || '—'}
                       </td>
-                      <td className="py-3.5 px-4 font-mono text-white/90 whitespace-nowrap text-[11px]">{item.Modelo || '—'}</td>
-                      <td className="py-3.5 px-4 text-white whitespace-nowrap">{item.Departamento || '—'}</td>
-                      <td className="py-3.5 px-4 text-white whitespace-nowrap">{item.Ubicacion || '—'}</td>
-                      <td className="py-3.5 px-4 text-white/90 whitespace-nowrap">{item.Proveedor || '—'}</td>
-                      <td className="py-3.5 px-4 text-center whitespace-nowrap">
-                        <span
-                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
-                            isActivo
-                              ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
-                              : isMtto
-                              ? 'bg-amber-500/10 border-amber-500/30 text-amber-400'
-                              : 'bg-rose-500/10 border-rose-500/30 text-rose-400'
-                          }`}
-                        >
-                          <span className={`w-1.5 h-1.5 rounded-full ${isActivo ? 'bg-emerald-400' : isMtto ? 'bg-amber-400' : 'bg-rose-400'}`} />
-                          {item.Estatus || 'Activo'}
-                        </span>
+
+                      {/* Ubicación & Depto */}
+                      <td className="py-3 px-4 whitespace-nowrap">
+                        <div className="text-xs font-semibold text-stone-200">{item.Ubicacion || '—'}</div>
+                        <div className="text-[11px] text-stone-400 mt-0.5">{item.Departamento || 'General'}</div>
                       </td>
+
+                      {/* Proveedor */}
+                      <td className="py-3 px-4 text-stone-300 text-xs whitespace-nowrap">{item.Proveedor || '—'}</td>
+
+                      {/* Estatus & Censo Anual */}
+                      <td className="py-3 px-4 text-center whitespace-nowrap">
+                        <div className="flex flex-col items-center gap-1.5">
+                          <span
+                            className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
+                              isActivo
+                                ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400'
+                                : isMtto
+                                ? 'bg-amber-500/15 border-amber-500/30 text-amber-400'
+                                : 'bg-rose-500/15 border-rose-500/30 text-rose-400'
+                            }`}
+                          >
+                            <span className={`w-1.5 h-1.5 rounded-full ${isActivo ? 'bg-emerald-400' : isMtto ? 'bg-amber-400' : 'bg-rose-400'}`} />
+                            {item.Estatus || 'Activo'}
+                          </span>
+
+                          {item.Ultima_Revision ? (
+                            <button
+                              onClick={() => verHistorial(item)}
+                              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/25 transition-all cursor-pointer"
+                              title="Ver censo anual y fotos"
+                            >
+                              <CheckCircle2 size={10} /> Censo {new Date(item.Ultima_Revision).getFullYear()}
+                            </button>
+                          ) : (
+                            <span className="text-[9px] text-stone-500 font-medium">Sin censo</span>
+                          )}
+                        </div>
+                      </td>
+
+                      {/* Acciones */}
                       {isAdmin && (
-                        <td className="py-3.5 px-4 text-right whitespace-nowrap">
-                          <div className="flex items-center justify-end gap-1.5">
+                        <td className="py-3 px-4 text-center whitespace-nowrap">
+                          <div className="flex items-center justify-center gap-1.5">
+                            {/* Botón QR (calcomanía) */}
+                            <button
+                              onClick={() => setModalQREquipos([item])}
+                              title="Imprimir Calcomanía QR"
+                              className="p-2 rounded-lg bg-orange-500/15 hover:bg-orange-500/30 text-orange-400 border border-orange-500/30 transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-sm"
+                            >
+                              <QrCode size={14} />
+                            </button>
+
+                            {/* Botón Historial de Auditorías */}
+                            <button
+                              onClick={() => verHistorial(item)}
+                              title="Historial de Auditorías Anuales"
+                              className="p-2 rounded-lg bg-cyan-500/15 hover:bg-cyan-500/30 text-cyan-400 border border-cyan-500/30 transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-sm"
+                            >
+                              <History size={14} />
+                            </button>
+
+                            {/* Botón Editar (Visibilidad garantizada en modo oscuro) */}
                             <button
                               onClick={() => abrirModalEditar(item)}
                               title="Editar registro"
-                              className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white hover:text-white border border-white/10 transition-colors cursor-pointer"
+                              className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-sm"
                             >
                               <Pencil size={14} />
                             </button>
+
+                            {/* Botón Eliminar */}
                             <button
                               onClick={() => confirmarEliminar(item.N_Interno)}
                               title="Eliminar registro"
-                              className="p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 transition-colors cursor-pointer"
+                              className="p-2 rounded-lg bg-rose-500/15 hover:bg-rose-500/30 text-rose-400 border border-rose-500/30 transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-sm"
                             >
                               <Trash2 size={14} />
                             </button>
@@ -1229,6 +1360,159 @@ export default function MobiliarioInventarioPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* BARRA FLOTANTE DE SELECCIÓN PARA IMPRIMIR CALCOMANÍAS QR */}
+      {selectedEquipos.length > 0 && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-stone-950/95 border border-orange-500/40 text-white px-5 py-3 rounded-2xl shadow-2xl backdrop-blur-md flex items-center gap-4 animate-in slide-in-from-bottom-5">
+          <span className="text-xs font-bold text-orange-400 flex items-center gap-1.5">
+            <CheckSquare size={16} /> {selectedEquipos.length} mobiliario(s) seleccionado(s)
+          </span>
+          <button
+            onClick={() => {
+              const eqs = equipos.filter(e => selectedEquipos.includes(e.N_Interno));
+              setModalQREquipos(eqs);
+            }}
+            className="px-4 py-2 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs shadow-lg transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer"
+          >
+            <Printer size={14} /> Imprimir Calcomanías QR ({selectedEquipos.length})
+          </button>
+          <button
+            onClick={() => setSelectedEquipos([])}
+            className="text-stone-400 hover:text-white text-xs font-semibold px-2 py-1 transition-colors cursor-pointer"
+          >
+            ✕ Desmarcar
+          </button>
+        </div>
+      )}
+
+      {/* MODAL DE CALCOMANÍAS QR COMPACTAS */}
+      <ModalCalcomaniasQRMobiliario
+        equipos={modalQREquipos || []}
+        isOpen={!!modalQREquipos}
+        onClose={() => setModalQREquipos(null)}
+      />
+
+      {/* MODAL DE HISTORIAL DE CENSO ANUAL CON FOTOS */}
+      {modalHistorial && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-stone-900 border border-white/10 rounded-3xl p-6 w-full max-w-2xl shadow-2xl relative animate-in zoom-in-95 duration-200 text-white max-h-[85vh] flex flex-col">
+            <div className="flex items-center justify-between pb-4 border-b border-white/10 shrink-0">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-400">
+                  <History size={18} />
+                </div>
+                <div>
+                  <h3 className="font-bold text-sm text-white">
+                    Historial de Censo Anual • {modalHistorial.nInterno}
+                  </h3>
+                  <p className="text-[11px] text-stone-400">
+                    {modalHistorial.tipo} • Registro histórico de auditorías y evidencias fotográficas
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setModalHistorial(null)}
+                className="p-1.5 text-stone-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="overflow-y-auto py-4 flex-1 space-y-3 pr-1">
+              {cargandoHistorial ? (
+                <div className="py-12 text-center text-stone-400 flex flex-col items-center justify-center gap-2">
+                  <RefreshCw className="w-6 h-6 animate-spin text-cyan-400" />
+                  <span className="text-xs">Consultando auditorías anuales...</span>
+                </div>
+              ) : modalHistorial.revisiones.length === 0 ? (
+                <div className="py-12 text-center text-stone-400">
+                  <History className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                  <p className="font-semibold text-xs text-stone-300">Sin revisiones anuales registradas.</p>
+                  <p className="text-[11px] text-stone-500 mt-0.5">
+                    Escanea el código QR de este mueble para capturar su primer censo.
+                  </p>
+                </div>
+              ) : (
+                modalHistorial.revisiones.map((rev: any) => (
+                  <div
+                    key={rev.Id_Revision}
+                    className="bg-black/40 border border-white/10 rounded-2xl p-4 space-y-2.5 text-xs"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-white flex items-center gap-2">
+                        <span className="px-2 py-0.5 rounded-md bg-cyan-500/20 text-cyan-300 font-mono text-[11px] font-bold">
+                          {rev.Anio}
+                        </span>
+                        <span className="text-sm">{rev.Dictamen}</span>
+                      </span>
+                      <span className="text-stone-400 text-[11px] font-mono">
+                        {new Date(rev.Fecha_Revision).toLocaleDateString('es-MX', {
+                          day: '2-digit',
+                          month: 'short',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-[11px] bg-white/[0.03] p-2.5 rounded-xl border border-white/5">
+                      <div>
+                        <span className="text-stone-400 block text-[10px]">Condición</span>
+                        <strong className="text-white">{rev.Condicion_Fisica}</strong>
+                      </div>
+                      <div>
+                        <span className="text-stone-400 block text-[10px]">Ubicación</span>
+                        <strong className="text-white truncate block">{rev.Ubicacion_Fisica || '—'}</strong>
+                      </div>
+                      <div>
+                        <span className="text-stone-400 block text-[10px]">Auditor</span>
+                        <strong className="text-stone-300 truncate block">{rev.Auditor_Nombre || rev.Auditor_Email}</strong>
+                      </div>
+                    </div>
+
+                    {rev.Observaciones && (
+                      <p className="text-stone-300 text-[11px] italic bg-white/[0.02] p-2 rounded-lg border border-white/5">
+                        "{rev.Observaciones}"
+                      </p>
+                    )}
+
+                    {rev.Foto_Evidencia && (
+                      <div className="pt-1">
+                        <span className="text-[10px] font-semibold text-stone-400 block mb-1">Evidencia Fotográfica:</span>
+                        <a href={rev.Foto_Evidencia} target="_blank" rel="noreferrer" className="inline-block">
+                          <img
+                            src={rev.Foto_Evidencia}
+                            alt={`Evidencia ${rev.Anio}`}
+                            className="w-28 h-20 object-cover rounded-xl border border-white/10 hover:opacity-90 transition-opacity shadow-md"
+                          />
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+
+            <div className="pt-3 border-t border-white/10 flex justify-between items-center shrink-0">
+              <Link
+                href={`/qr/mobiliario/${encodeURIComponent(modalHistorial.nInterno)}`}
+                target="_blank"
+                className="inline-flex items-center gap-1.5 text-xs text-orange-400 hover:text-orange-300 font-semibold"
+              >
+                <ExternalLink size={13} />
+                <span>Abrir Ficha QR Móvil</span>
+              </Link>
+              <button
+                onClick={() => setModalHistorial(null)}
+                className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold transition-colors"
+              >
+                Cerrar
+              </button>
+            </div>
           </div>
         </div>
       )}

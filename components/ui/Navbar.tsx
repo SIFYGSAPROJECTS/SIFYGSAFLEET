@@ -14,6 +14,7 @@ interface NavbarProps {
   userRole?: string;
   isAdmin?: boolean;
   maxWidth?: string;
+  backdropBg?: string;
 }
 
 // Helper client-side helper to read cookies
@@ -24,7 +25,7 @@ const getCookie = (name: string): string => {
   return '';
 };
 
-export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', isAdmin = false, maxWidth }: NavbarProps) {
+export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', isAdmin = false, maxWidth, backdropBg }: NavbarProps) {
   const router = useRouter();
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -262,7 +263,7 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
               </Link>
               {(localIsAdmin || localUserAreas.includes('CLIMA')) && (
                 <Link
-                  href="/clima/inventario"
+                  href="/clima"
                   onClick={() => setIsMenuOpen(false)}
                   className="bg-white/5 hover:bg-white/10 border border-white/5 text-white/90 px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold"
                 >
@@ -293,7 +294,7 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                   onClick={() => setIsMenuOpen(false)}
                   className="bg-white/5 hover:bg-white/10 border border-white/5 text-white/90 px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold"
                 >
-                  <Cctv size={14} className="text-rose-400" /> Video y Vigilancia
+                  <Cctv size={14} className="text-[#FF7420]" /> Video y Vigilancia
                 </Link>
               )}
 
@@ -348,7 +349,17 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
   return (
     <>
       {/* Backdrop Blocker - Prevents content from peeking around the floating Navbar when scrolled */}
-      <div className={`fixed top-0 left-0 right-0 h-[72px] ${type === 'auditoria' ? 'bg-[#0a0a0a]' : 'bg-[var(--bg-screen)]'} z-[90] transition-opacity duration-300 pointer-events-none ${scrolled ? 'opacity-100' : 'opacity-0'}`} />
+      <div
+        className={`fixed top-0 left-0 right-0 h-[72px] ${
+          backdropBg
+            ? backdropBg
+            : type === 'auditoria'
+            ? 'bg-[#0a0a0a]'
+            : type === 'mobiliario'
+            ? 'bg-stone-950'
+            : 'bg-[var(--bg-screen)]'
+        } z-[90] transition-opacity duration-300 pointer-events-none ${scrolled ? 'opacity-100' : 'opacity-0'}`}
+      />
 
       {/* Header Container - Floating Unified Black Ribbon */}
       <header className={`fixed top-2 left-4 right-4 z-[100] mx-auto transition-all duration-300 ${resolvedMaxWidth}`}>
@@ -403,7 +414,7 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                 </span>
               </Link>
             ) : type === 'clima' ? (
-              <Link href="/clima/inventario" className={`flex items-center space-x-3 group px-2 transition-all`}>
+              <Link href="/clima" className={`flex items-center space-x-3 group px-2 transition-all`}>
                 <div className="bg-cyan-500 p-1.5 rounded-lg shadow-lg shadow-cyan-500/20 group-hover:scale-105 transition-transform duration-300">
                   <Wind className="text-white h-4 w-4" />
                 </div>
@@ -541,6 +552,13 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                     <div className="px-3 py-1.5 text-[9px] font-black text-cyan-400/60 tracking-wider uppercase border-b border-white/5 mb-1">
                       Aires Acondicionados
                     </div>
+                    <Link
+                      href="/clima"
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all text-white/80 hover:text-white hover:bg-white/5 group/item"
+                    >
+                      <Home size={14} className="text-cyan-400 transition-transform duration-300 ease-in-out group-hover/item:scale-110" />
+                      <span>Panel Principal</span>
+                    </Link>
                     <Link
                       href="/clima/inventario"
                       className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all text-white/80 hover:text-white hover:bg-white/5 group/item"
@@ -717,7 +735,7 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                     )}
                     {(localIsAdmin || localUserAreas.includes('CLIMA')) && (
                       <Link
-                        href="/clima/inventario"
+                        href="/clima"
                         className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-white/80 hover:text-white hover:bg-white/5 transition-all group/item"
                       >
                         <Wind size={14} className="text-[#FF7420] transition-transform duration-500 ease-out group-hover/item:scale-125 group-hover/item:rotate-180" />
@@ -747,7 +765,7 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                         href="/vigilancia/inventario"
                         className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-white/80 hover:text-white hover:bg-white/5 transition-all group/item"
                       >
-                        <Cctv size={14} className="text-rose-400 transition-transform duration-300 ease-out group-hover/item:scale-125 group-hover/item:-translate-y-1" />
+                        <Cctv size={14} className="text-[#FF7420] transition-transform duration-300 ease-out group-hover/item:scale-125 group-hover/item:-translate-y-1" />
                         <span>Vigilancia</span>
                       </Link>
                     )}
@@ -893,6 +911,16 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
             {type === 'clima' && (
               <>
                 <div className="text-[10px] font-black text-white/30 uppercase tracking-widest pl-2 mb-1">Aires Acondicionados</div>
+                <Link
+                  href="/clima"
+                  onClick={() => setIsMenuOpen(false)}
+                  className={`border px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold ${pathname === '/clima'
+                    ? 'bg-cyan-600 border-cyan-500 text-white'
+                    : 'bg-white/5 border-white/5 text-white/90 hover:bg-white/10'
+                    }`}
+                >
+                  <Home size={14} className="text-cyan-400" /> Panel Principal
+                </Link>
                 <Link
                   href="/clima/inventario"
                   onClick={() => setIsMenuOpen(false)}

@@ -84,26 +84,11 @@ export async function POST(request: Request) {
       include: { equipo: true }
     });
 
-    // Enviar correo de confirmación al usuario y notificación al admin
+    // Enviar correo de notificación EXCLUSIVAMENTE a los técnicos de TI
     try {
-      const responsableNombre = usuario ? `${usuario.Nombre_Empleado} ${usuario.A_Paterno}` : userEmail;
+      const responsableNombre = usuario ? `${usuario.Nombre_Empleado} ${usuario.A_Paterno}` : (userEmail || 'Usuario');
       
-      // 1. Correo para el Usuario Solicitante
-      await enviarCorreo({
-        to: userEmail,
-        subject: `Confirmación de Solicitud de Cómputo: ${folioGenerado}`,
-        modulo: 'computo',
-        react: TicketComputoEmail({
-          consecutivo: c_interno,
-          responsable: responsableNombre,
-          departamento: departamento,
-          serviceTag: service_tag,
-          telefono: telefono,
-          detallesReporte: detalles_reporte,
-        }),
-      });
-
-      // 2. Correo para los Técnicos / Administradores de TI actuales (Alan Montiel, Citlali Sanchez)
+      // Correo para los Técnicos / Administradores de TI actuales (Alan Montiel, Citlali Sanchez)
       const adminsTI = await prisma.empleados.findMany({
         where: { Admin_TI: true },
         select: { Email: true }
@@ -127,7 +112,7 @@ export async function POST(request: Request) {
       });
 
     } catch (emailError) {
-      console.error('Error al enviar correo de TicketComputo:', emailError);
+      console.error('Error al enviar correo de TicketComputo al técnico:', emailError);
       // No detenemos el flujo, ya que el ticket sí se creó
     }
 
@@ -138,5 +123,55 @@ export async function POST(request: Request) {
   } catch (error: any) {
     console.error('Error en la API de Computo Tickets:', error);
     return NextResponse.json({ error: 'Error interno en el servidor' }, { status: 500 });
+  }
+}
+
+// Endpoint para consultar tickets abiertos de cómputo (usado por campanita de notificaciones y paneles)
+export async function GET(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const estado = searchParams.get('estado');
+    
+    const cookieStore = await cookies();
+    const userEmail = cookieStore.get('user_email')?.value;
+    const userRole = cookieStore.get('user_role')?.value || 'USER';
+    const userAdminTi = cookieStore.get('user_admin_ti')?.value === 'true';
+    const isAdmin = ['ADMIN', 'GERENCIAL'].includes(userRole) || userAdminTi;
+
+    const where: any = {};
+    if (estado === 'ABIERTOS' || estado === 'PENDIENTE') {
+      where.Estado = { in: ['PENDIENTE', 'EN PROCESO', 'EN_PROCESO'] };
+    } else if (estado && estado !== 'TODOS') {
+      where.Estado = estado;
+    }
+
+    // Si no es admin TI, filtrar solo los creados por este usuario
+    if (!isAdmin && userEmail) {
+      where.Email_Empleado = userEmail;
+    }
+
+    const tickets = await prisma.solicitud_Computo.findMany({
+      where,
+      include: {
+        equipo: {
+          select: {
+            Marca: true,
+            Modelo: true,
+            Usuario: true,
+            Departamento: true,
+            Service_Tag: true
+          }
+        }
+      },
+      orderBy: {
+        Fecha_Realizacion: 'desc'
+      },
+      take: 25
+    });
+
+    return NextResponse.json(tickets);
+  } catch (error) {
+    console.error('Error al obtener tickets de cómputo:', error);
+    return NextResponse.json({ error: 'Error interno al consultar tickets' }, { status: 500 });
   }
 }

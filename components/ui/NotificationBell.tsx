@@ -65,22 +65,45 @@ export default function NotificationBell({ isAdmin, moduleType = 'computo' }: { 
 
     const fetchNotifications = async () => {
       try {
-        let url = '';
         if (moduleType === 'vehiculos') {
-          url = '/api/tickets?estado=PENDIENTE';
+          const res = await fetch('/api/tickets?estado=PENDIENTE', { signal: controller.signal }).catch(() => null);
+          if (res && res.ok) {
+            const data = await res.json().catch(() => []);
+            if (isMounted && Array.isArray(data)) {
+              setReportes(data);
+            }
+          }
         } else if (moduleType === 'computo') {
-          url = '/api/mantenimientos/reportes?estado=PENDIENTE';
+          // Consultar tickets abiertos de cómputo y mantenimientos preventivos pendientes en paralelo
+          const [ticketsRes, mttosRes] = await Promise.all([
+            fetch('/api/computo/tickets?estado=ABIERTOS', { signal: controller.signal }).catch(() => null),
+            fetch('/api/mantenimientos/reportes?estado=PENDIENTE', { signal: controller.signal }).catch(() => null),
+          ]);
+
+          let tickets: any[] = [];
+          let mttos: any[] = [];
+
+          if (ticketsRes && ticketsRes.ok) {
+            const data = await ticketsRes.json().catch(() => []);
+            if (Array.isArray(data)) {
+              tickets = data.map(t => ({ ...t, __tipo: 'ticket_computo' }));
+            }
+          }
+
+          if (mttosRes && mttosRes.ok) {
+            const data = await mttosRes.json().catch(() => []);
+            if (Array.isArray(data)) {
+              mttos = data.map(m => ({ ...m, __tipo: 'mtto_computo' }));
+            }
+          }
+
+          if (isMounted) {
+            const combinados = [...tickets, ...mttos];
+            setReportes(combinados);
+          }
         } else {
           if (isMounted) setReportes([]);
           return;
-        }
-          
-        const res = await fetch(url, { signal: controller.signal }).catch(() => null);
-        if (res && res.ok) {
-          const data = await res.json().catch(() => []);
-          if (isMounted && Array.isArray(data)) {
-            setReportes(data);
-          }
         }
       } catch (e) {
         // Silenciar errores de abort/red en desarrollo
@@ -88,7 +111,7 @@ export default function NotificationBell({ isAdmin, moduleType = 'computo' }: { 
     };
 
     fetchNotifications();
-    const interval = setInterval(fetchNotifications, 60000);
+    const interval = setInterval(fetchNotifications, 15000); // Consulta cada 15s para respuesta rápida
 
     return () => {
       isMounted = false;
@@ -110,6 +133,8 @@ export default function NotificationBell({ isAdmin, moduleType = 'computo' }: { 
   const total = reportes.length;
 
   if (total === 0) return null;
+
+  const isComputoMod = moduleType === 'computo';
 
   return (
     <div className="relative group flex items-center justify-center" ref={dropdownRef}>
@@ -140,12 +165,16 @@ export default function NotificationBell({ isAdmin, moduleType = 'computo' }: { 
           style={{ originY: 0.1 }}
           className="flex items-center justify-center pointer-events-none"
         >
-          <Bell size={18} className={total > 0 ? 'text-[#FF7420]' : ''} />
+          <Bell size={18} className={total > 0 ? (isComputoMod ? 'text-emerald-400' : 'text-[#FF7420]') : ''} />
         </motion.div>
         {total > 0 && (
           <span className="absolute top-1 right-1 flex h-3 w-3 items-center justify-center">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-500 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-3 w-3 bg-orange-500 border border-zinc-900 text-[7px] font-black items-center justify-center text-white">
+            <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
+              isComputoMod ? 'bg-emerald-500' : 'bg-orange-500'
+            }`}></span>
+            <span className={`relative inline-flex rounded-full h-3 w-3 border border-zinc-900 text-[7px] font-black items-center justify-center text-white ${
+              isComputoMod ? 'bg-emerald-500' : 'bg-orange-500'
+            }`}>
               {total > 9 ? '+9' : total}
             </span>
           </span>
@@ -161,8 +190,14 @@ export default function NotificationBell({ isAdmin, moduleType = 'computo' }: { 
       >
         <div className="bg-[#0a0a0a]/95 border border-white/10 rounded-2xl shadow-2xl backdrop-blur-xl overflow-hidden flex flex-col text-left">
           <div className="px-4 py-3 border-b border-white/10 flex justify-between items-center bg-white/5">
-            <h3 className="text-[10px] font-black text-white/40 uppercase tracking-widest">Notificaciones</h3>
-            <span className="text-[10px] bg-white/10 px-2 py-0.5 rounded-full text-white/70 font-bold">{total} pendientes</span>
+            <h3 className="text-[10px] font-black text-white/40 uppercase tracking-widest">
+              {isComputoMod ? 'Notificaciones TI' : 'Notificaciones'}
+            </h3>
+            <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
+              isComputoMod ? 'bg-emerald-500/20 text-emerald-300' : 'bg-white/10 text-white/70'
+            }`}>
+              {total} pendientes
+            </span>
           </div>
 
           <div className="max-h-80 overflow-y-auto custom-scrollbar p-2 space-y-1">
@@ -173,31 +208,36 @@ export default function NotificationBell({ isAdmin, moduleType = 'computo' }: { 
             ) : (
               reportes.map((rep) => {
                 const isVehiculo = moduleType === 'vehiculos';
+                const isTicketComputo = rep.__tipo === 'ticket_computo' || (Boolean(rep.Pk_folio_ticket) && !isVehiculo);
                 const isDocumento = rep.tipoAlerta === 'documento';
                 
                 const id = isVehiculo 
                   ? (isDocumento ? `doc-${rep.id}` : rep.Pk_folio_ticket) 
-                  : rep.Id_Reporte;
+                  : (isTicketComputo ? rep.Pk_folio_ticket : rep.Id_Reporte);
                 
                 const urlTarget = isVehiculo 
                   ? (isDocumento 
                       ? `/dashboard/documentos?consecutivo=${rep.Consecutivo}&t=${Date.now()}`
                       : `/dashboard/servicios?ticketId=${id}&t=${Date.now()}`)
-                  : `/computo/soporte-mantenimientos?reporteId=${id}&t=${Date.now()}`;
+                  : (isTicketComputo 
+                      ? `/computo/soporte-mantenimientos?tab=seguimiento&ticketId=${rep.Pk_folio_ticket}&t=${Date.now()}`
+                      : `/computo/soporte-mantenimientos?reporteId=${rep.Id_Reporte}&t=${Date.now()}`);
                   
                 const titulo = isVehiculo 
                   ? (isDocumento ? `Vencimiento: ${rep.Titulo}` : `Servicio ${rep.auto?.Marca || 'Auto'}`) 
-                  : `Mantenimiento ${rep.C_Interno}`;
+                  : (isTicketComputo ? `Ticket TI: ${rep.Pk_folio_ticket}` : `Mantenimiento ${rep.C_Interno}`);
                 
                 const fecha = isVehiculo 
                   ? (isDocumento ? rep.Fecha_Expiracion : rep.Fecha_Realizacion) 
-                  : rep.Fecha_Programada;
+                  : (rep.Fecha_Realizacion || rep.Fecha_Programada);
                 
                 const subTitulo = isVehiculo && isDocumento
                   ? `Vehículo ${rep.Consecutivo}`
-                  : (isAdmin 
-                      ? `Asignado a: ${rep.equipo?.Usuario || rep.empleado?.Nombre_Empleado || 'Desconocido'}` 
-                      : 'Requiere tu confirmación de cita');
+                  : (isTicketComputo
+                      ? `${rep.Solicitante_Nombre || rep.equipo?.Usuario || 'Usuario'} • ${rep.C_Interno}${rep.Tipo_Servicio ? ` (${rep.Tipo_Servicio})` : ''}`
+                      : (isAdmin 
+                          ? `Asignado a: ${rep.equipo?.Usuario || rep.empleado?.Nombre_Empleado || 'Desconocido'}` 
+                          : 'Requiere tu confirmación de cita'));
 
                 return (
                   <div
@@ -211,12 +251,21 @@ export default function NotificationBell({ isAdmin, moduleType = 'computo' }: { 
                     <div className={`w-10 h-10 rounded-lg border flex items-center justify-center shrink-0 transition-colors ${
                       isDocumento 
                         ? 'bg-red-500/10 border-red-500/20 group-hover/item:bg-red-500/20 text-red-400' 
-                        : 'bg-orange-500/10 border-orange-500/20 group-hover/item:bg-orange-500/20 text-orange-400'
+                        : (isTicketComputo 
+                            ? 'bg-emerald-500/10 border-emerald-500/20 group-hover/item:bg-emerald-500/20 text-emerald-400' 
+                            : 'bg-orange-500/10 border-orange-500/20 group-hover/item:bg-orange-500/20 text-orange-400')
                     }`}>
-                      {isDocumento ? <AlertCircle size={18} /> : <CalendarClock size={18} />}
+                      {isDocumento ? <AlertCircle size={18} /> : (isTicketComputo ? <Ticket size={18} /> : <CalendarClock size={18} />)}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className={`text-sm font-semibold truncate ${isDocumento ? 'text-red-400/90' : 'text-white/90'}`}>{titulo}</p>
+                      <div className="flex items-center justify-between gap-1">
+                        <p className={`text-sm font-semibold truncate ${isDocumento ? 'text-red-400/90' : 'text-white/90'}`}>{titulo}</p>
+                        {rep.Prioridad === 'Urgente' && (
+                          <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-red-500/20 text-red-400 border border-red-500/30 shrink-0">
+                            URGENTE
+                          </span>
+                        )}
+                      </div>
                       <p className="text-xs text-white/50 truncate mt-0.5">{subTitulo}</p>
                       <p className="text-[10px] text-white/30 mt-1 uppercase font-bold tracking-wider">
                         {fecha ? new Date(fecha).toLocaleDateString('es-MX', { timeZone: 'UTC' }) : 'Sin Fecha'}
