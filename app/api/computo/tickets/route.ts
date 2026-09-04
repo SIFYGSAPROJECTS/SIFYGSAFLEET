@@ -103,9 +103,16 @@ export async function POST(request: Request) {
         }),
       });
 
-      // 2. Correo para el Admin de TI
+      // 2. Correo para los Técnicos / Administradores de TI actuales (Alan Montiel, Citlali Sanchez)
+      const adminsTI = await prisma.empleados.findMany({
+        where: { Admin_TI: true },
+        select: { Email: true }
+      });
+      const emailsDestino = adminsTI.map(a => a.Email).filter(Boolean);
+      const toEmails = emailsDestino.length > 0 ? emailsDestino : ['alanarmandomontiel@gmail.com', 'citlali.sanchez@sifygsa.com.mx'];
+
       await enviarCorreo({
-        to: 'mike.mendez2908@gmail.com',
+        to: toEmails,
         subject: `NUEVA Solicitud de Cómputo: ${folioGenerado}`,
         modulo: 'computo',
         react: TicketComputoAdminEmail({

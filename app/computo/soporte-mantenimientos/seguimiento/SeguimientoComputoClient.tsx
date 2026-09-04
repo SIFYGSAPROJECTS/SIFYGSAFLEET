@@ -229,13 +229,37 @@ export default function SeguimientoComputoClient({
                           setModalAbierto(true);
                         }}
                         placeholder="Sin Asesor"
-                        options={[
-                          { value: '', label: 'Sin Asesor' },
-                          ...empleados.map(emp => {
-                            const nombreCompleto = `${emp.Nombre_Empleado} ${emp.A_Paterno}`.trim();
-                            return { value: nombreCompleto, label: nombreCompleto };
-                          })
-                        ]}
+                        options={(() => {
+                          const baseOptions = [
+                            { value: '', label: 'Sin Asesor' },
+                            { value: 'Alan Montiel', label: 'Alan Montiel' },
+                            { value: 'Citlali Sanchez', label: 'Citlali Sanchez' }
+                          ];
+                          
+                          const dynamicOptions = (empleados || [])
+                            .filter(emp => {
+                              const email = (emp.Email || '').toLowerCase();
+                              const nombre = (emp.Nombre_Empleado || '').toLowerCase();
+                              return !email.includes('mike.mendez') && !nombre.includes('mike');
+                            })
+                            .map(emp => {
+                              let nombre = `${emp.Nombre_Empleado} ${emp.A_Paterno}`.trim();
+                              if (nombre.toLowerCase().includes('alan') && nombre.toLowerCase().includes('montiel')) {
+                                nombre = 'Alan Montiel';
+                              }
+                              if (nombre.toLowerCase().includes('citlali') && nombre.toLowerCase().includes('sanchez')) {
+                                nombre = 'Citlali Sanchez';
+                              }
+                              return { value: nombre, label: nombre };
+                            });
+
+                          const map = new Map<string, string>();
+                          [...baseOptions, ...dynamicOptions].forEach(opt => {
+                            if (!map.has(opt.value)) map.set(opt.value, opt.label);
+                          });
+
+                          return Array.from(map.entries()).map(([value, label]) => ({ value, label }));
+                        })()}
                         compact
                         accent="emerald"
                       />
