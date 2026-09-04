@@ -122,16 +122,6 @@ export default function MobiliarioInventarioPage() {
       .catch(() => {});
   }, []);
 
-  // Sincronización matemática de altura para el encabezado sticky
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 40);
-    };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   // Extraer listas únicas para los selectores de filtro
   const tiposUnicos = useMemo(() => {
@@ -157,26 +147,6 @@ export default function MobiliarioInventarioPage() {
     equipos.forEach(eq => { if (eq.Empresa) set.add(eq.Empresa.trim()); });
     return Array.from(set).sort();
   }, [equipos]);
-
-  useEffect(() => {
-    const updateHeaderHeight = () => {
-      const header = document.getElementById('sticky-header-mobiliario');
-      if (header) {
-        document.documentElement.style.setProperty('--mobiliario-sticky-height', `${header.offsetHeight + 72}px`);
-      } else {
-        document.documentElement.style.setProperty('--mobiliario-sticky-height', '180px');
-      }
-    };
-
-    updateHeaderHeight();
-    const timer = setTimeout(updateHeaderHeight, 100);
-    window.addEventListener('resize', updateHeaderHeight);
-
-    return () => {
-      clearTimeout(timer);
-      window.removeEventListener('resize', updateHeaderHeight);
-    };
-  }, [tiposUnicos.length, departamentosUnicos.length, ubicacionesUnicas.length, empresasUnicas.length, cargando, scrolled]);
 
   const abrirModalCrear = () => {
     setFormData({
@@ -670,183 +640,164 @@ export default function MobiliarioInventarioPage() {
         </div>
       </div>
 
-      {/* CONTENEDOR MAESTRO UNIFICADO: FILTROS STICKY + DATOS */}
-      <div className="relative z-10 bg-stone-900/90 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl md:overflow-visible overflow-hidden">
-        {/* BARRA STICKY COMPACTA DE BÚSQUEDA Y FILTROS */}
-        <div
-          id="sticky-header-mobiliario"
-          className="sticky top-[72px] z-40 bg-stone-900/98 backdrop-blur-2xl border-b border-white/10 rounded-t-2xl shadow-xl p-3 sm:p-4"
-        >
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={procesarArchivo}
-            accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
-            className="hidden"
-          />
+      {/* BARRA DE BÚSQUEDA Y FILTROS (Card flotante estilo Vigilancia) */}
+      <div className="relative z-30 bg-stone-900/70 backdrop-blur-xl border border-white/10 rounded-2xl p-3.5 sm:p-5 mb-6 shadow-xl space-y-3 sm:space-y-4">
+        <input
+          type="file"
+          ref={fileInputRef}
+          onChange={procesarArchivo}
+          accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+          className="hidden"
+        />
 
-          {/* FILA 1: Búsqueda + Límite + Acciones compactas */}
-          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 justify-between items-stretch sm:items-center mb-2.5">
-            {/* Logo / Badge de contexto */}
-            <div className="flex items-center gap-2 shrink-0">
-              <div className="bg-orange-500/20 border border-orange-500/40 p-1.5 rounded-lg text-orange-400">
-                <Package size={15} />
-              </div>
-              <span className="font-serif font-bold text-xs sm:text-sm text-white hidden sm:inline">Mobiliario</span>
-              <span className="text-[10px] font-mono text-orange-400 bg-orange-500/10 border border-orange-500/20 px-1.5 py-0.5 rounded font-bold">
-                {equiposFiltrados.length}
-              </span>
-            </div>
-
-            {/* Campo de búsqueda */}
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60 w-3.5 h-3.5" />
-              <input
-                type="text"
-                placeholder="Buscar por N_Interno, tipo, descripción, modelo, departamento, ubicación..."
-                value={busquedaTexto}
-                onChange={(e) => setBusquedaTexto(e.target.value)}
-                className="w-full pl-9 pr-8 py-1.5 rounded-xl bg-black/40 border border-white/10 text-white placeholder-stone-400 focus:outline-none focus:border-orange-500/50 text-xs transition-all"
-              />
-              {busquedaTexto && (
-                <button
-                  onClick={() => setBusquedaTexto('')}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-white/60 hover:text-white p-0.5"
-                >
-                  <X size={13} />
-                </button>
-              )}
-            </div>
-
-            {/* Selector de límite de filas y acciones */}
-            <div className="flex items-center justify-between sm:justify-end gap-2 shrink-0">
-              <div className="flex items-center gap-1.5">
-                <span className="text-[11px] font-bold text-white hidden sm:inline">Mostrar:</span>
-                <div className="flex bg-black/40 border border-white/10 rounded-lg p-0.5">
-                  {[50, 100, 200, 'Todos'].map((lim) => (
-                    <button
-                      key={lim}
-                      onClick={() => setLimiteEquipos(lim as any)}
-                      className={`px-2 py-0.5 rounded text-[11px] font-bold transition-colors cursor-pointer ${
-                        limiteEquipos === lim ? 'bg-orange-600 text-white shadow' : 'text-white/70 hover:text-white'
-                      }`}
-                    >
-                      {lim}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Acciones compactas */}
-              <div className="flex items-center gap-1.5">
-                <button
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={importando}
-                  className="p-1.5 bg-white/5 hover:bg-white/10 text-orange-400 border border-white/10 rounded-lg text-xs transition-colors cursor-pointer"
-                  title="Importar CSV/Excel"
-                >
-                  <UploadCloud size={14} className={importando ? "animate-bounce" : ""} />
-                </button>
-                <button
-                  onClick={exportarExcel}
-                  className="p-1.5 bg-white/5 hover:bg-white/10 text-emerald-400 border border-white/10 rounded-lg text-xs transition-colors cursor-pointer"
-                  title="Exportar Excel"
-                >
-                  <Download size={14} />
-                </button>
-                {isAdmin && (
-                  <button
-                    onClick={abrirModalCrear}
-                    className="flex items-center gap-1 bg-orange-600 hover:bg-orange-500 text-white px-2.5 py-1 rounded-lg text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer"
-                  >
-                    <Plus size={13} />
-                    <span className="hidden sm:inline">Nuevo</span>
-                  </button>
-                )}
-              </div>
-            </div>
+        {/* FILA 1: Búsqueda + Límite + Acciones compactas */}
+        <div className="flex flex-col sm:flex-row gap-3 justify-between items-stretch sm:items-center">
+          {/* Campo de búsqueda */}
+          <div className="relative flex-1">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/70 w-4 h-4" />
+            <input
+              type="text"
+              placeholder="Buscar por N_Interno, tipo, descripción, modelo, departamento, ubicación o proveedor..."
+              value={busquedaTexto}
+              onChange={(e) => setBusquedaTexto(e.target.value)}
+              className="w-full pl-10 pr-9 py-2 sm:py-2.5 rounded-xl bg-black/40 border border-white/10 text-white placeholder-stone-400 text-xs sm:text-sm focus:outline-none focus:border-orange-500/50 transition-colors"
+            />
+            {busquedaTexto && (
+              <button
+                onClick={() => setBusquedaTexto('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-white/70 hover:text-white p-1 cursor-pointer"
+              >
+                <X size={14} />
+              </button>
+            )}
           </div>
 
-          {/* FILTROS SECUNDARIOS COMPACTOS CON MODO OSCURO */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 pt-2 border-t border-white/10">
-            <div className="relative focus-within:z-30 hover:z-20">
-              <PremiumSelect
-                compact
-                dark
-                value={filtroEstatus}
-                onChange={(val) => setFiltroEstatus(val)}
-                options={[
-                  { value: 'Todos', label: 'Estatus: Todos' },
-                  { value: 'Activo', label: 'Activo' },
-                  { value: 'En Mantenimiento', label: 'En Mantenimiento' },
-                  { value: 'En Reparación', label: 'En Reparación' },
-                  { value: 'Inactivo', label: 'Inactivo' },
-                  { value: 'Baja', label: 'Baja' },
-                ]}
-                accent="orange"
-              />
-            </div>
-
-            <div className="relative focus-within:z-30 hover:z-20">
-              <PremiumSelect
-                compact
-                dark
-                value={filtroTipo}
-                onChange={(val) => setFiltroTipo(val)}
-                options={[
-                  { value: 'Todos', label: 'Tipo: Todos' },
-                  ...tiposUnicos.map(t => ({ value: t, label: t }))
-                ]}
-                accent="orange"
-                searchable={tiposUnicos.length > 5}
-              />
-            </div>
-
-            <div className="relative focus-within:z-30 hover:z-20">
-              <PremiumSelect
-                compact
-                dark
-                value={filtroDepartamento}
-                onChange={(val) => setFiltroDepartamento(val)}
-                options={[
-                  { value: 'Todos', label: 'Depto: Todos' },
-                  ...departamentosUnicos.map(d => ({ value: d, label: d }))
-                ]}
-                accent="orange"
-                searchable={departamentosUnicos.length > 5}
-              />
-            </div>
-
-            <div className="relative focus-within:z-30 hover:z-20">
-              <PremiumSelect
-                compact
-                dark
-                value={filtroUbicacion}
-                onChange={(val) => setFiltroUbicacion(val)}
-                options={[
-                  { value: 'Todos', label: 'Ubicación: Todas' },
-                  ...ubicacionesUnicas.map(u => ({ value: u, label: u }))
-                ]}
-                accent="orange"
-                searchable={ubicacionesUnicas.length > 5}
-              />
-            </div>
-
-            <div className="relative focus-within:z-30 hover:z-20 col-span-2 sm:col-span-1">
-              <PremiumSelect
-                compact
-                dark
-                value={filtroEmpresa}
-                onChange={(val) => setFiltroEmpresa(val)}
-                options={[
-                  { value: 'Todos', label: 'Empresa: Todas' },
-                  ...empresasUnicas.map(e => ({ value: e, label: e }))
-                ]}
-                accent="orange"
-              />
+          {/* Selector de límite de filas */}
+          <div className="flex items-center justify-between sm:justify-end gap-2 shrink-0">
+            <span className="text-xs font-bold text-white">Mostrar:</span>
+            <div className="flex bg-black/40 border border-white/10 rounded-xl p-1">
+              {[50, 100, 200, 'Todos'].map((lim) => (
+                <button
+                  key={lim}
+                  onClick={() => setLimiteEquipos(lim as any)}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
+                    limiteEquipos === lim ? 'bg-orange-600 text-white shadow' : 'text-white/80 hover:text-white'
+                  }`}
+                >
+                  {lim}
+                </button>
+              ))}
             </div>
           </div>
         </div>
+
+        {/* FILTROS SECUNDARIOS (Selects blancos con label blanco como en Vigilancia) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5 sm:gap-3 pt-2 border-t border-white/5">
+          <div className="relative focus-within:z-30 hover:z-20">
+            <label className="text-[11px] font-bold text-white mb-1 block">Estatus</label>
+            <PremiumSelect
+              value={filtroEstatus}
+              onChange={(val) => setFiltroEstatus(val)}
+              options={[
+                { value: 'Todos', label: 'Todos los estatus' },
+                { value: 'Activo', label: 'Activo' },
+                { value: 'En Mantenimiento', label: 'En Mantenimiento' },
+                { value: 'En Reparación', label: 'En Reparación' },
+                { value: 'Inactivo', label: 'Inactivo' },
+                { value: 'Baja', label: 'Baja' },
+              ]}
+              accent="orange"
+            />
+          </div>
+
+          <div className="relative focus-within:z-30 hover:z-20">
+            <label className="text-[11px] font-bold text-white mb-1 block">Tipo de Mobiliario</label>
+            <PremiumSelect
+              value={filtroTipo}
+              onChange={(val) => setFiltroTipo(val)}
+              options={[
+                { value: 'Todos', label: 'Todos los tipos' },
+                ...tiposUnicos.map(t => ({ value: t, label: t }))
+              ]}
+              accent="orange"
+              searchable={tiposUnicos.length > 5}
+            />
+          </div>
+
+          <div className="relative focus-within:z-30 hover:z-20">
+            <label className="text-[11px] font-bold text-white mb-1 block">Departamento</label>
+            <PremiumSelect
+              value={filtroDepartamento}
+              onChange={(val) => setFiltroDepartamento(val)}
+              options={[
+                { value: 'Todos', label: 'Todos los departamentos' },
+                ...departamentosUnicos.map(d => ({ value: d, label: d }))
+              ]}
+              accent="orange"
+              searchable={departamentosUnicos.length > 5}
+            />
+          </div>
+
+          <div className="relative focus-within:z-30 hover:z-20">
+            <label className="text-[11px] font-bold text-white mb-1 block">Ubicación / Sede</label>
+            <PremiumSelect
+              value={filtroUbicacion}
+              onChange={(val) => setFiltroUbicacion(val)}
+              options={[
+                { value: 'Todos', label: 'Todas las sedes' },
+                ...ubicacionesUnicas.map(u => ({ value: u, label: u }))
+              ]}
+              accent="orange"
+              searchable={ubicacionesUnicas.length > 5}
+            />
+          </div>
+
+          <div className="relative focus-within:z-30 hover:z-20 sm:col-span-2 lg:col-span-1">
+            <label className="text-[11px] font-bold text-white mb-1 block">Empresa</label>
+            <PremiumSelect
+              value={filtroEmpresa}
+              onChange={(val) => setFiltroEmpresa(val)}
+              options={[
+                { value: 'Todos', label: 'Todas las empresas' },
+                ...empresasUnicas.map(e => ({ value: e, label: e }))
+              ]}
+              accent="orange"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* BARRA FLOTANTE DE ACCIONES POR LOTE (Si hay seleccionados) */}
+      {selectedEquipos.length > 0 && (
+        <div className="bg-orange-950/70 border border-orange-500/40 rounded-2xl p-3 sm:p-4 mb-4 shadow-xl flex items-center justify-between gap-3 text-white backdrop-blur-xl animate-in fade-in slide-in-from-top-2">
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-xs sm:text-sm text-orange-200">
+              {selectedEquipos.length} {selectedEquipos.length === 1 ? 'mueble seleccionado' : 'muebles seleccionados'}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => {
+                const itemsParaQR = equipos.filter(e => selectedEquipos.includes(e.N_Interno));
+                setModalQREquipos(itemsParaQR);
+              }}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-600 hover:bg-orange-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-orange-600/30 transition-all cursor-pointer"
+            >
+              <QrCode size={14} />
+              <span>Imprimir QRs</span>
+            </button>
+            <button
+              onClick={() => setSelectedEquipos([])}
+              className="text-xs text-stone-300 hover:text-white px-2.5 py-1 rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
+            >
+              Desmarcar
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* TARJETA CONTENEDORA DE LA TABLA (Card flotante estilo Vigilancia) */}
+      <div className="bg-stone-900/70 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
 
         {/* VISTA MÓVIL: TARJETAS COMPACTAS (Pantallas < 768px) */}
         <div className="block md:hidden p-3 sm:p-4 space-y-3">
@@ -979,15 +930,12 @@ export default function MobiliarioInventarioPage() {
           )}
         </div>
 
-        {/* VISTA ESCRITORIO / TABLET: TABLA OPTIMIZADA CON OVERFLOW HORIZONTAL SUAVE Y FONDO OSCURO COMPLETO */}
-        <div id="table-scroll-container-mobiliario" className="hidden md:block w-full overflow-x-auto md:overflow-x-visible transition-all duration-300 bg-stone-900/98 border-t border-white/10">
-          <table className="w-full text-left border-collapse min-w-[980px]">
-            <thead className="border-b border-white/10">
-              <tr className="border-b border-white/10 text-white shadow-md">
-                <th
-                  className="sticky z-30 px-3 bg-stone-900 border-b border-white/10 py-3 text-center w-12 shadow-sm"
-                  style={{ top: 'var(--mobiliario-sticky-height, 180px)' }}
-                >
+        {/* VISTA ESCRITORIO / TABLET: TABLA COMPLETA (Pantallas >= 768px) */}
+        <div className="hidden md:block overflow-x-auto custom-scrollbar">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="border-b border-white/10 bg-white/[0.04] text-[11px] font-extrabold uppercase tracking-wider text-white">
+                <th className="py-3.5 px-3 text-center w-12">
                   <button
                     type="button"
                     onClick={toggleSelectAll}
@@ -1001,53 +949,16 @@ export default function MobiliarioInventarioPage() {
                     )}
                   </button>
                 </th>
-                <th
-                  className="sticky z-30 px-4 bg-stone-900 border-b border-white/10 py-3 text-[10px] font-extrabold uppercase tracking-wider text-white shadow-sm"
-                  style={{ top: 'var(--mobiliario-sticky-height, 180px)' }}
-                >
-                  ID / Empresa
-                </th>
-                <th
-                  className="sticky z-30 px-4 bg-stone-900 border-b border-white/10 py-3 text-[10px] font-extrabold uppercase tracking-wider text-white shadow-sm"
-                  style={{ top: 'var(--mobiliario-sticky-height, 180px)' }}
-                >
-                  Tipo & Modelo
-                </th>
-                <th
-                  className="sticky z-30 px-4 bg-stone-900 border-b border-white/10 py-3 text-[10px] font-extrabold uppercase tracking-wider text-white shadow-sm"
-                  style={{ top: 'var(--mobiliario-sticky-height, 180px)' }}
-                >
-                  Descripción
-                </th>
-                <th
-                  className="sticky z-30 px-4 bg-stone-900 border-b border-white/10 py-3 text-[10px] font-extrabold uppercase tracking-wider text-white shadow-sm"
-                  style={{ top: 'var(--mobiliario-sticky-height, 180px)' }}
-                >
-                  Ubicación & Depto
-                </th>
-                <th
-                  className="sticky z-30 px-4 bg-stone-900 border-b border-white/10 py-3 text-[10px] font-extrabold uppercase tracking-wider text-white shadow-sm"
-                  style={{ top: 'var(--mobiliario-sticky-height, 180px)' }}
-                >
-                  Proveedor
-                </th>
-                <th
-                  className="sticky z-30 px-4 text-center bg-stone-900 border-b border-white/10 py-3 text-[10px] font-extrabold uppercase tracking-wider text-white shadow-sm"
-                  style={{ top: 'var(--mobiliario-sticky-height, 180px)' }}
-                >
-                  Estatus & Censo
-                </th>
-                {isAdmin && (
-                  <th
-                    className="sticky z-30 px-4 text-center bg-stone-900 border-b border-white/10 py-3 text-[10px] font-extrabold uppercase tracking-wider text-white shadow-sm"
-                    style={{ top: 'var(--mobiliario-sticky-height, 180px)' }}
-                  >
-                    Acciones
-                  </th>
-                )}
+                <th className="py-3.5 px-4">ID / Empresa</th>
+                <th className="py-3.5 px-4">Tipo & Modelo</th>
+                <th className="py-3.5 px-4">Descripción</th>
+                <th className="py-3.5 px-4">Ubicación & Depto</th>
+                <th className="py-3.5 px-4">Proveedor</th>
+                <th className="py-3.5 px-4 text-center">Estatus & Censo</th>
+                {isAdmin && <th className="py-3.5 px-4 text-center">Acciones</th>}
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5 text-xs text-white font-medium bg-stone-900/95">
+            <tbody className="divide-y divide-white/5 text-xs text-white font-medium">
               {cargando ? (
                 <tr>
                   <td colSpan={isAdmin ? 8 : 7} className="py-12 text-center text-white">

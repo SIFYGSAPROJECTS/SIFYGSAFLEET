@@ -355,8 +355,6 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
             ? backdropBg
             : type === 'auditoria'
             ? 'bg-[#0a0a0a]'
-            : type === 'mobiliario'
-            ? 'bg-stone-950'
             : 'bg-[var(--bg-screen)]'
         } z-[90] transition-opacity duration-300 pointer-events-none ${scrolled ? 'opacity-100' : 'opacity-0'}`}
       />

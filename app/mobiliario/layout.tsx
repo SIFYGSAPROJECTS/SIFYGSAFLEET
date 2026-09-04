@@ -35,14 +35,14 @@ export default async function MobiliarioLayout({
   return (
     <>
       <div className="fixed inset-0 pointer-events-none z-[9999] animate-entrance-overlay" />
-      <div className="min-h-screen bg-stone-950 text-slate-100">
+      <div className="min-h-screen bg-transparent">
         <IdleTimer />
         <RoleGuard />
         
         {/* HEADER GLOBAL DEL MÓDULO */}
-        <Navbar type="mobiliario" userName={userName} userRole={userRole} isAdmin={isAdmin} maxWidth="max-w-[95%]" backdropBg="bg-stone-950" />
+        <Navbar type="mobiliario" userName={userName} userRole={userRole} isAdmin={isAdmin} maxWidth="max-w-[95%]" />
 
-        <main className="flex-1 w-full bg-stone-950 pt-24">
+        <main className="flex-1 w-full bg-orange-50/5 pt-24">
           {children}
         </main>
       </div>
