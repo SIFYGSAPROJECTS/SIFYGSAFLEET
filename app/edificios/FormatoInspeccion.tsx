@@ -1,7 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, @next/next/no-img-element, @typescript-eslint/no-unused-vars */
 "use client";
 import React, { useState, useMemo } from 'react';
-import { X, Save, Building2, Camera, UploadCloud, Trash2, CheckCircle2, Plus, Minus, AlertTriangle, AlertCircle, FileText, ChevronDown, ChevronUp } from 'lucide-react';
+import { 
+  X, Save, Building2, Camera, UploadCloud, Trash2, CheckCircle2, 
+  Plus, Minus, AlertTriangle, AlertCircle, FileText, ChevronDown, 
+  ChevronUp, Clock, Wrench, Sparkles, ClipboardList
+} from 'lucide-react';
 
 const CATEGORIAS_INSPECCION = [
   { nombre: "HIDRÁULICO", items: ["Fuga de agua general", "Revisión de tanques inodoros", "Goteras en grifos"] },
@@ -11,12 +15,13 @@ const CATEGORIAS_INSPECCION = [
   { nombre: "REPARACIÓN / REMOZAMIENTO", items: ["Reparación aplanados", "Reparación recubrimientos", "Pintura exterior", "Pintura interior", "Pintura herrerías", "Laqueado / Barnizado maderas", "Aceitado bisagras/carriles"] },
   { nombre: "SEGURIDAD", items: ["Cerraduras/candados", "Antiderrapantes", "Reparación de pisos", "Condición de cristales"] },
   { nombre: "JARDINES", items: ["Césped corte/plantación", "Poda de árboles", "Plantas poda/transplante", "Agregar tierra maceteros", "Abono de plantas", "Eliminación de plagas"] },
-  { nombre: "CONFORT / OTROS", items: ["Iluminación", "Cableados línea telefónica", "Cableados internet", "Cableados audio / video", "Otros Espacios"] }
+  { nombre: "CONFORT / VENTILACIÓN E ILUMINACIÓN", items: ["Estado de la iluminación", "Estado de la ventilación", "Cableados de red e internet", "Cableados audio / video", "Otros Espacios / Confort"] }
 ];
 
 interface RespuestaDetalle {
   estado: 'Bien' | 'Corrección' | 'Urgente' | '';
   observacion: string;
+  planAccion?: string;
 }
 
 interface AreaInspeccion {
@@ -26,6 +31,7 @@ interface AreaInspeccion {
   luminarias: number;
   estado: 'Bien' | 'Corrección' | 'Urgente' | '';
   observacion: string;
+  planAccion?: string;
   categoriasActivas?: string[];
   respuestas?: Record<string, RespuestaDetalle>; 
   fotos?: { url: string, descripcion: string }[];
@@ -42,21 +48,63 @@ export default function FormatoInspeccion({ datosBase, onClose, onSuccess }: any
           if (a.respuestas) {
             Object.entries(a.respuestas).forEach(([k, v]) => {
               if (typeof v === 'string') {
-                newRespuestas[k] = { estado: v as any, observacion: '' };
+                newRespuestas[k] = { estado: v as any, observacion: '', planAccion: '' };
               } else {
-                newRespuestas[k] = v as RespuestaDetalle;
+                const itemObj = v as any;
+                newRespuestas[k] = {
+                  estado: itemObj.estado || '',
+                  observacion: itemObj.observacion || '',
+                  planAccion: itemObj.planAccion || ''
+                };
               }
             });
           }
-          return { ...a, respuestas: newRespuestas, categoriasActivas: a.categoriasActivas || [], fotos: a.fotos || [] };
+          return { 
+            ...a, 
+            planAccion: a.planAccion || '',
+            respuestas: newRespuestas, 
+            categoriasActivas: a.categoriasActivas || [], 
+            fotos: a.fotos || [] 
+          };
         });
       }
     } catch (e) {}
   }
 
-  const [areas, setAreas] = useState<AreaInspeccion[]>(parsed.areas.length > 0 ? parsed.areas : [
-    { id: Date.now().toString(), nombre: 'Recepción', puertas: 1, luminarias: 2, estado: '', observacion: '', categoriasActivas: [], respuestas: {}, fotos: [] }
-  ]);
+  // Pre-cargar departamentos de la sucursal si es una inspección nueva
+  const getInitialAreas = (): AreaInspeccion[] => {
+    if (parsed.areas.length > 0) return parsed.areas;
+    
+    if (datosBase.Departamentos) {
+      let deptos: string[] = [];
+      try {
+        const d = JSON.parse(datosBase.Departamentos);
+        if (Array.isArray(d)) deptos = d.map(String).map(s => s.trim()).filter(Boolean);
+      } catch {
+        deptos = String(datosBase.Departamentos).split(',').map(s => s.trim()).filter(Boolean);
+      }
+      if (deptos.length > 0) {
+        return deptos.map((nombre, idx) => ({
+          id: `${Date.now()}-${idx}`,
+          nombre,
+          puertas: 0,
+          luminarias: 0,
+          estado: '',
+          observacion: '',
+          planAccion: '',
+          categoriasActivas: [],
+          respuestas: {},
+          fotos: []
+        }));
+      }
+    }
+
+    return [
+      { id: Date.now().toString(), nombre: 'Recepción', puertas: 1, luminarias: 2, estado: '', observacion: '', planAccion: '', categoriasActivas: [], respuestas: {}, fotos: [] }
+    ];
+  };
+
+  const [areas, setAreas] = useState<AreaInspeccion[]>(getInitialAreas);
   const [observacionesGenerales, setObservacionesGenerales] = useState(datosBase.Observaciones || '');
   const [fotosGenerales, setFotosGenerales] = useState<any[]>(datosBase.fotos || []);
   const [isSaving, setIsSaving] = useState(false);
@@ -72,6 +120,7 @@ export default function FormatoInspeccion({ datosBase, onClose, onSuccess }: any
       luminarias: 0,
       estado: '',
       observacion: '',
+      planAccion: '',
       categoriasActivas: [],
       respuestas: {},
       fotos: []
@@ -112,7 +161,6 @@ export default function FormatoInspeccion({ datosBase, onClose, onSuccess }: any
     setAreas(areas.map(a => {
       if (a.id === areaId) {
         const current = a.categoriasActivas || [];
-        // Optionally: we could clear responses for this category, but keeping them is safer if they accidentally remove it.
         return { ...a, categoriasActivas: current.filter(c => c !== categoria) };
       }
       return a;
@@ -123,7 +171,7 @@ export default function FormatoInspeccion({ datosBase, onClose, onSuccess }: any
     setAreas(areas.map(a => {
       if (a.id === areaId) {
         const current = a.respuestas || {};
-        const currentItem = current[item] || { estado: '', observacion: '' };
+        const currentItem = current[item] || { estado: '', observacion: '', planAccion: '' };
         return {
           ...a,
           respuestas: { ...current, [item]: { ...currentItem, estado } }
@@ -137,10 +185,24 @@ export default function FormatoInspeccion({ datosBase, onClose, onSuccess }: any
     setAreas(areas.map(a => {
       if (a.id === areaId) {
         const current = a.respuestas || {};
-        const currentItem = current[item] || { estado: '', observacion: '' };
+        const currentItem = current[item] || { estado: '', observacion: '', planAccion: '' };
         return {
           ...a,
           respuestas: { ...current, [item]: { ...currentItem, observacion } }
+        };
+      }
+      return a;
+    }));
+  };
+
+  const setRespuestaPlanAccion = (areaId: string, item: string, planAccion: string) => {
+    setAreas(areas.map(a => {
+      if (a.id === areaId) {
+        const current = a.respuestas || {};
+        const currentItem = current[item] || { estado: '', observacion: '', planAccion: '' };
+        return {
+          ...a,
+          respuestas: { ...current, [item]: { ...currentItem, planAccion } }
         };
       }
       return a;
@@ -220,9 +282,9 @@ export default function FormatoInspeccion({ datosBase, onClose, onSuccess }: any
   const resumen = useMemo(() => {
     const total = areas.length;
     const bien = areas.filter(a => a.estado === 'Bien').length;
-    const correccion = areas.filter(a => a.estado === 'Corrección').length;
-    const urgente = areas.filter(a => a.estado === 'Urgente').length;
-    const sinEstado = areas.filter(a => !a.estado).length;
+    const correccion = areas.filter(a => a.estado === 'Corrección' || Object.values(a.respuestas || {}).some(r => r.estado === 'Corrección')).length;
+    const urgente = areas.filter(a => a.estado === 'Urgente' || Object.values(a.respuestas || {}).some(r => r.estado === 'Urgente')).length;
+    const sinEstado = areas.filter(a => !a.estado && Object.values(a.respuestas || {}).every(r => !r.estado)).length;
     
     const totales = areas.reduce((acc, a) => {
       acc.puertas += a.puertas;
@@ -333,10 +395,33 @@ export default function FormatoInspeccion({ datosBase, onClose, onSuccess }: any
                         type="text" 
                         value={area.observacion}
                         onChange={(e) => updateArea(area.id, 'observacion', e.target.value)}
-                        placeholder="Observaciones de este departamento (opcional)..."
+                        placeholder="Diagnóstico u observaciones generales de este departamento..."
                         className="w-full bg-[var(--bg-screen)] border-b border-[var(--border-cream)] px-2 py-2 text-xs text-[var(--text-main)] outline-none focus:border-amber-500 transition-colors"
                       />
                     </div>
+
+                    {/* CAJA CONDICIONADA: PLAN DE ACCIÓN Y RECURSOS DEL DEPARTAMENTO */}
+                    {(area.estado === 'Corrección' || area.estado === 'Urgente') && (
+                      <div className={`mx-2 p-3 rounded-xl border flex flex-col gap-1.5 animate-in fade-in zoom-in-95 duration-200 ${
+                        area.estado === 'Urgente' 
+                          ? 'bg-red-500/10 border-red-500/30' 
+                          : 'bg-orange-500/10 border-orange-500/30'
+                      }`}>
+                        <div className="flex items-center gap-1.5 text-xs font-bold">
+                          <Clock size={14} className={area.estado === 'Urgente' ? 'text-red-500' : 'text-orange-500'} />
+                          <span className={area.estado === 'Urgente' ? 'text-red-500' : 'text-orange-500'}>
+                            Plan de acción, tiempos y recursos requeridos para {area.nombre || 'este departamento'}:
+                          </span>
+                        </div>
+                        <textarea
+                          rows={2}
+                          value={area.planAccion || ''}
+                          onChange={(e) => updateArea(area.id, 'planAccion', e.target.value)}
+                          placeholder="Indica qué acciones correctivas realizar, tiempos estimados (ej. 24h, 3 días) y recursos/materiales necesarios..."
+                          className="w-full bg-[var(--bg-screen)] border border-[var(--border-cream)] rounded-lg p-2.5 text-xs text-[var(--text-main)] outline-none focus:border-amber-500 resize-none transition-colors"
+                        />
+                      </div>
+                    )}
                   </div>
 
                   {/* Secciones Específicas / Opcionales */}
@@ -362,7 +447,7 @@ export default function FormatoInspeccion({ datosBase, onClose, onSuccess }: any
                           
                           <div className="p-3 space-y-3">
                             {catInfo.items.map(item => {
-                              const respData = (area.respuestas || {})[item] || { estado: '', observacion: '' };
+                              const respData = (area.respuestas || {})[item] || { estado: '', observacion: '', planAccion: '' };
                               const estadoAct = respData.estado;
                               
                               return (
@@ -394,13 +479,36 @@ export default function FormatoInspeccion({ datosBase, onClose, onSuccess }: any
                                   <div className="mt-1">
                                     <input 
                                       type="text" 
-                                      maxLength={120}
+                                      maxLength={140}
                                       value={respData.observacion || ''}
                                       onChange={(e) => setRespuestaObservacion(area.id, item, e.target.value)}
-                                      placeholder={`Anotar observación (Máx 120 caracteres)...`}
-                                      className="w-full bg-[var(--bg-floating)] border border-[var(--border-cream)] px-2 py-1.5 rounded-lg text-xs text-[var(--text-main)] outline-none focus:border-amber-500 transition-colors"
+                                      placeholder={`Diagnóstico u observación (ej. foco parpadea, extractor atascado)...`}
+                                      className="w-full bg-[var(--bg-floating)] border border-[var(--border-cream)] px-2.5 py-1.5 rounded-lg text-xs text-[var(--text-main)] outline-none focus:border-amber-500 transition-colors"
                                     />
                                   </div>
+
+                                  {/* CAJA CONDICIONADA: PASOS A SEGUIR, TIEMPOS Y RECURSOS ANTE ATENCIÓN O URGENCIA */}
+                                  {(estadoAct === 'Corrección' || estadoAct === 'Urgente') && (
+                                    <div className={`mt-2 p-2.5 rounded-xl border flex flex-col gap-1.5 animate-in fade-in zoom-in-95 duration-200 ${
+                                      estadoAct === 'Urgente'
+                                        ? 'bg-red-500/10 border-red-500/30'
+                                        : 'bg-orange-500/10 border-orange-500/30'
+                                    }`}>
+                                      <div className="flex items-center gap-1.5 text-[11px] font-bold">
+                                        <Clock size={13} className={estadoAct === 'Urgente' ? 'text-red-500' : 'text-orange-500'} />
+                                        <span className={estadoAct === 'Urgente' ? 'text-red-500' : 'text-orange-500'}>
+                                          Pasos a seguir, tiempos y recursos requeridos:
+                                        </span>
+                                      </div>
+                                      <textarea
+                                        rows={2}
+                                        value={respData.planAccion || ''}
+                                        onChange={(e) => setRespuestaPlanAccion(area.id, item, e.target.value)}
+                                        placeholder="¿Qué se debe hacer? Pasos a seguir, tiempo estimado (ej. 24 hrs, 3 días) y recursos requeridos (herramientas, refacción, personal)..."
+                                        className="w-full bg-[var(--bg-screen)] border border-[var(--border-cream)] rounded-lg p-2 text-xs text-[var(--text-main)] outline-none focus:border-amber-500 transition-colors resize-none placeholder:text-stone-400"
+                                      />
+                                    </div>
+                                  )}
                                 </div>
                               );
                             })}
@@ -602,21 +710,44 @@ export default function FormatoInspeccion({ datosBase, onClose, onSuccess }: any
               {resumen.urgente > 0 && (
                 <div>
                   <h3 className="text-xs font-bold text-red-500 uppercase mb-3 flex items-center gap-2">
-                    <AlertCircle size={16} /> Puntos Críticos de Acción
+                    <AlertCircle size={16} /> Puntos Críticos de Acción (Urgentes)
                   </h3>
-                  <div className="flex flex-col gap-2">
-                    {areas.filter(a => a.estado === 'Urgente').map(a => {
-                      const detallesProblema = Object.entries(a.respuestas || {}).filter(([k,v]) => v.estado === 'Urgente' || v.estado === 'Corrección');
+                  <div className="flex flex-col gap-3">
+                    {areas.filter(a => a.estado === 'Urgente' || Object.values(a.respuestas || {}).some(r => r.estado === 'Urgente')).map(a => {
+                      const detallesUrgentes = Object.entries(a.respuestas || {}).filter(([_, r]) => r.estado === 'Urgente');
                       return (
-                      <div key={a.id} className="bg-red-500/10 border border-red-500/30 rounded-xl p-3 flex flex-col gap-1">
-                        <span className="text-sm font-bold text-red-400">{a.nombre || 'Depto sin nombre'}</span>
-                        {a.observacion && <span className="text-xs text-red-300/80">{a.observacion}</span>}
-                        {detallesProblema.length > 0 && (
-                          <div className="flex flex-col gap-1 mt-2">
-                            {detallesProblema.map(([item, resp]) => (
-                              <div key={item} className={`px-2 py-1 rounded flex flex-col gap-0.5 ${resp.estado === 'Urgente' ? 'bg-red-500/20 text-red-400 border border-red-500/20' : 'bg-orange-500/20 text-orange-400 border border-orange-500/20'}`}>
-                                <span className="text-[11px] font-bold">{item}</span>
-                                {resp.observacion && <span className="text-[10px] italic opacity-80">{resp.observacion}</span>}
+                      <div key={a.id} className="bg-red-500/10 border border-red-500/30 rounded-xl p-3.5 flex flex-col gap-2 shadow-sm">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm font-bold text-red-400">{a.nombre || 'Depto sin nombre'}</span>
+                          {a.estado === 'Urgente' && (
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-500/20 text-red-300 border border-red-500/30 uppercase tracking-wider">
+                              Depto Crítico
+                            </span>
+                          )}
+                        </div>
+                        {a.observacion && <p className="text-xs text-red-300/90 italic">"{a.observacion}"</p>}
+                        {a.planAccion && (
+                          <div className="p-2.5 rounded-lg bg-red-950/40 border border-red-500/30 text-xs text-amber-200 flex items-start gap-2">
+                            <Clock size={14} className="shrink-0 mt-0.5 text-amber-400" />
+                            <span><strong>Plan de Acción Depto:</strong> {a.planAccion}</span>
+                          </div>
+                        )}
+                        {detallesUrgentes.length > 0 && (
+                          <div className="flex flex-col gap-2 mt-1">
+                            {detallesUrgentes.map(([item, resp]) => (
+                              <div key={item} className="bg-red-500/20 border border-red-500/30 rounded-lg p-2.5 flex flex-col gap-1.5 text-xs">
+                                <span className="font-bold text-red-200 text-xs">{item}</span>
+                                {resp.observacion && (
+                                  <span className="text-[11px] text-stone-300">
+                                    <strong>Diagnóstico:</strong> {resp.observacion}
+                                  </span>
+                                )}
+                                {resp.planAccion && (
+                                  <div className="mt-1 pt-1.5 border-t border-red-500/30 text-[11px] text-amber-200 flex items-start gap-1.5">
+                                    <Clock size={13} className="shrink-0 mt-0.5 text-amber-300" />
+                                    <span><strong>Pasos y Recursos:</strong> {resp.planAccion}</span>
+                                  </div>
+                                )}
                               </div>
                             ))}
                           </div>
@@ -630,21 +761,44 @@ export default function FormatoInspeccion({ datosBase, onClose, onSuccess }: any
               {resumen.correccion > 0 && (
                 <div>
                   <h3 className="text-xs font-bold text-orange-500 uppercase mb-3 flex items-center gap-2">
-                    <AlertTriangle size={16} /> Requieren Mantenimiento
+                    <AlertTriangle size={16} /> Requieren Mantenimiento (Atención)
                   </h3>
-                  <div className="flex flex-col gap-2">
-                    {areas.filter(a => a.estado === 'Corrección').map(a => {
-                      const detallesProblema = Object.entries(a.respuestas || {}).filter(([k,v]) => v.estado === 'Urgente' || v.estado === 'Corrección');
+                  <div className="flex flex-col gap-3">
+                    {areas.filter(a => a.estado === 'Corrección' || Object.values(a.respuestas || {}).some(r => r.estado === 'Corrección')).map(a => {
+                      const detallesCorreccion = Object.entries(a.respuestas || {}).filter(([_, r]) => r.estado === 'Corrección');
                       return (
-                      <div key={a.id} className="bg-orange-500/10 border border-orange-500/30 rounded-xl p-3 flex flex-col gap-1">
-                        <span className="text-sm font-bold text-orange-400">{a.nombre || 'Depto sin nombre'}</span>
-                        {a.observacion && <span className="text-xs text-orange-300/80">{a.observacion}</span>}
-                        {detallesProblema.length > 0 && (
-                          <div className="flex flex-col gap-1 mt-2">
-                            {detallesProblema.map(([item, resp]) => (
-                              <div key={item} className={`px-2 py-1 rounded flex flex-col gap-0.5 ${resp.estado === 'Urgente' ? 'bg-red-500/20 text-red-400 border border-red-500/20' : 'bg-orange-500/20 text-orange-400 border border-orange-500/20'}`}>
-                                <span className="text-[11px] font-bold">{item}</span>
-                                {resp.observacion && <span className="text-[10px] italic opacity-80">{resp.observacion}</span>}
+                      <div key={a.id} className="bg-orange-500/10 border border-orange-500/30 rounded-xl p-3.5 flex flex-col gap-2 shadow-sm">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm font-bold text-orange-400">{a.nombre || 'Depto sin nombre'}</span>
+                          {a.estado === 'Corrección' && (
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-300 border border-orange-500/30 uppercase tracking-wider">
+                              Requiere Atención
+                            </span>
+                          )}
+                        </div>
+                        {a.observacion && <p className="text-xs text-orange-300/90 italic">"{a.observacion}"</p>}
+                        {a.planAccion && (
+                          <div className="p-2.5 rounded-lg bg-orange-950/40 border border-orange-500/30 text-xs text-amber-200 flex items-start gap-2">
+                            <Clock size={14} className="shrink-0 mt-0.5 text-amber-400" />
+                            <span><strong>Plan de Acción Depto:</strong> {a.planAccion}</span>
+                          </div>
+                        )}
+                        {detallesCorreccion.length > 0 && (
+                          <div className="flex flex-col gap-2 mt-1">
+                            {detallesCorreccion.map(([item, resp]) => (
+                              <div key={item} className="bg-orange-500/20 border border-orange-500/30 rounded-lg p-2.5 flex flex-col gap-1.5 text-xs">
+                                <span className="font-bold text-orange-200 text-xs">{item}</span>
+                                {resp.observacion && (
+                                  <span className="text-[11px] text-stone-300">
+                                    <strong>Diagnóstico:</strong> {resp.observacion}
+                                  </span>
+                                )}
+                                {resp.planAccion && (
+                                  <div className="mt-1 pt-1.5 border-t border-orange-500/30 text-[11px] text-amber-200 flex items-start gap-1.5">
+                                    <Clock size={13} className="shrink-0 mt-0.5 text-amber-300" />
+                                    <span><strong>Pasos y Recursos:</strong> {resp.planAccion}</span>
+                                  </div>
+                                )}
                               </div>
                             ))}
                           </div>

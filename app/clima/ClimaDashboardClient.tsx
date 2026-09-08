@@ -64,41 +64,41 @@ export default function ClimaDashboardClient({
     <div className="space-y-8 animate-in fade-in duration-500 pb-12">
       
       {/* 1. HERO HEADER DE BIENVENIDA (DESVANECIDO GRIS CON TIPOGRAFÍA DE ALTO CONTRASTE) */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-zinc-900 to-neutral-950 border border-cyan-500/30 p-6 sm:p-9 shadow-2xl backdrop-blur-xl">
+      <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-br from-slate-900 via-zinc-900 to-neutral-950 border border-cyan-500/30 p-5 sm:p-8 lg:p-9 shadow-2xl backdrop-blur-xl">
         {/* Destellos ambientales sutiles */}
         <div className="absolute top-0 right-0 -mr-16 -mt-16 w-72 h-72 rounded-full bg-cyan-500/15 blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-1/4 -mb-12 w-56 h-56 rounded-full bg-teal-500/10 blur-2xl pointer-events-none" />
 
         <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
           <div className="space-y-3 max-w-2xl text-left">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-500/20 border border-cyan-400/40 text-cyan-200 text-xs font-extrabold tracking-wider uppercase shadow-inner">
-              <ThermometerSnowflake size={14} className="text-cyan-300 animate-pulse" />
-              <span>Módulo de Climatización & Confort</span>
+            <div className="inline-flex items-center gap-2 px-3 sm:px-3.5 py-1 sm:py-1.5 rounded-full bg-cyan-500/20 border border-cyan-400/40 text-cyan-200 text-[11px] sm:text-xs font-extrabold tracking-wider uppercase shadow-inner">
+              <ThermometerSnowflake size={14} className="text-cyan-300 animate-pulse shrink-0" />
+              <span className="truncate">Módulo de Climatización & Confort</span>
             </div>
             
             {/* Título blanco nítido y legible */}
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-bold text-white tracking-tight drop-shadow-md">
+            <h1 className="text-2xl sm:text-4xl lg:text-5xl font-serif font-bold text-white tracking-tight drop-shadow-md">
               Aires Acondicionados
             </h1>
             
             {/* Descripción en gris claro / plata de alta legibilidad */}
-            <p className="text-sm sm:text-base text-slate-200 leading-relaxed font-normal">
+            <p className="text-xs sm:text-base text-slate-200 leading-relaxed font-normal">
               Hola, <span className="font-bold text-cyan-300 underline decoration-cyan-400/60 underline-offset-4">{userName}</span>. Bienvenido al panel de control: supervisa el inventario de unidades, solicita reparaciones y coordina mantenimientos preventivos.
             </p>
           </div>
 
-          {/* Botones con alto contraste */}
-          <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto shrink-0">
+          {/* Botones con alto contraste adaptados para móvil */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 w-full sm:w-auto shrink-0">
             <Link
               href="/clima/soporte-mantenimientos?tab=nueva"
-              className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl font-extrabold text-sm text-slate-950 bg-gradient-to-r from-cyan-400 to-teal-300 hover:from-cyan-300 hover:to-teal-200 shadow-lg shadow-cyan-500/30 active:scale-95 transition-all cursor-pointer"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-3 sm:py-3.5 rounded-xl font-extrabold text-xs sm:text-sm text-slate-950 bg-gradient-to-r from-cyan-400 to-teal-300 hover:from-cyan-300 hover:to-teal-200 shadow-lg shadow-cyan-500/30 active:scale-95 transition-all cursor-pointer"
             >
               <PlusCircle size={18} className="text-slate-950 stroke-[2.5]" />
               <span>Nuevo Reporte</span>
             </Link>
             <Link
               href="/clima/inventario"
-              className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl font-bold text-sm text-white bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur-md shadow-md active:scale-95 transition-all cursor-pointer"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 sm:px-5 py-3 sm:py-3.5 rounded-xl font-bold text-xs sm:text-sm text-white bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur-md shadow-md active:scale-95 transition-all cursor-pointer"
             >
               <Layers size={18} className="text-cyan-300" />
               <span>Ver Catálogo</span>
@@ -107,62 +107,62 @@ export default function ClimaDashboardClient({
         </div>
       </div>
 
-      {/* 2. KPIs Y MÉTRICAS CLAVE (CONTADORES VIBRANTES Y LEGIBLES) */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* 2. KPIs Y MÉTRICAS CLAVE (CONTADORES VIBRANTES Y LEGIBLES EN 2x2 MÓVIL Y 4 COLUMNAS DESKTOP) */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
         {/* KPI 1: Total Equipos */}
-        <div className="p-5 rounded-2xl bg-[var(--bg-floating)] border border-[var(--border-cream)] hover:border-cyan-500/50 hover:shadow-lg hover:shadow-cyan-500/5 transition-all duration-300 group">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-bold tracking-wider uppercase text-stone-500">Total Unidades</span>
-            <div className="p-2.5 rounded-xl bg-cyan-500/15 text-cyan-600 group-hover:scale-110 transition-transform">
-              <Wind size={18} />
+        <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-[var(--bg-floating)] border border-[var(--border-cream)] hover:border-cyan-500/50 hover:shadow-lg hover:shadow-cyan-500/5 transition-all duration-300 group">
+          <div className="flex items-center justify-between mb-2 sm:mb-3">
+            <span className="text-[10px] sm:text-xs font-bold tracking-wider uppercase text-stone-500 truncate">Total Unidades</span>
+            <div className="p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-cyan-500/15 text-cyan-600 group-hover:scale-110 transition-transform shrink-0">
+              <Wind className="w-4 h-4 sm:w-[18px] sm:h-[18px]" />
             </div>
           </div>
-          <div className="text-2xl sm:text-3xl font-extrabold text-stone-900 font-mono">
+          <div className="text-xl sm:text-3xl font-extrabold text-stone-900 font-mono">
             <AnimatedCounter value={totalEquipos} />
           </div>
-          <p className="text-xs text-stone-600 font-medium mt-1">Equipos en inventario</p>
+          <p className="text-[11px] sm:text-xs text-stone-600 font-medium mt-1 leading-tight">Equipos en inventario</p>
         </div>
 
         {/* KPI 2: Operativos */}
-        <div className="p-5 rounded-2xl bg-[var(--bg-floating)] border border-[var(--border-cream)] hover:border-emerald-500/50 hover:shadow-lg hover:shadow-emerald-500/5 transition-all duration-300 group">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-bold tracking-wider uppercase text-stone-500">Operativos</span>
-            <div className="p-2.5 rounded-xl bg-emerald-500/15 text-emerald-600 group-hover:scale-110 transition-transform">
-              <CheckCircle2 size={18} />
+        <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-[var(--bg-floating)] border border-[var(--border-cream)] hover:border-emerald-500/50 hover:shadow-lg hover:shadow-emerald-500/5 transition-all duration-300 group">
+          <div className="flex items-center justify-between mb-2 sm:mb-3">
+            <span className="text-[10px] sm:text-xs font-bold tracking-wider uppercase text-stone-500 truncate">Operativos</span>
+            <div className="p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-emerald-500/15 text-emerald-600 group-hover:scale-110 transition-transform shrink-0">
+              <CheckCircle2 className="w-4 h-4 sm:w-[18px] sm:h-[18px]" />
             </div>
           </div>
-          <div className="text-2xl sm:text-3xl font-extrabold text-emerald-600 font-mono">
+          <div className="text-xl sm:text-3xl font-extrabold text-emerald-600 font-mono">
             <AnimatedCounter value={equiposActivos} />
           </div>
-          <p className="text-xs text-stone-600 font-medium mt-1">Estatus activo en servicio</p>
+          <p className="text-[11px] sm:text-xs text-stone-600 font-medium mt-1 leading-tight">Activo en servicio</p>
         </div>
 
         {/* KPI 3: Bajas / Inactivos */}
-        <div className="p-5 rounded-2xl bg-[var(--bg-floating)] border border-[var(--border-cream)] hover:border-amber-500/50 hover:shadow-lg hover:shadow-amber-500/5 transition-all duration-300 group">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-bold tracking-wider uppercase text-stone-500">Bajas / Desuso</span>
-            <div className="p-2.5 rounded-xl bg-amber-500/15 text-amber-600 group-hover:scale-110 transition-transform">
-              <AlertCircle size={18} />
+        <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-[var(--bg-floating)] border border-[var(--border-cream)] hover:border-amber-500/50 hover:shadow-lg hover:shadow-amber-500/5 transition-all duration-300 group">
+          <div className="flex items-center justify-between mb-2 sm:mb-3">
+            <span className="text-[10px] sm:text-xs font-bold tracking-wider uppercase text-stone-500 truncate">Bajas / Desuso</span>
+            <div className="p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-amber-500/15 text-amber-600 group-hover:scale-110 transition-transform shrink-0">
+              <AlertCircle className="w-4 h-4 sm:w-[18px] sm:h-[18px]" />
             </div>
           </div>
-          <div className="text-2xl sm:text-3xl font-extrabold text-amber-600 font-mono">
+          <div className="text-xl sm:text-3xl font-extrabold text-amber-600 font-mono">
             <AnimatedCounter value={equiposBaja} />
           </div>
-          <p className="text-xs text-stone-600 font-medium mt-1">Equipos deshabilitados</p>
+          <p className="text-[11px] sm:text-xs text-stone-600 font-medium mt-1 leading-tight">Deshabilitados</p>
         </div>
 
         {/* KPI 4: Tickets Activos */}
-        <div className="p-5 rounded-2xl bg-[var(--bg-floating)] border border-[var(--border-cream)] hover:border-cyan-500/50 hover:shadow-lg hover:shadow-cyan-500/5 transition-all duration-300 group">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-bold tracking-wider uppercase text-stone-500">Tickets Activos</span>
-            <div className="p-2.5 rounded-xl bg-cyan-500/15 text-cyan-600 group-hover:scale-110 transition-transform">
-              <Wrench size={18} />
+        <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-[var(--bg-floating)] border border-[var(--border-cream)] hover:border-cyan-500/50 hover:shadow-lg hover:shadow-cyan-500/5 transition-all duration-300 group">
+          <div className="flex items-center justify-between mb-2 sm:mb-3">
+            <span className="text-[10px] sm:text-xs font-bold tracking-wider uppercase text-stone-500 truncate">Tickets Activos</span>
+            <div className="p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-cyan-500/15 text-cyan-600 group-hover:scale-110 transition-transform shrink-0">
+              <Wrench className="w-4 h-4 sm:w-[18px] sm:h-[18px]" />
             </div>
           </div>
-          <div className="text-2xl sm:text-3xl font-extrabold text-cyan-600 font-mono">
+          <div className="text-xl sm:text-3xl font-extrabold text-cyan-600 font-mono">
             <AnimatedCounter value={ticketsActivos} />
           </div>
-          <p className="text-xs text-stone-600 font-medium mt-1">Solicitudes en atención</p>
+          <p className="text-[11px] sm:text-xs text-stone-600 font-medium mt-1 leading-tight">En atención</p>
         </div>
       </div>
 
@@ -248,14 +248,14 @@ export default function ClimaDashboardClient({
           <div className="space-y-4">
             {ubicaciones.map((ubi) => (
               <div key={ubi.ubicacion} className="space-y-1.5">
-                <div className="flex items-center justify-between text-xs sm:text-sm">
-                  <span className="font-bold text-stone-800 flex items-center gap-2">
-                    <MapPin size={14} className="text-cyan-600" />
-                    {ubi.ubicacion}
+                <div className="flex items-center justify-between text-xs sm:text-sm gap-2">
+                  <span className="font-bold text-stone-800 flex items-center gap-2 min-w-0">
+                    <MapPin size={14} className="text-cyan-600 shrink-0" />
+                    <span className="truncate">{ubi.ubicacion}</span>
                   </span>
-                  <div className="flex items-center gap-3">
-                    <span className="text-stone-600 text-xs font-mono font-medium">{ubi.count} unidades</span>
-                    <span className="font-extrabold text-cyan-600 font-mono text-xs">{ubi.percentage}%</span>
+                  <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+                    <span className="text-stone-500 text-[11px] sm:text-xs font-mono font-medium">{ubi.count} unid.</span>
+                    <span className="font-extrabold text-cyan-600 font-mono text-xs w-9 text-right">{ubi.percentage}%</span>
                   </div>
                 </div>
                 <div className="h-3 w-full bg-stone-100 rounded-full overflow-hidden border border-stone-200">

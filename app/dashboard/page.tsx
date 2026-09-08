@@ -1,58 +1,97 @@
-import { prisma } from '@/lib/db';
-import { PlusCircle } from 'lucide-react'; 
 import { cookies } from 'next/headers';
-import Link from 'next/link';
-import DashboardMenu from './DashboardMenu';
+import { prisma } from '@/lib/db';
+import DashboardClient from './DashboardClient';
 
-export default async function Dashboard() {
+export default async function DashboardPage() {
   const cookieStore = await cookies();
   const userRole = cookieStore.get('user_role')?.value || 'USER';
   const userName = cookieStore.get('user_name')?.value || 'Usuario';
-
   const isAdmin = ['ADMIN', 'GERENCIAL'].includes(userRole);
 
-  // MÉTRICAS 
-  const totalAutos = isAdmin ? await prisma.inventario_Automoviles.count() : 0;
-  const totalEmpleados = isAdmin ? await prisma.empleados.count() : 0;
-  const ticketsPendientes = isAdmin ? await prisma.solicitud.count({
-    where: { Estado: 'PENDIENTE' }
-  }) : 0;
+  // Consultas optimizadas en paralelo
+  const [
+    totalAutos,
+    activosFlota,
+    bajasFlota,
+    serviciosActivos,
+    ubicacionesGroup
+  ] = await Promise.all([
+    prisma.inventario_Automoviles.count(),
+    prisma.inventario_Automoviles.count({
+      where: { Estatus_Operativo: 'Activo en flota' }
+    }),
+    prisma.inventario_Automoviles.count({
+      where: { Estatus_Operativo: { not: 'Activo en flota' } }
+    }),
+    prisma.solicitud.count({
+      where: { Estado: { in: ['PENDIENTE', 'EN PROCESO', 'EN_PROCESO'] } }
+    }),
+    prisma.inventario_Automoviles.groupBy({
+      by: ['Ubicacion'],
+      _count: { Ubicacion: true },
+      orderBy: {
+        _count: {
+          Ubicacion: 'desc'
+        }
+      }
+    })
+  ]);
+
+  // Normalización y unificación de sedes (unifica variantes con/sin tilde y mayúsculas)
+  const normalizarUbicacion = (raw: string | null | undefined): string => {
+    if (!raw) return 'Base General / Sin Asignar';
+    const clean = raw.trim();
+    if (!clean) return 'Base General / Sin Asignar';
+
+    const lower = clean.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+    if (lower.includes('minatitlan')) return 'Minatitlán';
+    if (lower.includes('comalcalco')) return 'Comalcalco';
+    if (lower.includes('veracruz')) return 'Veracruz';
+    if (lower.includes('cadereyta')) return 'Cadereyta';
+    if (lower.includes('villahermosa')) return 'Villahermosa';
+    if (lower.includes('obregon')) return 'Cd. Obregón';
+    if (lower.includes('mapachapa')) return 'Mapachapa';
+    if (lower.includes('cdmx')) return 'CDMX';
+    if (lower.includes('chinameca')) return 'Chinameca';
+    if (lower.includes('rio bravo')) return 'Río Bravo';
+    if (lower.includes('braskem')) return 'Braskem';
+    if (lower === 'vendida' || lower === 'ventas') return 'Otras / En Tránsito';
+
+    return clean.charAt(0).toUpperCase() + clean.slice(1);
+  };
+
+  // Agrupar y sumar conteos por sede canónica
+  const ubicacionesMap = new Map<string, number>();
+  for (const item of ubicacionesGroup) {
+    const key = normalizarUbicacion(item.Ubicacion);
+    const prev = ubicacionesMap.get(key) || 0;
+    ubicacionesMap.set(key, prev + item._count.Ubicacion);
+  }
+
+  // Ordenar por volumen y calcular porcentajes (Top 6)
+  const totalConUbicacion = totalAutos || 1;
+  const ubicaciones = Array.from(ubicacionesMap.entries())
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 6)
+    .map(([ubicacion, count]) => ({
+      ubicacion,
+      count,
+      percentage: Math.round((count / totalConUbicacion) * 100)
+    }));
 
   return (
-    <div className="min-h-screen bg-transparent">
-
-      <main className="max-w-7xl mx-auto p-6 space-y-6 pt-4">
-        
-        {/* ENCABEZADO CON BOTÓN DE ACCIÓN RÁPIDA */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div className="text-left">
-            <h1 className="text-3xl font-serif font-medium text-[var(--text-main)] tracking-tight">
-              {isAdmin ? 'Panel de Control' : 'Centro de Servicios'}
-            </h1>
-            <p className="text-[var(--text-muted)]">Gestión de flota SIFYGSA</p>
-          </div>
-
-          {/* BOTÓN "NUEVO MANTENIMIENTO" (Solo para clientes/empleados) */}
-          {!isAdmin && (
-            <Link 
-              href="/dashboard/servicios" 
-              className="bg-[#71717a] hover:bg-[#52525b] text-white px-5 py-2.5 rounded-lg font-bold flex items-center gap-2 transition-all shadow-lg active:scale-95"
-            >
-              <PlusCircle size={20} />
-              Nuevo Mantenimiento
-            </Link>
-          )}
-        </div>
-
-        {/* Pasamos el control al Menú */}
-        <DashboardMenu 
-          userRole={userRole} 
-          totalAutos={totalAutos}
-          totalEmpleados={totalEmpleados}
-          ticketsPendientes={ticketsPendientes}
-        />
-
-      </main>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <DashboardClient
+        userName={userName}
+        userRole={userRole}
+        isAdmin={isAdmin}
+        totalAutos={totalAutos}
+        activosFlota={activosFlota}
+        bajasFlota={bajasFlota}
+        serviciosActivos={serviciosActivos}
+        ubicaciones={ubicaciones}
+      />
     </div>
   );
 }

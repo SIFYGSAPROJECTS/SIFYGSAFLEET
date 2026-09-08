@@ -41,6 +41,16 @@ export default async function EdificiosPage() {
     }),
   ]);
 
+  // Serializar inspecciones para el cliente
+  const safeInspecciones = inspecciones.map(i => ({
+    ...i,
+    Fecha_Inspeccion: i.Fecha_Inspeccion.toISOString(),
+    fotos: i.fotos.map(f => ({
+      ...f,
+      Fecha_Subida: f.Fecha_Subida.toISOString()
+    }))
+  }));
+
   return (
     <div className="min-h-screen bg-transparent">
       <div className="w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 space-y-6 pt-4">
@@ -59,6 +69,7 @@ export default async function EdificiosPage() {
 
         <EdificiosClient 
           initialEdificios={edificios}
+          initialInspecciones={safeInspecciones}
           currentUserEmail={userEmail}
         />
       </div>

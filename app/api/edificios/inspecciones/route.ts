@@ -6,13 +6,15 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const Id_Edificio = searchParams.get('Id_Edificio');
 
-    if (!Id_Edificio) {
-      return NextResponse.json({ error: 'Falta el Id del Edificio' }, { status: 400 });
+    const where: any = {};
+    if (Id_Edificio) {
+      where.Id_Edificio = parseInt(Id_Edificio);
     }
 
     const inspecciones = await prisma.inspeccion_Edificio.findMany({
-      where: { Id_Edificio: parseInt(Id_Edificio) },
+      where,
       include: {
+        edificio: true,
         fotos: true,
         areas: {
           include: {
@@ -103,15 +105,28 @@ export async function POST(request: Request) {
             const detallesToCreate: any[] = [];
             if (area.respuestas) {
               for (const [item, resp] of Object.entries(area.respuestas)) {
-                 const r = resp as { estado: string, observacion: string };
+                 const r = resp as { estado: string, observacion: string, planAccion?: string };
                  if (r.estado) {
+                   let obsCombined = r.observacion || '';
+                   if (r.planAccion) {
+                     obsCombined = obsCombined 
+                       ? `${obsCombined} | Plan/Recursos: ${r.planAccion}`
+                       : `Plan/Recursos: ${r.planAccion}`;
+                   }
                    detallesToCreate.push({
                      Item: item,
                      Estado: r.estado,
-                     Observaciones: r.observacion || ''
+                     Observaciones: obsCombined
                    });
                  }
               }
+            }
+
+            let areaObsCombined = area.observacion || '';
+            if (area.planAccion) {
+              areaObsCombined = areaObsCombined 
+                ? `${areaObsCombined} | Plan/Recursos: ${area.planAccion}`
+                : `Plan/Recursos: ${area.planAccion}`;
             }
 
             await prisma.inspeccion_Area.create({
@@ -121,7 +136,7 @@ export async function POST(request: Request) {
                 Puertas: area.puertas || 0,
                 Luminarias: area.luminarias || 0,
                 Estado: area.estado || 'No definido',
-                Observaciones: area.observacion || '',
+                Observaciones: areaObsCombined,
                 Categorias: area.categoriasActivas ? JSON.stringify(area.categoriasActivas) : '',
                 detalles: detallesToCreate.length > 0 ? { create: detallesToCreate } : undefined
               }
