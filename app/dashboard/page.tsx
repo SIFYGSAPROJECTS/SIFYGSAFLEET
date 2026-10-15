@@ -6,9 +6,48 @@ export default async function DashboardPage() {
   const cookieStore = await cookies();
   const userRole = cookieStore.get('user_role')?.value || 'USER';
   const userName = cookieStore.get('user_name')?.value || 'Usuario';
+  const userEmail = cookieStore.get('user_email')?.value || '';
   const isAdmin = ['ADMIN', 'GERENCIAL'].includes(userRole);
 
-  // Consultas optimizadas en paralelo
+  // Estadísticas del usuario normal (unidad asignada y servicios)
+  let userStats = null;
+  if (!isAdmin && userEmail) {
+    const [autoAsignado, serviciosUsuario] = await Promise.all([
+      prisma.inventario_Automoviles.findFirst({
+        where: { Email_encargado: userEmail },
+        include: {
+          _count: {
+            select: {
+              checklists: true,
+              documentos: true
+            }
+          }
+        }
+      }),
+      prisma.solicitud.count({
+        where: {
+          OR: [
+            { Email_Empleado: userEmail },
+            { auto: { Email_encargado: userEmail } }
+          ],
+          Estado: { in: ['PENDIENTE', 'EN PROCESO', 'EN_PROCESO'] }
+        }
+      })
+    ]);
+
+    userStats = {
+      vehiculo: autoAsignado ? `${autoAsignado.Marca || ''} ${autoAsignado.Modelo || ''}`.trim() : null,
+      placas: autoAsignado?.Placa || null,
+      consecutivo: autoAsignado?.Consecutivo || null,
+      color: autoAsignado?.Color || null,
+      estatusOperativo: autoAsignado?.Estatus_Operativo || 'Sin unidad asignada',
+      serviciosActivos: serviciosUsuario,
+      totalChecklists: autoAsignado?._count?.checklists || 0,
+      totalDocumentos: autoAsignado?._count?.documentos || 0,
+    };
+  }
+
+  // Consultas optimizadas en paralelo para administradores y métricas globales
   const [
     totalAutos,
     activosFlota,
@@ -91,6 +130,7 @@ export default async function DashboardPage() {
         bajasFlota={bajasFlota}
         serviciosActivos={serviciosActivos}
         ubicaciones={ubicaciones}
+        userStats={userStats}
       />
     </div>
   );

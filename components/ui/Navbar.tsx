@@ -78,8 +78,9 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
     const cookieAreas = getCookie('user_areas');
     if (cookieName) setLocalUserName(cookieName);
     if (cookieRole) {
+      const cookieAdminTi = getCookie('user_admin_ti') === 'true';
       setLocalUserRole(cookieRole);
-      setLocalIsAdmin(['ADMIN', 'GERENCIAL'].includes(cookieRole));
+      setLocalIsAdmin(['ADMIN', 'GERENCIAL'].includes(cookieRole) || cookieAdminTi);
     }
     if (cookieAreas) {
       try {
@@ -233,34 +234,51 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                 <Home size={14} className="text-white" /> Volver al Portal
               </Link>
               <div className="h-px bg-white/5 my-1"></div>
-              <Link
-                href="/dashboard"
-                onClick={() => setIsMenuOpen(false)}
-                className="bg-white/5 hover:bg-white/10 border border-white/5 text-white/90 px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold"
-              >
-                <Car size={14} className="text-[#FF7420]" /> Transporte (Flota)
-              </Link>
-              <Link
-                href="/computo"
-                onClick={() => setIsMenuOpen(false)}
-                className="bg-white/5 hover:bg-white/10 border border-white/5 text-white/90 px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold"
-              >
-                <Server size={14} className="text-[#FF7420]" /> Cómputo (TI)
-              </Link>
-              <Link
-                href="/programa-anual"
-                onClick={() => setIsMenuOpen(false)}
-                className="bg-white/5 hover:bg-white/10 border border-white/5 text-white/90 px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold"
-              >
-                <CalendarDays size={14} className="text-[#FF7420]" /> Programa Anual
-              </Link>
-              <Link
-                href="/edificios"
-                onClick={() => setIsMenuOpen(false)}
-                className="bg-white/5 hover:bg-white/10 border border-white/5 text-white/90 px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold"
-              >
-                <Building size={14} className="text-[#FF7420]" /> Edificios (Infraestructura)
-              </Link>
+              {(localIsAdmin || localUserAreas.includes('AUTOS')) && (
+                <Link
+                  href="/dashboard"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="bg-white/5 hover:bg-white/10 border border-white/5 text-white/90 px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold"
+                >
+                  <Car size={14} className="text-[#FF7420]" /> Transporte (Flota)
+                </Link>
+              )}
+              {(localIsAdmin || localUserAreas.includes('COMPUTO')) && (
+                <Link
+                  href="/computo"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="bg-white/5 hover:bg-white/10 border border-white/5 text-white/90 px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold"
+                >
+                  <Server size={14} className="text-[#FF7420]" /> Cómputo (TI)
+                </Link>
+              )}
+              {localIsAdmin && (
+                <Link
+                  href="/programa-anual"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="bg-white/5 hover:bg-white/10 border border-white/5 text-white/90 px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold"
+                >
+                  <CalendarDays size={14} className="text-[#FF7420]" /> Programa Anual
+                </Link>
+              )}
+              {(localIsAdmin || localUserAreas.includes('GASTOS')) && (
+                <Link
+                  href="/gastos"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="bg-white/5 hover:bg-white/10 border border-white/5 text-white/90 px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold"
+                >
+                  <Wallet size={14} className="text-[#FF7420]" /> Gastos Generales
+                </Link>
+              )}
+              {(localIsAdmin || localUserAreas.includes('EDIFICIOS')) && (
+                <Link
+                  href="/edificios"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="bg-white/5 hover:bg-white/10 border border-white/5 text-white/90 px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold"
+                >
+                  <Building size={14} className="text-[#FF7420]" /> Edificios (Infraestructura)
+                </Link>
+              )}
               {(localIsAdmin || localUserAreas.includes('CLIMA')) && (
                 <Link
                   href="/clima"
@@ -627,7 +645,7 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                       className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all text-white/80 hover:text-white hover:bg-white/5 group/item"
                     >
                       <User size={14} className="text-[#FF7420] transition-transform duration-300 ease-out group-hover/item:scale-125 group-hover/item:-translate-y-1" />
-                      <span>Usuarios</span>
+                      <span>{localIsAdmin ? 'Personal & Usuarios' : 'Mi Perfil'}</span>
                     </Link>
                     <Link
                       href={localIsAdmin ? "/dashboard/checklists" : "/dashboard/mis-checklists"}
@@ -713,7 +731,7 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                         <span>Programa Anual</span>
                       </Link>
                     )}
-                    {localIsAdmin && (
+                    {(localIsAdmin || localUserAreas.includes('GASTOS')) && (
                       <Link
                         href="/gastos"
                         className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-white/80 hover:text-white hover:bg-white/5 transition-all group/item"
@@ -722,7 +740,7 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                         <span>Gastos Generales</span>
                       </Link>
                     )}
-                    {localIsAdmin && (
+                    {(localIsAdmin || localUserAreas.includes('EDIFICIOS')) && (
                       <Link
                         href="/edificios"
                         className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-white/80 hover:text-white hover:bg-white/5 transition-all group/item"
@@ -1039,7 +1057,7 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                     : 'bg-white/5 border-white/5 text-white/90 hover:bg-white/10'
                     }`}
                 >
-                  <User size={14} className="text-zinc-400" /> Usuarios
+                  <User size={14} className="text-zinc-400" /> {localIsAdmin ? 'Personal & Usuarios' : 'Mi Perfil'}
                 </Link>
                 <Link
                   href={localIsAdmin ? "/dashboard/checklists" : "/dashboard/mis-checklists"}
@@ -1107,7 +1125,7 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                     <CalendarDays size={14} className="text-[#FF7420]" /> Programa Anual
                   </Link>
                 )}
-                {localIsAdmin && (
+                {(localIsAdmin || localUserAreas.includes('GASTOS')) && (
                   <Link
                     href="/gastos"
                     onClick={() => setIsMenuOpen(false)}
@@ -1116,13 +1134,31 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                     <Wallet size={14} className="text-[#FF7420]" /> Gastos Generales
                   </Link>
                 )}
-                {localIsAdmin && (
+                {(localIsAdmin || localUserAreas.includes('EDIFICIOS')) && (
                   <Link
                     href="/edificios"
                     onClick={() => setIsMenuOpen(false)}
                     className="bg-white/5 hover:bg-white/10 border border-white/5 text-white/90 px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold"
                   >
                     <Building size={14} className="text-[#FF7420]" /> Edificios
+                  </Link>
+                )}
+                {(localIsAdmin || localUserAreas.includes('CLIMA')) && (
+                  <Link
+                    href="/clima"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="bg-white/5 hover:bg-white/10 border border-white/5 text-white/90 px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold"
+                  >
+                    <Wind size={14} className="text-[#FF7420]" /> Aires Acondicionados
+                  </Link>
+                )}
+                {(localIsAdmin || localUserAreas.includes('TELEFONIA')) && (
+                  <Link
+                    href="/telefonia/inventario"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="bg-white/5 hover:bg-white/10 border border-white/5 text-white/90 px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold"
+                  >
+                    <Phone size={14} className="text-[#FF7420]" /> Telefonía Celular
                   </Link>
                 )}
                 {localIsAdmin && (

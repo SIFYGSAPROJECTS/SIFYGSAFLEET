@@ -1,11 +1,17 @@
 import { prisma } from '@/lib/db';
 import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 import DocumentosComputoClient from './DocumentosComputoClient';
 
 export default async function DocumentosComputoPage() {
   const cookieStore = await cookies();
   const userRole = cookieStore.get('user_role')?.value;
-  const isAdmin = ['ADMIN', 'GERENCIAL'].includes(userRole || '');
+  const userAdminTi = cookieStore.get('user_admin_ti')?.value === 'true';
+  const isAdmin = ['ADMIN', 'GERENCIAL'].includes(userRole || '') || userAdminTi;
+
+  if (!isAdmin) {
+    redirect('/computo');
+  }
 
   const equiposDB = await prisma.inventario_Computo.findMany({
     select: {

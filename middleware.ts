@@ -50,16 +50,17 @@ export function middleware(request: NextRequest) {
     const userRoleCookie = request.cookies.get('user_role');
     const userRole = userRoleCookie?.value || 'USER';
     const userAdminTi = request.cookies.get('user_admin_ti')?.value === 'true';
-    const isAdmin = ['ADMIN', 'GERENCIAL'].includes(userRole) || userAdminTi;
+    const isGlobalAdmin = ['ADMIN', 'GERENCIAL'].includes(userRole);
+    const isComputoAdmin = isGlobalAdmin || userAdminTi;
 
     const userAreasCookie = request.cookies.get('user_areas');
     const userAreas = userAreasCookie?.value ? JSON.parse(userAreasCookie.value) : [];
 
-    // Módulos raíz o páginas completas exclusivas para administrador
+    // Módulos raíz o páginas completas exclusivas para administrador global
     const adminOnlyPaths = ['/programa-anual', '/verificaciones', '/auditoria', '/mobiliario', '/vigilancia'];
     const isAdminOnlyPath = adminOnlyPaths.some(path => pathname === path || pathname.startsWith(path + '/'));
 
-    // Sub-rutas de /dashboard exclusivas para administrador
+    // Sub-rutas de /dashboard exclusivas para administrador global
     const adminOnlyDashboardPaths = [
       '/dashboard/inventario',
       '/dashboard/costos',
@@ -70,19 +71,34 @@ export function middleware(request: NextRequest) {
     ];
     const isAdminOnlyDashboardPath = adminOnlyDashboardPaths.some(path => pathname === path || pathname.startsWith(path + '/'));
 
-    // Si intenta acceder a una ruta de administrador sin ser administrador, redirigir al portal o inicio
-    if ((isAdminOnlyPath || isAdminOnlyDashboardPath) && !isAdmin) {
-      const homeUrl = new URL("/portal", request.url);
-      return NextResponse.redirect(homeUrl);
+    // Sub-rutas de /computo exclusivas para administrador de TI
+    const adminOnlyComputoPaths = [
+      '/computo/inventario',
+      '/computo/documentos',
+      '/computo/empleados',
+    ];
+    const isAdminOnlyComputoPath = adminOnlyComputoPaths.some(path => pathname === path || pathname.startsWith(path + '/'));
+
+    // Si intenta acceder a una ruta de admin global sin ser administrador global
+    if ((isAdminOnlyPath || isAdminOnlyDashboardPath) && !isGlobalAdmin) {
+      if (pathname.startsWith('/dashboard')) {
+        return NextResponse.redirect(new URL("/dashboard", request.url));
+      }
+      return NextResponse.redirect(new URL("/portal", request.url));
+    }
+
+    // Si intenta acceder a una sub-ruta administrativa de Cómputo TI sin ser administrador de TI ni global
+    if (isAdminOnlyComputoPath && !isComputoAdmin) {
+      return NextResponse.redirect(new URL("/computo", request.url));
     }
 
     // Verificación de acceso por área para usuarios normales
-    if (!isAdmin) {
+    if (!isGlobalAdmin) {
       if (pathname.startsWith('/dashboard') && !userAreas.includes('AUTOS')) {
         // No tiene acceso a autos
         return NextResponse.redirect(new URL("/portal", request.url));
       }
-      if (pathname.startsWith('/computo') && !userAreas.includes('COMPUTO')) {
+      if (pathname.startsWith('/computo') && !isComputoAdmin && !userAreas.includes('COMPUTO')) {
         // No tiene acceso a computo
         return NextResponse.redirect(new URL("/portal", request.url));
       }
