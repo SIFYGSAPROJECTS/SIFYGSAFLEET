@@ -488,7 +488,7 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
           <div className="flex-1 hidden md:flex justify-end items-center gap-2">
 
             {/* Cómputo TI Sub-navigation (Dropdown similar to Módulos) */}
-            {type === 'computo' && pathname !== '/computo' && (
+            {type === 'computo' && (
               <div className="relative group">
                 <button
                   onClick={(e) => toggleDropdown('menu-ti', e)}
@@ -509,6 +509,13 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                     <div className="px-3 py-1.5 text-[9px] font-black text-white/40 tracking-wider uppercase border-b border-white/5 mb-1">
                       Menú TI
                     </div>
+                    <Link
+                      href="/computo"
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-white hover:bg-white/10 transition-all group/item bg-white/5 mb-1"
+                    >
+                      <Home size={14} className="text-emerald-400 transition-transform duration-300 ease-out group-hover/item:scale-125 group-hover/item:-translate-y-0.5" />
+                      <span>Panel Principal</span>
+                    </Link>
                     {localIsAdmin && (
                       <Link
                         href="/computo/inventario"
@@ -594,7 +601,7 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
               </div>
             )}
             {/* Fleet Sub-navigation Dropdown */}
-            {type === 'dashboard' && pathname !== '/dashboard' && (
+            {type === 'dashboard' && (
               <div className="relative group">
                 <button
                   onClick={(e) => toggleDropdown('menu-fleet', e)}
@@ -616,11 +623,11 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                       Menú Flota
                     </div>
                     <Link
-                      href="/dashboard/servicios"
-                      className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all text-white/80 hover:text-white hover:bg-white/5 group/item"
+                      href="/dashboard"
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-white hover:bg-white/10 transition-all group/item bg-white/5 mb-1"
                     >
-                      <Wrench size={14} className="text-[#FF7420] transition-transform duration-300 ease-out group-hover/item:scale-125 group-hover/item:-rotate-45" />
-                      <span>Servicios</span>
+                      <Home size={14} className="text-[#FF7420] transition-transform duration-300 ease-out group-hover/item:scale-125 group-hover/item:-translate-y-0.5" />
+                      <span>Panel Principal</span>
                     </Link>
                     {localIsAdmin && (
                       <Link
@@ -631,6 +638,13 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                         <span>Flota</span>
                       </Link>
                     )}
+                    <Link
+                      href="/dashboard/servicios"
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all text-white/80 hover:text-white hover:bg-white/5 group/item"
+                    >
+                      <Wrench size={14} className="text-[#FF7420] transition-transform duration-300 ease-out group-hover/item:scale-125 group-hover/item:-rotate-45" />
+                      <span>Servicios</span>
+                    </Link>
                     {localIsAdmin && (
                       <Link
                         href="/dashboard/costos"
@@ -640,13 +654,6 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                         <span>Costos</span>
                       </Link>
                     )}
-                    <Link
-                      href="/dashboard/usuarios"
-                      className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all text-white/80 hover:text-white hover:bg-white/5 group/item"
-                    >
-                      <User size={14} className="text-[#FF7420] transition-transform duration-300 ease-out group-hover/item:scale-125 group-hover/item:-translate-y-1" />
-                      <span>{localIsAdmin ? 'Personal & Usuarios' : 'Mi Perfil'}</span>
-                    </Link>
                     <Link
                       href={localIsAdmin ? "/dashboard/checklists" : "/dashboard/mis-checklists"}
                       className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all text-white/80 hover:text-white hover:bg-white/5 group/item"
@@ -670,6 +677,13 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                         <span>Verificaciones</span>
                       </Link>
                     )}
+                    <Link
+                      href="/dashboard/usuarios"
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all text-white/80 hover:text-white hover:bg-white/5 group/item"
+                    >
+                      <User size={14} className="text-[#FF7420] transition-transform duration-300 ease-out group-hover/item:scale-125 group-hover/item:-translate-y-1" />
+                      <span>{localIsAdmin ? 'Personal & Usuarios' : 'Mi Perfil'}</span>
+                    </Link>
                   </div>
                 </div>
               </div>
@@ -959,9 +973,19 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
                 </Link>
               </>
             )}
-            {type === 'computo' && pathname !== '/computo' && (
+            {type === 'computo' && (
               <>
                 <div className="text-[10px] font-black text-white/30 uppercase tracking-widest pl-2 mb-1">Cómputo TI</div>
+                <Link
+                  href="/computo"
+                  onClick={() => setIsMenuOpen(false)}
+                  className={`border px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold ${pathname === '/computo'
+                    ? 'bg-emerald-600 border-emerald-500 text-white'
+                    : 'bg-white/5 border-white/5 text-white/90 hover:bg-white/10'
+                    }`}
+                >
+                  <Home size={14} className="text-emerald-400" /> Panel Principal
+                </Link>
                 {localIsAdmin && (
                   <Link
                     href="/computo/inventario"
@@ -1012,9 +1036,19 @@ export default function Navbar({ type, userName = 'Usuario', userRole = 'USER', 
               </>
             )}
 
-            {type === 'dashboard' && pathname !== '/dashboard' && (
+            {type === 'dashboard' && (
               <>
                 <div className="text-[10px] font-black text-white/30 uppercase tracking-widest pl-2 mb-1">Gestión de Flota</div>
+                <Link
+                  href="/dashboard"
+                  onClick={() => setIsMenuOpen(false)}
+                  className={`border px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-all font-bold ${pathname === '/dashboard'
+                    ? 'bg-zinc-800 border-zinc-700 text-white'
+                    : 'bg-white/5 border-white/5 text-white/90 hover:bg-white/10'
+                    }`}
+                >
+                  <Home size={14} className="text-[#FF7420]" /> Panel Principal
+                </Link>
                 <Link
                   href="/dashboard/servicios"
                   onClick={() => setIsMenuOpen(false)}
