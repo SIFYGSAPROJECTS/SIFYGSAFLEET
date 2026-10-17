@@ -12,6 +12,7 @@ import {
 import * as React from 'react';
 
 interface TicketCreatedEmailProps {
+  consecutivo?: string | null;
   marca: string;
   modelo: string;
   placa: string;
@@ -25,6 +26,7 @@ interface TicketCreatedEmailProps {
 }
 
 export const TicketCreatedEmail = ({
+  consecutivo,
   marca = 'Marca',
   modelo = 'Modelo',
   placa = 'XXX-000',
@@ -39,7 +41,7 @@ export const TicketCreatedEmail = ({
   return (
     <Html>
       <Head />
-      <Preview>Nueva Orden de Servicio ({tipoServicio}): {placa}</Preview>
+      <Preview>Nueva Orden de Servicio ({tipoServicio}): {consecutivo ? `[${consecutivo}] ` : ''}{placa}</Preview>
       <Body style={main}>
         <Container style={container}>
           <Section style={header}>
@@ -53,7 +55,7 @@ export const TicketCreatedEmail = ({
             </Text>
 
             <Section style={infoBox}>
-              <Text style={infoText}><strong>🚗 Unidad:</strong> {marca} {modelo} ({placa})</Text>
+              <Text style={infoText}><strong>🚗 Unidad:</strong> {consecutivo ? `[${consecutivo}] ` : ''}{marca} {modelo} ({placa})</Text>
               <Text style={infoText}><strong>👤 Solicitante:</strong> {solicitanteEmail}</Text>
               <Text style={infoText}><strong>📋 Servicio:</strong> {tipoServicio}</Text>
               {kilometraje && (

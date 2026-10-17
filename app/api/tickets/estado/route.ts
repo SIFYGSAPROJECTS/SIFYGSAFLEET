@@ -32,11 +32,14 @@ export async function PUT(request: Request) {
 
     // Envía notificaciones por correo electrónico al empleado según el nuevo estado
     if (ticketActualizado.empleado?.Email) {
+      const consecutivoVehiculo = ticketActualizado.Consecutivo || ticketActualizado.auto?.Consecutivo;
+
       if (estado === 'CITA') {
         await enviarCorreo({
           to: ticketActualizado.empleado.Email,
           subject: `📅 Cita Confirmada: Mantenimiento SIFYGSA - Folio: ${folio}`,
           react: TicketCitaEmail({
+            consecutivo: consecutivoVehiculo,
             folio: folio,
             lugar: lugar || 'Por confirmar',
             fecha: fecha || 'Por confirmar',
@@ -54,6 +57,7 @@ export async function PUT(request: Request) {
           to: ticketActualizado.empleado.Email,
           subject: `🛠️ Unidad en Mantenimiento - Folio: ${folio}`,
           react: TicketEnTallerEmail({
+            consecutivo: consecutivoVehiculo,
             empleadoNombre: ticketActualizado.empleado.Nombre_Empleado || 'Usuario',
             folio: folio,
             marca: ticketActualizado.auto?.Marca || 'Desconocida',
@@ -66,6 +70,7 @@ export async function PUT(request: Request) {
           to: ticketActualizado.empleado.Email,
           subject: `✅ Tu unidad está lista para recolección - Folio: ${folio}`,
           react: TicketListoEmail({
+            consecutivo: consecutivoVehiculo,
             empleadoNombre: ticketActualizado.empleado.Nombre_Empleado || 'Usuario',
             folio: folio,
             marca: ticketActualizado.auto?.Marca || 'Desconocida',

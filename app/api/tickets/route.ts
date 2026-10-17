@@ -199,6 +199,7 @@ export async function POST(request: Request) {
       to: destinatariosFinales.split(', '), // Resend acepta array de strings o string separado por comas, pero array es más seguro
       subject: `🔧 Nueva Orden de Servicio (${tipoServicioCapitalizado}): ${nuevoMantenimiento.auto?.Placa}`,
       react: TicketCreatedEmail({
+        consecutivo: nuevoMantenimiento.Consecutivo || nuevoMantenimiento.auto?.Consecutivo || consecutivo,
         marca: nuevoMantenimiento.auto?.Marca || 'Desconocida',
         modelo: nuevoMantenimiento.auto?.Modelo || 'Desconocido',
         placa: nuevoMantenimiento.auto?.Placa || 'Sin Placa',

@@ -12,6 +12,7 @@ import {
 import * as React from 'react';
 
 interface TicketListoEmailProps {
+  consecutivo?: string | null;
   empleadoNombre: string;
   folio: string;
   marca: string;
@@ -23,6 +24,7 @@ interface TicketListoEmailProps {
 }
 
 export const TicketListoEmail = ({
+  consecutivo,
   empleadoNombre = 'Usuario',
   folio,
   marca,
@@ -49,7 +51,7 @@ export const TicketListoEmail = ({
             </Text>
             
             <Section style={infoBox}>
-              <Text style={infoText}><strong>🚗 Vehículo:</strong> {marca} {modelo}</Text>
+              <Text style={infoText}><strong>🚗 Vehículo:</strong> {consecutivo ? `[${consecutivo}] ` : ''}{marca} {modelo}</Text>
               <Text style={infoText}><strong>🔢 Placas:</strong> {placa}</Text>
               <Text style={infoText}><strong>📋 Folio:</strong> {folio}</Text>
               {asesor && <Text style={infoText}><strong>👤 Asesor a cargo:</strong> {asesor}</Text>}

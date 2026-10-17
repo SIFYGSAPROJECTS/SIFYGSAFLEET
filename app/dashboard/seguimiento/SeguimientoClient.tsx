@@ -9,6 +9,8 @@ import { Activity, MapPin, Calendar, Clock, Timer, Wrench, CheckCircle2, User, P
 const TicketCard = memo(({ ticket, isAdmin, infoMemoria, setDatosTemporales }: any) => {
   const estadoVisual = infoMemoria.estado || ticket.Estado || 'PENDIENTE';
   
+  const consecutivo = ticket.Consecutivo || ticket.auto?.Consecutivo || (ticket.Pk_folio_ticket?.includes('-') ? ticket.Pk_folio_ticket.split('-').slice(0, 2).join('-') : '');
+
   const lugar = infoMemoria.lugar || ticket.Lugar_Cita || '';
   const fecha = infoMemoria.fecha || ticket.Fecha_Cita || '';
   const hora = infoMemoria.hora || ticket.Hora_Cita || '';
@@ -27,11 +29,22 @@ const TicketCard = memo(({ ticket, isAdmin, infoMemoria, setDatosTemporales }: a
     <div id={`ticket-${ticket.Pk_folio_ticket}`} className={`bg-[var(--bg-floating)] rounded-xl shadow-xl border-x border-b border-[var(--border-cream)] border-t-4 p-5 sm:p-8 transition-colors ${esFinalizadoVisual ? 'border-t-emerald-500' : 'border-t-[#71717a]'}`}>
       <div className="flex flex-col md:flex-row justify-between items-start mb-10 gap-6">
         <div>
-          <span className={`px-2 py-1 rounded text-[10px] font-mono font-black mb-3 inline-block tracking-[0.2em] ${esFinalizadoVisual ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'bg-[#71717a]/10 text-[#71717a] border border-[#71717a]/20'}`}>
+          <span className={`px-2.5 py-1 rounded-md text-[11px] font-mono font-bold mb-3 inline-block tracking-wider ${
+            esFinalizadoVisual 
+              ? 'bg-emerald-500/10 text-emerald-700 border border-emerald-500/30' 
+              : 'bg-[var(--bg-screen)] text-[var(--text-muted)] border border-[var(--border-cream)]'
+          }`}>
             FOLIO: {ticket.Pk_folio_ticket}
           </span>
-          <h3 className="text-xl sm:text-2xl font-bold text-[var(--text-main)] leading-tight font-serif">
-            {ticket.auto?.Linea ? `(${ticket.auto.Linea}) ` : ''}{ticket.auto?.Marca} {ticket.auto?.Modelo}
+          <h3 className="text-xl sm:text-2xl font-bold text-[var(--text-main)] leading-tight font-serif flex items-center flex-wrap gap-2.5">
+            {consecutivo && (
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-lg text-sm sm:text-base font-mono font-bold bg-[var(--bg-screen)] text-[var(--text-main)] border border-[var(--border-cream)] shadow-xs shrink-0">
+                {consecutivo}
+              </span>
+            )}
+            <span>
+              {ticket.auto?.Linea ? `(${ticket.auto.Linea}) ` : ''}{ticket.auto?.Marca} {ticket.auto?.Modelo}
+            </span>
           </h3>
           <div className="flex gap-2 items-center mt-1.5">
             <p className="text-sm text-[var(--text-muted)] font-medium">

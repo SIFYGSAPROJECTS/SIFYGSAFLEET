@@ -12,6 +12,7 @@ import {
 import * as React from 'react';
 
 interface TicketCitaEmailProps {
+  consecutivo?: string | null;
   folio: string;
   lugar?: string;
   fecha?: string;
@@ -25,6 +26,7 @@ interface TicketCitaEmailProps {
 }
 
 export const TicketCitaEmail = ({
+  consecutivo,
   folio,
   lugar = 'Por confirmar',
   fecha = 'Por confirmar',
@@ -62,7 +64,7 @@ export const TicketCitaEmail = ({
             
             <Section style={vehicleBox}>
               <Text style={vehicleText}>
-                🚗 Unidad: {marca} {modelo} ({placa})
+                🚗 Unidad: {consecutivo ? `[${consecutivo}] ` : ''}{marca} {modelo} ({placa})
               </Text>
             </Section>
 

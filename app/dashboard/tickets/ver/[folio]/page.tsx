@@ -98,7 +98,7 @@ export default async function VerTicketPage({ params }: { params: Promise<{ foli
             <div className="flex items-center gap-3">
               <Car className="text-blue-600 print:text-black" size={20} />
               <p className="font-bold text-[#2D2D2D]">
-                {ticket.auto?.Marca} {ticket.auto?.Modelo} ({ticket.auto?.Placa})
+                {ticket.Consecutivo || ticket.auto?.Consecutivo ? `[${ticket.Consecutivo || ticket.auto?.Consecutivo}] ` : ''}{ticket.auto?.Marca} {ticket.auto?.Modelo} ({ticket.auto?.Placa})
               </p>
             </div>
           </div>
