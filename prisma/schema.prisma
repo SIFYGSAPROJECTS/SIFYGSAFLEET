@@ -22,6 +22,7 @@ model Empleados {
   Expiracion_Pin            DateTime?
   Pin_Temporal              String?
   Admin_TI                  Boolean                        @default(false)
+  Vencimiento_Licencia      DateTime?                      @db.Date
   cajaChica                 Caja_Chica[]
   comprobacionGastos        Comprobacion_Gastos[]
   historial_propios         Historial_Empleados[]
@@ -49,6 +50,7 @@ model Inventario_Automoviles {
   Email_encargado   String?                        @db.VarChar(100)
   Numero_Serie      String?
   Poliza_Seguro     String?
+  Vencimiento_Poliza DateTime?                      @db.Date
   Departamento      String?
   Contrato          String?
   Ubicacion         String?
@@ -105,7 +107,16 @@ model Checklist {
   Consecutivo  String
   Titulo       String
   Ruta_PDF     String
-  Fecha_Subida DateTime               @default(now())
+  Fecha_Subida      DateTime               @default(now())
+  Folio_Checklist   String?                @db.VarChar(50)
+  Kilometraje       Int?
+  Responsable       String?                @db.VarChar(150)
+  Inspector         String?                @db.VarChar(150)
+  Datos_JSON        String?                @db.Text
+  Fotos_JSON        String?                @db.Text
+  Firma_Responsable String?                @db.Text
+  Firma_Inspector   String?                @db.Text
+  Origen            String?                @default("WEB") @db.VarChar(20)
   vehiculo     Inventario_Automoviles @relation(fields: [Consecutivo], references: [Consecutivo], onDelete: Cascade)
 }
 
@@ -547,7 +558,7 @@ model Reporte_Mantenimiento_Clima {
   Tecnico_Proveedor   String?                     @db.VarChar(150)
   Horario             String?                     @db.VarChar(50)
   
-  // Checklist técnico específico de climatización
+  // Checklist tÃ©cnico especÃ­fico de climatizaciÃ³n
   Limpieza_Filtros    Boolean                     @default(false)
   Lavado_Evaporador   Boolean                     @default(false)
   Lavado_Condensadora Boolean                     @default(false)
@@ -723,7 +734,7 @@ model Inventario_Vigilancia {
   Direccion_IP         String?   @db.VarChar(50)
   Canal_NVR            String?   @db.VarChar(50)
   Resolucion           String?   @db.VarChar(50)
-  Estatus              String?   @default("En Línea") @db.VarChar(50)
+  Estatus              String?   @default("En LÃ­nea") @db.VarChar(50)
   Ultimo_Mantenimiento DateTime?
   Notas                String?   @db.Text
   Fecha_Alta           DateTime  @default(now())

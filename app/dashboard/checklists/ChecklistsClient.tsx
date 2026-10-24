@@ -534,8 +534,23 @@ export default function ChecklistsPage({ vehiculos = [], isAdmin = false }: Prop
                                     })}
                                   </span>
                                 )}
+                                                              {check.Origen === 'APP_ANDROID' && (
+                                  <span className="inline-block mt-1.5 px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-md text-[9px] font-black uppercase tracking-wider">
+                                    App Móvil · PDF + Fotos
+                                  </span>
+                                )}
                               </div>
                             </div>
+                            {(check.Inspector || check.Kilometraje) && (
+                              <div className="mb-4 px-3 py-2 bg-stone-50 rounded-xl border border-[var(--border-cream)] text-[11px] text-stone-600 flex flex-col gap-0.5">
+                                {check.Inspector && (
+                                  <div className="truncate"><strong className="text-stone-800">Inspector:</strong> {check.Inspector}</div>
+                                )}
+                                {check.Kilometraje && (
+                                  <div><strong className="text-stone-800">Kilometraje:</strong> {Number(check.Kilometraje).toLocaleString('es-MX')} km</div>
+                                )}
+                              </div>
+                            )}
 
                             {/* Modo edición */}
                             {editandoChecklistId === check.id ? (

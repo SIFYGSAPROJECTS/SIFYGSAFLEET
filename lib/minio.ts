@@ -71,5 +71,6 @@ export const uploadToMinio = async (objectName: string, buffer: Buffer, contentT
   });
 
   const protocol = process.env.MINIO_USE_SSL === 'true' || minioPort === 443 ? 'https' : 'http';
-  return `${protocol}://${minioEndpoint}:${minioPort}/${bucketName}/${objectName}`;
+  const portSuffix = minioPort === 80 || minioPort === 443 ? '' : `:${minioPort}`;
+  return `${protocol}://${minioEndpoint}${portSuffix}/${bucketName}/${objectName}`;
 };

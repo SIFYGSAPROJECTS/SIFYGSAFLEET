@@ -8,10 +8,10 @@ const allowedOrigins = [
 ];
 
 export function middleware(request: NextRequest) {
-  // Generación de Nonce para CSP
+  // GeneraciÃ³n de Nonce para CSP
   const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
 
-  // Definición de política CSP
+  // DefiniciÃ³n de polÃ­tica CSP
   const cspHeader = `
     default-src 'self';
     script-src 'self' 'nonce-${nonce}' 'strict-dynamic';
@@ -33,20 +33,20 @@ export function middleware(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
 
-  // Rutas que requieren autenticación
+  // Rutas que requieren autenticaciÃ³n
   const protectedPaths = ['/portal', '/dashboard', '/computo', '/programa-anual', '/verificaciones', '/auditoria', '/gastos', '/edificios', '/clima', '/telefonia', '/mobiliario', '/vigilancia'];
   const isProtectedPath = protectedPaths.some(path => pathname === path || pathname.startsWith(path + '/'));
 
   if (isProtectedPath) {
     const session = request.cookies.get('user_email');
 
-    // Si no está autenticado, redirigir al login
+    // Si no estÃ¡ autenticado, redirigir al login
     if (!session || !session.value) {
       const loginUrl = new URL("/", request.url);
       return NextResponse.redirect(loginUrl);
     }
 
-    // Comprobación de roles y áreas
+    // ComprobaciÃ³n de roles y Ã¡reas
     const userRoleCookie = request.cookies.get('user_role');
     const userRole = userRoleCookie?.value || 'USER';
     const userAdminTi = request.cookies.get('user_admin_ti')?.value === 'true';
@@ -56,7 +56,7 @@ export function middleware(request: NextRequest) {
     const userAreasCookie = request.cookies.get('user_areas');
     const userAreas = userAreasCookie?.value ? JSON.parse(userAreasCookie.value) : [];
 
-    // Módulos raíz o páginas completas exclusivas para administrador global
+    // MÃ³dulos raÃ­z o pÃ¡ginas completas exclusivas para administrador global
     const adminOnlyPaths = ['/programa-anual', '/verificaciones', '/auditoria', '/mobiliario', '/vigilancia'];
     const isAdminOnlyPath = adminOnlyPaths.some(path => pathname === path || pathname.startsWith(path + '/'));
 
@@ -87,12 +87,12 @@ export function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL("/portal", request.url));
     }
 
-    // Si intenta acceder a una sub-ruta administrativa de Cómputo TI sin ser administrador de TI ni global
+    // Si intenta acceder a una sub-ruta administrativa de CÃ³mputo TI sin ser administrador de TI ni global
     if (isAdminOnlyComputoPath && !isComputoAdmin) {
       return NextResponse.redirect(new URL("/computo", request.url));
     }
 
-    // Verificación de acceso por área para usuarios normales
+    // VerificaciÃ³n de acceso por Ã¡rea para usuarios normales
     if (!isGlobalAdmin) {
       if (pathname.startsWith('/dashboard') && !userAreas.includes('AUTOS')) {
         // No tiene acceso a autos
@@ -109,11 +109,11 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  // Configuración de CORS y seguridad para API
+  // ConfiguraciÃ³n de CORS y seguridad para API
   if (pathname.startsWith('/api')) {
     const origin = request.headers.get('origin');
 
-    if (origin && !allowedOrigins.includes(origin)) {
+    if (origin && !allowedOrigins.includes(origin) && !pathname.startsWith('/api/mobile')) {
       return new NextResponse(
         JSON.stringify({ error: 'Acceso denegado: Dominio no autorizado' }),
         {
@@ -133,9 +133,9 @@ export function middleware(request: NextRequest) {
       return new NextResponse(null, { status: 200, headers: preflightHeaders });
     }
 
-    // 🔒 Candado Universal: Exigir sesión activa para TODAS las APIs del sistema
-    // Protege todos los módulos (Vehículos, Gastos, Cómputo, Empleados, Clima, etc.)
-    // contra Forced Browsing o filtración no autenticada.
+    // ðŸ”’ Candado Universal: Exigir sesiÃ³n activa para TODAS las APIs del sistema
+    // Protege todos los mÃ³dulos (VehÃ­culos, Gastos, CÃ³mputo, Empleados, Clima, etc.)
+    // contra Forced Browsing o filtraciÃ³n no autenticada.
     const publicApiPrefixes = [
       '/api/auth',
       '/api/logout',
@@ -143,6 +143,7 @@ export function middleware(request: NextRequest) {
       '/api/tickets/rastreo',
       '/api/clima/upload',
       '/api/cron',
+      '/api/mobile',
     ];
 
     const isPublicApi = publicApiPrefixes.some(
@@ -153,7 +154,7 @@ export function middleware(request: NextRequest) {
       const session = request.cookies.get('user_email');
       if (!session || !session.value) {
         return new NextResponse(
-          JSON.stringify({ error: 'No autorizado: Se requiere una sesión activa para acceder a este recurso.' }),
+          JSON.stringify({ error: 'No autorizado: Se requiere una sesiÃ³n activa para acceder a este recurso.' }),
           {
             status: 401,
             headers: { 'Content-Type': 'application/json' }

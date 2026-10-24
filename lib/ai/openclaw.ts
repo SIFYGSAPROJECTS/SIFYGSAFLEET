@@ -24,7 +24,13 @@ async function analizarConLLM(usuario: string, accion: string, modulo: string, d
     const keys = Object.keys(changes);
     
     if (keys.length > 0) {
-      let diffText = keys.map(k => `${k}: de '${changes[k].from ?? 'Nada'}' a '${changes[k].to ?? 'Nada'}'`).join(', ');
+      let diffText = keys.map(k => {
+        const val = changes[k];
+        if (val && typeof val === 'object' && ('from' in val || 'to' in val)) {
+          return `${k}: de '${val.from ?? 'Nada'}' a '${val.to ?? 'Nada'}'`;
+        }
+        return `${k}: '${val ?? 'Nada'}'`;
+      }).join(', ');
       analisisInteligente = `El usuario ${usuario} actualizó registros. ${contextMsg ? `Detalle: ${contextMsg}.` : ''} Cambios exactos: ${diffText}`;
     } else {
       analisisInteligente = `El usuario ${usuario} realizó una acción. ${contextMsg ? `Detalle: ${contextMsg}.` : ''} (Sin cambios detectados en campos clave).`;

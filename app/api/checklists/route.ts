@@ -55,6 +55,9 @@ export async function GET(request: Request) {
     return NextResponse.json({
       checklists,
       vehiculoInfo: {
+        placas: vehiculo.Placa,
+        polizaSeguro: vehiculo.Poliza_Seguro,
+        vencimientoPoliza: vehiculo.Vencimiento_Poliza ? vehiculo.Vencimiento_Poliza.toISOString().slice(0, 10) : null,
         marca: vehiculo.Marca,
         linea: vehiculo.Linea,
         modelo: vehiculo.Modelo,
