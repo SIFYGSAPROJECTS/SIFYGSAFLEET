@@ -16,6 +16,7 @@ export interface ChecklistPayload {
   verificacionVehicular: string;
   kilometraje: number | string;
   millas?: number | string;
+  combustible?: string;
   licenciaManejo: {
     tiene: 'SI' | 'NO';
     fechaVencimiento: string;
@@ -209,7 +210,22 @@ export async function generarChecklistVehicularPDF(data: ChecklistPayload): Prom
     ['ENCENDEDOR', mark(data.inventario?.encendedor), 'GPS', mark(data.funciona?.gps), 'ASIENTOS/VESTIDURA', mark(data.condicion?.asientos), 'AVISO CHECAR MOTOR', mark(data.alertas?.motor)],
     ['TARJETA DE CIRCULACIÓN', mark(data.inventario?.tarjetaCirculacion), 'VENTANA', mark(data.funciona?.ventana), 'Km ACTUAL', String(data.kilometraje || ''), 'AVISO CHECAR LLANTA', mark(data.alertas?.checarLlanta)],
     ['PÓLIZA DE GARANTÍA', mark(data.inventario?.polizaGarantia), 'SEGUROS', mark(data.funciona?.seguros), 'Millas', String(data.millas || 'N/A'), 'AVISO CHECAR FRENOS', mark(data.alertas?.frenos)],
-    ['MANUAL DE PROPIETARIO', mark(data.inventario?.manualPropietario), 'ESPEJOS', mark(data.funciona?.espejos), '', '', 'AVISO CHECAR ABS', mark(data.alertas?.abs)],
+    [
+      'MANUAL DE PROPIETARIO',
+      mark(data.inventario?.manualPropietario),
+      'ESPEJOS',
+      mark(data.funciona?.espejos),
+      { content: 'GASOLINA', styles: { fontStyle: 'bold' as const, fillColor: headerBg } },
+      data.combustible
+        ? data.combustible === 'VACIO'
+          ? 'RESERVA (E)'
+          : data.combustible === 'LLENO'
+          ? 'LLENO (F)'
+          : `${data.combustible} TANQUE`
+        : '1/2 TANQUE',
+      'AVISO CHECAR ABS',
+      mark(data.alertas?.abs),
+    ],
     ['DADO DE SEGURIDAD', mark(data.inventario?.dadoSeguridad), 'QUEMACOCOS', mark(data.funciona?.quemacocos), '', '', 'AVISO CHECAR BOLSAS', mark(data.alertas?.bolsas)],
   ];
 
@@ -356,24 +372,56 @@ export async function generarChecklistVehicularPDF(data: ChecklistPayload): Prom
             const parsed = JSON.parse(sig) as {
               w: number;
               h: number;
+              bbox?: { minX: number; maxX: number; minY: number; maxY: number };
               strokes: Array<Array<{ x: number; y: number }>>;
             };
-            const scaleX = 42 / (parsed.w || 320);
-            const scaleY = 14 / (parsed.h || 180);
-            const offsetX = hookData.cell.x + 4;
-            const offsetY = hookData.cell.y + 2;
 
-            doc.setDrawColor(15, 23, 42);
-            doc.setLineWidth(0.35);
+            let minX = parsed.bbox?.minX ?? 9999;
+            let maxX = parsed.bbox?.maxX ?? 0;
+            let minY = parsed.bbox?.minY ?? 9999;
+            let maxY = parsed.bbox?.maxY ?? 0;
+
+            if (minX === 9999) {
+              for (const stroke of parsed.strokes || []) {
+                for (const pt of stroke) {
+                  if (pt.x < minX) minX = pt.x;
+                  if (pt.x > maxX) maxX = pt.x;
+                  if (pt.y < minY) minY = pt.y;
+                  if (pt.y > maxY) maxY = pt.y;
+                }
+              }
+            }
+
+            const rawW = Math.max(maxX - minX, 10);
+            const rawH = Math.max(maxY - minY, 10);
+
+            // Espacio disponible en la celda del PDF
+            const targetW = 44;
+            const targetH = 13.5;
+
+            // Escala uniforme que preserva la caligrafía real (sin aplastar la firma)
+            const scale = Math.min(targetW / rawW, targetH / rawH, 0.22);
+            const renderedW = rawW * scale;
+            const renderedH = rawH * scale;
+
+            // Centrar la firma perfectamente en la celda
+            const offsetX = hookData.cell.x + (hookData.cell.width - renderedW) / 2;
+            const offsetY = hookData.cell.y + (hookData.cell.height - renderedH) / 2;
+
+            doc.setDrawColor(16, 37, 66); // Tinta ejecutiva tipo bolígrafo
+            doc.setLineWidth(0.5);
+            doc.setLineCap(2); // 'round'
+            doc.setLineJoin(2); // 'round'
+
             for (const stroke of parsed.strokes || []) {
               for (let i = 1; i < stroke.length; i++) {
                 const p1 = stroke[i - 1];
                 const p2 = stroke[i];
                 doc.line(
-                  offsetX + p1.x * scaleX,
-                  offsetY + p1.y * scaleY,
-                  offsetX + p2.x * scaleX,
-                  offsetY + p2.y * scaleY
+                  offsetX + (p1.x - minX) * scale,
+                  offsetY + (p1.y - minY) * scale,
+                  offsetX + (p2.x - minX) * scale,
+                  offsetY + (p2.y - minY) * scale
                 );
               }
             }
