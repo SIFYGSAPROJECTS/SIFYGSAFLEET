@@ -177,7 +177,7 @@ export async function generarChecklistVehicularPDF(data: ChecklistPayload): Prom
   y = (doc as any).lastAutoTable.finalY + 1.5;
 
   // ==========================================
-  // 4. LICENCIA DE MANEJO Y PÓLIZA DE SEGURO
+  // 4. LICENCIA DE MANEJO, PÓLIZA, VERIFICACIÓN Y TENENCIA
   // ==========================================
   autoTable(doc, {
     startY: y,
@@ -192,6 +192,14 @@ export async function generarChecklistVehicularPDF(data: ChecklistPayload): Prom
         data.licenciaManejo?.fechaVencimiento || 'N/A',
         { content: 'PÓLIZA DE SEGURO EN UNIDAD:', styles: { fontStyle: 'bold', fillColor: headerBg } },
         `SI [${data.polizaVigente === 'SI' ? 'X' : ' '}]   NO [${data.polizaVigente === 'NO' ? 'X' : ' '}]`,
+      ],
+      [
+        { content: 'PÓLIZA GARANTÍA:', styles: { fontStyle: 'bold', fillColor: headerBg } },
+        `SI [${data.inventario?.polizaGarantia !== 'NO' ? 'X' : ' '}]   NO [${data.inventario?.polizaGarantia === 'NO' ? 'X' : ' '}]`,
+        { content: 'PAPELETA VERIFICACIÓN:', styles: { fontStyle: 'bold', fillColor: headerBg } },
+        `SI [${data.inventario?.papeletaVerificacion !== 'NO' ? 'X' : ' '}]   NO [${data.inventario?.papeletaVerificacion === 'NO' ? 'X' : ' '}]`,
+        { content: 'TENENCIA VIGENTE:', styles: { fontStyle: 'bold', fillColor: headerBg } },
+        `SI [${data.inventario?.tenencia !== 'NO' ? 'X' : ' '}]   NO [${data.inventario?.tenencia === 'NO' ? 'X' : ' '}]`,
       ],
     ],
   });
