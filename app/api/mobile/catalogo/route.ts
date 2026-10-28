@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { getVerificationPeriods } from '@/lib/utils/verificaciones';
+import { verificarSesionMovil } from '@/lib/mobileAuth';
 
 const NOMBRES_MESES = ['ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO', 'JULIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'];
 
@@ -13,8 +14,16 @@ function obtenerBimestrePlaca(placa?: string | null): string {
   return `${m1}/${m2}`;
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const auth = await verificarSesionMovil(request);
+    if (!auth.ok) {
+      return NextResponse.json(
+        { error: auth.error, code: 'UNAUTHORIZED' },
+        { status: auth.status }
+      );
+    }
+
     const anioActual = new Date().getFullYear();
 
     const vehiculos = await prisma.inventario_Automoviles.findMany({

@@ -5,9 +5,11 @@ import {
   Search, Upload, FileText, AlertCircle, CheckCircle2, Car, User, Palette, Gauge,
   ArrowLeft, X, Eye, Download, Trash2, PencilLine, Wrench, DollarSign, FolderOpen,
   ClipboardCheck, FilePlus2, Info
-, CalendarCheck } from 'lucide-react';
+  , CalendarCheck
+} from 'lucide-react';
 import SystemModal, { ModalType } from '@/components/ui/SystemModal';
 import DynamicMobilePDFViewer from '@/components/ui/DynamicMobilePDFViewer';
+import MobileAppReleasesCard from '@/components/checklists/MobileAppReleasesCard';
 
 interface Props {
   vehiculos?: any[];
@@ -276,16 +278,14 @@ export default function ChecklistsPage({ vehiculos = [], isAdmin = false }: Prop
                           aria-selected={idx === activeIndex}
                           onClick={() => handleSelectVehiculo(v.Num_Eco)}
                           onMouseEnter={() => setActiveIndex(idx)}
-                          className={`px-4 py-3 cursor-pointer text-[var(--text-main)] flex items-center justify-between transition-colors border-b border-[var(--border-cream)] last:border-0 ${
-                            idx === activeIndex
+                          className={`px-4 py-3 cursor-pointer text-[var(--text-main)] flex items-center justify-between transition-colors border-b border-[var(--border-cream)] last:border-0 ${idx === activeIndex
                               ? 'bg-cyan-50 border-l-2 border-l-cyan-400'
                               : 'hover:bg-cyan-50'
-                          }`}
+                            }`}
                         >
                           <div className="flex items-center gap-3">
-                            <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
-                              idx === activeIndex ? 'bg-cyan-100' : 'bg-stone-100'
-                            }`}>
+                            <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-colors ${idx === activeIndex ? 'bg-cyan-100' : 'bg-stone-100'
+                              }`}>
                               <Car size={14} className={idx === activeIndex ? 'text-cyan-600' : 'text-[#71717a]'} />
                             </div>
                             <span className={`font-bold text-sm ${idx === activeIndex ? 'text-cyan-700' : ''}`}>
@@ -378,6 +378,8 @@ export default function ChecklistsPage({ vehiculos = [], isAdmin = false }: Prop
                 </div>
               </div>
             )}
+
+            <MobileAppReleasesCard isAdmin={isAdmin} />
 
             {/* Estado vacío izquierda */}
             {!vehiculoActivo && !cargando && (
@@ -534,7 +536,7 @@ export default function ChecklistsPage({ vehiculos = [], isAdmin = false }: Prop
                                     })}
                                   </span>
                                 )}
-                                                              {check.Origen === 'APP_ANDROID' && (
+                                {check.Origen === 'APP_ANDROID' && (
                                   <span className="inline-block mt-1.5 px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-md text-[9px] font-black uppercase tracking-wider">
                                     App Móvil · PDF + Fotos
                                   </span>

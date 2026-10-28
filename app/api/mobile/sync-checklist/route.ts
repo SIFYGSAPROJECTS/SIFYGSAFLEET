@@ -3,11 +3,20 @@ import { prisma } from '@/lib/db';
 import { minioClient, uploadToMinio } from '@/lib/minio';
 import { generarChecklistVehicularPDF, ChecklistPayload } from '@/lib/pdf/generarChecklistVehicular';
 import { logAuditoria } from '@/lib/utils/audit';
+import { verificarSesionMovil } from '@/lib/mobileAuth';
 
 const MAX_CHECKLISTS_POR_UNIDAD = 10; // Retención inteligente: conserva los últimos 10 PDFs por unidad y purga los más antiguos de MinIO
 
 export async function POST(request: Request) {
   try {
+    const auth = await verificarSesionMovil(request);
+    if (!auth.ok) {
+      return NextResponse.json(
+        { error: auth.error, code: 'UNAUTHORIZED' },
+        { status: auth.status }
+      );
+    }
+
     const body: ChecklistPayload & {
       responsableEmail?: string;
       inspectorEmail?: string;
@@ -21,12 +30,14 @@ export async function POST(request: Request) {
     const consecutivoFolder = consecutivoUpper.toLowerCase();
     const fechaStr = body.fechaRevision || new Date().toISOString().slice(0, 10);
     const folio = body.folio || `CHK-${consecutivoUpper}-${Date.now().toString().slice(-6)}`;
+    const inspectorFinal = body.inspector || auth.nombreCompleto;
 
     // 1. Generar el PDF oficial (HOJA DE REVISION DE VEHICULOS + Anexo Fotográfico con fotos y firmas ya incrustadas)
     //    Estrategia Ahorro NVMe (Single-Artifact Storage):
     //    No guardamos fotos ni firmas sueltas por duplicado en MinIO; todo queda dentro del único PDF comprimido (~250KB).
     const pdfBuffer = await generarChecklistVehicularPDF({
       ...body,
+      inspector: inspectorFinal,
       consecutivo: consecutivoUpper,
       folio,
     });
@@ -124,7 +135,7 @@ export async function POST(request: Request) {
       Folio_Checklist: folio,
       Kilometraje: kmNum && !isNaN(kmNum) ? kmNum : null,
       Responsable: body.responsable || null,
-      Inspector: body.inspector || null,
+      Inspector: inspectorFinal || null,
       Datos_JSON: JSON.stringify(datosEstructurados),
       Fotos_JSON: JSON.stringify(resumenFotos),
       Firma_Responsable: body.firmaResponsableBase64 ? 'INCRUSTADA_EN_PDF' : null,
@@ -177,10 +188,10 @@ export async function POST(request: Request) {
     }
 
     await logAuditoria(
-      body.inspectorEmail || body.inspector || 'App Android',
+      auth.email || body.inspectorEmail || inspectorFinal || 'App Android',
       'SYNC_CHECKLIST_MOVIL',
       'CHECKLISTS',
-      `Checklist móvil sincronizado (${folio}) para unidad ${consecutivoUpper} (PDF optimizado con ${resumenFotos.length} fotos incrustadas).`
+      `Checklist móvil sincronizado (${folio}) para unidad ${consecutivoUpper} por ${auth.nombreCompleto} (PDF optimizado con ${resumenFotos.length} fotos incrustadas).`
     );
 
     return NextResponse.json({
